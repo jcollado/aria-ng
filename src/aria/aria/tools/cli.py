@@ -4,7 +4,6 @@ from aria.reader import *
 from aria.parser import *
 from aria.generator import *
 from aria.grammar import *
-from aria.grammar.tosca import *
 from tosca.datatypes import *
 
 from clint.arguments import Args 
@@ -18,17 +17,17 @@ args = Args()
 r = Credential({'properties': {'protocol': 'http'}})
 print r.properties.protocol
 
-grammar = ToscaSimpleProfileGrammarV1_0
-
-parser = DefaultParser('blueprints/simple-blueprint.yaml', grammar)
+parser = DefaultParser('blueprints/simple-blueprint.yaml')
 structure = parser.consume()
 
 #Writer(structure).consume()
 
-validator = Validator(structure, grammar)
+validator = Validator(structure)
 validator.consume()
 
-profile = grammar(structure).profile
+grammar_cls = parser.grammar_source.get_grammar(structure)
+profile = grammar_cls(structure).profile
+
 print profile.tosca_definitions_version
 for name, n in profile.node_templates.iteritems():
     print name + ' ' + n.type

@@ -1,7 +1,7 @@
 
 import tosca
 
-class Root(tosca.Artifact):
+class Root(tosca.HasProperties):
     """
     This is the default (root) TOSCA Artifact Type definition that all other TOSCA base Artifact Types derive from.
     

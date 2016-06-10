@@ -1,5 +1,6 @@
 
 from aria import AriaError, UnimplementedAriaError, classname
+from aria.grammar import DefaultGrammarSource
 import ruamel.yaml as yaml
 import sys
 
@@ -45,12 +46,12 @@ class Validator(Generator):
     """
     ARIA validator.
     
-    Validates the agnostic data structure according to a grammar.
+    Validates the agnostic data structure according to its grammar.
     """
     
-    def __init__(self, structure, grammar):
+    def __init__(self, structure, grammar_source=DefaultGrammarSource()):
         super(Validator, self).__init__(structure)
-        self.grammar = grammar
+        self.grammar_source = grammar_source
 
     def consume(self):
         pass

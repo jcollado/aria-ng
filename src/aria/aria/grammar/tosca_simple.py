@@ -1,5 +1,17 @@
 
-from primitives import *
+import aria.grammar
+
+class ToscaSimpleGrammar1_0(aria.grammar.Grammar):
+    """
+    ARIA grammar for `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html>`.
+    """
+    
+    @property
+    def profile(self):
+        return Profile(self.structure)
+
+    def get_import_locators(self):
+        return [i.file for i in self.profile.imports]
 
 class Base(object):
     def __init__(self, structure={}):
@@ -140,14 +152,6 @@ class Profile(Base):
         :class:`TopologyTemplate`
         """
         return self._get_object('topology_template', TopologyTemplate)
-
-    # TODO
-    @property
-    def node_templates(self):
-        """
-        :class:`NodeTemplate`
-        """
-        return self._get_object_dict('node_templates', NodeTemplate)
 
 class Repository(Base):
     """
@@ -1199,3 +1203,14 @@ class NodeFilter(Base):
         :class:`CapabilityDefinition`
         """
         return self._get_object_list('capabilities', CapabilityDefinition)
+
+class PropertyFilter(Base):
+    """
+    A property filter definition defines criteria, using constraint clauses, for selection of a TOSCA entity based upon it property values.
+    
+    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_FILTER_DEFN>`
+    """
+    
+    DESCRIPTION = 'A property filter definition defines criteria, using constraint clauses, for selection of a TOSCA entity based upon it property values.'
+
+    # TODO

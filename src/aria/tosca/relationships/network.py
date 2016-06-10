@@ -5,7 +5,7 @@ class LinksTo(tosca.relationships.DependsOn):
 	"""
 	This relationship type represents an association relationship between Port and Network node types.
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_RELATIONSHIPS_NETWORK_LINKSTO>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_RELATIONSHIPS_NETWORK_LINKSTO>`__
 	"""
 	
 	DESCRIPTION = 'This relationship type represents an association relationship between Port and Network node types.'
@@ -18,7 +18,7 @@ class BindsTo(tosca.relationships.DependsOn):
 	"""
 	This type represents a network association relationship between Port and Compute node types.
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_RELATIONSHIPS_NETWORK_BINDTO>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_RELATIONSHIPS_NETWORK_BINDTO>`__
 	"""
 	
 	DESCRIPTION = 'This type represents a network association relationship between Port and Compute node types.'

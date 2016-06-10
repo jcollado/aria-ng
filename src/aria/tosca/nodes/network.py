@@ -5,7 +5,7 @@ class Network(tosca.nodes.Root):
     """
     The TOSCA Network node represents a simple, logical network service.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>` (no anchor)
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>`__ (no anchor)
     """
     
     DESCRIPTION = 'The TOSCA Network node represents a simple, logical network service.'
@@ -33,7 +33,7 @@ class Port(tosca.nodes.Root):
     
     The Port node type effectively represents a single virtual NIC on the Compute node instance.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>` (no anchor)
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>`__ (no anchor)
     """
     
     DESCRIPTION = 'The TOSCA Port node represents a logical entity that associates between Compute and Network normative types.'

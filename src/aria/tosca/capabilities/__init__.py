@@ -1,11 +1,11 @@
 
-import tosca
+import tosca, tosca.datatypes.network
     
 class Root(tosca.HasProperties):
     """
     This is the default (root) TOSCA Capability Type definition that all other TOSCA Capability Types derive from.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ROOT>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ROOT>`__
     """
     
     DESCRIPTION = 'This is the default (root) TOSCA Capability Type definition that all other TOSCA Capability Types derive from.'
@@ -14,7 +14,7 @@ class Node(Root):
     """
     The Node capability indicates the base capabilities of a TOSCA Node Type.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_NODE>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_NODE>`__
     """
     
     DESCRIPTION = 'The Node capability indicates the base capabilities of a TOSCA Node Type.'
@@ -27,7 +27,7 @@ class Container(Root):
     """
     The Container capability, when included on a Node Type or Template definition, indicates that the node can act as a container for (or a host for) one or more other declared Node Types.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_CONTAINER>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_CONTAINER>`__
     """
     
     DESCRIPTION = 'The Container capability, when included on a Node Type or Template definition, indicates that the node can act as a container for (or a host for) one or more other declared Node Types.'
@@ -46,7 +46,7 @@ class Endpoint(Root):
     """
     This is the default TOSCA type that should be used or extended to define a network endpoint capability. This includes the information to express a basic endpoint with a single port or a complex endpoint with multiple ports. By default the Endpoint is assumed to represent an address on a private network unless otherwise specified.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT>`__
     """
     
     DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define a network endpoint capability. This includes the information to express a basic endpoint with a single port or a complex endpoint with multiple ports. By default the Endpoint is assumed to represent an address on a private network unless otherwise specified.'
@@ -59,69 +59,75 @@ class Endpoint(Root):
         'protocol': {'type': str, 'required': True, 'default': 'tcp', 'description': 'The name of the protocol (i.e., the protocol prefix) that the endpoint accepts (any OSI Layer 4-7 protocols). Examples: http, https, ftp, tcp, udp, etc.'},
         'port': {'type': tosca.datatypes.network.PortDef, 'description': 'The optional port of the endpoint.'},
         'secure': {'type': bool, 'default': False, 'description': 'Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.'},
-        'url_path': {'type': str, 'description': 'The optional URL path of the endpoint's address if applicable for the protocol.'},
+        'url_path': {'type': str, 'description': 'The optional URL path of the endpoint\'s address if applicable for the protocol.'},
         'port_name': {'type': str, 'description': 'The optional name (or ID) of the network port this endpoint should be bound to.'},
         'network_name': {'type': str, 'default': 'PRIVATE', 'description': 'The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE | PUBLIC |<network_name> | <network_id>'},
         'initiator': {'type': str, 'default': 'source', 'description': 'The optional indicator of the direction of the connection.'},
         'ports': {'type': tosca.Map(tosca.datatypes.network.PortSpec), 'description': 'The optional map of ports the Endpoint supports (if more than one)'}}
 
     ATTRIBUTES = {
-        'ip_address': {'type': str, 'required': True, 'description': 'Note: This is the IP address as propagated up by the associated node's host (Compute) container.'}}
+        'ip_address': {'type': str, 'required': True, 'description': 'Note: This is the IP address as propagated up by the associated node\'s host (Compute) container.'}}
     
-    class Public(Endpoint):
-        """
-        This capability represents a public endpoint which is accessible to the general internet (and its public IP address ranges).
+class Public(Endpoint):
+    """
+    This capability represents a public endpoint which is accessible to the general internet (and its public IP address ranges).
 
-        This public endpoint capability also can be used to create a floating (IP) address that the underlying network assigns from a pool allocated from the application's underlying public network. This floating address is managed by the underlying network such that can be routed an application's private address and remains reliable to internet clients.
+    This public endpoint capability also can be used to create a floating (IP) address that the underlying network assigns from a pool allocated from the application's underlying public network. This floating address is managed by the underlying network such that can be routed an application's private address and remains reliable to internet clients.
 
-        `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_PUBLIC>`
-        """
-        
-        DESCRIPTION = 'This capability represents a public endpoint which is accessible to the general internet (and its public IP address ranges).'
-        
-        SHORTHAND_NAME = 'Endpoint.Public'
-        TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Public'
-        TYPE_URI = 'tosca.capabilities.Endpoint.Public'
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_PUBLIC>`__
+    """
+    
+    DESCRIPTION = 'This capability represents a public endpoint which is accessible to the general internet (and its public IP address ranges).'
+    
+    SHORTHAND_NAME = 'Endpoint.Public'
+    TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Public'
+    TYPE_URI = 'tosca.capabilities.Endpoint.Public'
 
-        PROPERTIES = {
-            'network_name': {'type': str, 'default': 'PUBLIC', 'description': 'The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE | PUBLIC |<network_name> | <network_id>'},
-            'floating': {'type': bool, 'default': False, 'description': 'Indicates that the public address should be allocated from a pool of floating IPs that are associated with the network.', 'status': 'experimental'},
-            'dns_name': {'type': str, 'description': 'The optional name to register with DNS.', 'status': 'experimental'}}
+    PROPERTIES = {
+        'network_name': {'type': str, 'default': 'PUBLIC', 'description': 'The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE | PUBLIC |<network_name> | <network_id>'},
+        'floating': {'type': bool, 'default': False, 'description': 'Indicates that the public address should be allocated from a pool of floating IPs that are associated with the network.', 'status': 'experimental'},
+        'dns_name': {'type': str, 'description': 'The optional name to register with DNS.', 'status': 'experimental'}}
 
-    class Admin(Endpoint):
-        """
-        This is the default TOSCA type that should be used or extended to define a specialized administrator endpoint capability.
-        
-        `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_ADMIN>`
-        """
-        
-        DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define a specialized administrator endpoint capability.'
-        
-        SHORTHAND_NAME = 'Endpoint.Admin'
-        TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Admin'
-        TYPE_URI = 'tosca.capabilities.Endpoint.Admin'
+Endpoint.Public = Public
 
-        PROPERTIES = {
-            'secure': {'type': bool, 'default': True, 'description': 'Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.'}}
+class Admin(Endpoint):
+    """
+    This is the default TOSCA type that should be used or extended to define a specialized administrator endpoint capability.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_ADMIN>`__
+    """
+    
+    DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define a specialized administrator endpoint capability.'
+    
+    SHORTHAND_NAME = 'Endpoint.Admin'
+    TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Admin'
+    TYPE_URI = 'tosca.capabilities.Endpoint.Admin'
 
-    class Database(Endpoint):
-        """
-        This is the default TOSCA type that should be used or extended to define a specialized database endpoint capability.
-        
-        `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_DATABASE>`
-        """
-        
-        DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define a specialized database endpoint capability.'
-        
-        SHORTHAND_NAME = 'Endpoint.Database'
-        TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Database'
-        TYPE_URI = 'tosca.capabilities.Endpoint.Database'
+    PROPERTIES = {
+        'secure': {'type': bool, 'default': True, 'description': 'Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.'}}
+
+Endpoint.Admin = Admin
+
+class Database(Endpoint):
+    """
+    This is the default TOSCA type that should be used or extended to define a specialized database endpoint capability.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_DATABASE>`__
+    """
+    
+    DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define a specialized database endpoint capability.'
+    
+    SHORTHAND_NAME = 'Endpoint.Database'
+    TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Database'
+    TYPE_URI = 'tosca.capabilities.Endpoint.Database'
+
+Endpoint.Database = Database
 
 class Attachment(Root):
     """
     This is the default TOSCA type that should be used or extended to define an attachment capability of a (logical) infrastructure device node (e.g., BlockStorage node).
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ATTACHMENT>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ATTACHMENT>`__
     """
     
     DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define an attachment capability of a (logical) infrastructure device node (e.g., BlockStorage node).'
@@ -134,7 +140,7 @@ class OperatingSystem(Root):
     """
     This is the default TOSCA type that should be used to express an Operating System capability for a node.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_OPSYS>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_OPSYS>`__
     """
     
     DESCRIPTION = 'This is the default TOSCA type that should be used to express an Operating System capability for a node.'
@@ -153,7 +159,7 @@ class Scalable(Root):
     """
     This is the default TOSCA type that should be used to express a scalability capability for a node.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_SCALABLE>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_SCALABLE>`__
     """
     
     DESCRIPTION = 'This is the default TOSCA type that should be used to express a scalability capability for a node.'

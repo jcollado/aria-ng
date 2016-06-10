@@ -5,7 +5,7 @@ class Root(tosca.HasProperties):
     """
     This is the default (root) TOSCA Root Type definition that all complex TOSCA Data Types derive from.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_ROOT>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_ROOT>`__
     """
     
     DESCRIPTION = 'This is the default (root) TOSCA Root Type definition that all complex TOSCA Data Types derive from.'
@@ -14,7 +14,7 @@ class Credential(Root):
     """
     The Credential type is a complex TOSCA data Type used when describing authorization credentials used to access network accessible resources.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_CREDENTIAL>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_CREDENTIAL>`__
     """
 
     DESCRIPTION = 'The Credential type is a complex TOSCA data Type used when describing authorization credentials used to access network accessible resources.'

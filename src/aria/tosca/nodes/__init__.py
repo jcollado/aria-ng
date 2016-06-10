@@ -1,11 +1,11 @@
 
-import tosca, tosca.datatypes
+import tosca, tosca.datatypes.network
 	
 class Root(tosca.HasProperties):
 	"""
 	The TOSCA Root Node Type is the default type that all other TOSCA base Node Types derive from. This allows for all TOSCA nodes to have a consistent set of features for modeling and management (e.g., consistent definitions for requirements, capabilities and lifecycle interfaces).
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_ROOT>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_ROOT>`__
 	"""
 	
 	DESCRIPTION = 'The TOSCA Root Node Type is the default type that all other TOSCA base Node Types derive from. This allows for all TOSCA nodes to have a consistent set of features for modeling and management (e.g., consistent definitions for requirements, capabilities and lifecycle interfaces).'
@@ -23,7 +23,7 @@ class Compute(Root):
 	"""
 	The TOSCA Compute node represents one or more real or virtual processors of software applications or services along with other essential local resources. Collectively, the resources the compute node represents can logically be viewed as a (real or virtual) "server".
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_COMPUTE>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_COMPUTE>`__
 	"""
 	
 	DESCRIPTION = 'The TOSCA Compute node represents one or more real or virtual processors of software applications or services along with other essential local resources. Collectively, the resources the compute node represents can logically be viewed as a (real or virtual) "server".'
@@ -35,14 +35,14 @@ class Compute(Root):
 	ATTRIBUTES = {
 		'private_address': {'type': str, 'description': 'The primary private IP address assigned by the cloud provider that applications may use to access the Compute node.'},
 		'public_address': {'type': str, 'description': 'The primary public IP address assigned by the cloud provider that applications may use to access the Compute node.'},
-		'networks': {'type': tosca.Map(tosca.datatypes.NetworkInfo), 'description': 'The list of logical networks assigned to the compute host instance and information about them.'},
-		'ports': {'type': tosca.Map(tosca.datatypes.PortInfo), 'description': 'The list of logical ports assigned to the compute host instance and information about them.'}}
+		'networks': {'type': tosca.Map(tosca.datatypes.network.NetworkInfo), 'description': 'The list of logical networks assigned to the compute host instance and information about them.'},
+		'ports': {'type': tosca.Map(tosca.datatypes.network.PortInfo), 'description': 'The list of logical ports assigned to the compute host instance and information about them.'}}
 
 class SoftwareComponent(Root):
 	"""
 	The TOSCA SoftwareComponent node represents a generic software component that can be managed and run by a TOSCA Compute Node Type.
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_SOFTWARE_COMPONENT>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_SOFTWARE_COMPONENT>`__
 	"""
 	
 	DESCRIPTION = 'The TOSCA SoftwareComponent node represents a generic software component that can be managed and run by a TOSCA Compute Node Type.'
@@ -52,14 +52,14 @@ class SoftwareComponent(Root):
 	TYPE_URI = 'tosca.nodes.SoftwareComponent'
 	
 	PROPERTIES = {
-		'component_version': {'type': tosca.Version, 'description': 'The optional software component’s version.'},
+		'component_version': {'type': tosca.Version, 'description': 'The optional software component\'s version.'},
 		'admin_credential': {'type': tosca.datatypes.Credential, 'description': 'The optional credential that can be used to authenticate to the software component.'}}
 
 class WebServer(SoftwareComponent):
 	"""
 	This TOSA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing management operations for one or more WebApplication nodes.
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBSERVER>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBSERVER>`__
 	"""
 	
 	DESCRIPTION = 'This TOSA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing management operations for one or more WebApplication nodes.'
@@ -72,7 +72,7 @@ class WebApplication(Root):
 	"""
 	The TOSCA WebApplication node represents a software application that can be managed and run by a TOSCA WebServer node. Specific types of web applications such as Java, etc. could be derived from this type.
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBAPPLICATION>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBAPPLICATION>`__
 	"""
 	
 	DESCRIPTION = 'The TOSCA WebApplication node represents a software application that can be managed and run by a TOSCA WebServer node. Specific types of web applications such as Java, etc. could be derived from this type.'
@@ -82,13 +82,13 @@ class WebApplication(Root):
 	TYPE_URI = 'tosca.nodes.WebApplication'
 
 	PROPERTIES = {
-		'context_root': {'type': str, 'description': 'The web application’s context root which designates the application’s URL path within the web server it is hosted on.'}}
+		'context_root': {'type': str, 'description': 'The web application\'s context root which designates the application\'s URL path within the web server it is hosted on.'}}
 
 class DBMS(SoftwareComponent):
 	"""
 	The TOSCA DBMS node represents a typical relational, SQL Database Management System software component or service.
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBSERVER>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBSERVER>`__
 	"""
 	
 	DESCRIPTION = 'The TOSCA DBMS node represents a typical relational, SQL Database Management System software component or service.'
@@ -106,7 +106,7 @@ class Database(Root):
 	"""
 	The TOSCA Database node represents a logical database that can be managed and hosted by a TOSCA DBMS node.
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_DATABASE>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_DATABASE>`__
 	"""
 	
 	DESCRIPTION = 'The TOSCA Database node represents a logical database that can be managed and hosted by a TOSCA DBMS node.'
@@ -125,7 +125,7 @@ class ObjectStorage(Root):
 	"""
 	The TOSCA ObjectStorage node represents storage that provides the ability to store data as objects (or BLOBs of data) without consideration for the underlying filesystem or devices.
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>` (no anchor)
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>`__ (no anchor)
 	"""
 	
 	DESCRIPTION = 'The TOSCA ObjectStorage node represents storage that provides the ability to store data as objects (or BLOBs of data) without consideration for the underlying filesystem or devices.'
@@ -143,7 +143,7 @@ class BlockStorage(Root):
     """
     The TOSCA BlockStorage node currently represents a server-local block storage device (i.e., not shared) offering evenly sized blocks of data from which raw storage volumes can be created.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_BLOCK_STORAGE>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_BLOCK_STORAGE>`__
     """
     
     DESCRIPTION = 'The TOSCA BlockStorage node currently represents a server-local block storage device (i.e., not shared) offering evenly sized blocks of data from which raw storage volumes can be created.'
@@ -155,41 +155,46 @@ class BlockStorage(Root):
     PROPERTIES = {
         'size': {'type': tosca.Size, 'required': True, 'description': 'The requested storage size (default unit is MB).'},
         'volume_id': {'type': str, 'description': 'ID of an existing volume (that is in the accessible scope of the requesting application).'},
-        'snapshot_id': {'type': str, 'description': 'Some identifier that represents an existing snapshot that should be used when creating the block storage (volume).'},
+        'snapshot_id': {'type': str, 'description': 'Some identifier that represents an existing snapshot that should be used when creating the block storage (volume).'}}
 
 class Container(object):
+    pass
 	
-	class Runtime(SoftwareComponent):
-		"""
-		The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.
-		
-		`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_RUNTIME>`
-		"""
-		
-		DESCRIPTION = 'The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.'
+class Runtime(SoftwareComponent):
+    """
+    The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_RUNTIME>`__
+    """
+    
+    DESCRIPTION = 'The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.'
 
-		SHORTHAND_NAME = 'Container.Runtime'
-		TYPE_QUALIFIED_NAME = 'tosca:Container.Runtime'
-		TYPE_URI = 'tosca.nodes.Container.Runtime'
+    SHORTHAND_NAME = 'Container.Runtime'
+    TYPE_QUALIFIED_NAME = 'tosca:Container.Runtime'
+    TYPE_URI = 'tosca.nodes.Container.Runtime'
 
-	class Application(Root):
-		"""
-		The TOSCA Container Application node represents an application that requires Container-level virtualization technology.
-		
-		`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_APP>`
-		"""
-		
-		DESCRIPTION = 'The TOSCA Container Application node represents an application that requires Container-level virtualization technology.'
+Container.Runtime = Runtime
 
-		SHORTHAND_NAME = 'Container.Application'
-		TYPE_QUALIFIED_NAME = 'tosca:Container.Application'
-		TYPE_URI = 'tosca.nodes.Container.Application'
+class Application(Root):
+    """
+    The TOSCA Container Application node represents an application that requires Container-level virtualization technology.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_APP>`__
+    """
+    
+    DESCRIPTION = 'The TOSCA Container Application node represents an application that requires Container-level virtualization technology.'
+
+    SHORTHAND_NAME = 'Container.Application'
+    TYPE_QUALIFIED_NAME = 'tosca:Container.Application'
+    TYPE_URI = 'tosca.nodes.Container.Application'
+
+Container.Application = Application
 
 class LoadBalancer(Root):
 	"""
 	The TOSCA Load Balancer node represents logical function that be used in conjunction with a Floating Address to distribute an application's traffic (load) across a number of instances of the application (e.g., for a clustered or scaled application).
 	
-	`TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379548332>`
+	See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379548332>`__
 	"""
 	
 	DESCRIPTION = 'The TOSCA Load Balancer node represents logical function that be used in conjunction with a Floating Address to distribute an application\'s traffic (load) across a number of instances of the application (e.g., for a clustered or scaled application).'

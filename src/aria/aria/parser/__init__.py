@@ -1,68 +1,50 @@
 
-from aria import AriaError, UnimplementedAriaError, classname
-from aria.loader import DefaultLoaderSource
-from aria.reader import DefaultReaderSource
-from aria.grammar import DefaultGrammarSource, GrammarNotFoundGrammarError
+from exceptions import *
+from parser import *
 
-class ParserError(AriaError):
-    """
-    ARIA parser error.
-    """
-
-class Parser(object):
-    """
-    Base class for ARIA parsers.
-    
-    Parsers generate agnostic data structures by consuming a data source via appropriate
-    :class:`aria.loader.Loader`, :class:`aria.reader.Reader`, and :class:`aria.grammar.Grammar`
-    instances.
-    
-    Note that parsing may internally trigger more than one loading/reading cycle,
-    for example if the agnostic data structure has dependencies that must also be
-    parsed.
-    """
-    
-    def __init__(self, locator, loader_source=DefaultLoaderSource(), reader_source=DefaultReaderSource(), grammar_source=DefaultGrammarSource()):
-        self.locator = locator
-        self.loader_source = loader_source
-        self.reader_source = reader_source
-        self.grammar_source = grammar_source
-
-    def consume(self, locator):
-        raise UnimplementedAriaError(classname(self) + '.parse')
+from aria.presenter import PresenterNotFoundPresenterError
 
 class DefaultParser(Parser):
     """
-    The default ARIA parser supports agnostic data structure composing for grammars
-    that have get_import_locators.
+    The default ARIA parser supports agnostic raw data composition for presenters
+    that have `get_import_locators` and `merge_import`.
     """
     
-    def consume(self):
-        return self._parse_composite(self.locator, None, None)
+    def parse(self):
+        """
+        :class:`aria.presenter.Presenter` or raw
+        """
+        return self._parse_all(self.locator, None, self.presenter_class)
 
-    def _parse_composite(self, locator, origin_locator, grammar_cls):
-        structure = self._parse_one(locator, origin_locator)
+    def _parse_all(self, locator, origin_locator, presenter_class):
+        raw = self._parse_one(locator, origin_locator)
         
-        if not grammar_cls:
+        if not presenter_class:
             try:
-                grammar_cls = self.grammar_source.get_grammar(structure)
-            except GrammarNotFoundGrammarError:
+                presenter_class = self.presenter_source.get_presenter(raw)
+            except PresenterNotFoundPresenterError:
                 pass
         
+        presentation = presenter_class(raw) if presenter_class else None
+        
         # Handle imports
-        if grammar_cls:
-            grammar = grammar_cls(structure)
-            if hasattr(grammar, 'get_import_locators'):
-                imports = grammar.get_import_locators()
-                for import_locator in imports:
-                    imported_structure = self._parse_composite(import_locator, locator, grammar_cls)
-                    # TODO: too primitive! what if there are conflicts?
-                    # also, recursion is not the best idea :/
-                    structure.update(imported_structure)
+        if presentation and hasattr(presentation, 'get_import_locators') and hasattr(presentation, 'merge_import'):
+            import_locators = presentation.get_import_locators()
+            for import_locator in import_locators:
+                # The imports inherit the parent presenter class
+                imported_presentation = self._parse_all(import_locator, locator, presenter_class)
+                presentation.merge_import(imported_presentation)
 
-        return structure
+        return presentation or raw
     
     def _parse_one(self, locator, origin_locator):
+        if self.reader:
+            return self.reader.read()
         loader = self.loader_source.get_loader(locator, origin_locator)
         reader = self.reader_source.get_reader(locator, loader)
-        return reader.consume()
+        return reader.read()
+
+__all__ = [
+    'ParserError',
+    'Parser',
+    'DefaultParser']

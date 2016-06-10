@@ -5,7 +5,7 @@ class Bindable(tosca.capabilities.Node):
     """
     A node type that includes the Bindable capability indicates that it can be bound to a logical network association via a network port.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_NETWORK_BINDABLE>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_NETWORK_BINDABLE>`__
     """
     
     DESCRIPTION = 'A node type that includes the Bindable capability indicates that it can be bound to a logical network association via a network port.'
@@ -18,7 +18,7 @@ class Linkable(tosca.capabilities.Node):
     """
     A node type that includes the Linkable capability indicates that it can be pointed by tosca.relationships.network.LinksTo relationship type.
     
-    `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_NETWORK_LINKABLE>`
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_NETWORK_LINKABLE>`__
     """
     
     DESCRIPTION = 'A node type that includes the Linkable capability indicates that it can be pointed by tosca.relationships.network.LinksTo relationship type.'

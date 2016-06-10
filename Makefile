@@ -16,4 +16,4 @@ docs-requirements:
 	pip install --upgrade --requirement $(SPHINX_SRC)/requirements.txt
 
 docs: docs-requirements
-	sphinx-build -c $(SPHINX_SRC) -b html $(DOCS)
+	sphinx-build -b html -c $(SPHINX_SRC) $(ARIA_SRC) $(DOCS)

@@ -1,7 +1,7 @@
 
 class Dynamic(object):
-    def __init__(self, structure, definitions):
-        self._structure = structure
+    def __init__(self, raw, definitions):
+        self._structure = raw
         self._definitions= definitions
 
     def __getattr__(self, name):
@@ -24,14 +24,14 @@ class Dynamic(object):
             raise AttributeError(name)
 
 class HasProperties(object):
-    def __init__(self, structure={}):
-        self.structure = structure
+    def __init__(self, raw={}):
+        self.raw = raw
 
     @property
     def properties(self):
         properties = HasProperties._get_class_properties(self.__class__)
-        return Dynamic(self.structure.get('properties', {}), properties)
-        
+        return Dynamic(self.raw.get('properties', {}), properties)
+
     @staticmethod
     def _get_class_properties(cls):
         properties = {}
@@ -42,13 +42,13 @@ class HasProperties(object):
         return properties
 
 class HasConstraints(object):
-    def __init__(self, structure={}):
-        self.structure = structure
+    def __init__(self, raw={}):
+        self.raw = raw
 
     @property
     def constraints(self):
         constraints = HasConstraints._get_class_constraints(self.__class__)
-        return Dynamic(self.structure.get('constraints', {}), constraints)
+        return Dynamic(self.raw.get('constraints', {}), constraints)
 
     @staticmethod
     def _get_class_constraints(cls):

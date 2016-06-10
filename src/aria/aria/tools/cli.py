@@ -1,33 +1,35 @@
+#!/usr/bin/env python
 
 from aria import *
 from aria.reader import *
 from aria.parser import *
-from aria.generator import *
-from aria.grammar import *
+from aria.consumer import *
+from aria.presenter import *
 from tosca.datatypes import *
 
 from clint.arguments import Args 
 from clint.textui import puts, colored, indent
 
-args = Args()
+if __name__ == '__main__':
 
-#reader = YamlReader('simple-blueprint.yaml')
-#reader.read()
+    args = Args()
 
-r = Credential({'properties': {'protocol': 'http'}})
-print r.properties.protocol
+    #reader = YamlReader('simple-blueprint.yaml')
+    #reader.read()
 
-parser = DefaultParser('blueprints/simple-blueprint.yaml')
-structure = parser.consume()
+    r = Credential({'properties': {'protocol': 'http'}})
+    print r.properties.protocol
 
-#Writer(structure).consume()
+    parser = DefaultParser('blueprints/simple-blueprint.yaml')
+    presentation = parser.parse()
 
-validator = Validator(structure)
-validator.consume()
+    #Writer(structure).consume()
 
-grammar_cls = parser.grammar_source.get_grammar(structure)
-profile = grammar_cls(structure).profile
+    validator = Validator(presentation)
+    validator.consume()
 
-print profile.tosca_definitions_version
-for name, n in profile.node_templates.iteritems():
-    print name + ' ' + n.type
+    profile = presentation.profile
+
+    print profile.tosca_definitions_version
+    for name, n in profile.node_templates.iteritems():
+        print name + ' ' + n.type

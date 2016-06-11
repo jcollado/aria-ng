@@ -2,37 +2,37 @@
 from misc import Input, Output
 from types import NodeType, RelationshipType
 from templates import NodeTemplate
-from aria.presenter import has_properties, property_object_dict
+from aria.presenter import has_fields, object_dict_field
 from aria.presenter.tosca_simple import Profile as BaseProfile
 
-@has_properties
+@has_fields
 class Profile(BaseProfile):
-    @property_object_dict(Input)
+    @object_dict_field(Input)
     def inputs(self):
         """
         :class:`Input`
         """
 
-    @property_object_dict(Output)
+    @object_dict_field(Output)
     def outputs(self):
         """
         :class:`Output`
         """
     
-    @property_object_dict(NodeType)
+    @object_dict_field(NodeType)
     def node_types(self):
         """
         :class:`NodeType`
         """
 
-    @property_object_dict(RelationshipType)
+    @object_dict_field(RelationshipType)
     def relationships(self):
         """
         :class:`RelationshipType`
         """
         return self._get_object_dict('relationships', RelationshipType)
     
-    @property_object_dict(NodeTemplate)
+    @object_dict_field(NodeTemplate)
     def node_templates(self):
         """
         :class:`NodeTemplate`

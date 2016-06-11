@@ -20,9 +20,9 @@ def get_object_dict(raw, name, cls, default=None):
     raws = raw.get(name)
     return {k: cls(raw) for k, raw in raws.iteritems()} if raws else default
 
-def has_properties(cls):
+def has_fields(cls):
     """
-    Class decorator.
+    Class decorator for presentations.
     """
     
     # Make sure we have PROPERTIES
@@ -34,112 +34,116 @@ def has_properties(cls):
         if hasattr(base, 'PROPERTIES'):
             cls.PROPERTIES.update(base.PROPERTIES)
     
-    for name, p in cls.__dict__.iteritems():
-        if isinstance(p, Property):
+    for name, field in cls.__dict__.iteritems():
+        if isinstance(field, Field):
             # Accumulate
-            cls.PROPERTIES[name] = p
+            cls.PROPERTIES[name] = field
             
             # Convert to Python property
-            if p.type == 'raw':
-                def closure(name, p):
+            if field.type == 'raw':
+                def closure(name, field):
                     @property
                     def the_property(*args):
                         this = args[0] # First argument is 'self'
-                        return get_raw(this.raw, name, default=p.default)
+                        return get_raw(this.raw, name, default=field.default)
                     return the_property
-                setattr(cls, name, closure(name, p))
+                setattr(cls, name, closure(name, field))
                 
-            elif p.type == 'primitive':
-                def closure(name, p):
+            elif field.type == 'primitive':
+                def closure(name, field):
                     @property
                     def the_property(*args):
                         this = args[0] # First argument is 'self'
-                        return get_primitive(this.raw, name, default=p.default)
+                        return get_primitive(this.raw, name, default=field.default)
                     return the_property
-                setattr(cls, name, closure(name, p))
+                setattr(cls, name, closure(name, field))
                 
-            elif p.type == 'primitive_list':
-                def closure(name, p):
+            elif field.type == 'primitive_list':
+                def closure(name, field):
                     @property
                     def the_property(*args):
                         this = args[0] # First argument is 'self'
-                        return get_primitive_list(this.raw, name, default=p.default)
+                        return get_primitive_list(this.raw, name, default=field.default)
                     return the_property
-                setattr(cls, name, closure(name, p))
+                setattr(cls, name, closure(name, field))
                 
-            elif p.type == 'object':
-                def closure(name, p):
+            elif field.type == 'object':
+                def closure(name, field):
                     @property
                     def the_property(*args):
                         this = args[0] # First argument is 'self'
-                        return get_object(this.raw, name, p.cls, default=p.default)
+                        return get_object(this.raw, name, field.cls, default=field.default)
                     return the_property
-                setattr(cls, name, closure(name, p))
+                setattr(cls, name, closure(name, field))
                 
-            elif p.type == 'object_list':
-                def closure(name, p):
+            elif field.type == 'object_list':
+                def closure(name, field):
                     @property
                     def the_property(*args):
                         this = args[0] # First argument is 'self'
-                        return get_object_list(this.raw, name, p.cls, default=p.default)
+                        return get_object_list(this.raw, name, field.cls, default=field.default)
                     return the_property
-                setattr(cls, name, closure(name, p))
+                setattr(cls, name, closure(name, field))
                 
-            elif p.type == 'object_dict':
-                def closure(name, p):
+            elif field.type == 'object_dict':
+                def closure(name, field):
                     @property
                     def the_property(*args):
                         this = args[0] # First argument is 'self'
-                        return get_object_dict(this.raw, name, p.cls, default=p.default)
+                        return get_object_dict(this.raw, name, field.cls, default=field.default)
                     return the_property
-                setattr(cls, name, closure(name, p))
+                setattr(cls, name, closure(name, field))
                 
             else:
-                raise AttributeError('Unsupported Property type: %s' % p.type)
+                raise AttributeError('Unsupported Field type: %s' % field.type)
                 
     return cls
 
-def property_raw(f):
-    return Property('raw')
+def raw_field(f):
+    return Field('raw')
 
-def property_primitive(f):
-    return Property('primitive')
+def primitive_field(f):
+    return Field('primitive')
 
-def property_primitive_default(default):
+def primitive_field_with_default(default):
     def decorator(f):
-        return Property('primitive', default=default)
+        return Field('primitive', default=default)
     return decorator
 
-def property_primitive_list(f):
-    return Property('primitive_list')
+def primitive_list_field(f):
+    return Field('primitive_list')
 
-def property_object(cls):
+def object_field(cls):
     def decorator(f):
-        return Property('object', cls=cls)
+        return Field('object', cls=cls)
     return decorator
 
-def property_object_list(cls):
+def object_list_field(cls):
     def decorator(f):
-        return Property('object_list', cls=cls)
+        return Field('object_list', cls=cls)
     return decorator
 
-def property_object_dict(cls):
+def object_dict_field(cls):
     def decorator(f):
-        return Property('object_dict', cls=cls)
+        return Field('object_dict', cls=cls)
     return decorator
 
-def required(f):
-    if isinstance(f, Property):
+def required_field(f):
+    if isinstance(f, Field):
         f.required = True
         return f
     else:
-        raise AttributeError('@required must be used with a Property')
+        raise AttributeError('@required_field must be used with a Field')
 
-class HasRaw(object):
+class Presentation(object):
     def __init__(self, raw={}):
         self.raw = raw
+        
+    def validate(self):
+        # TODO
+        pass
 
-class Property(object):
+class Field(object):
     def __init__(self, type, default=None, cls=None, required=False):
         self.type = type
         self.default = default

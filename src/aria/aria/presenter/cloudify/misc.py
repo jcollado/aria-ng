@@ -1,55 +1,55 @@
 
-from aria.presenter import HasRaw, has_properties, property_primitive, property_object_dict, required
+from aria.presenter import Presentation, has_fields, primitive_field, object_dict_field, required_field
 from aria.presenter.tosca_simple import PropertyAssignment
 
-@has_properties
-class Input(HasRaw):
-    @property_primitive
+@has_fields
+class Input(Presentation):
+    @primitive_field
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         """
 
-@has_properties
-class Output(HasRaw):
-    @property_primitive
+@has_fields
+class Output(Presentation):
+    @primitive_field
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         """
 
-    @required
-    @property_object_dict(PropertyAssignment)
+    @required_field
+    @object_dict_field(PropertyAssignment)
     def value(self):
         """
         :class:`PropertyAssignment`
         """
 
-@has_properties
-class Relationship(HasRaw):
-    @required
-    @property_primitive
+@has_fields
+class Relationship(Presentation):
+    @required_field
+    @primitive_field
     def type(self):
         pass
 
-    @property_primitive
+    @primitive_field
     def target(self):
         pass
 
-@has_properties
-class Workflow(HasRaw):
+@has_fields
+class Workflow(Presentation):
     def __init__(self, raw={}):
         super(Workflow, self).__init__({'implementation': raw} if isinstance(raw, basestring) else raw)
 
-    @property_primitive
+    @primitive_field
     def implementation(self):
         pass
 
-    @property_primitive
+    @primitive_field
     def executor(self):
         pass
 
-    @property_object_dict(PropertyAssignment)
+    @object_dict_field(PropertyAssignment)
     def inputs(self):
         """
         :class:`PropertyAssignment`

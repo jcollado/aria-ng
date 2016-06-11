@@ -1,9 +1,9 @@
 
 from misc import Workflow
-from aria.presenter import has_properties
+from aria.presenter import has_fields
 from aria.presenter.tosca_simple import InterfaceDefinition as BaseInterfaceDefinition
 
-@has_properties
+@has_fields
 class InterfaceDefinition(BaseInterfaceDefinition):
     @property
     def workflows(self):

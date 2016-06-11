@@ -20,7 +20,8 @@ Importantly, it keeps the original TOSCA data intact, such that modifications ca
 written back to files.
 
 It is furthermore possible to use ARIA in order to generate a complete TOSCA profile
-programmatically, in Python, and then write it to files.
+programmatically, in Python, and then write it to files. The same technique can be
+used to convert from one DSL (parse it) to another (write it).
 
 The parser has three phases, represented by packages and classes in the API:
 
@@ -47,6 +48,10 @@ Consumers
 
 ARIA also comes with various "consumers" that do things with presentation. Consumers
 can be generic, or can be designed to work only with specific kinds of presentations.
+
+Though you can simply make use of presentation without using the ARIA consumer API,
+the advantage of using it is that you may benefit from other tools that make use of
+the API.
 
 
 CLI Tool

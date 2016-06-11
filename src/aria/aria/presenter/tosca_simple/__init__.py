@@ -1,5 +1,4 @@
 
-from base import *
 from assignments import *
 from definitions import *
 from filters import *
@@ -8,11 +7,12 @@ from templates import *
 from types import *
 from misc import *
 
+from aria import merge
 from aria.presenter import Presenter
 
 class ToscaSimplePresenter1_0(Presenter):
     """
-    ARIA presenter for See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html>`__.
+    ARIA presenter for the `TOSCA Simple Profile v1.0 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html>`__.
     """
     
     @staticmethod
@@ -24,14 +24,13 @@ class ToscaSimplePresenter1_0(Presenter):
         return Profile(self.raw)
 
     def get_import_locators(self):
-        return [i.file for i in self.profile.imports]
+        return [i.file for i in self.profile.imports] if (self.profile and self.profile.imports) else []
         
     def merge_import(self, presentation):
         # TODO: too primitive! what if there are conflicts?
-        self.raw.update(presentation.raw)
+        merge(self.raw, presentation.raw)
 
 __all__ = [
-    'Base',
     'PropertyAssignment',
     'RequirementAssignment',
     'CapabilityAssignment',

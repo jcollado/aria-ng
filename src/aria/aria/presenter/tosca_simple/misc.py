@@ -1,126 +1,108 @@
 
-from base import Base
-from tosca import Range
+from aria.presenter import HasRaw, has_properties, property_primitive, property_object, required
 from tosca.datatypes import Credential
 
-class Repository(Base):
+@has_properties
+class Repository(HasRaw):
     """
     A repository definition defines a named external repository which contains deployment and implementation artifacts that are referenced within the TOSCA Service Template.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_REPOSITORY_DEF>`__
     """
     
-    REQUIRED = ['url']
-    
-    @property
+    @property_primitive
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         """
-        return self._get_primitive('description')
 
-    @property
+    @required
+    @property_primitive
     def url(self):
-        return self._get_primitive('url')
+        pass
 
-    @property
+    @property_object(Credential)
     def credential(self):
         """
         :class:`tosca.datatypes.Credential`
         """
-        return self._get_object('credential', Credential)
 
-class Import(Base):
+@has_properties
+class Import(HasRaw):
     """
     An import definition is used within a TOSCA Service Template to locate and uniquely name another TOSCA Service Template file which has type and template definitions to be imported (included) and referenced within another Service Template.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_IMPORT_DEF>`__
     """
     
-    REQUIRED = ['file']
-
     def __init__(self, raw={}):
         super(Import, self).__init__({'file': raw} if isinstance(raw, basestring) else raw)
 
-    @property
+    @required
+    @property_primitive
     def file(self):
-        return self._get_primitive('file')
+        pass
 
-    @file.setter
-    def file(self, value):
-        self.raw['file'] = value
-
-    @property
+    @property_primitive
     def repository(self):
-        return self._get_primitive('repository')
+        pass
 
-    @repository.setter
-    def repository(self, value):
-        self.raw['repository'] = value
-
-    @property
+    @property_primitive
     def namespace_uri(self):
-        return self._get_primitive('namespace_uri')
+        pass
 
-    @namespace_uri.setter
-    def namespace_uri(self, value):
-        self.raw['namespace_uri'] = value
-
-    @property
+    @property_primitive
     def namespace_prefix(self):
-        return self._get_primitive('namespace_prefix')
+        pass
 
-    @namespace_prefix.setter
-    def namespace_prefix(self, value):
-        self.raw['namespace_prefix'] = value
-
-class ConstraintClause(Base):
+@has_properties
+class ConstraintClause(HasRaw):
     """
     A constraint clause defines an operation along with one or more compatible values that can be used to define a constraint on a property or parameter's allowed values when it is defined in a TOSCA Service Template or one of its entities.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_CONSTRAINTS_CLAUSE>`__
     """
     
-    @property
+    @property_primitive
     def equal(self):
-        return self._get_primitive('equal')
+        pass
     
-    @property
+    @property_primitive
     def greater_than(self):
-        return self._get_primitive('greater_than')
+        pass
     
-    @property
+    @property_primitive
     def greater_or_equal(self):
-        return self._get_primitive('greater_or_equal')
+        pass
     
-    @property
+    @property_primitive
     def less_than(self):
-        return self._get_primitive('less_than')
+        pass
     
-    @property
+    @property_primitive
     def less_or_equal(self):
-        return self._get_primitive('less_or_equal')
+        pass
     
-    @property
+    @property_primitive
     def in_range(self):
-        return self._get_object('in_range', Range)
+        pass
     
-    @property
+    @property_primitive
     def valid_values(self):
-        return self._get_primitive_list('valid_values')
+        pass
     
-    @property
+    @property_primitive
     def length(self):
-        return self._get_primitive('length')
+        pass
     
-    @property
+    @property_primitive
     def min_length(self):
-        return self._get_primitive('min_length')
+        pass
     
-    @property
+    @property_primitive
     def max_length(self):
-        return self._get_primitive('max_length')
+        pass
 
-    @property
+    @property_primitive
     def pattern(self):
-        return self._get_primitive('pattern')
+        pass

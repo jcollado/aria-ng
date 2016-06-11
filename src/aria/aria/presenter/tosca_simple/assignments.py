@@ -1,16 +1,20 @@
 
-from base import Base
+from aria.presenter import HasRaw, has_properties
 
-class PropertyAssignment(Base):
+@has_properties
+class PropertyAssignment(HasRaw):
     """
-    This section defines the presenter for assigning values to named properties within TOSCA Node and Relationship templates that are defined in their corresponding named types.
+    This section defines the grammar for assigning values to named properties within TOSCA Node and Relationship templates that are defined in their corresponding named types.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_VALUE_ASSIGNMENT>`__
     """
     
-    # TODO
+    @property
+    def value(self):
+        return self.raw
 
-class RequirementAssignment(Base):
+@has_properties
+class RequirementAssignment(HasRaw):
     """
     A Requirement assignment allows template authors to provide either concrete names of TOSCA templates or provide abstract selection criteria for providers to use to find matching TOSCA templates that are used to fulfill a named requirement's declared TOSCA Node Type.
     
@@ -19,7 +23,8 @@ class RequirementAssignment(Base):
     
     #TODO
 
-class CapabilityAssignment(Base):
+@has_properties
+class CapabilityAssignment(HasRaw):
     """
     A capability assignment allows node template authors to assign values to properties and attributes for a named capability definition that is part of a Node Template's type definition.
     
@@ -28,9 +33,10 @@ class CapabilityAssignment(Base):
     
     #TODO
 
-class AttributeAssignment(Base):
+@has_properties
+class AttributeAssignment(HasRaw):
     """
-    This section defines the presenter for assigning values to named attributes within TOSCA Node and Relationship templates which are defined in their corresponding named types.
+    This section defines the grammar for assigning values to named attributes within TOSCA Node and Relationship templates which are defined in their corresponding named types.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_ATTRIBUTE_VALUE_ASSIGNMENT>`__
     """

@@ -10,26 +10,35 @@ from tosca.datatypes import *
 from clint.arguments import Args 
 from clint.textui import puts, colored, indent
 
-if __name__ == '__main__':
+def show_help():
+    puts(colored.red('ARIA CLI'))
+    with indent(2):
+        puts('aria [profile URI or file path]')
 
+if __name__ == '__main__':
     args = Args()
+    
+    if len(args.all) == 0:
+        show_help()
+        exit(1)
+    
+    uri = args.all[0]
 
     #reader = YamlReader('simple-blueprint.yaml')
     #reader.read()
 
-    r = Credential({'properties': {'protocol': 'http'}})
-    print r.properties.protocol
+    #r = Credential({'properties': {'protocol': 'http'}})
+    #print r.properties.protocol
 
-    parser = DefaultParser('blueprints/simple-blueprint.yaml')
+    parser = DefaultParser(uri)
     presentation = parser.parse()
 
     #Writer(structure).consume()
 
     validator = Validator(presentation)
     validator.consume()
+    
+    #print presentation.profile.tosca_definitions_version
 
-    profile = presentation.profile
+    Printer(presentation).consume()
 
-    print profile.tosca_definitions_version
-    for name, n in profile.node_templates.iteritems():
-        print name + ' ' + n.type

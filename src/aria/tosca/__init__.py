@@ -16,6 +16,6 @@ __all__ = [
     'Size',
     'Time',
     'Frequency',
-    'Dynamic',
+    'PropertiesContainer',
     'HasProperties',
-    'HasCapabilities']
+    'HasConstraints']

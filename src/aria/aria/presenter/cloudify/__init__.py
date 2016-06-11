@@ -1,7 +1,13 @@
 
-import aria.presenter.tosca_simple
+from definitions import *
+from misc import *
+from profile import *
+from templates import *
+from types import *
 
-class CloudifyPresenter1_3(aria.presenter.tosca_simple.ToscaSimplePresenter1_0):
+from aria.presenter.tosca_simple import ToscaSimplePresenter1_0
+
+class CloudifyPresenter1_3(ToscaSimplePresenter1_0):
     """
     ARIA presenter for Cloudify.
     """
@@ -14,14 +20,14 @@ class CloudifyPresenter1_3(aria.presenter.tosca_simple.ToscaSimplePresenter1_0):
     def profile(self):
         return Profile(self.raw)
 
-class Profile(aria.presenter.tosca_simple.Profile):
-    @property
-    def node_templates(self):
-        """
-        :class:`NodeTemplate`
-        """
-        return self._get_object_dict('node_templates', aria.presenter.tosca_simple.NodeTemplate)
-
 __all__ = [
     'CloudifyPresenter1_3',
-    'Profile']
+    'InterfaceDefinition',
+    'Input',
+    'Output',
+    'Relationship',
+    'Workflow',
+    'Profile',
+    'NodeTemplate',
+    'NodeType',
+    'RelationshipType']

@@ -128,7 +128,7 @@ html_theme = 'sphinx_rtd_theme'
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-# html_theme_path = []
+#html_theme_path = []
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
@@ -335,3 +335,6 @@ texinfo_documents = [
 
 # Include __init__ docstring into class docstring
 autoclass_content = 'both'
+
+# Default to everything important
+autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance']

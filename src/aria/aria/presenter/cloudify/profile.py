@@ -10,30 +10,30 @@ class Profile(BaseProfile):
     @object_dict_field(Input)
     def inputs(self):
         """
-        :class:`Input`
+        :rtype: dict of str, :class:`Input`
         """
 
     @object_dict_field(Output)
     def outputs(self):
         """
-        :class:`Output`
+        :rtype: dict of str, :class:`Output`
         """
     
     @object_dict_field(NodeType)
     def node_types(self):
         """
-        :class:`NodeType`
+        :rtype: dict of str, :class:`NodeType`
         """
 
     @object_dict_field(RelationshipType)
     def relationships(self):
         """
-        :class:`RelationshipType`
+        :rtype: dict of str, :class:`RelationshipType`
         """
         return self._get_object_dict('relationships', RelationshipType)
     
     @object_dict_field(NodeTemplate)
     def node_templates(self):
         """
-        :class:`NodeTemplate`
+        :rtype: dict of str, :class:`NodeTemplate`
         """

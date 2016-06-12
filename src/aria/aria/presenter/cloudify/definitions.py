@@ -8,6 +8,6 @@ class InterfaceDefinition(BaseInterfaceDefinition):
     @property
     def workflows(self):
         """
-        :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
         return {k: Workflow(v) for k, v in self.raw.iteritems()}

@@ -18,6 +18,8 @@ class PropertyDefinition(Presentation):
     def type(self):
         """
         The required data type for the property.
+        
+        :rtype: str
         """
     
     @field_type(str)
@@ -27,6 +29,8 @@ class PropertyDefinition(Presentation):
         The optional description for the property.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @field_default(True)
@@ -35,6 +39,8 @@ class PropertyDefinition(Presentation):
     def required(self):
         """
         An optional key that declares a property as required (true) or not (false).
+        
+        :rtype: bool
         """
 
     @field_type(str)
@@ -42,6 +48,8 @@ class PropertyDefinition(Presentation):
     def default(self):
         """
         An optional key that may provide a value to be used as a default if not provided by another means.
+        
+        :rtype: str
         """
 
     @field_default('supported')
@@ -50,6 +58,8 @@ class PropertyDefinition(Presentation):
     def status(self):
         """
         The optional status of the property relative to the specification or implementation.
+        
+        :rtype: str
         """
 
     @object_dict_field(ConstraintClause)
@@ -57,7 +67,7 @@ class PropertyDefinition(Presentation):
         """
         The optional list of sequenced constraint clauses for the property.
         
-        :class:`ConstraintClause`
+        :rtype: dict of str, :class:`ConstraintClause`
         """
 
     @field_type(str)
@@ -65,6 +75,8 @@ class PropertyDefinition(Presentation):
     def entry_schema(self):
         """
         The optional key that is used to declare the name of the Datatype definition for entries of set types such as the TOSCA list or map.
+        
+        :rtype: str
         """
 
 @has_fields
@@ -81,6 +93,8 @@ class AttributeDefinition(Presentation):
     def type(self):
         """
         The required data type for the attribute.
+        
+        :rtype: str
         """
     
     @field_type(str)
@@ -90,6 +104,8 @@ class AttributeDefinition(Presentation):
         The optional description for the attribute.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
         return self._get_primitive('description')
 
@@ -100,6 +116,8 @@ class AttributeDefinition(Presentation):
         An optional key that may provide a value to be used as a default if not provided by another means.
 
         This value SHALL be type compatible with the type declared by the property definition's type keyname.
+        
+        :rtype: str
         """
 
     @field_default('supported')
@@ -108,6 +126,8 @@ class AttributeDefinition(Presentation):
     def status(self):
         """
         The optional status of the attribute relative to the specification or implementation.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -115,6 +135,8 @@ class AttributeDefinition(Presentation):
     def entry_schema(self):
         """
         The optional key that is used to declare the name of the Datatype definition for entries of set types such as the TOSCA list or map.
+        
+        :rtype: str
         """
 
 @has_fields
@@ -132,6 +154,8 @@ class ParameterDefinition(Presentation):
         The required data type for the parameter.
 
         Note: This keyname is required for a TOSCA Property definition, but is not for a TOSCA Parameter definition.
+        
+        :rtype: str
         """
 
     @primitive_field
@@ -153,7 +177,7 @@ class InterfaceDefinition(Presentation):
         """
         The optional list of input property definitions available to all defined operations for interface definitions that are within TOSCA Node or Relationship Type definitions. This includes when interface definitions are included as part of a Requirement definition in a Node Type.
         
-        :class:`ParameterDefinition`
+        :rtype: dict of str, :class:`ParameterDefinition`
         """
 
     @object_dict_field(PropertyDefinition)
@@ -161,7 +185,7 @@ class InterfaceDefinition(Presentation):
         """
         The optional list of input property assignments (i.e., parameters assignments) for interface definitions that are within TOSCA Node or Relationship Template definitions. This includes when interface definitions are referenced as part of a Requirement assignment in a Node Template.
         
-        :class:`PropertyDefinition` or :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyDefinition` or :class:`PropertyAssignment`
         """
         # TODO
 
@@ -179,6 +203,8 @@ class RequirementDefinition(Presentation):
     def capability(self):
         """
         The required reserved keyname used that can be used to provide the name of a valid Capability Type that can fulfill the requirement.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -186,6 +212,8 @@ class RequirementDefinition(Presentation):
     def node(self):
         """
         The optional reserved keyname used to provide the name of a valid Node Type that contains the capability definition that can be used to fulfill the requirement.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -193,6 +221,8 @@ class RequirementDefinition(Presentation):
     def relationship(self):
         """
         The optional reserved keyname used to provide the name of a valid Relationship Type to construct when fulfilling the requirement.
+        
+        :rtype: str
         """
 
     @object_field(Range)
@@ -201,6 +231,8 @@ class RequirementDefinition(Presentation):
         The optional minimum and maximum occurrences for the requirement.
 
         Note: the keyword UNBOUNDED is also supported to represent any positive integer.
+        
+        :rtype: :class:`tosca.Range`
         """
 
 @has_fields
@@ -217,6 +249,8 @@ class CapabilityDefinition(Presentation):
     def type(self):
         """
         The required name of the Capability Type the capability definition is based upon.
+        
+        :rtype: str
         """
     
     @field_type(str)
@@ -226,6 +260,8 @@ class CapabilityDefinition(Presentation):
         The optional description of the Capability definition.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyDefinition)
@@ -233,7 +269,7 @@ class CapabilityDefinition(Presentation):
         """
         An optional list of property definitions for the Capability definition.
         
-        :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
     @object_dict_field(AttributeDefinition)
@@ -241,13 +277,16 @@ class CapabilityDefinition(Presentation):
         """
         An optional list of attribute definitions for the Capability definition.
         
-        :class:`AttributeDefinition`
+        :rtype: dict of str, :class:`AttributeDefinition`
         """
+
     @field_type(str)
     @primitive_list_field
     def valid_source_types(self):
         """
         An optional list of one or more valid names of Node Types that are supported as valid sources of any relationship established to the declared Capability Type.
+        
+        :rtype: list of str
         """
 
     @object_field(Range)
@@ -256,6 +295,8 @@ class CapabilityDefinition(Presentation):
         The optional minimum and maximum occurrences for the capability. By default, an exported Capability should allow at least one relationship to be formed with it with a maximum of UNBOUNDED relationships.
 
         Note: the keyword UNBOUNDED is also supported to represent any positive integer.
+        
+        :rtype: :class:`tosca.Range`
         """
         # TODO: range of integer
 
@@ -273,6 +314,8 @@ class ArtifactDefinition(Presentation):
     def type(self):
         """
         The required artifact type for the artifact definition.
+        
+        :rtype: str
         """
 
     @required_field
@@ -281,6 +324,8 @@ class ArtifactDefinition(Presentation):
     def file(self):
         """
         The required URI string (relative or absolute) which can be used to locate the artifact's file.
+            
+        :rtype: str
         """
     
     @field_type(str)
@@ -288,6 +333,8 @@ class ArtifactDefinition(Presentation):
     def repository(self):
         """
         The optional name of the repository definition which contains the location of the external repository that contains the artifact. The artifact is expected to be referenceable by its file URI within the repository.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -297,6 +344,8 @@ class ArtifactDefinition(Presentation):
         The optional description for the artifact definition.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -304,6 +353,8 @@ class ArtifactDefinition(Presentation):
     def deploy_path(self):
         """
         The file path the associated file would be deployed into within the target node's container.
+        
+        :rtype: str
         """
 
 @has_fields
@@ -320,6 +371,8 @@ class GroupDefinition(Presentation):
     def type(self):
         """
         The required name of the group type the group definition is based upon.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -329,15 +382,16 @@ class GroupDefinition(Presentation):
         The optional description for the group definition.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
-        pass
 
     @object_dict_field(PropertyAssignment)
     def properties(self):
         """
         An optional list of property value assignments for the group definition.
         
-        :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
 
     @field_type(str)
@@ -345,6 +399,8 @@ class GroupDefinition(Presentation):
     def members(self):
         """
         The optional list of one or more node template names that are members of this group definition.
+        
+        :rtype: list of str
         """
 
     @object_dict_field(InterfaceDefinition)
@@ -352,7 +408,7 @@ class GroupDefinition(Presentation):
         """
         An optional list of named interface definitions for the group definition.
         
-        :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
 @has_fields
@@ -364,10 +420,13 @@ class PolicyDefinition(Presentation):
     """
 
     @required_field
+    @field_type(str)
     @primitive_field
     def type(self):
         """
         The required name of the policy type the policy definition is based upon.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -377,6 +436,8 @@ class PolicyDefinition(Presentation):
         The optional description for the policy definition.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyAssignment)
@@ -384,11 +445,13 @@ class PolicyDefinition(Presentation):
         """
         An optional list of property value assignments for the policy definition.
         
-        :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
 
     @primitive_list_field
     def targets(self):
         """
         An optional list of valid Node Templates or Groups the Policy can be applied to.
+        
+        :rtype: list of str
         """

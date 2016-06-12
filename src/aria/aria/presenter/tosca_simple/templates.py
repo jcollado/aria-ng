@@ -18,6 +18,8 @@ class NodeTemplate(Presentation):
     def type(self):
         """
         The required name of the Node Type the Node Template is based upon.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -27,6 +29,8 @@ class NodeTemplate(Presentation):
         An optional description for the Node Template.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -34,6 +38,8 @@ class NodeTemplate(Presentation):
     def directives(self):
         """
         An optional list of directive values to provide processing instructions to orchestrators and tooling.
+        
+        :rtype: list of str
         """
 
     @object_dict_field(PropertyAssignment)
@@ -41,7 +47,7 @@ class NodeTemplate(Presentation):
         """
         An optional list of property value assignments for the Node Template.
         
-        :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
 
     @object_dict_field(AttributeAssignment)
@@ -49,7 +55,7 @@ class NodeTemplate(Presentation):
         """
         An optional list of attribute value assignments for the Node Template.
         
-        :class:`AttributeAssignment`
+        :rtype: dict of str, :class:`AttributeAssignment`
         """
 
     @object_dict_field(RequirementAssignment)
@@ -57,7 +63,7 @@ class NodeTemplate(Presentation):
         """
         An optional sequenced list of requirement assignments for the Node Template.
         
-        :class:`RequirementAssignment`
+        :rtype: dict of str, :class:`RequirementAssignment`
         """
 
     @object_dict_field(CapabilityAssignment)
@@ -65,7 +71,7 @@ class NodeTemplate(Presentation):
         """
         An optional list of capability assignments for the Node Template.
         
-        :class:`CapabilityAssignment`
+        :rtype: dict of str, :class:`CapabilityAssignment`
         """
 
     @object_dict_field(InterfaceDefinition)
@@ -73,7 +79,7 @@ class NodeTemplate(Presentation):
         """
         An optional list of named interface definitions for the Node Template.
         
-        :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
     @object_dict_field(ArtifactDefinition)
@@ -81,7 +87,7 @@ class NodeTemplate(Presentation):
         """
         An optional list of named artifact definitions for the Node Template.
         
-        :class:`ArtifactDefinition`
+        :rtype: dict of str, :class:`ArtifactDefinition`
         """
 
     @object_dict_field(NodeFilter)
@@ -89,7 +95,7 @@ class NodeTemplate(Presentation):
         """
         The optional filter definition that TOSCA orchestrators would use to select the correct target node. This keyname is only valid if the directive has the value of "selectable" set.
         
-        :class:`NodeFilter`
+        :rtype: dict of str, :class:`NodeFilter`
         """
 
     @field_type(str)
@@ -97,6 +103,8 @@ class NodeTemplate(Presentation):
     def copy(self):
         """
         The optional (symbolic) name of another node template to copy into (all keynames and values) and use as a basis for this node template.
+        
+        :rtype: str
         """
 
 @has_fields
@@ -113,6 +121,8 @@ class RelationshipTemplate(Presentation):
     def type(self):
         """
         The required name of the Relationship Type the Relationship Template is based upon.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -122,6 +132,8 @@ class RelationshipTemplate(Presentation):
         An optional description for the Relationship Template.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyAssignment)
@@ -129,7 +141,7 @@ class RelationshipTemplate(Presentation):
         """
         An optional list of property assignments for the Relationship Template.
         
-        :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
 
     @object_dict_field(AttributeAssignment)
@@ -137,7 +149,7 @@ class RelationshipTemplate(Presentation):
         """
         An optional list of attribute assignments for the Relationship Template.
         
-        :class:`AttributeAssignment`
+        :rtype: dict of str, :class:`AttributeAssignment`
         """
 
     @object_dict_field(InterfaceDefinition)
@@ -145,7 +157,7 @@ class RelationshipTemplate(Presentation):
         """
         An optional list of named interface definitions for the Node Template.
         
-        :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
     @field_type(str)
@@ -153,6 +165,8 @@ class RelationshipTemplate(Presentation):
     def copy(self):
         """
         The optional (symbolic) name of another relationship template to copy into (all keynames and values) and use as a basis for this relationship template.
+        
+        :rtype: str
         """
 
 @has_fields
@@ -170,6 +184,8 @@ class TopologyTemplate(Presentation):
         The optional description for the Topology Template.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(ParameterDefinition)
@@ -177,7 +193,7 @@ class TopologyTemplate(Presentation):
         """
         An optional list of input parameters (i.e., as parameter definitions) for the Topology Template.
         
-        :class:`ParameterDefinition`
+        :rtype: dict of str, :class:`ParameterDefinition`
         """
 
     @object_dict_field(NodeTemplate)
@@ -185,7 +201,7 @@ class TopologyTemplate(Presentation):
         """
         An optional list of node template definitions for the Topology Template.
         
-        :class:`NodeTemplate`
+        :rtype: dict of str, :class:`NodeTemplate`
         """
 
     @object_dict_field(RelationshipTemplate)
@@ -193,7 +209,7 @@ class TopologyTemplate(Presentation):
         """
         An optional list of relationship templates for the Topology Template.
         
-        :class:`RelationshipTemplate`
+        :rtype: dict of str, :class:`RelationshipTemplate`
         """
 
     @object_dict_field(GroupDefinition)
@@ -209,7 +225,7 @@ class TopologyTemplate(Presentation):
         """
         An optional list of Policy definitions for the Topology Template.
         
-        :class:`PolicyDefinition`
+        :rtype: dict of str, :class:`PolicyDefinition`
         """
 
     @object_dict_field(ParameterDefinition)
@@ -217,7 +233,7 @@ class TopologyTemplate(Presentation):
         """
         An optional list of output parameters (i.e., as parameter definitions) for the Topology Template.
         
-        :class:`ParameterDefinition`
+        :rtype: dict of str, :class:`ParameterDefinition`
         """
     
     @primitive_field

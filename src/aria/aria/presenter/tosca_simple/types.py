@@ -17,6 +17,8 @@ class ArtifactType(Presentation):
     def derived_from(self):
         """
         An optional parent Artifact Type name the Artifact Type derives from.
+        
+        :rtype: str
         """
 
     @object_field(Version)
@@ -24,7 +26,7 @@ class ArtifactType(Presentation):
         """
         An optional version for the Artifact Type definition.
         
-        :class:`Version`
+        :rtype: :class:`Version`
         """
 
     @field_type(str)
@@ -34,6 +36,8 @@ class ArtifactType(Presentation):
         An optional description for the Artifact Type.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -41,6 +45,8 @@ class ArtifactType(Presentation):
     def mime_type(self):
         """
         The required mime type property for the Artifact Type.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -48,6 +54,8 @@ class ArtifactType(Presentation):
     def file_ext(self):
         """
         The required file extension property for the Artifact Type.
+        
+        :rtype: list of str
         """
 
     @object_dict_field(PropertyDefinition)
@@ -55,7 +63,7 @@ class ArtifactType(Presentation):
         """
         An optional list of property definitions for the Artifact Type.
         
-        :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
 @has_fields
@@ -71,6 +79,8 @@ class DataType(Presentation):
     def derived_from(self):
         """
         The optional key used when a datatype is derived from an existing TOSCA Data Type.
+        
+        :rtype: str
         """
 
     @object_field(Version)
@@ -78,7 +88,7 @@ class DataType(Presentation):
         """
         An optional version for the Data Type definition.
         
-        :class:`Version`
+        :rtype: :class:`Version`
         """
 
     @field_type(str)
@@ -88,6 +98,8 @@ class DataType(Presentation):
         The optional description for the Data Type.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(ConstraintClause)
@@ -95,7 +107,7 @@ class DataType(Presentation):
         """
         The optional list of sequenced constraint clauses for the Data Type.
         
-        :class:`ConstraintClause`
+        :rtype: dict of str, :class:`ConstraintClause`
         """
 
     @object_dict_field(PropertyDefinition)
@@ -103,7 +115,7 @@ class DataType(Presentation):
         """
         The optional list property definitions that comprise the schema for a complex Data Type in TOSCA.
         
-        :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
 @has_fields
@@ -119,6 +131,8 @@ class CapabilityType(Presentation):
     def derived_from(self):
         """
         An optional parent capability type name this new Capability Type derives from.
+        
+        :rtype: str
         """
 
     @object_field(Version)
@@ -126,7 +140,7 @@ class CapabilityType(Presentation):
         """
         An optional version for the Capability Type definition.
         
-        :class:`Version`
+        :rtype: :class:`Version`
         """
 
     @field_type(str)
@@ -136,6 +150,8 @@ class CapabilityType(Presentation):
         An optional description for the Capability Type.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyDefinition)
@@ -143,7 +159,7 @@ class CapabilityType(Presentation):
         """
         An optional list of property definitions for the Capability Type.
         
-        :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
     @object_dict_field(AttributeDefinition)
@@ -151,7 +167,7 @@ class CapabilityType(Presentation):
         """
         An optional list of attribute definitions for the Capability Type.
         
-        :class:`AttributeDefinition`
+        :rtype: dict of str, :class:`AttributeDefinition`
         """
 
     @field_type(str)
@@ -159,6 +175,8 @@ class CapabilityType(Presentation):
     def valid_source_types(self):
         """
         An optional list of one or more valid names of Node Types that are supported as valid sources of any relationship established to the declared Capability Type.
+        
+        :rtype: list of str
         """
 
 @has_fields
@@ -174,6 +192,8 @@ class InterfaceType(Presentation):
     def derived_from(self):
         """
         An optional parent Interface Type name this new Interface Type derives from.
+        
+        :rtype: str
         """
 
     @object_field(Version)
@@ -181,7 +201,7 @@ class InterfaceType(Presentation):
         """
         An optional version for the Interface Type definition.
         
-        :class:`Version`
+        :rtype: :class:`Version`
         """
 
     @field_type(str)
@@ -191,6 +211,8 @@ class InterfaceType(Presentation):
         An optional description for the Interface Type.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyDefinition)
@@ -198,7 +220,7 @@ class InterfaceType(Presentation):
         """
         The optional list of input parameter definitions.
         
-        :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
 @has_fields
@@ -214,6 +236,8 @@ class RelationshipType(Presentation):
     def derived_from(self):
         """
         An optional parent Relationship Type name the Relationship Type derives from.
+        
+        :rtype: str
         """
 
     @object_field(Version)
@@ -221,7 +245,7 @@ class RelationshipType(Presentation):
         """
         An optional version for the Relationship Type definition.
         
-        :class:`Version`
+        :rtype: :class:`Version`
         """
 
     @field_type(str)
@@ -231,6 +255,8 @@ class RelationshipType(Presentation):
         An optional description for the Relationship Type.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyDefinition)
@@ -238,7 +264,7 @@ class RelationshipType(Presentation):
         """
         An optional list of property definitions for the Relationship Type.
         
-        :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
     @object_dict_field(AttributeDefinition)
@@ -246,7 +272,7 @@ class RelationshipType(Presentation):
         """
         An optional list of attribute definitions for the Relationship Type.
         
-        :class:`AttributeDefinition`
+        :rtype: dict of str, :class:`AttributeDefinition`
         """
 
     @object_dict_field(InterfaceDefinition)
@@ -254,7 +280,7 @@ class RelationshipType(Presentation):
         """
         An optional list of interface definitions interfaces supported by the Relationship Type.
         
-        :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
     @field_type(str)
@@ -262,6 +288,8 @@ class RelationshipType(Presentation):
     def valid_target_types(self):
         """
         An optional list of one or more names of Capability Types that are valid targets for this relationship.
+        
+        :rtype: list of str
         """
 
 @has_fields
@@ -277,6 +305,8 @@ class NodeType(Presentation):
     def derived_from(self):
         """
         An optional parent Node Type name this new Node Type derives from.
+        
+        :rtype: str
         """
 
     @object_field(Version)
@@ -284,7 +314,7 @@ class NodeType(Presentation):
         """
         An optional version for the Node Type definition.
         
-        :class:`Version`
+        :rtype: :class:`Version`
         """
 
     @field_type(str)
@@ -294,6 +324,8 @@ class NodeType(Presentation):
         An optional description for the Node Type.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyDefinition)
@@ -301,7 +333,7 @@ class NodeType(Presentation):
         """
         An optional list of property definitions for the Node Type.
         
-        :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
     @object_dict_field(AttributeDefinition)
@@ -309,7 +341,7 @@ class NodeType(Presentation):
         """
         An optional list of attribute definitions for the Node Type.
         
-        :class:`AttributeDefinition`
+        :rtype: dict of str, :class:`AttributeDefinition`
         """
 
     @object_dict_field(RequirementDefinition)
@@ -317,7 +349,7 @@ class NodeType(Presentation):
         """
         An optional sequenced list of requirement definitions for the Node Type.
         
-        :class:`RequirementDefinition`
+        :rtype: dict of str, :class:`RequirementDefinition`
         """
 
     @object_dict_field(CapabilityDefinition)
@@ -325,7 +357,7 @@ class NodeType(Presentation):
         """
         An optional list of capability definitions for the Node Type.
         
-        :class:`CapabilityDefinition`
+        :rtype: dict of str, :class:`CapabilityDefinition`
         """
 
     @object_dict_field(InterfaceDefinition)
@@ -333,7 +365,7 @@ class NodeType(Presentation):
         """
         An optional list of interface definitions supported by the Node Type.
         
-        :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
     @object_dict_field(ArtifactDefinition)
@@ -341,7 +373,7 @@ class NodeType(Presentation):
         """
         An optional list of named artifact definitions for the Node Type.
         
-        :class:`ArtifactDefinition`
+        :rtype: dict of str, :class:`ArtifactDefinition`
         """
 
 @has_fields
@@ -359,6 +391,8 @@ class GroupType(Presentation):
     def derived_from(self):
         """
         An optional parent Group Type name the Group Type derives from.
+        
+        :rtype: str
         """
 
     @object_field(Version)
@@ -366,7 +400,7 @@ class GroupType(Presentation):
         """
         An optional version for the Group Type definition.
         
-        :class:`Version`
+        :rtype: :class:`Version`
         """
 
     @field_type(str)
@@ -376,6 +410,8 @@ class GroupType(Presentation):
         The optional description for the Group Type.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyDefinition)
@@ -383,7 +419,7 @@ class GroupType(Presentation):
         """
         An optional list of property definitions for the Group Type.
         
-        :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
     @field_type(str)
@@ -393,6 +429,8 @@ class GroupType(Presentation):
         An optional list of one or more names of Node Types that are valid (allowed) as members of the Group Type. 
 
         Note: This can be viewed by TOSCA Orchestrators as an implied relationship from the listed members nodes to the group, but one that does not have operational lifecycle considerations. For example, if we were to name this as an explicit Relationship Type we might call this "MemberOf" (group).
+        
+        :rtype: list of str
         """
 
     @object_dict_field(InterfaceDefinition)
@@ -400,7 +438,7 @@ class GroupType(Presentation):
         """
         An optional list of interface definitions supported by the Group Type.
         
-        :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
 @has_fields
@@ -416,6 +454,8 @@ class PolicyType(Presentation):
     def derived_from(self):
         """
         An optional parent Policy Type name the Policy Type derives from.
+        
+        :rtype: str
         """
 
     @object_field(Version)
@@ -423,7 +463,7 @@ class PolicyType(Presentation):
         """
         An optional version for the Policy Type definition.
         
-        :class:`Version`
+        :rtype: :class:`Version`
         """
 
     @field_type(str)
@@ -433,6 +473,8 @@ class PolicyType(Presentation):
         The optional description for the Policy Type.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @object_dict_field(PropertyDefinition)
@@ -440,7 +482,7 @@ class PolicyType(Presentation):
         """
         An optional list of property definitions for the Policy Type.
         
-        :class:`PropertyDefinition`
+        :rtype: :class:`PropertyDefinition`
         """
 
     @field_type(str)
@@ -450,4 +492,6 @@ class PolicyType(Presentation):
         An optional list of valid Node Types or Group Types the Policy Type can be applied to.
 
         Note: This can be viewed by TOSCA Orchestrators as an implied relationship to the target nodes, but one that does not have operational lifecycle considerations. For example, if we were to name this as an explicit Relationship Type we might call this "AppliesTo" (node or group).
+        
+        :rtype: list of str
         """

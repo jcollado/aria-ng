@@ -17,6 +17,8 @@ class Repository(Presentation):
         The optional description for the repository.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @required_field
@@ -25,6 +27,8 @@ class Repository(Presentation):
     def url(self):
         """
         The required URL or network address used to access the repository.
+        
+        :rtype: str
         """
 
     @object_field(Credential)
@@ -32,7 +36,7 @@ class Repository(Presentation):
         """
         The optional Credential used to authorize access to the repository.
         
-        :class:`tosca.datatypes.Credential`
+        :rtype: :class:`tosca.datatypes.Credential`
         """
 
 def get_file(field, raw):
@@ -56,6 +60,8 @@ class Import(Presentation):
     def file(self):
         """
         The required symbolic name for the imported file.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -63,6 +69,8 @@ class Import(Presentation):
     def repository(self):
         """
         The optional symbolic name of the repository definition where the imported file can be found as a string.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -70,6 +78,8 @@ class Import(Presentation):
     def namespace_uri(self):
         """
         The optional namespace URI to that will be applied to type definitions found within the imported file as a string.
+        
+        :rtype: str
         """
 
     @field_type(str)
@@ -77,6 +87,8 @@ class Import(Presentation):
     def namespace_prefix(self):
         """
         The optional namespace prefix (alias) that will be used to indicate the namespace_uri when forming a qualified name (i.e., qname) when referencing type definitions from the imported file.
+        
+        :rtype: str
         """
 
 @has_fields

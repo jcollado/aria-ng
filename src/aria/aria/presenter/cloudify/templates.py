@@ -8,5 +8,5 @@ class NodeTemplate(BaseNodeTemplate):
     @object_list_field(Relationship)
     def relationships(self):
         """
-        :class:`Relationship`
+        :rtype: list of :class:`Relationship`
         """

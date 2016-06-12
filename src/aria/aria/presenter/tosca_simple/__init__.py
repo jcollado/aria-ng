@@ -55,4 +55,6 @@ __all__ = (
     'RelationshipType',
     'NodeType',
     'GroupType',
-    'PolicyType')
+    'PolicyType',
+    'Repository',
+    'Import')

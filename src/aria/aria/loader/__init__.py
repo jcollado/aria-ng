@@ -2,7 +2,7 @@
 from exceptions import *
 from loader import *
 from source import *
-from string import *
+from literal import *
 from uri import *
 
 import urlparse

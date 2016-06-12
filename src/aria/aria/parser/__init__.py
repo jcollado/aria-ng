@@ -12,7 +12,7 @@ class DefaultParser(Parser):
     
     def parse(self):
         """
-        :class:`aria.presenter.Presenter` or raw
+        :rtype: :class:`aria.presenter.Presenter` or raw
         """
         presentation = self._parse_all(self.locator, None, self.presenter_class)
         if presentation:

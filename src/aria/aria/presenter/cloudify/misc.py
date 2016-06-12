@@ -9,6 +9,8 @@ class Input(Presentation):
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
 @has_fields
@@ -18,13 +20,15 @@ class Output(Presentation):
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
         """
 
     @required_field
     @object_dict_field(PropertyAssignment)
     def value(self):
         """
-        :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
 
 @has_fields
@@ -33,12 +37,16 @@ class Relationship(Presentation):
     @field_type(str)
     @primitive_field
     def type(self):
-        pass
+        """
+        :rtype: str
+        """
 
     @field_type(str)
     @primitive_field
     def target(self):
-        pass
+        """
+        :rtype: str
+        """
 
 @has_fields
 class Workflow(Presentation):
@@ -48,16 +56,19 @@ class Workflow(Presentation):
     @field_type(str)
     @primitive_field
     def implementation(self):
-        pass
+        """
+        :rtype: str
+        """
 
     @field_type(str)
     @primitive_field
     def executor(self):
-        pass
+        """
+        :rtype: str
+        """
 
     @object_dict_field(PropertyAssignment)
     def inputs(self):
         """
-        :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
-    

@@ -16,5 +16,5 @@ class RelationshipType(BaseRelationshipType):
     @object_dict_field(InterfaceDefinition)
     def target_interfaces(self):
         """
-        :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """

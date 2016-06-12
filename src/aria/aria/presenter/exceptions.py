@@ -12,9 +12,3 @@ class PresenterNotFoundError(PresenterError):
     ARIA presenter error: presenter not found for raw.
     """
     pass
-
-class InvalidValueError(PresenterError):
-    """
-    ARIA presenter error: value is invalid.
-    """
-    pass

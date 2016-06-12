@@ -13,13 +13,13 @@ def get_location(raw, name):
     return '<unknown>'
 
 class Field(object):
-    def __init__(self, type, name=None, default=None, cls=None, required=False, fn=None):
+    def __init__(self, fn, type, cls=None, name=None, default=None, required=False):
+        self.fn = fn
         self.type = type
+        self.cls = cls
         self.name = name
         self.default = default
-        self.cls = cls
         self.required = required
-        self.fn = fn
     
     def get(self, raw):
         return self._get(raw)
@@ -149,9 +149,7 @@ def has_fields(cls):
 
                 return property(fget=getter, fset=setter)
 
-            the_property = closure(field)
-                
-            setattr(cls, name, the_property)
+            setattr(cls, name, closure(field))
                 
     return cls
 
@@ -159,53 +157,53 @@ def primitive_field(f):
     """
     Function decorator for primitive fields.
     
-    The function must be a method in a class decorated with :func:`has_fields`.
+    The function must be a method in a class decorated with :func:`has\_fields`.
     """
-    return Field('primitive', fn=f)
+    return Field(f, 'primitive')
 
 def primitive_list_field(f):
     """
     Function decorator for list of primitive fields.
     
-    The function must be a method in a class decorated with :func:`has_fields`.
+    The function must be a method in a class decorated with :func:`has\_fields`.
     """
-    return Field('primitive_list', fn=f)
+    return Field(f, 'primitive_list')
 
 def object_field(cls):
     """
     Function decorator for object fields.
     
-    The function must be a method in a class decorated with :func:`has_fields`.
+    The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(f):
-        return Field('object', cls=cls, fn=f)
+        return Field(f, 'object', cls)
     return decorator
 
 def object_list_field(cls):
     """
     Function decorator for list of object fields.
     
-    The function must be a method in a class decorated with :func:`has_fields`.
+    The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(f):
-        return Field('object_list', cls=cls, fn=f)
+        return Field(f, 'object_list', cls)
     return decorator
 
 def object_dict_field(cls):
     """
     Function decorator for dict of object fields.
     
-    The function must be a method in a class decorated with :func:`has_fields`.
+    The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(f):
-        return Field('object_dict', cls=cls, fn=f)
+        return Field(f, 'object_dict', cls)
     return decorator
 
 def field_type(type):
     """
-    Function decorator for primitive and list of primitive fields.
+    Function decorator for setting the type of a field.
     
-    The function must already be decorated with :func:`primitive_field` or :func:`primitive_list_field`.
+    The function must already be decorated with :func:`primitive\_field` or :func:`primitive\_list\_field`.
     """
     def decorator(f):
         if isinstance(f, Field):
@@ -217,7 +215,7 @@ def field_type(type):
 
 def field_getter(getter_fn):
     """
-    Function decorator for overriding the getter function.
+    Function decorator for overriding the getter function of a field.
     
     The signature of the getter function must be: f(field, raw).
     
@@ -233,7 +231,7 @@ def field_getter(getter_fn):
 
 def field_validator(validator_fn):
     """
-    Function decorator for overriding the validator function.
+    Function decorator for overriding the validator function of a field.
     
     The signature of the validator function must be: f(field, presentation, issues).
     

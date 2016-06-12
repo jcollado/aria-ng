@@ -1,5 +1,6 @@
 
-from aria.presenter import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_type, field_default, required_field
+from aria import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_type, field_default, required_field
+from aria.presenter import Presentation
 from assignments import PropertyAssignment
 from misc import ConstraintClause
 from tosca import Range
@@ -43,7 +44,6 @@ class PropertyDefinition(Presentation):
         :rtype: bool
         """
 
-    @field_type(str)
     @primitive_field
     def default(self):
         """

@@ -1,6 +1,6 @@
 
 from misc import Workflow
-from aria.presenter import has_fields
+from aria import has_fields
 from aria.presenter.tosca_simple import InterfaceDefinition as BaseInterfaceDefinition
 
 @has_fields

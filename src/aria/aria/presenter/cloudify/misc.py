@@ -1,5 +1,6 @@
 
-from aria.presenter import Presentation, has_fields, primitive_field, object_dict_field, field_type, required_field
+from aria import has_fields, primitive_field, object_dict_field, field_type, required_field
+from aria.presenter import Presentation
 from aria.presenter.tosca_simple import PropertyAssignment
 
 @has_fields

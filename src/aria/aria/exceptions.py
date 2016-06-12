@@ -12,3 +12,9 @@ class UnimplementedFunctionalityError(AriaError):
     """
     ARIA error: funcionality is unimplemented.
     """
+
+class InvalidValueError(AriaError):
+    """
+    ARIA presenter error: value is invalid.
+    """
+    pass

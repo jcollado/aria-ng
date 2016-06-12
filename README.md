@@ -62,7 +62,7 @@ it goes over the entire presentation, attempts to read all the fields, and accum
 all the error messages into a single report. Error messages include the exact location
 (file, line, column) where the error occurred.
 
-### Implementor
+### Implementer
 
 This converts the presentation into an "implementation", which is the Python class
 structure implied by TOSCA. Thus, node types become classes, the instances being
@@ -77,7 +77,7 @@ if a TOSCA artifact type derives from `tosca.artifacts.Deployment.Image.VM`, thi
 would be implemented as normal Python inheritance from a class that is already
 defined in ARIA.
 
-Note that the implementor is entirely optional: it is very much possible to consume
+Note that the implementer is entirely optional: it is very much possible to consume
 the validated TOSCA presentation as is appropriate for your product without converting
 it into an implementation.
 

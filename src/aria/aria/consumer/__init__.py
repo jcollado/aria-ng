@@ -3,6 +3,7 @@ from exceptions import *
 from consumer import *
 from printer import *
 from validator import *
+from implementer import *
 from yaml import *
 
 __all__ = (
@@ -10,5 +11,6 @@ __all__ = (
     'Consumer',
     'Printer',
     'Validator',
+    'Implementer',
     'YamlWriter')
     

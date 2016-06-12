@@ -21,11 +21,14 @@ class OpenClose(object):
         return False
 
 def classname(o):
+    """
+    The full class name of an object.
+    """
     return o.__module__ + '.' + o.__class__.__name__
 
 def merge(a, b, path=None, strict=True):
     """
-    Deep merge dict b into a.
+    Deep merge dicts.
     """
     #TODO: a.add_yaml_merge(b), see https://bitbucket.org/ruamel/yaml/src/86622a1408e0f171a12e140d53c4ffac4b6caaa3/comments.py?fileviewer=file-view-default
     
@@ -42,19 +45,43 @@ def merge(a, b, path=None, strict=True):
             a[key] = value_b
     return a
 
-def import_class(name):
-    if name and ('.' in name):
-        module_name, class_name = name.rsplit('.', 1)
-        return getattr(__import__(module_name, fromlist=[class_name], level=0), class_name)
-    else:
+def import_class(name, paths=[]):
+    """
+    Imports a class based on its full name, optionally searching for it in the paths.
+    """
+    if not name:
         return None
+    
+    def do_import(name):
+        if name and ('.' in name):
+            module_name, class_name = name.rsplit('.', 1)
+            return getattr(__import__(module_name, fromlist=[class_name], level=0), class_name)
+        else:
+            raise ImportError('Cannot find import: %s' % name)
+    
+    try:
+        return do_import(name)
+    except:
+        for p in paths:
+            try:
+                return do_import('%s.%s' % (p, name))
+            except:
+                pass
+
+    raise ImportError('Cannot find import: %s' % name)
 
 def print_exception(e, full=True, tb=None):
+    """
+    Prints the exception with nice colors and such.
+    """
     puts(colored.red('%s:' % e.__class__.__name__, bold=True) + ' ' + colored.red(str(e)))
     if full:
         print_traceback(tb)
 
 def print_traceback(tb=None):
+    """
+    Prints the traceback with nice colors and such.
+    """
     if tb is None:
         _, _, tb = sys.exc_info()
     while tb is not None:
@@ -71,3 +98,14 @@ def print_traceback(tb=None):
                 with indent(2):
                     puts(colored.black(line.strip()))
         tb = tb.tb_next
+
+def make_agnostic(value):
+    if isinstance(value, dict):
+        value = dict(value) # makes sure we convert ordereddict to dict
+    if isinstance(value, dict):
+        for k, v in value.iteritems():
+            value[k] = make_agnostic(v)
+    if isinstance(value, list):
+        for i in range(len(value)):
+            value[i] = make_agnostic(value[i])
+    return value

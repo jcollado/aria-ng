@@ -1,5 +1,6 @@
 
-from aria.presenter import Presentation, has_fields
+from aria import has_fields
+from aria.presenter import Presentation
 
 @has_fields
 class PropertyAssignment(Presentation):

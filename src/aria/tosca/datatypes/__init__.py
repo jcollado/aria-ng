@@ -1,6 +1,7 @@
 
+from aria import has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca
-    
+
 class Root(tosca.HasProperties):
     """
     This is the default (root) TOSCA Root Type definition that all complex TOSCA Data Types derive from.
@@ -10,6 +11,7 @@ class Root(tosca.HasProperties):
     
     DESCRIPTION = 'This is the default (root) TOSCA Root Type definition that all complex TOSCA Data Types derive from.'
 
+@has_validated_properties
 class Credential(Root):
     """
     The Credential type is a complex TOSCA data Type used when describing authorization credentials used to access network accessible resources.
@@ -23,9 +25,40 @@ class Credential(Root):
     TYPE_QUALIFIED_NAME = 'tosca:Credential'
     TYPE_URI = 'tosca.datatypes.Credential'
     
-    PROPERTIES = {
-        'protocol': {'type': str, 'description': 'The optional protocol name.'},
-        'token_type': {'type': str, 'required': True, 'default': 'password', 'description': 'The required token type.'},
-        'token': {'type': str, 'required': True, 'description': 'The required token used as a credential for authorization or access to a networked resource.'},
-        'keys': {'type': tosca.Map(str), 'description': 'The optional list of protocol-specific keys or assertions.'},
-        'user': {'type': str, 'description': 'The optional user (name or ID) used for non-token based credentials.'}}
+    @property_type(str)
+    @validated_property
+    def protocol(self):
+        """
+        The optional protocol name.
+        """
+
+    @required_property
+    @property_default('password')
+    @property_type(str)
+    @validated_property
+    def token_type(self):
+        """
+        The required token type.
+        """
+
+    @required_property
+    @property_type(str)
+    @validated_property
+    def token(self):
+        """
+        The required token used as a credential for authorization or access to a networked resource.
+        """
+
+    @property_type(tosca.Map(str))
+    @validated_property
+    def keys(self):
+        """
+        The optional list of protocol-specific keys or assertions.
+        """
+
+    @property_type(str)
+    @validated_property
+    def user(self):
+        """
+        The optional user (name or ID) used for non-token based credentials.
+        """

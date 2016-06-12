@@ -1,6 +1,7 @@
 
+from aria import has_validated_properties, validated_property, property_type, property_default, property_status, required_property
 import tosca, tosca.datatypes.network
-    
+
 class Root(tosca.HasProperties):
     """
     This is the default (root) TOSCA Capability Type definition that all other TOSCA Capability Types derive from.
@@ -23,6 +24,7 @@ class Node(Root):
     TYPE_QUALIFIED_NAME = 'tosca:Node'
     TYPE_URI = 'tosca.capabilities.Node'
 
+@has_validated_properties
 class Container(Root):
     """
     The Container capability, when included on a Node Type or Template definition, indicates that the node can act as a container for (or a host for) one or more other declared Node Types.
@@ -36,12 +38,35 @@ class Container(Root):
     TYPE_QUALIFIED_NAME = 'tosca:Container'
     TYPE_URI = 'tosca.capabilities.Container'
 
-    PROPERTIES = {
-        'num_cpus': {'type': tosca.Integer, 'description': 'Number of (actual or virtual) CPUs associated with the Compute node.'},
-        'cpu_frequency': {'type': tosca.Frequency, 'description': 'Specifies the operating frequency of CPU\'s core. This property expresses the expected frequency of one (1) CPU as provided by the property "num_cpus".'},
-        'disk_size': {'type': tosca.Size, 'description': 'Size of the local disk available to applications running on the Compute node (default unit is MB).'},
-        'mem_size': {'type': tosca.Size, 'description': 'Size of memory available to applications running on the Compute node (default unit is MB).'}}
+    @property_type(tosca.Integer)
+    @validated_property
+    def num_cpus(self):
+        """
+        Number of (actual or virtual) CPUs associated with the Compute node.
+        """
 
+    @property_type( tosca.Frequency)
+    @validated_property
+    def cpu_frequency(self):
+        """
+        Specifies the operating frequency of CPU's core. This property expresses the expected frequency of one (1) CPU as provided by the property "num_cpus".
+        """
+
+    @property_type(tosca.Size)
+    @validated_property
+    def disk_size(self):
+        """
+        Size of the local disk available to applications running on the Compute node (default unit is MB).
+        """
+
+    @property_type(tosca.Size)
+    @validated_property
+    def mem_size(self):
+        """
+        Size of memory available to applications running on the Compute node (default unit is MB).
+        """
+
+@has_validated_properties
 class Endpoint(Root):
     """
     This is the default TOSCA type that should be used or extended to define a network endpoint capability. This includes the information to express a basic endpoint with a single port or a complex endpoint with multiple ports. By default the Endpoint is assumed to represent an address on a private network unless otherwise specified.
@@ -55,19 +80,71 @@ class Endpoint(Root):
     TYPE_QUALIFIED_NAME = 'tosca:Endpoint'
     TYPE_URI = 'tosca.capabilities.Endpoint'
 
-    PROPERTIES = {
-        'protocol': {'type': str, 'required': True, 'default': 'tcp', 'description': 'The name of the protocol (i.e., the protocol prefix) that the endpoint accepts (any OSI Layer 4-7 protocols). Examples: http, https, ftp, tcp, udp, etc.'},
-        'port': {'type': tosca.datatypes.network.PortDef, 'description': 'The optional port of the endpoint.'},
-        'secure': {'type': bool, 'default': False, 'description': 'Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.'},
-        'url_path': {'type': str, 'description': 'The optional URL path of the endpoint\'s address if applicable for the protocol.'},
-        'port_name': {'type': str, 'description': 'The optional name (or ID) of the network port this endpoint should be bound to.'},
-        'network_name': {'type': str, 'default': 'PRIVATE', 'description': 'The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE | PUBLIC |<network_name> | <network_id>'},
-        'initiator': {'type': str, 'default': 'source', 'description': 'The optional indicator of the direction of the connection.'},
-        'ports': {'type': tosca.Map(tosca.datatypes.network.PortSpec), 'description': 'The optional map of ports the Endpoint supports (if more than one)'}}
+    @required_property
+    @property_default('tcp')
+    @property_type(str)
+    @validated_property
+    def protocol(self):
+        """
+        The name of the protocol (i.e., the protocol prefix) that the endpoint accepts (any OSI Layer 4-7 protocols). Examples: http, https, ftp, tcp, udp, etc.
+        """
+
+    @property_type(tosca.datatypes.network.PortDef)
+    @validated_property
+    def port(self):
+        """
+        The optional port of the endpoint.
+        """
+
+    @property_default(False)
+    @property_type(bool)
+    @validated_property
+    def secure(self):
+        """
+        Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.
+        """
+
+    @property_type(str)
+    @validated_property
+    def url_path(self):
+        """
+        The optional URL path of the endpoint\'s address if applicable for the protocol.
+        """
+
+    @property_type(str)
+    @validated_property
+    def port_name(self):
+        """
+        The optional name (or ID) of the network port this endpoint should be bound to.
+        """
+
+    @property_default('PRIVATE')
+    @property_type(str)
+    @validated_property
+    def network_name(self):
+        """
+        The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE \| PUBLIC \| <network_name> \| <network_id>.
+        """
+
+    @property_default('source')
+    @property_type(str)
+    @validated_property
+    def initiator(self):
+        """
+        The optional indicator of the direction of the connection.
+        """
+
+    @property_type(tosca.Map(tosca.datatypes.network.PortSpec))
+    @validated_property
+    def ports(self):
+        """
+        The optional map of ports the Endpoint supports (if more than one).
+        """
 
     ATTRIBUTES = {
         'ip_address': {'type': str, 'required': True, 'description': 'Note: This is the IP address as propagated up by the associated node\'s host (Compute) container.'}}
     
+@has_validated_properties
 class Public(Endpoint):
     """
     This capability represents a public endpoint which is accessible to the general internet (and its public IP address ranges).
@@ -83,13 +160,34 @@ class Public(Endpoint):
     TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Public'
     TYPE_URI = 'tosca.capabilities.Endpoint.Public'
 
-    PROPERTIES = {
-        'network_name': {'type': str, 'default': 'PUBLIC', 'description': 'The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE | PUBLIC |<network_name> | <network_id>'},
-        'floating': {'type': bool, 'default': False, 'description': 'Indicates that the public address should be allocated from a pool of floating IPs that are associated with the network.', 'status': 'experimental'},
-        'dns_name': {'type': str, 'description': 'The optional name to register with DNS.', 'status': 'experimental'}}
+    @property_default('PUBLIC')
+    @property_type(str)
+    @validated_property
+    def network_name(self):
+        """
+        The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE \| PUBLIC \| <network_name> \| <network_id>.
+        """
+
+    @property_status('experimental')
+    @property_default(False)
+    @property_type(bool)
+    @validated_property
+    def floating(self):
+        """
+        Indicates that the public address should be allocated from a pool of floating IPs that are associated with the network.
+        """
+
+    @property_status('experimental')
+    @property_type(str)
+    @validated_property
+    def dns_name(self):
+        """
+        The optional name to register with DNS.
+        """
 
 Endpoint.Public = Public
 
+@has_validated_properties
 class Admin(Endpoint):
     """
     This is the default TOSCA type that should be used or extended to define a specialized administrator endpoint capability.
@@ -103,8 +201,13 @@ class Admin(Endpoint):
     TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Admin'
     TYPE_URI = 'tosca.capabilities.Endpoint.Admin'
 
-    PROPERTIES = {
-        'secure': {'type': bool, 'default': True, 'description': 'Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.'}}
+    @property_default(True)
+    @property_type(bool)
+    @validated_property
+    def secure(self):
+        """
+        Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.
+        """
 
 Endpoint.Admin = Admin
 
@@ -136,6 +239,7 @@ class Attachment(Root):
     TYPE_QUALIFIED_NAME = 'tosca:Attachment'
     TYPE_URI = 'tosca.capabilities.Attachment'
 
+@has_validated_properties
 class OperatingSystem(Root):
     """
     This is the default TOSCA type that should be used to express an Operating System capability for a node.
@@ -149,12 +253,35 @@ class OperatingSystem(Root):
     TYPE_QUALIFIED_NAME = 'tosca:OperatingSystem'
     TYPE_URI = 'tosca.capabilities.OperatingSystem'
 
-    PROPERTIES = {
-        'architecture': {'type': str, 'description': 'The Operating System (OS) architecture. Examples of valid values include: x86_32, x86_64, etc.'},
-        'type': {'type': str, 'description': 'The Operating System (OS) type. Examples of valid values include: linux, aix, mac, windows, etc.'},
-        'distribution': {'type': str, 'description': 'The Operating System (OS) distribution. Examples of valid values for a "type" of "Linux" would include:  debian, fedora, rhel and ubuntu.'},
-        'version': {'type': str, 'description': 'The Operating System version.'}}
+    @property_type(str)
+    @validated_property
+    def architecture(self):
+        """
+        The Operating System (OS) architecture. Examples of valid values include: x86_32, x86_64, etc.
+        """
 
+    @property_type(str)
+    @validated_property
+    def type(self):
+        """
+        The Operating System (OS) type. Examples of valid values include: linux, aix, mac, windows, etc.
+        """
+
+    @property_type(str)
+    @validated_property
+    def distribution(self):
+        """
+        The Operating System (OS) distribution. Examples of valid values for a "type" of "Linux" would include:  debian, fedora, rhel and ubuntu.
+        """
+
+    @property_type(str)
+    @validated_property
+    def version(self):
+        """
+        The Operating System version.
+        """
+
+@has_validated_properties
 class Scalable(Root):
     """
     This is the default TOSCA type that should be used to express a scalability capability for a node.
@@ -168,7 +295,27 @@ class Scalable(Root):
     TYPE_QUALIFIED_NAME = 'tosca:Scalable'
     TYPE_URI = 'tosca.capabilities.Scalable'
 
-    PROPERTIES = {
-        'min_instances': {'type': tosca.Integer, 'required': True, 'default': 1, 'description': 'This property is used to indicate the minimum number of instances that should be created for the associated TOSCA Node Template by a TOSCA orchestrator.'},
-        'max_instances': {'type': tosca.Integer, 'required': True, 'default': 1, 'description': 'This property is used to indicate the maximum number of instances that should be created for the associated TOSCA Node Template by a TOSCA orchestrator.'},
-        'default_instances': {'type': tosca.Integer, 'description': 'An optional property that indicates the requested default number of instances that should be the starting number of instances a TOSCA orchestrator should attempt to allocate. Note: The value for this property MUST be in the range between the values set for "min_instances" and "max_instances" properties.'}}
+    @required_property
+    @property_default(1)
+    @property_type(tosca.Integer)
+    @validated_property
+    def min_instances(self):
+        """
+        This property is used to indicate the minimum number of instances that should be created for the associated TOSCA Node Template by a TOSCA orchestrator.
+        """
+
+    @required_property
+    @property_default(1)
+    @property_type(tosca.Integer)
+    @validated_property
+    def max_instances(self):
+        """
+        This property is used to indicate the maximum number of instances that should be created for the associated TOSCA Node Template by a TOSCA orchestrator.
+        """
+
+    @property_type(tosca.Integer)
+    @validated_property
+    def default_instances(self):
+        """
+        An optional property that indicates the requested default number of instances that should be the starting number of instances a TOSCA orchestrator should attempt to allocate. Note: The value for this property MUST be in the range between the values set for "min_instances" and "max_instances" properties.
+        """

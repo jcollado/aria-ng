@@ -1,4 +1,5 @@
 
+from aria import has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.datatypes
     
 class Root(tosca.HasProperties):
@@ -41,6 +42,7 @@ class HostedOn(Root):
     TYPE_QUALIFIED_NAME = 'tosca:HostedOn'
     TYPE_URI = 'tosca.relationships.HostedOn'
 
+@has_validated_properties
 class ConnectsTo(Root):
     """
     This type represents a network connection relationship between two nodes.
@@ -54,9 +56,14 @@ class ConnectsTo(Root):
     TYPE_QUALIFIED_NAME = 'tosca:ConnectsTo'
     TYPE_URI = 'tosca.relationships.ConnectsTo'
 
-    PROPERTIES = {
-        'credential': {'type': tosca.datatypes.Credential, 'description': 'The security credential to use to present to the target endpoint to for either authentication or authorization purposes.'}}
+    @property_type(tosca.datatypes.Credential)
+    @validated_property
+    def credential(self):
+        """
+        The security credential to use to present to the target endpoint to for either authentication or authorization purposes.
+        """
 
+@has_validated_properties
 class AttachesTo(Root):
     """
     This type represents an attachment relationship between two nodes. For example, an AttachesTo relationship type would be used for attaching a storage node to a Compute node.
@@ -70,9 +77,20 @@ class AttachesTo(Root):
     TYPE_QUALIFIED_NAME = 'tosca:AttachesTo'
     TYPE_URI = 'tosca.relationships.AttachesTo'
 
-    PROPERTIES = {
-        'location': {'type': str, 'required': True, 'description': 'The relative location (e.g., path on the file system), which provides the root location to address an attached node. e.g., a mount point / path such as \'/usr/data\'. Note: The user must provide it and it cannot be "root".'},
-        'device': {'type': str, 'description': 'The logical device name which for the attached device (which is represented by the target node in the model). e.g., \'/dev/hda1\''}}
+    @required_property
+    @property_type(str)
+    @validated_property
+    def location(self):
+        """
+        The relative location (e.g., path on the file system), which provides the root location to address an attached node. e.g., a mount point / path such as '/usr/data'. Note: The user must provide it and it cannot be "root".
+        """
+
+    @property_type(str)
+    @validated_property
+    def device(self):
+        """
+        The logical device name which for the attached device (which is represented by the target node in the model). e.g., '/dev/hda1'.
+        """
     
     ATTRIBUTES = {
         'device': {'type': str, 'description': 'The logical name of the device as exposed to the instance. Note: A runtime property that gets set when the model gets instantiated by the orchestrator.'}}

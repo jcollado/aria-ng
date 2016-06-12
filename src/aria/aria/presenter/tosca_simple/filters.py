@@ -1,5 +1,6 @@
 
-from aria.presenter import Presentation, has_fields, object_list_field
+from aria import has_fields, object_list_field
+from aria.presenter import Presentation
 from definitions import PropertyDefinition, CapabilityDefinition
 
 @has_fields

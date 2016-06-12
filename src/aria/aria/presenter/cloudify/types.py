@@ -1,6 +1,6 @@
 
 from definitions import InterfaceDefinition
-from aria.presenter import has_fields, object_dict_field
+from aria import has_fields, object_dict_field
 from aria.presenter.tosca_simple import NodeType as BaseNodeType, RelationshipType as BaseRelationshipType
 
 @has_fields

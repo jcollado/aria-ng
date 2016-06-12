@@ -1,5 +1,6 @@
 
-from aria.presenter import Presentation, has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field
+from aria import has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field
+from aria.presenter import Presentation
 from misc import Repository, Import
 from types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from templates import TopologyTemplate

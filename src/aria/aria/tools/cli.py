@@ -21,12 +21,12 @@ def main():
         arguments = Arguments().parse_args()
         
         uri = arguments.uri
-        consumer_class = import_class(arguments.consumer)
-        parser_class = import_class(arguments.parser)
-        loader_source_class = import_class(arguments.loader_source)
-        reader_source_class = import_class(arguments.reader_source)
-        presenter_source_class = import_class(arguments.presenter_source)
-        presenter_class = import_class(arguments.presenter)
+        consumer_class = import_class(arguments.consumer, ['aria.consumer'])
+        parser_class = import_class(arguments.parser, ['aria.parser'])
+        loader_source_class = import_class(arguments.loader_source, ['aria.loader'])
+        reader_source_class = import_class(arguments.reader_source, ['aria.reader'])
+        presenter_source_class = import_class(arguments.presenter_source, ['aria.presenter'])
+        presenter_class = import_class(arguments.presenter, ['aria.presenter'])
         
         parser = parser_class(locator=uri,
             loader_source=loader_source_class(),

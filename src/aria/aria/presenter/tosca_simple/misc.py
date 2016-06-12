@@ -14,6 +14,8 @@ class Repository(Presentation):
     @primitive_field
     def description(self):
         """
+        The optional description for the repository.
+        
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         """
 
@@ -21,11 +23,15 @@ class Repository(Presentation):
     @field_type(str)
     @primitive_field
     def url(self):
-        pass
+        """
+        The required URL or network address used to access the repository.
+        """
 
     @object_field(Credential)
     def credential(self):
         """
+        The optional Credential used to authorize access to the repository.
+        
         :class:`tosca.datatypes.Credential`
         """
 
@@ -48,22 +54,30 @@ class Import(Presentation):
     @field_getter(get_file)
     @primitive_field
     def file(self):
-        pass
+        """
+        The required symbolic name for the imported file.
+        """
 
     @field_type(str)
     @primitive_field
     def repository(self):
-        pass
+        """
+        The optional symbolic name of the repository definition where the imported file can be found as a string.
+        """
 
     @field_type(str)
     @primitive_field
     def namespace_uri(self):
-        pass
+        """
+        The optional namespace URI to that will be applied to type definitions found within the imported file as a string.
+        """
 
     @field_type(str)
     @primitive_field
     def namespace_prefix(self):
-        pass
+        """
+        The optional namespace prefix (alias) that will be used to indicate the namespace_uri when forming a qualified name (i.e., qname) when referencing type definitions from the imported file.
+        """
 
 @has_fields
 class ConstraintClause(Presentation):
@@ -75,44 +89,70 @@ class ConstraintClause(Presentation):
     
     @primitive_field
     def equal(self):
-        pass
+        """
+        Constrains a property or parameter to a value equal to ('=') the value declared.
+        """
     
     @primitive_field
     def greater_than(self):
-        pass
+        """
+        Constrains a property or parameter to a value greater than ('>') the value declared.
+        """
     
     @primitive_field
     def greater_or_equal(self):
-        pass
+        """
+        Constrains a property or parameter to a value greater than or equal to ('>=') the value declared.
+        """
     
     @primitive_field
     def less_than(self):
-        pass
+        """
+        Constrains a property or parameter to a value less than ('<') the value declared.
+        """
     
     @primitive_field
     def less_or_equal(self):
-        pass
+        """
+        Constrains a property or parameter to a value less than or equal to ('<=') the value declared.
+        """
     
     @primitive_field
     def in_range(self):
-        pass
+        """
+        Constrains a property or parameter to a value in range of (inclusive) the two values declared.
+
+        Note: subclasses or templates of types that declare a property with the in_range constraint MAY only further restrict the range specified by the parent type.
+        """
     
     @primitive_field
     def valid_values(self):
-        pass
+        """
+        Constrains a property or parameter to a value that is in the list of declared values.
+        """
     
     @primitive_field
     def length(self):
-        pass
+        """
+        Constrains the property or parameter to a value of a given length.
+        """
     
     @primitive_field
     def min_length(self):
-        pass
+        """
+        Constrains the property or parameter to a value to a minimum length.
+        """
     
     @primitive_field
     def max_length(self):
-        pass
+        """
+        Constrains the property or parameter to a value to a maximum length.
+        """
 
     @primitive_field
     def pattern(self):
-        pass
+        """
+        Constrains the property or parameter to a value that is allowed by the provided regular expression.
+
+        Note: Future drafts of this specification will detail the use of regular expressions and reference an appropriate standardized grammar.
+        """

@@ -13,12 +13,16 @@ class NodeFilter(Presentation):
     @object_list_field(PropertyDefinition)
     def properties(self):
         """
+        An optional sequenced list of property filters that would be used to select (filter) matching TOSCA entities (e.g., Node Template, Node Type, Capability Types, etc.) based upon their property definitions' values.
+        
         :class:`PropertyDefinition`
         """
 
     @object_list_field(CapabilityDefinition)
     def capabilities(self):
         """
+        An optional sequenced list of property filters that would be used to select (filter) matching TOSCA entities (e.g., Node Template, Node Type, Capability Types, etc.) based upon their capabilities' property definitions' values.
+        
         :class:`CapabilityDefinition`
         """
 

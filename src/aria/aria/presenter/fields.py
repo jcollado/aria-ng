@@ -5,9 +5,11 @@ from functools import wraps
 from types import MethodType
 
 def get_location(raw, name):
-    map = raw._map
-    map = map.children.get(name, map)
-    return str(map)
+    if hasattr(raw, '_map'):
+        map = raw._map
+        map = map.children.get(name, map)
+        return str(map)
+    return '<unknown>'
 
 class Field(object):
     def __init__(self, type, name=None, default=None, cls=None, required=False, fn=None):

@@ -29,12 +29,12 @@ class DefaultLoaderSource(LoaderSource):
             
         return super(DefaultLoaderSource, self).get_loader(locator, origin_locator)
 
-__all__ = [
+__all__ = (
     'LoaderError',
-    'LoaderNotFoundLoaderError',
-    'SourceNotFoundLoaderError',
+    'LoaderNotFoundError',
+    'SourceNotFoundError',
     'Loader',
     'LoaderSource',
-    'StringLoader',
+    'LiteralLoader',
     'UriTextLoader',
-    'DefaultLoaderSource']
+    'DefaultLoaderSource')

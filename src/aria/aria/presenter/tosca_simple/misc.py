@@ -1,5 +1,5 @@
 
-from aria.presenter import Presentation, has_fields, primitive_field, object_field, required_field
+from aria.presenter import Presentation, has_fields, primitive_field, object_field, field_type, field_getter, required_field
 from tosca.datatypes import Credential
 
 @has_fields
@@ -10,6 +10,7 @@ class Repository(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_REPOSITORY_DEF>`__
     """
     
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -17,6 +18,7 @@ class Repository(Presentation):
         """
 
     @required_field
+    @field_type(str)
     @primitive_field
     def url(self):
         pass
@@ -27,6 +29,12 @@ class Repository(Presentation):
         :class:`tosca.datatypes.Credential`
         """
 
+def get_file(field, raw):
+    if isinstance(raw, basestring):
+        return raw
+    else:
+        return field._get(raw)
+
 @has_fields
 class Import(Presentation):
     """
@@ -35,22 +43,24 @@ class Import(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_IMPORT_DEF>`__
     """
     
-    def __init__(self, raw={}):
-        super(Import, self).__init__({'file': raw} if isinstance(raw, basestring) else raw)
-
     @required_field
+    @field_type(str)
+    @field_getter(get_file)
     @primitive_field
     def file(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def repository(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def namespace_uri(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def namespace_prefix(self):
         pass

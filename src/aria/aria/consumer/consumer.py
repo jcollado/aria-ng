@@ -1,4 +1,4 @@
-from aria import UnimplementedAriaError, classname
+from aria import UnimplementedFunctionalityError, classname
 
 class Consumer(object):
     """
@@ -13,4 +13,4 @@ class Consumer(object):
         self.presentation = presentation
     
     def consume(self):
-        raise UnimplementedAriaError(classname(self) + '.consume')
+        raise UnimplementedFunctionalityError(classname(self) + '.consume')

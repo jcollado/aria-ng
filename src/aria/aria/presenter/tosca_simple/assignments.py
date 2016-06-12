@@ -12,6 +12,12 @@ class PropertyAssignment(Presentation):
     @property
     def value(self):
         return self.raw
+    
+    @value.setter
+    def value(self, value):
+        self.raw = value
+        
+    #TODO
 
 @has_fields
 class RequirementAssignment(Presentation):

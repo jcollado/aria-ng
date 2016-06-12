@@ -1,5 +1,5 @@
 
-from aria import UnimplementedAriaError, OpenClose, classname
+from aria import UnimplementedFunctionalityError, OpenClose, classname
 
 class Reader(object):
     """
@@ -16,4 +16,4 @@ class Reader(object):
             return loader.load()
     
     def read(self):
-        raise UnimplementedAriaError(classname(self) + '.read')
+        raise UnimplementedFunctionalityError(classname(self) + '.read')

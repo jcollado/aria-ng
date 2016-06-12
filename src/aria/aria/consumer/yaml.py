@@ -19,5 +19,5 @@ class YamlWriter(Consumer):
         try:
             text = yaml.dump(self.presentation.raw, Dumper=yaml.RoundTripDumper)
             self.out.write(text)
-        except e:
+        except Exception as e:
             raise ConsumerError('Writer', e)

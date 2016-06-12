@@ -9,5 +9,8 @@ class Validator(Consumer):
     """
 
     def consume(self):
-        pass
-        # TODO
+        issues = []
+        self.presentation.validate(issues)
+        for issue in issues:
+            print '%s' % issue
+        return issues

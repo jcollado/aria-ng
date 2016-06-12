@@ -1,5 +1,5 @@
 
-from aria import  UnimplementedAriaError, classname
+from aria import UnimplementedFunctionalityError, classname
 
 class Loader(object):
     """
@@ -12,7 +12,7 @@ class Loader(object):
     """
     
     def load(self):
-        raise UnimplementedAriaError(classname(self) + '.read')
+        raise UnimplementedFunctionalityError(classname(self) + '.read')
     
     def open(self):
         pass

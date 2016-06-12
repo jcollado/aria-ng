@@ -16,6 +16,11 @@ class Printer(Consumer):
         
     def _print_cloudify(self):
         profile = self.presentation.profile
+
+        if profile.description:
+            puts(self._section('Description:'))
+            with indent(self.indent):
+                self._print_description(profile.description)
         
         if profile.inputs:
             puts(self._section('Inputs:'))
@@ -110,19 +115,19 @@ class Printer(Consumer):
             puts('%s: %s' % (k, self._literal(value)))
 
     def _section(self, value):
-        return colored.cyan(value)
+        return colored.cyan(value, bold=True)
     
     def _type(self, value):
-        return colored.blue(value)
+        return colored.blue(value, bold=True)
 
     def _node(self, value):
-        return colored.red(value)
+        return colored.red(value, bold=True)
     
     def _property(self, value):
-        return colored.magenta(value)
+        return colored.magenta(value, bold=True)
 
     def _literal(self, value):
-        return colored.yellow(repr(value))
+        return colored.yellow(repr(value), bold=True)
 
     def _print_interface(self, k, interface):
         puts(self._type(k))

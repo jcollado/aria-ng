@@ -8,7 +8,7 @@ class AriaError(Exception):
         super(AriaError, self).__init__(str(message))
         self.cause = cause
 
-class UnimplementedAriaError(AriaError):
+class UnimplementedFunctionalityError(AriaError):
     """
     ARIA error: funcionality is unimplemented.
     """

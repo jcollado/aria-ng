@@ -2,7 +2,7 @@
 from primitives import *
 from utils import *
 
-__all__ = [
+__all__ = (
     'String',
     'Integer',
     'Float',
@@ -18,4 +18,4 @@ __all__ = [
     'Frequency',
     'PropertiesContainer',
     'HasProperties',
-    'HasConstraints']
+    'HasConstraints')

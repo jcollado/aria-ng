@@ -1,5 +1,5 @@
 
-from aria.presenter import Presentation, has_fields, primitive_field, primitive_field_with_default, primitive_list_field, object_field, object_list_field, object_dict_field, required_field
+from aria.presenter import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_type, field_default, required_field
 from assignments import PropertyAssignment
 from misc import ConstraintClause
 from tosca import Range
@@ -12,11 +12,13 @@ class PropertyDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_DEFN>`__
     """
     
-    @required_field
+    #@required_field # TODO: cloudify ignores this
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
     
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -24,15 +26,20 @@ class PropertyDefinition(Presentation):
         return self._get_primitive('description')
         """
 
-    @primitive_field_with_default(True)
+    @field_default(True)
+    @field_type(bool)
+    @primitive_field
     def required(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def default(self):
         pass
 
-    @primitive_field_with_default('supported')
+    @field_default('supported')
+    @field_type(str)
+    @primitive_field
     def status(self):
         pass
 
@@ -42,6 +49,7 @@ class PropertyDefinition(Presentation):
         :class:`ConstraintClause`
         """
 
+    @field_type(str)
     @primitive_field
     def entry_schema(self):
         pass
@@ -55,10 +63,12 @@ class AttributeDefinition(Presentation):
     """
 
     @required_field
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
     
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -66,14 +76,18 @@ class AttributeDefinition(Presentation):
         """
         return self._get_primitive('description')
 
+    @field_type(str)
     @primitive_field
     def default(self):
         pass
 
-    @primitive_field_with_default('supported')
+    @field_default('supported')
+    @field_type(str)
+    @primitive_field
     def status(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def entry_schema(self):
         pass
@@ -86,6 +100,7 @@ class ParameterDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PARAMETER_DEF>`__
     """
 
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
@@ -124,14 +139,17 @@ class RequirementDefinition(Presentation):
     """
     
     @required_field
+    @field_type(str)
     @primitive_field
     def capability(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def node(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def relationship(self):
         pass
@@ -150,10 +168,12 @@ class CapabilityDefinition(Presentation):
     """
     
     @required_field
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
     
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -171,7 +191,7 @@ class CapabilityDefinition(Presentation):
         """
         :class:`AttributeDefinition`
         """
-
+    @field_type(str)
     @primitive_list_field
     def valid_source_types(self):
         pass
@@ -190,25 +210,30 @@ class ArtifactDefinition(Presentation):
     """
     
     @required_field
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
 
     @required_field
+    @field_type(str)
     @primitive_field
     def file(self):
         pass
     
+    @field_type(str)
     @primitive_field
     def repository(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         """
 
+    @field_type(str)
     @primitive_field
     def deploy_path(self):
         pass
@@ -222,10 +247,12 @@ class GroupDefinition(Presentation):
     """
 
     @required_field
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -239,6 +266,7 @@ class GroupDefinition(Presentation):
         :class:`PropertyAssignment`
         """
 
+    @field_type(str)
     @primitive_list_field
     def members(self):
         pass
@@ -262,6 +290,7 @@ class PolicyDefinition(Presentation):
     def type(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """

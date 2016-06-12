@@ -1,5 +1,5 @@
 
-from exceptions import LoaderNotFoundLoaderError
+from exceptions import LoaderNotFoundError
 from loader import Loader
 
 class LoaderSource(object):
@@ -13,5 +13,5 @@ class LoaderSource(object):
         if isinstance(locator, Loader):
             return locator
         elif isinstance(locator, basestring):
-            return StringLoader(locator)
-        raise LoaderNotFoundLoaderError(locator)
+            return LiteralLoader(locator)
+        raise LoaderNotFoundError(locator)

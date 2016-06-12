@@ -2,7 +2,7 @@
 from exceptions import *
 from parser import *
 
-from aria.presenter import PresenterNotFoundPresenterError
+from aria.presenter import PresenterNotFoundError
 
 class DefaultParser(Parser):
     """
@@ -14,7 +14,10 @@ class DefaultParser(Parser):
         """
         :class:`aria.presenter.Presenter` or raw
         """
-        return self._parse_all(self.locator, None, self.presenter_class)
+        presentation = self._parse_all(self.locator, None, self.presenter_class)
+        if presentation:
+            presentation.link()
+        return presentation
 
     def _parse_all(self, locator, origin_locator, presenter_class):
         raw = self._parse_one(locator, origin_locator)
@@ -22,7 +25,7 @@ class DefaultParser(Parser):
         if not presenter_class:
             try:
                 presenter_class = self.presenter_source.get_presenter(raw)
-            except PresenterNotFoundPresenterError:
+            except PresenterNotFoundError:
                 pass
         
         presentation = presenter_class(raw) if presenter_class else None
@@ -34,8 +37,8 @@ class DefaultParser(Parser):
                 # The imports inherit the parent presenter class
                 imported_presentation = self._parse_all(import_locator, locator, presenter_class)
                 presentation.merge_import(imported_presentation)
-
-        return presentation or raw
+        
+        return presentation
     
     def _parse_one(self, locator, origin_locator):
         if self.reader:
@@ -44,7 +47,7 @@ class DefaultParser(Parser):
         reader = self.reader_source.get_reader(locator, loader)
         return reader.read()
 
-__all__ = [
+__all__ = (
     'ParserError',
     'Parser',
-    'DefaultParser']
+    'DefaultParser')

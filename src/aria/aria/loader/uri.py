@@ -1,6 +1,6 @@
 
 from loader import Loader
-from exceptions import LoaderError, SourceNotFoundLoaderError
+from exceptions import LoaderError, SourceNotFoundError
 import urllib, os.path
 
 class UriTextLoader(Loader):
@@ -18,11 +18,12 @@ class UriTextLoader(Loader):
     def __init__(self, uri, paths=[]):
         self.uri = uri
         self.paths = paths
+        self.location = uri
 
     def load(self):
         try:
             return self._f.read()
-        except e:
+        except Exception as e:
             raise LoaderError('URI: %s' % self.uri, e)
 
     def open(self):
@@ -40,15 +41,15 @@ class UriTextLoader(Loader):
                         if ee.errno != 2:
                             raise ee
                 if not hasattr(self, '_f'):
-                    raise SourceNotFoundLoaderError('URI: %s' % self.uri, e)
+                    raise SourceNotFoundError('URI: "%s"' % self.uri, e)
             else:
-                raise LoaderError('URI: %s' % self.uri, e)
-        except e:
-            raise LoaderError('URI: %s' % self.uri, e)
+                raise LoaderError('URI: "%s"' % self.uri, e)
+        except Exception as e:
+            raise LoaderError('URI: "%s"' % self.uri, e)
 
     def close(self):
         if hasattr(self, '_f'):
             try:
                 self._f.close()
-            except e:
-                raise LoaderError('URI: %s' % self.uri, e)
+            except Exception as e:
+                raise LoaderError('URI: "%s"' % self.uri, e)

@@ -20,7 +20,7 @@ class CloudifyPresenter1_3(ToscaSimplePresenter1_0):
     def profile(self):
         return Profile(self.raw)
 
-__all__ = [
+__all__ = (
     'CloudifyPresenter1_3',
     'InterfaceDefinition',
     'Input',
@@ -30,4 +30,4 @@ __all__ = [
     'Profile',
     'NodeTemplate',
     'NodeType',
-    'RelationshipType']
+    'RelationshipType')

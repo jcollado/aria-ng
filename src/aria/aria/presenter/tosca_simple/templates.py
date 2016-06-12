@@ -1,5 +1,5 @@
 
-from aria.presenter import Presentation, has_fields, primitive_field, primitive_list_field, object_dict_field, required_field
+from aria.presenter import Presentation, has_fields, primitive_field, primitive_list_field, object_dict_field, field_type, required_field
 from definitions import ParameterDefinition, GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinition, ArtifactDefinition
 from assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment
 from filters import NodeFilter
@@ -13,16 +13,19 @@ class NodeTemplate(Presentation):
     """
 
     @required_field
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         """
 
+    @field_type(str)
     @primitive_list_field
     def directives(self):
         pass
@@ -69,6 +72,7 @@ class NodeTemplate(Presentation):
         :class:`NodeFilter`
         """
 
+    @field_type(str)
     @primitive_field
     def copy(self):
         pass
@@ -82,10 +86,12 @@ class RelationshipTemplate(Presentation):
     """
 
     @required_field
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -110,10 +116,12 @@ class RelationshipTemplate(Presentation):
         :class:`InterfaceDefinition`
         """
 
+    @field_type(str)
     @primitive_field
     def copy(self):
         pass
 
+    @field_type(str)
     @primitive_list_field
     def targets(self):
         pass
@@ -126,6 +134,7 @@ class TopologyTemplate(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_TOPOLOGY_TEMPLATE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -168,6 +177,7 @@ class TopologyTemplate(Presentation):
         :class:`ParameterDefinition`
         """
     
-    @property
+    @primitive_field
     def substitution_mappings(self):
-        return self._get_primitive('substitution_mappings')
+        #TODO
+        pass

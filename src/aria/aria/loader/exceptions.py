@@ -7,13 +7,13 @@ class LoaderError(AriaError):
     """
     pass
 
-class LoaderNotFoundLoaderError(LoaderError):
+class LoaderNotFoundError(LoaderError):
     """
     ARIA loader error: loader not found for source.
     """
     pass
 
-class SourceNotFoundLoaderError(LoaderError):
+class SourceNotFoundError(LoaderError):
     """
     ARIA loader error: resource not found.
     """

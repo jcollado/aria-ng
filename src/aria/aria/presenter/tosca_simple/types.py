@@ -1,5 +1,5 @@
 
-from aria.presenter import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field
+from aria.presenter import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type
 from definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinition, RequirementDefinition, CapabilityDefinition, ArtifactDefinition
 from misc import ConstraintClause
 from tosca import Version
@@ -12,6 +12,7 @@ class ArtifactType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_ARTIFACT_TYPE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def derived_from(self):
         pass
@@ -22,16 +23,19 @@ class ArtifactType(Presentation):
         :class:`Version`
         """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         """
 
+    @field_type(str)
     @primitive_field
     def mime_type(self):
         pass
 
+    @field_type(str)
     @primitive_list_field
     def file_ext(self):
         pass
@@ -50,6 +54,7 @@ class DataType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_DATA_TYPE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def derived_from(self):
         pass
@@ -60,6 +65,7 @@ class DataType(Presentation):
         :class:`Version`
         """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -86,6 +92,7 @@ class CapabilityType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_CAPABILITY_TYPE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def derived_from(self):
         pass
@@ -96,6 +103,7 @@ class CapabilityType(Presentation):
         :class:`Version`
         """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -114,6 +122,7 @@ class CapabilityType(Presentation):
         :class:`AttributeDefinition`
         """
 
+    @field_type(str)
     @primitive_list_field
     def valid_source_types(self):
         pass
@@ -126,6 +135,7 @@ class InterfaceType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_INTERFACE_TYPE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def derived_from(self):
         pass
@@ -136,6 +146,7 @@ class InterfaceType(Presentation):
         :class:`Version`
         """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -156,6 +167,7 @@ class RelationshipType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_RELATIONSHIP_TYPE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def derived_from(self):
         pass
@@ -166,6 +178,7 @@ class RelationshipType(Presentation):
         :class:`Version`
         """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -190,6 +203,7 @@ class RelationshipType(Presentation):
         :class:`InterfaceDefinition`
         """
 
+    @field_type(str)
     @primitive_list_field
     def valid_target_types(self):
         pass
@@ -202,6 +216,7 @@ class NodeType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_NODE_TYPE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def derived_from(self):
         pass
@@ -212,6 +227,7 @@ class NodeType(Presentation):
         :class:`Version`
         """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -264,6 +280,7 @@ class GroupType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_GROUP_TYPE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def derived_from(self):
         pass
@@ -274,6 +291,7 @@ class GroupType(Presentation):
         :class:`Version`
         """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -286,11 +304,12 @@ class GroupType(Presentation):
         :class:`PropertyDefinition`
         """
 
+    @field_type(str)
     @primitive_list_field
     def members(self):
         pass
 
-    @property
+    @object_dict_field(InterfaceDefinition)
     def interfaces(self):
         """
         :class:`InterfaceDefinition`
@@ -304,6 +323,7 @@ class PolicyType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_POLICY_TYPE>`__
     """
 
+    @field_type(str)
     @primitive_field
     def derived_from(self):
         pass
@@ -314,6 +334,7 @@ class PolicyType(Presentation):
         :class:`Version`
         """
 
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -326,6 +347,7 @@ class PolicyType(Presentation):
         :class:`PropertyDefinition`
         """
 
+    @field_type(str)
     @primitive_list_field
     def targets(self):
         pass

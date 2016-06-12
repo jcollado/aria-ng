@@ -1,44 +1,57 @@
 #!/usr/bin/env python
 
-from aria import *
-from aria.reader import *
-from aria.parser import *
-from aria.consumer import *
-from aria.presenter import *
-from tosca.datatypes import *
-
-from clint.arguments import Args 
+from aria import import_class, print_exception
+from aria.consumer import Validator
+from argparse import ArgumentParser
 from clint.textui import puts, colored, indent
 
-def show_help():
-    puts(colored.red('ARIA CLI'))
-    with indent(2):
-        puts('aria [profile URI or file path]')
+class Arguments(ArgumentParser):
+    def __init__(self):
+        super(Arguments, self).__init__(description='ARIA', prog='aria')
+        self.add_argument('uri', help='URI or file path to profile')
+        self.add_argument('consumer', nargs='?', default='aria.consumer.Printer', help='consumer class')
+        self.add_argument('--parser', default='aria.parser.DefaultParser', help='parser class')
+        self.add_argument('--loader-source', default='aria.loader.DefaultLoaderSource', help='loader source class for the parser')
+        self.add_argument('--reader-source', default='aria.reader.DefaultReaderSource', help='reader source class for the parser')
+        self.add_argument('--presenter-source', default='aria.presenter.DefaultPresenterSource', help='presenter source class for the parser')
+        self.add_argument('--presenter', help='force use of this presenter class in parser')
+
+def main():
+    try:
+        arguments = Arguments().parse_args()
+        
+        uri = arguments.uri
+        consumer_class = import_class(arguments.consumer)
+        parser_class = import_class(arguments.parser)
+        loader_source_class = import_class(arguments.loader_source)
+        reader_source_class = import_class(arguments.reader_source)
+        presenter_source_class = import_class(arguments.presenter_source)
+        presenter_class = import_class(arguments.presenter)
+        
+        parser = parser_class(locator=uri,
+            loader_source=loader_source_class(),
+            reader_source=reader_source_class(),
+            presenter_source=presenter_source_class(),
+            presenter_class=presenter_class)
+        
+        presentation = parser.parse()
+        
+        Validator(presentation).consume()
+
+        #presentation.profile.description = 12
+        #print presentation.profile.description
+        
+        consumer_class(presentation).consume()
+
+        #reader = YamlReader('simple-blueprint.yaml')
+        #reader.read()
+
+        #r = Credential({'properties': {'protocol': 'http'}})
+        #print r.properties.protocol
+
+        #Writer(structure).consume()
+    except Exception as e:
+        print_exception(e)
 
 if __name__ == '__main__':
-    args = Args()
-    
-    if len(args.all) == 0:
-        show_help()
-        exit(1)
-    
-    uri = args.all[0]
-
-    #reader = YamlReader('simple-blueprint.yaml')
-    #reader.read()
-
-    #r = Credential({'properties': {'protocol': 'http'}})
-    #print r.properties.protocol
-
-    parser = DefaultParser(uri)
-    presentation = parser.parse()
-
-    #Writer(structure).consume()
-
-    validator = Validator(presentation)
-    validator.consume()
-    
-    #print presentation.profile.tosca_definitions_version
-
-    Printer(presentation).consume()
-
+    main()

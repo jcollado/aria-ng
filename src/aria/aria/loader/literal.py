@@ -1,7 +1,7 @@
 
 from loader import Loader
 
-class StringLoader(Loader):
+class LiteralLoader(Loader):
     """
     ARIA string loader.
     
@@ -10,6 +10,7 @@ class StringLoader(Loader):
 
     def __init__(self, value):
         self.value = value
+        self.location = '<literal>'
     
     def consume(self):
         return str(self.value)

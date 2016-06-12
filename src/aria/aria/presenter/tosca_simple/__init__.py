@@ -7,7 +7,6 @@ from templates import *
 from types import *
 from misc import *
 
-from aria import merge
 from aria.presenter import Presenter
 
 class ToscaSimplePresenter1_0(Presenter):
@@ -18,6 +17,9 @@ class ToscaSimplePresenter1_0(Presenter):
     @staticmethod
     def can_present(raw):
         return raw.get('tosca_definitions_version') == 'tosca_simple_yaml_1_0'
+
+    def validate(self, issues):
+        self.profile.validate(issues)
     
     @property
     def profile(self):
@@ -25,12 +27,8 @@ class ToscaSimplePresenter1_0(Presenter):
 
     def get_import_locators(self):
         return [i.file for i in self.profile.imports] if (self.profile and self.profile.imports) else []
-        
-    def merge_import(self, presentation):
-        # TODO: too primitive! what if there are conflicts?
-        merge(self.raw, presentation.raw)
 
-__all__ = [
+__all__ = (
     'PropertyAssignment',
     'RequirementAssignment',
     'CapabilityAssignment',
@@ -57,4 +55,4 @@ __all__ = [
     'RelationshipType',
     'NodeType',
     'GroupType',
-    'PolicyType']
+    'PolicyType')

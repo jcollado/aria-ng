@@ -1,9 +1,10 @@
 
-from aria.presenter import Presentation, has_fields, primitive_field, object_dict_field, required_field
+from aria.presenter import Presentation, has_fields, primitive_field, object_dict_field, field_type, required_field
 from aria.presenter.tosca_simple import PropertyAssignment
 
 @has_fields
 class Input(Presentation):
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -12,6 +13,7 @@ class Input(Presentation):
 
 @has_fields
 class Output(Presentation):
+    @field_type(str)
     @primitive_field
     def description(self):
         """
@@ -28,10 +30,12 @@ class Output(Presentation):
 @has_fields
 class Relationship(Presentation):
     @required_field
+    @field_type(str)
     @primitive_field
     def type(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def target(self):
         pass
@@ -41,10 +45,12 @@ class Workflow(Presentation):
     def __init__(self, raw={}):
         super(Workflow, self).__init__({'implementation': raw} if isinstance(raw, basestring) else raw)
 
+    @field_type(str)
     @primitive_field
     def implementation(self):
         pass
 
+    @field_type(str)
     @primitive_field
     def executor(self):
         pass

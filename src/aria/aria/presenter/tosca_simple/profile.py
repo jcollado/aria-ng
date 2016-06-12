@@ -1,5 +1,5 @@
 
-from aria.presenter import Presentation, has_fields, raw_field, primitive_field, object_field, object_list_field, object_dict_field
+from aria.presenter import Presentation, has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field
 from misc import Repository, Import
 from types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from templates import TopologyTemplate
@@ -10,6 +10,7 @@ class Profile(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc445238241>`__.
     """
     
+    @field_type(str)
     @primitive_field
     def tosca_definitions_version(self):
         """
@@ -18,27 +19,21 @@ class Profile(Presentation):
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379455047>`__
         """
 
-    #@tosca_definitions_version.setter
-    #def tosca_definitions_version(self, value):
-    #    self.raw['tosca_definitions_version'] = value
-
-    @raw_field
+    @primitive_field
     def metadata(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379455048>`__
         """
 
+    @field_type(str)
+    @required_field # test
     @primitive_field
     def description(self):
         """
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         """
     
-    #@description.setter
-    #def description(self, value):
-    #    self.raw['description'] = value
-        
-    @raw_field
+    @primitive_field
     def dsl_definitions(self):
         # TODO ???
         pass

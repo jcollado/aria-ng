@@ -1,5 +1,5 @@
 
-from exceptions import PresenterNotFoundPresenterError
+from exceptions import PresenterNotFoundError
 
 class PresenterSource(object):
     """
@@ -9,4 +9,4 @@ class PresenterSource(object):
     """
 
     def get_presenter(self, raw):
-        raise PresenterNotFoundPresenterError()
+        raise PresenterNotFoundError()

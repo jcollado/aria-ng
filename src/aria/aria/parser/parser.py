@@ -1,5 +1,5 @@
 
-from aria import UnimplementedAriaError, classname
+from aria import UnimplementedFunctionalityError, classname
 from aria.loader import DefaultLoaderSource
 from aria.reader import DefaultReaderSource
 from aria.presenter import DefaultPresenterSource
@@ -25,4 +25,4 @@ class Parser(object):
         self.presenter_source = presenter_source
 
     def consume(self, locator):
-        raise UnimplementedAriaError(classname(self) + '.parse')
+        raise UnimplementedFunctionalityError(classname(self) + '.parse')

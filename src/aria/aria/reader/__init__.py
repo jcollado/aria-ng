@@ -2,6 +2,7 @@
 from exceptions import *
 from reader import *
 from source import *
+from map import *
 from yaml import *
 
 class DefaultReaderSource(ReaderSource):
@@ -15,9 +16,10 @@ class DefaultReaderSource(ReaderSource):
             return YamlReader(loader)
         return super(DefaultReaderSource, self).get_reader(locator, loader)
 
-__all__ = [
+__all__ = (
     'ReaderError',
     'ReaderNotFoundReaderError',
     'Reader',
     'ReaderSource',
-    'DefaultReaderSource']
+    'Map',
+    'DefaultReaderSource')

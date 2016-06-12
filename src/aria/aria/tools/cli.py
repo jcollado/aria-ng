@@ -36,7 +36,8 @@ def main():
         
         presentation = parser.parse()
         
-        Validator(presentation).consume()
+        if Validator(presentation).validate():
+            exit(0)
 
         #presentation.profile.description = 12
         #print presentation.profile.description

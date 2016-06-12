@@ -23,7 +23,6 @@ class CloudifyPresenter1_3(ToscaSimplePresenter1_0):
 __all__ = (
     'CloudifyPresenter1_3',
     'InterfaceDefinition',
-    'Input',
     'Output',
     'Relationship',
     'Workflow',

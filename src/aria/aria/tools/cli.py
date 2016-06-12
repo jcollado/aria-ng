@@ -18,7 +18,7 @@ class Arguments(ArgumentParser):
 
 def main():
     try:
-        arguments = Arguments().parse_args()
+        arguments, unknown_args = Arguments().parse_known_args()
         
         uri = arguments.uri
         consumer_class = import_class(arguments.consumer, ['aria.consumer'])
@@ -41,7 +41,7 @@ def main():
         #presentation.profile.description = 12
         #print presentation.profile.description
         
-        consumer_class(presentation).consume()
+        consumer_class(presentation, unknown_args).consume()
 
         #reader = YamlReader('simple-blueprint.yaml')
         #reader.read()

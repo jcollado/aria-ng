@@ -49,7 +49,7 @@ def import_class(name, paths=[]):
     """
     Imports a class based on its full name, optionally searching for it in the paths.
     """
-    if not name:
+    if name is None:
         return None
     
     def do_import(name):

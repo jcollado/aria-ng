@@ -10,4 +10,3 @@ class ReaderNotFoundReaderError(ReaderError):
     """
     ARIA reader error: reader not found for source.
     """
-    pass

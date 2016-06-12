@@ -2,6 +2,7 @@
 from utils import *
 from fields import *
 from properties import *
+from interfaces import *
 from issue import *
 from exceptions import *
 
@@ -31,6 +32,8 @@ __all__ = (
     'property_default',
     'property_status',
     'required_property',
+    'has_interfaces',
+    'interfacemethod',
     'Issue',
     'AriaError',
     'UnimplementedFunctionalityError',

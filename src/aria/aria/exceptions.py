@@ -17,4 +17,3 @@ class InvalidValueError(AriaError):
     """
     ARIA presenter error: value is invalid.
     """
-    pass

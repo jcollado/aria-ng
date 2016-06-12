@@ -5,4 +5,3 @@ class ConsumerError(AriaError):
     """
     ARIA consumer error.
     """
-    pass

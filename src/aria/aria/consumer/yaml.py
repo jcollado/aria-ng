@@ -11,8 +11,8 @@ class YamlWriter(Consumer):
     Outputs the presentation's raw data as YAML text.
     """
     
-    def __init__(self, presentation, out=sys.stdout):
-        super(YamlWriter, self).__init__(presentation)
+    def __init__(self, presentation, args=[], out=sys.stdout):
+        super(YamlWriter, self).__init__(presentation, args)
         self.out = out
         
     def consume(self):

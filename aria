@@ -5,4 +5,4 @@ HERE=$(dirname "$(readlink -f "$0")")
 ARIA_SRC="$HERE/src/aria"
 
 PYTHONPATH="$ARIA_SRC:$PYTHONPATH" \
-python "$ARIA_SRC/aria/tools/cli.py" "$@"
+python -m aria.tools.cli "$@"

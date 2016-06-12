@@ -38,7 +38,7 @@ class Printer(Consumer):
                     with indent(self.indent):
                         self._print_description(output.description)
                         for k, v in output.value.iteritems():
-                            self._print_assignment(k, v.value)
+                            self._print_assignment(k, v)
 
         if profile.node_types:
             puts(self._section('Node types:'))
@@ -149,4 +149,4 @@ class Printer(Consumer):
                                 puts('Inputs:') # TODO
                                 with indent(self.indent):
                                     for kkk, v in workflow.inputs.iteritems():
-                                        self._print_assignment(kkk, v.value)
+                                        self._print_assignment(kkk, v)

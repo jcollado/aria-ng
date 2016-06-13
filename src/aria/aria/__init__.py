@@ -6,7 +6,10 @@ from interfaces import *
 from issue import *
 from exceptions import *
 
+VERSION = '0.1'
+
 __all__ = (
+    'VERSION',
     'OpenClose',
     'classname',
     'merge',

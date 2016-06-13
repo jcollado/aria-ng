@@ -2,14 +2,13 @@
 from aria import has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca
 
-class Root(tosca.HasProperties):
+@has_validated_properties
+class Root(object):
     """
     This is the default (root) TOSCA Root Type definition that all complex TOSCA Data Types derive from.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_ROOT>`__
     """
-    
-    DESCRIPTION = 'This is the default (root) TOSCA Root Type definition that all complex TOSCA Data Types derive from.'
 
 @has_validated_properties
 class Credential(Root):
@@ -18,8 +17,6 @@ class Credential(Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_CREDENTIAL>`__
     """
-
-    DESCRIPTION = 'The Credential type is a complex TOSCA data Type used when describing authorization credentials used to access network accessible resources.'
 
     SHORTHAND_NAME = 'Credential'
     TYPE_QUALIFIED_NAME = 'tosca:Credential'

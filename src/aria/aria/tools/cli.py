@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from aria import import_class, print_exception
+from aria import VERSION, import_class, print_exception
 from aria.consumer import Validator
 from argparse import ArgumentParser
 from clint.textui import puts, colored, indent
 
 class Arguments(ArgumentParser):
     def __init__(self):
-        super(Arguments, self).__init__(description='ARIA', prog='aria')
+        super(Arguments, self).__init__(description='ARIA version %s' % VERSION, prog='aria')
         self.add_argument('uri', help='URI or file path to profile')
         self.add_argument('consumer', nargs='?', default='aria.consumer.Printer', help='consumer class')
         self.add_argument('--parser', default='aria.parser.DefaultParser', help='parser class')

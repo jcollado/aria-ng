@@ -1,12 +1,14 @@
 `tosca` Package
 ===============
 
-These are standard TOSCA types defined in the specification.
+These are all the standard TOSCA types defined in the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html>`__
+and the `TOSCA Simple Profile for NFV v1.0 specification <http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html>`__.
 
 You can use these types directly in TOSCA via `type`.
 
 You can also inherit these classes, in TOSCA via `derived_from`,
 or directly in Python.
+
 
 :mod:`tosca`
 ------------
@@ -28,6 +30,11 @@ or directly in Python.
 
 .. automodule:: tosca.capabilities.network
 
+:mod:`tosca.capabilities.nfv`
+-----------------------------
+
+.. automodule:: tosca.capabilities.nfv
+
 :mod:`tosca.datatypes`
 ----------------------
 
@@ -38,10 +45,20 @@ or directly in Python.
 
 .. automodule:: tosca.datatypes.network
 
+:mod:`tosca.datatypes.compute`
+------------------------------
+
+.. automodule:: tosca.datatypes.compute
+
 :mod:`tosca.groups`
 -------------------
 
 .. automodule:: tosca.groups
+
+:mod:`tosca.groups.nfv`
+-----------------------
+
+.. automodule:: tosca.groups.nfv
 
 :mod:`tosca.interfaces`
 -----------------------
@@ -68,6 +85,11 @@ or directly in Python.
 
 .. automodule:: tosca.nodes.network
 
+:mod:`tosca.nodes.nfv`
+----------------------
+
+.. automodule:: tosca.nodes.nfv
+
 :mod:`tosca.policies`
 ---------------------
 
@@ -82,3 +104,8 @@ or directly in Python.
 ----------------------------------
 
 .. automodule:: tosca.relationships.network
+
+:mod:`tosca.relationships.nfv`
+------------------------------
+
+.. automodule:: tosca.relationships.nfv

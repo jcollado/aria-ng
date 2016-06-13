@@ -27,19 +27,16 @@ This is core ARIA API.
 ---------------------
 
 .. automodule:: aria.presenter
-   :exclude-members: FIELDS
 
 :mod:`aria.presenter.cloudify`
 ------------------------------
 
 .. automodule:: aria.presenter.cloudify
-   :exclude-members: FIELDS
 
 :mod:`aria.presenter.tosca_simple`
 ----------------------------------
 
 .. automodule:: aria.presenter.tosca_simple
-   :exclude-members: FIELDS
 
 :mod:`aria.reader`
 ------------------

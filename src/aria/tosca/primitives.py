@@ -1,20 +1,22 @@
 
-from utils import *
-
 class String(object):
     YAML = 'tag:yaml.org,2002:str'
     
     SHORTHAND_NAME = 'string'
         
-class Integer(HasConstraints):
+class Integer(object):
     YAML = 'tag:yaml.org,2002:int'
     
     SHORTHAND_NAME = 'integer'
+    
+    #TODO constraints
 
-class Float(HasConstraints):
+class Float(object):
     YAML = 'tag:yaml.org,2002:float'
     
     SHORTHAND_NAME = 'float'
+
+    #TODO constraints
 
 class Boolean(object):
     YAML = 'tag:yaml.org,2002:bool'
@@ -36,8 +38,6 @@ class Version(object):
     TOSCA supports the concept of "reuse" of type definitions, as well as template definitions which could be version and change over time. It is important to provide a reliable, normative means to represent a version string which enables the comparison and management of types and templates over time. Therefore, the TOSCA TC intends to provide a normative version type (string) for this purpose in future Working Drafts of this specification.
     """
     
-    DESCRIPTION = 'TOSCA supports the concept of "reuse" of type definitions, as well as template definitions which could be version and change over time. It is important to provide a reliable, normative means to represent a version string which enables the comparison and management of types and templates over time. Therefore, the TOSCA TC intends to provide a normative version type (string) for this purpose in future Working Drafts of this specification.'
-    
     SHORTHAND_NAME = 'version'
     TYPE_QUALIFIED_NAME = 'tosca:version'
 
@@ -49,8 +49,6 @@ class List(object):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_LIST>`__
     """
-    
-    DESCRIPTION = 'The list type allows for specifying multiple values for a parameter of property. For example, if an application allows for being configured to listen on multiple ports, a list of ports could be configured using the list data type.'
 
     SHORTHAND_NAME = 'list'
     TYPE_QUALIFIED_NAME = 'tosca:list'
@@ -66,8 +64,6 @@ class Map(object):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_MAP>`__
     """
-    
-    DESCRIPTION = 'The map type allows for specifying multiple values for a parameter of property as a map. In contrast to the list type, where each entry can only be addressed by its index in the list, entries in a map are named elements that can be addressed by their keys.'
 
     SHORTHAND_NAME = 'map'
     TYPE_QUALIFIED_NAME = 'tosca:map'

@@ -1,24 +1,22 @@
 
 from aria import has_validated_properties, validated_property, property_type, property_default, property_status, required_property
-import tosca, tosca.datatypes.network
+import tosca, tosca.datatypes.network, tosca.datatypes.compute
 
-class Root(tosca.HasProperties):
+@has_validated_properties
+class Root(object):
     """
     This is the default (root) TOSCA Capability Type definition that all other TOSCA Capability Types derive from.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ROOT>`__
     """
-    
-    DESCRIPTION = 'This is the default (root) TOSCA Capability Type definition that all other TOSCA Capability Types derive from.'
 
+@has_validated_properties
 class Node(Root):
     """
     The Node capability indicates the base capabilities of a TOSCA Node Type.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_NODE>`__
     """
-    
-    DESCRIPTION = 'The Node capability indicates the base capabilities of a TOSCA Node Type.'
 
     SHORTHAND_NAME = 'Node'
     TYPE_QUALIFIED_NAME = 'tosca:Node'
@@ -31,8 +29,6 @@ class Container(Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_CONTAINER>`__
     """
-    
-    DESCRIPTION = 'The Container capability, when included on a Node Type or Template definition, indicates that the node can act as a container for (or a host for) one or more other declared Node Types.'
 
     SHORTHAND_NAME = 'Container'
     TYPE_QUALIFIED_NAME = 'tosca:Container'
@@ -45,7 +41,7 @@ class Container(Root):
         Number of (actual or virtual) CPUs associated with the Compute node.
         """
 
-    @property_type( tosca.Frequency)
+    @property_type(tosca.Frequency)
     @validated_property
     def cpu_frequency(self):
         """
@@ -67,14 +63,70 @@ class Container(Root):
         """
 
 @has_validated_properties
+class Architecture(Container):
+    """
+    Enhance compute architecture capability that needs to be typically use for performance sensitive NFV workloads.
+    
+    See the `TOSCA Simple Profile for NFV v1.0 specification <http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#DEFN_TYPE_CAPABILITIES_CONTAINER>`__
+    """
+
+    SHORTHAND_NAME = 'Compute.Container.Architecture'
+    TYPE_QUALIFIED_NAME = 'tosca:Compute.Container.Architecture'
+    TYPE_URI = 'tosca.capabilities.Compute.Container.Architecture' # mismatch with TOSCA Simple Profile, where we don't have Compute.Container, just Container
+
+    @property_type(str)
+    @validated_property
+    def mem_page_size(self):
+        """
+        Describe page size of the VM:
+
+        * small page size is typically 4KB
+        * large page size is typically 2MB
+        * any page size maps to system default
+        * custom MB value: sets TLB size to this specific value
+        """
+
+    @property_type(str)
+    @validated_property
+    def mem_page_size(self):
+        """
+        Describes CPU allocation requirements like dedicated CPUs (cpu pinning), socket count, thread count, etc.
+        """
+
+    @property_type(tosca.datatypes.compute.CPUAllocation)
+    @validated_property
+    def cpu_allocation(self):
+        """
+        Describes CPU allocation requirements like dedicated CPUs (cpu pinning), socket count, thread count, etc.
+        """
+
+    @property_type(tosca.Integer)
+    @validated_property
+    def numa_node_count(self):
+        """
+        Specifies the symmetric count of NUMA nodes to expose to the VM. vCPU and Memory equally split across this number of NUMA.
+
+        NOTE: the map of numa_nodes should not be specified. 
+        """
+
+    @property_type(tosca.Map(tosca.datatypes.compute.NUMA))
+    @validated_property
+    def numa_nodes(self):
+        """
+        Asymmetric allocation of vCPU and Memory across the specific NUMA nodes (CPU sockets and memory banks).
+
+        NOTE: symmetric numa_node_count should not be specified.
+        """
+
+Container.Architecture = Architecture
+
+@has_validated_properties
 class Endpoint(Root):
     """
     This is the default TOSCA type that should be used or extended to define a network endpoint capability. This includes the information to express a basic endpoint with a single port or a complex endpoint with multiple ports. By default the Endpoint is assumed to represent an address on a private network unless otherwise specified.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT>`__
     """
-    
-    DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define a network endpoint capability. This includes the information to express a basic endpoint with a single port or a complex endpoint with multiple ports. By default the Endpoint is assumed to represent an address on a private network unless otherwise specified.'
 
     SHORTHAND_NAME = 'Endpoint'
     TYPE_QUALIFIED_NAME = 'tosca:Endpoint'
@@ -141,8 +193,15 @@ class Endpoint(Root):
         The optional map of ports the Endpoint supports (if more than one).
         """
 
-    ATTRIBUTES = {
-        'ip_address': {'type': str, 'required': True, 'description': 'Note: This is the IP address as propagated up by the associated node\'s host (Compute) container.'}}
+    # Attributes
+
+    @required_property
+    @property_type(str)
+    @validated_property
+    def ip_address(self):
+        """
+        Note: This is the IP address as propagated up by the associated node's host (Compute) container.
+        """
     
 @has_validated_properties
 class Public(Endpoint):
@@ -153,8 +212,6 @@ class Public(Endpoint):
 
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_PUBLIC>`__
     """
-    
-    DESCRIPTION = 'This capability represents a public endpoint which is accessible to the general internet (and its public IP address ranges).'
     
     SHORTHAND_NAME = 'Endpoint.Public'
     TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Public'
@@ -195,8 +252,6 @@ class Admin(Endpoint):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_ADMIN>`__
     """
     
-    DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define a specialized administrator endpoint capability.'
-    
     SHORTHAND_NAME = 'Endpoint.Admin'
     TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Admin'
     TYPE_URI = 'tosca.capabilities.Endpoint.Admin'
@@ -211,6 +266,7 @@ class Admin(Endpoint):
 
 Endpoint.Admin = Admin
 
+@has_validated_properties
 class Database(Endpoint):
     """
     This is the default TOSCA type that should be used or extended to define a specialized database endpoint capability.
@@ -218,22 +274,19 @@ class Database(Endpoint):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ENDPOINT_DATABASE>`__
     """
     
-    DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define a specialized database endpoint capability.'
-    
     SHORTHAND_NAME = 'Endpoint.Database'
     TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Database'
     TYPE_URI = 'tosca.capabilities.Endpoint.Database'
 
 Endpoint.Database = Database
 
+@has_validated_properties
 class Attachment(Root):
     """
     This is the default TOSCA type that should be used or extended to define an attachment capability of a (logical) infrastructure device node (e.g., BlockStorage node).
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_ATTACHMENT>`__
     """
-    
-    DESCRIPTION = 'This is the default TOSCA type that should be used or extended to define an attachment capability of a (logical) infrastructure device node (e.g., BlockStorage node).'
 
     SHORTHAND_NAME = 'Attachment'
     TYPE_QUALIFIED_NAME = 'tosca:Attachment'
@@ -246,8 +299,6 @@ class OperatingSystem(Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_OPSYS>`__
     """
-    
-    DESCRIPTION = 'This is the default TOSCA type that should be used to express an Operating System capability for a node.'
 
     SHORTHAND_NAME = 'OperatingSystem'
     TYPE_QUALIFIED_NAME = 'tosca:OperatingSystem'
@@ -288,8 +339,6 @@ class Scalable(Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_CAPABILITIES_SCALABLE>`__
     """
-    
-    DESCRIPTION = 'This is the default TOSCA type that should be used to express a scalability capability for a node.'
 
     SHORTHAND_NAME = 'Scalable'
     TYPE_QUALIFIED_NAME = 'tosca:Scalable'

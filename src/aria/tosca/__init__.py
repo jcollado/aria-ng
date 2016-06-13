@@ -1,6 +1,5 @@
 
 from primitives import *
-from utils import *
 
 __all__ = (
     'String',
@@ -15,7 +14,4 @@ __all__ = (
     'Range',
     'Size',
     'Time',
-    'Frequency',
-    'PropertiesContainer',
-    'HasProperties',
-    'HasConstraints')
+    'Frequency')

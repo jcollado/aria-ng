@@ -9,8 +9,6 @@ class NetworkInfo(tosca.datatypes.Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_NETWORKINFO>`__
     """
-    
-    DESCRIPTION = 'The Network type is a complex TOSCA data type used to describe logical network information.'
 
     SHORTHAND_NAME = 'NetworkInfo'
     TYPE_QUALIFIED_NAME = 'tosca:NetworkInfo'
@@ -44,8 +42,6 @@ class PortInfo(tosca.datatypes.Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_PORTINFO>`__
     """
-    
-    DESCRIPTION = 'The PortInfo type is a complex TOSCA data type used to describe network port information.'
 
     SHORTHAND_NAME = 'PortInfo'
     TYPE_QUALIFIED_NAME = 'tosca:PortInfo'
@@ -86,14 +82,13 @@ class PortInfo(tosca.datatypes.Root):
         The list of IP address(es) assigned to the port.
         """
 
+@has_validated_properties
 class PortDef(tosca.Integer):
     """
     The PortDef type is a TOSCA data Type used to define a network port.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_PORTDEF>`__
     """
-    
-    DESCRIPTION = 'The PortDef type is a TOSCA data Type used to define a network port.'
 
     SHORTHAND_NAME = 'PortDef'
     TYPE_QUALIFIED_NAME = 'tosca:PortDef'
@@ -109,8 +104,6 @@ class PortSpec(tosca.datatypes.Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_DATA_PORTSPEC>`__
     """
-    
-    DESCRIPTION = 'The PortSpec type is a complex TOSCA data Type used when describing port specifications for a network connection/'
 
     SHORTHAND_NAME = 'PortSpec'
     TYPE_QUALIFIED_NAME = 'tosca:PortSpec'

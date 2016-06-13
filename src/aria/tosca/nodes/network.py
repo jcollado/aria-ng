@@ -9,8 +9,6 @@ class Network(tosca.nodes.Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>`__ (no anchor)
     """
-    
-    DESCRIPTION = 'The TOSCA Network node represents a simple, logical network service.'
 
     SHORTHAND_NAME = 'Network'
     TYPE_QUALIFIED_NAME = 'tosca:Network'
@@ -104,8 +102,6 @@ class Port(tosca.nodes.Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>`__ (no anchor)
     """
-    
-    DESCRIPTION = 'The TOSCA Port node represents a logical entity that associates between Compute and Network normative types.'
 
     SHORTHAND_NAME = 'Port'
     TYPE_QUALIFIED_NAME = 'tosca:Port'

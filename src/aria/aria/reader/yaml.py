@@ -43,7 +43,7 @@ class YamlReader(Reader):
             #return yaml.load(data, yaml.RoundTripLoader)
         except Exception as e:
             if isinstance(e, yaml.parser.MarkedYAMLError):
-                context = e.context
+                context = e.context or 'while parsing'
                 problem = e.problem
                 line = e.problem_mark.line
                 column = e.problem_mark.column

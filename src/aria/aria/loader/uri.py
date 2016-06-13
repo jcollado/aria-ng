@@ -3,11 +3,13 @@ from loader import Loader
 from exceptions import LoaderError, SourceNotFoundError
 import urllib, os.path
 
-class UriTextLoader(Loader):
+PATHS = []
+
+class UriLoader(Loader):
     """
-    ARIA URI text loader.
+    Base class for ARIA URI loaders.
     
-    Extracts text from a URI.
+    Extracts data from a URI.
     
     If the URI does not have a scheme, it is assumed to be "file:".
     
@@ -17,30 +19,24 @@ class UriTextLoader(Loader):
 
     def __init__(self, uri, paths=[]):
         self.uri = uri
-        self.paths = paths
+        self.paths = PATHS + paths
         self.location = uri
-
-    def load(self):
-        try:
-            return self._f.read()
-        except Exception as e:
-            raise LoaderError('URI: %s' % self.uri, e)
 
     def open(self):
         try:
-            self._f = urllib.urlopen(self.uri)
+            self.file = urllib.urlopen(self.uri)
         except IOError as e:
             if e.errno == 2:
                 # Not found, so try in paths
                 for p in self.paths:
                     uri = os.path.join(p, self.uri)
                     try:
-                        self._f = urllib.urlopen(uri)
+                        self.file = urllib.urlopen(uri)
                         self.uri = uri
                     except IOError as ee:
                         if ee.errno != 2:
                             raise ee
-                if not hasattr(self, '_f'):
+                if not hasattr(self, 'file'):
                     raise SourceNotFoundError('URI: "%s"' % self.uri, e)
             else:
                 raise LoaderError('URI: "%s"' % self.uri, e)
@@ -48,8 +44,19 @@ class UriTextLoader(Loader):
             raise LoaderError('URI: "%s"' % self.uri, e)
 
     def close(self):
-        if hasattr(self, '_f'):
+        if hasattr(self, 'file'):
             try:
-                self._f.close()
+                self.file.close()
             except Exception as e:
                 raise LoaderError('URI: "%s"' % self.uri, e)
+
+class UriTextLoader(UriLoader):
+    """
+    ARIA URI text loader.
+    """
+
+    def load(self):
+        try:
+            return self.file.read()
+        except Exception as e:
+            raise LoaderError('URI: %s' % self.uri, e)

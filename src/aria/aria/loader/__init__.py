@@ -36,5 +36,7 @@ __all__ = (
     'Loader',
     'LoaderSource',
     'LiteralLoader',
+    'PATHS',
+    'UriLoader',
     'UriTextLoader',
     'DefaultLoaderSource')

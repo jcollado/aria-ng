@@ -1,7 +1,7 @@
 
 from exceptions import *
 from parser import *
-
+from aria.consumer import Validator
 from aria.presenter import PresenterNotFoundError
 
 class DefaultParser(Parser):
@@ -12,12 +12,26 @@ class DefaultParser(Parser):
     
     def parse(self):
         """
-        :rtype: :class:`aria.presenter.Presenter` or raw
+        :rtype: :class:`aria.presenter.Presenter`
         """
         presentation = self._parse_all(self.locator, None, self.presenter_class)
         if presentation:
             presentation.link()
         return presentation
+    
+    def validate(self):
+        """
+        :rtype: :class:`aria.presenter.Presenter`, list of str
+        """
+        presentation = None
+        issues = []
+        try:
+            presentation = self.parse()
+            issues = Validator(presentation).validate()
+        except Exception as e:
+            print e
+            issues = ['%s: %s' % (e.__class__.__name__, e)]
+        return presentation, issues
 
     def _parse_all(self, locator, origin_locator, presenter_class):
         raw = self._parse_one(locator, origin_locator)

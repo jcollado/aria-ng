@@ -14,6 +14,4 @@ class Validator(Consumer):
     def validate(self):
         issues = []
         self.presentation.validate(issues)
-        for issue in issues:
-            print '%s' % issue
         return issues

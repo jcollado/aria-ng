@@ -86,7 +86,9 @@ CLI Tool
 --------
 
 Though ARIA is fully exposed as an API, it also comes with a CLI tool to allow you to
-work from the shell.
+work from the shell:
+
+   aria blueprints/simple-blueprint.yaml
 
 The tool loads YAML files and run consumers on them. It can be useful for quickly
 validating a blueprint.
@@ -94,3 +96,20 @@ validating a blueprint.
 If other consumers are in the Python path, it can run them, too: it can thus serve as
 a useful entry point for complex TOSCA-based tools, such as deployers, orchestractors,
 etc.
+
+REST Tool
+---------
+
+The ARIA REST tool starts a RESTful HTTP server that can do basic validation over the
+wire:
+
+    aria-rest
+
+With the server started, you can hit a few endpoints:
+
+    curl http://localhost:8080/validate/blueprints/simple-blueprint.yaml
+
+You will get a JSON response with a list of validation issues. You can also POST a
+blueprint over the wire:
+
+    curl --data-binary @blueprints/simple-blueprint.yaml http://localhost:8080/validate/

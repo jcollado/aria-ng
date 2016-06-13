@@ -4,6 +4,7 @@ from reader import *
 from source import *
 from map import *
 from yaml import *
+from aria.loader import LiteralLoader
 
 class DefaultReaderSource(ReaderSource):
     """
@@ -12,7 +13,9 @@ class DefaultReaderSource(ReaderSource):
     """
 
     def get_reader(self, locator, loader):
-        if isinstance(locator, basestring) and locator.endswith('.yaml'):
+        if isinstance(locator, LiteralLoader):
+            return YamlReader(loader)
+        elif isinstance(locator, basestring) and locator.endswith('.yaml'):
             return YamlReader(loader)
         return super(DefaultReaderSource, self).get_reader(locator, loader)
 

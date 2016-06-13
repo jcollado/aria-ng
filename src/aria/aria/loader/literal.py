@@ -12,5 +12,5 @@ class LiteralLoader(Loader):
         self.value = value
         self.location = '<literal>'
     
-    def consume(self):
+    def load(self):
         return str(self.value)

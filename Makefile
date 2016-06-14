@@ -5,6 +5,7 @@ ARIA_SRC=$(SRC)/aria
 SPHINX_SRC=$(SRC)/sphinx
 
 .PHONY: clean aria-requirements docs-requirements docs
+.DEFAULT_GOAL = test
 
 clean:
 	rm -rf $(DOCS) out .tox .coverage

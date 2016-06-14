@@ -10,6 +10,7 @@ clean:
 	rm -rf $(DOCS) out .tox .coverage
 	find . -type d -name '*.egg-info' -exec rm -rf {} \;
 	find . -type d -name '.coverage' -exec rm -rf {} \;
+	find . -type f -name '.coverage' -delete
 
 aria-requirements:
 	pip install --upgrade --requirement $(ARIA_SRC)/requirements.txt

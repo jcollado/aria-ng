@@ -7,7 +7,7 @@ SPHINX_SRC=$(SRC)/sphinx
 .PHONY: clean aria-requirements docs-requirements docs
 
 clean:
-	rm -rf $(DOCS)
+	rm -rf $(DOCS) out .tox .coverage
 
 aria-requirements:
 	pip install --upgrade --requirement $(ARIA_SRC)/requirements.txt
@@ -18,3 +18,7 @@ docs-requirements:
 docs: docs-requirements
 	rm -rf $(DOCS)
 	sphinx-build -b html -c $(SPHINX_SRC) $(ARIA_SRC) $(DOCS)
+
+test:
+	pip install --upgrade tox==1.6.1
+	tox

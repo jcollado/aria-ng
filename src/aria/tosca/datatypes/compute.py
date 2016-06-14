@@ -16,35 +16,35 @@ class CPUAllocation(tosca.datatypes.Root):
     
     @property_type(str)
     @validated_property
-    def cpu_affinity(self):
+    def cpu_affinity():
         """
         Describes whether vCPU need to be pinned to dedicated CPU core or shared dynamically.
         """
 
     @property_type(str)
     @validated_property
-    def thread_allocation(self):
+    def thread_allocation():
         """
         Describe thread allocation requirement.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def socket_count(self):
+    def socket_count():
         """
         Number of CPU sockets.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def core_count(self):
+    def core_count():
         """
         Number of cores per socket.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def thread_count(self):
+    def thread_count():
         """
         Number of threads per core.
         """
@@ -63,14 +63,14 @@ class NUMA(tosca.datatypes.Root):
 
     @property_type(tosca.Integer)
     @validated_property
-    def id(self):
+    def id():
         """
         CPU socket identifier.
         """
 
     @property_type(tosca.Map(tosca.Integer))
     @validated_property
-    def vcpus(self):
+    def vcpus():
         """
         List of specific host cpu numbers within a NUMA socket complex.
 
@@ -79,7 +79,7 @@ class NUMA(tosca.datatypes.Root):
 
     @property_type(tosca.Size)
     @validated_property
-    def mem_size(self):
+    def mem_size():
         """
         Size of memory allocated from this NUMA memory bank.
         """

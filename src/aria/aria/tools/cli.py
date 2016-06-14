@@ -24,18 +24,7 @@ def main():
                 puts(colored.red('%s' % issue))
             exit(0)
 
-        #presentation.profile.description = 12
-        #print presentation.profile.description
-        
         consumer_class(presentation, unknown_args).consume()
-
-        #reader = YamlReader('simple-blueprint.yaml')
-        #reader.read()
-
-        #r = Credential({'properties': {'protocol': 'http'}})
-        #print r.properties.protocol
-
-        #Writer(structure).consume()
     except Exception as e:
         print_exception(e)
 

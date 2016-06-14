@@ -1,6 +1,7 @@
 
 from exceptions import InvalidValueError
 from functools import wraps
+from collections import OrderedDict
 
 class Prop(object):
     def __init__(self, fn=None, cls=None, status='supported', name=None, default=None, required=False):
@@ -39,7 +40,7 @@ def has_validated_properties(cls):
 
     # Make sure we have PROPERTIES
     if not hasattr(cls, 'PROPERTIES'):
-        cls.PROPERTIES = {}
+        cls.PROPERTIES = OrderedDict()
     
     # Inherit PROPERTIES from base classes 
     for base in cls.__bases__:

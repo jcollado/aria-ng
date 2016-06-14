@@ -8,6 +8,7 @@ SPHINX_SRC=$(SRC)/sphinx
 
 clean:
 	rm -rf $(DOCS) out .tox .coverage
+	find . -type f -name '*.egg-info' -delete
 
 aria-requirements:
 	pip install --upgrade --requirement $(ARIA_SRC)/requirements.txt

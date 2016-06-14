@@ -36,28 +36,28 @@ class Container(Root):
 
     @property_type(tosca.Integer)
     @validated_property
-    def num_cpus(self):
+    def num_cpus():
         """
         Number of (actual or virtual) CPUs associated with the Compute node.
         """
 
     @property_type(tosca.Frequency)
     @validated_property
-    def cpu_frequency(self):
+    def cpu_frequency():
         """
         Specifies the operating frequency of CPU's core. This property expresses the expected frequency of one (1) CPU as provided by the property "num_cpus".
         """
 
     @property_type(tosca.Size)
     @validated_property
-    def disk_size(self):
+    def disk_size():
         """
         Size of the local disk available to applications running on the Compute node (default unit is MB).
         """
 
     @property_type(tosca.Size)
     @validated_property
-    def mem_size(self):
+    def mem_size():
         """
         Size of memory available to applications running on the Compute node (default unit is MB).
         """
@@ -76,7 +76,7 @@ class Architecture(Container):
 
     @property_type(str)
     @validated_property
-    def mem_page_size(self):
+    def mem_page_size():
         """
         Describe page size of the VM:
 
@@ -88,21 +88,21 @@ class Architecture(Container):
 
     @property_type(str)
     @validated_property
-    def mem_page_size(self):
+    def mem_page_size():
         """
         Describes CPU allocation requirements like dedicated CPUs (cpu pinning), socket count, thread count, etc.
         """
 
     @property_type(tosca.datatypes.compute.CPUAllocation)
     @validated_property
-    def cpu_allocation(self):
+    def cpu_allocation():
         """
         Describes CPU allocation requirements like dedicated CPUs (cpu pinning), socket count, thread count, etc.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def numa_node_count(self):
+    def numa_node_count():
         """
         Specifies the symmetric count of NUMA nodes to expose to the VM. vCPU and Memory equally split across this number of NUMA.
 
@@ -111,7 +111,7 @@ class Architecture(Container):
 
     @property_type(tosca.Map(tosca.datatypes.compute.NUMA))
     @validated_property
-    def numa_nodes(self):
+    def numa_nodes():
         """
         Asymmetric allocation of vCPU and Memory across the specific NUMA nodes (CPU sockets and memory banks).
 
@@ -136,14 +136,14 @@ class Endpoint(Root):
     @property_default('tcp')
     @property_type(str)
     @validated_property
-    def protocol(self):
+    def protocol():
         """
         The name of the protocol (i.e., the protocol prefix) that the endpoint accepts (any OSI Layer 4-7 protocols). Examples: http, https, ftp, tcp, udp, etc.
         """
 
     @property_type(tosca.datatypes.network.PortDef)
     @validated_property
-    def port(self):
+    def port():
         """
         The optional port of the endpoint.
         """
@@ -151,21 +151,21 @@ class Endpoint(Root):
     @property_default(False)
     @property_type(bool)
     @validated_property
-    def secure(self):
+    def secure():
         """
         Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.
         """
 
     @property_type(str)
     @validated_property
-    def url_path(self):
+    def url_path():
         """
         The optional URL path of the endpoint\'s address if applicable for the protocol.
         """
 
     @property_type(str)
     @validated_property
-    def port_name(self):
+    def port_name():
         """
         The optional name (or ID) of the network port this endpoint should be bound to.
         """
@@ -173,7 +173,7 @@ class Endpoint(Root):
     @property_default('PRIVATE')
     @property_type(str)
     @validated_property
-    def network_name(self):
+    def network_name():
         """
         The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE \| PUBLIC \| <network_name> \| <network_id>.
         """
@@ -181,14 +181,14 @@ class Endpoint(Root):
     @property_default('source')
     @property_type(str)
     @validated_property
-    def initiator(self):
+    def initiator():
         """
         The optional indicator of the direction of the connection.
         """
 
     @property_type(tosca.Map(tosca.datatypes.network.PortSpec))
     @validated_property
-    def ports(self):
+    def ports():
         """
         The optional map of ports the Endpoint supports (if more than one).
         """
@@ -198,7 +198,7 @@ class Endpoint(Root):
     @required_property
     @property_type(str)
     @validated_property
-    def ip_address(self):
+    def ip_address():
         """
         Note: This is the IP address as propagated up by the associated node's host (Compute) container.
         """
@@ -220,7 +220,7 @@ class Public(Endpoint):
     @property_default('PUBLIC')
     @property_type(str)
     @validated_property
-    def network_name(self):
+    def network_name():
         """
         The optional name (or ID) of the network this endpoint should be bound to. network_name: PRIVATE \| PUBLIC \| <network_name> \| <network_id>.
         """
@@ -229,7 +229,7 @@ class Public(Endpoint):
     @property_default(False)
     @property_type(bool)
     @validated_property
-    def floating(self):
+    def floating():
         """
         Indicates that the public address should be allocated from a pool of floating IPs that are associated with the network.
         """
@@ -237,7 +237,7 @@ class Public(Endpoint):
     @property_status('experimental')
     @property_type(str)
     @validated_property
-    def dns_name(self):
+    def dns_name():
         """
         The optional name to register with DNS.
         """
@@ -259,7 +259,7 @@ class Admin(Endpoint):
     @property_default(True)
     @property_type(bool)
     @validated_property
-    def secure(self):
+    def secure():
         """
         Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.
         """
@@ -306,28 +306,28 @@ class OperatingSystem(Root):
 
     @property_type(str)
     @validated_property
-    def architecture(self):
+    def architecture():
         """
         The Operating System (OS) architecture. Examples of valid values include: x86_32, x86_64, etc.
         """
 
     @property_type(str)
     @validated_property
-    def type(self):
+    def type():
         """
         The Operating System (OS) type. Examples of valid values include: linux, aix, mac, windows, etc.
         """
 
     @property_type(str)
     @validated_property
-    def distribution(self):
+    def distribution():
         """
         The Operating System (OS) distribution. Examples of valid values for a "type" of "Linux" would include:  debian, fedora, rhel and ubuntu.
         """
 
     @property_type(str)
     @validated_property
-    def version(self):
+    def version():
         """
         The Operating System version.
         """
@@ -348,7 +348,7 @@ class Scalable(Root):
     @property_default(1)
     @property_type(tosca.Integer)
     @validated_property
-    def min_instances(self):
+    def min_instances():
         """
         This property is used to indicate the minimum number of instances that should be created for the associated TOSCA Node Template by a TOSCA orchestrator.
         """
@@ -357,14 +357,14 @@ class Scalable(Root):
     @property_default(1)
     @property_type(tosca.Integer)
     @validated_property
-    def max_instances(self):
+    def max_instances():
         """
         This property is used to indicate the maximum number of instances that should be created for the associated TOSCA Node Template by a TOSCA orchestrator.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def default_instances(self):
+    def default_instances():
         """
         An optional property that indicates the requested default number of instances that should be the starting number of instances a TOSCA orchestrator should attempt to allocate. Note: The value for this property MUST be in the range between the values set for "min_instances" and "max_instances" properties.
         """

@@ -16,7 +16,7 @@ class NodeTemplate(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required name of the Node Type the Node Template is based upon.
         
@@ -25,7 +25,7 @@ class NodeTemplate(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         An optional description for the Node Template.
         
@@ -36,7 +36,7 @@ class NodeTemplate(Presentation):
 
     @field_type(str)
     @primitive_list_field
-    def directives(self):
+    def directives():
         """
         An optional list of directive values to provide processing instructions to orchestrators and tooling.
         
@@ -44,7 +44,7 @@ class NodeTemplate(Presentation):
         """
 
     @object_dict_field(PropertyAssignment)
-    def properties(self):
+    def properties():
         """
         An optional list of property value assignments for the Node Template.
         
@@ -52,7 +52,7 @@ class NodeTemplate(Presentation):
         """
 
     @object_dict_field(AttributeAssignment)
-    def attributes(self):
+    def attributes():
         """
         An optional list of attribute value assignments for the Node Template.
         
@@ -60,7 +60,7 @@ class NodeTemplate(Presentation):
         """
 
     @object_dict_field(RequirementAssignment)
-    def requirements(self):
+    def requirements():
         """
         An optional sequenced list of requirement assignments for the Node Template.
         
@@ -68,7 +68,7 @@ class NodeTemplate(Presentation):
         """
 
     @object_dict_field(CapabilityAssignment)
-    def capabilities(self):
+    def capabilities():
         """
         An optional list of capability assignments for the Node Template.
         
@@ -76,7 +76,7 @@ class NodeTemplate(Presentation):
         """
 
     @object_dict_field(InterfaceDefinition)
-    def interfaces(self):
+    def interfaces():
         """
         An optional list of named interface definitions for the Node Template.
         
@@ -84,7 +84,7 @@ class NodeTemplate(Presentation):
         """
 
     @object_dict_field(ArtifactDefinition)
-    def artifacts(self):
+    def artifacts():
         """
         An optional list of named artifact definitions for the Node Template.
         
@@ -92,7 +92,7 @@ class NodeTemplate(Presentation):
         """
 
     @object_dict_field(NodeFilter)
-    def node_filter(self):
+    def node_filter():
         """
         The optional filter definition that TOSCA orchestrators would use to select the correct target node. This keyname is only valid if the directive has the value of "selectable" set.
         
@@ -101,7 +101,7 @@ class NodeTemplate(Presentation):
 
     @field_type(str)
     @primitive_field
-    def copy(self):
+    def copy():
         """
         The optional (symbolic) name of another node template to copy into (all keynames and values) and use as a basis for this node template.
         
@@ -119,7 +119,7 @@ class RelationshipTemplate(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required name of the Relationship Type the Relationship Template is based upon.
         
@@ -128,7 +128,7 @@ class RelationshipTemplate(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         An optional description for the Relationship Template.
         
@@ -138,7 +138,7 @@ class RelationshipTemplate(Presentation):
         """
 
     @object_dict_field(PropertyAssignment)
-    def properties(self):
+    def properties():
         """
         An optional list of property assignments for the Relationship Template.
         
@@ -146,7 +146,7 @@ class RelationshipTemplate(Presentation):
         """
 
     @object_dict_field(AttributeAssignment)
-    def attributes(self):
+    def attributes():
         """
         An optional list of attribute assignments for the Relationship Template.
         
@@ -154,7 +154,7 @@ class RelationshipTemplate(Presentation):
         """
 
     @object_dict_field(InterfaceDefinition)
-    def interfaces(self):
+    def interfaces():
         """
         An optional list of named interface definitions for the Node Template.
         
@@ -163,7 +163,7 @@ class RelationshipTemplate(Presentation):
 
     @field_type(str)
     @primitive_field
-    def copy(self):
+    def copy():
         """
         The optional (symbolic) name of another relationship template to copy into (all keynames and values) and use as a basis for this relationship template.
         
@@ -180,7 +180,7 @@ class TopologyTemplate(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the Topology Template.
         
@@ -190,7 +190,7 @@ class TopologyTemplate(Presentation):
         """
 
     @object_dict_field(ParameterDefinition)
-    def inputs(self):
+    def inputs():
         """
         An optional list of input parameters (i.e., as parameter definitions) for the Topology Template.
         
@@ -198,7 +198,7 @@ class TopologyTemplate(Presentation):
         """
 
     @object_dict_field(NodeTemplate)
-    def node_templates(self):
+    def node_templates():
         """
         An optional list of node template definitions for the Topology Template.
         
@@ -206,7 +206,7 @@ class TopologyTemplate(Presentation):
         """
 
     @object_dict_field(RelationshipTemplate)
-    def relationship_templates(self):
+    def relationship_templates():
         """
         An optional list of relationship templates for the Topology Template.
         
@@ -214,7 +214,7 @@ class TopologyTemplate(Presentation):
         """
 
     @object_dict_field(GroupDefinition)
-    def groups(self):
+    def groups():
         """
         An optional list of Group definitions whose members are node templates defined within this same Topology Template.
         
@@ -222,7 +222,7 @@ class TopologyTemplate(Presentation):
         """
 
     @object_dict_field(PolicyDefinition)
-    def policies(self):
+    def policies():
         """
         An optional list of Policy definitions for the Topology Template.
         
@@ -230,7 +230,7 @@ class TopologyTemplate(Presentation):
         """
 
     @object_dict_field(ParameterDefinition)
-    def outputs(self):
+    def outputs():
         """
         An optional list of output parameters (i.e., as parameter definitions) for the Topology Template.
         
@@ -238,7 +238,7 @@ class TopologyTemplate(Presentation):
         """
     
     @primitive_field
-    def substitution_mappings(self):
+    def substitution_mappings():
         """
         An optional declaration that exports the topology template as an implementation of a Node type.
 

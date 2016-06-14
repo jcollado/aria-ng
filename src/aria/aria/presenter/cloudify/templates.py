@@ -6,7 +6,7 @@ from aria.presenter.tosca_simple import NodeTemplate as BaseNodeTemplate
 @has_fields
 class NodeTemplate(BaseNodeTemplate):
     @object_list_field(Relationship)
-    def relationships(self):
+    def relationships():
         """
         :rtype: list of :class:`Relationship`
         """

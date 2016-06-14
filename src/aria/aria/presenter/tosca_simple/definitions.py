@@ -16,7 +16,7 @@ class PropertyDefinition(Presentation):
     #@required_field # TODO: cloudify ignores this
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required data type for the property.
         
@@ -25,7 +25,7 @@ class PropertyDefinition(Presentation):
     
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the property.
         
@@ -37,7 +37,7 @@ class PropertyDefinition(Presentation):
     @field_default(True)
     @field_type(bool)
     @primitive_field
-    def required(self):
+    def required():
         """
         An optional key that declares a property as required (true) or not (false).
         
@@ -45,7 +45,7 @@ class PropertyDefinition(Presentation):
         """
 
     @primitive_field
-    def default(self):
+    def default():
         """
         An optional key that may provide a value to be used as a default if not provided by another means.
         
@@ -55,7 +55,7 @@ class PropertyDefinition(Presentation):
     @field_default('supported')
     @field_type(str)
     @primitive_field
-    def status(self):
+    def status():
         """
         The optional status of the property relative to the specification or implementation.
         
@@ -63,7 +63,7 @@ class PropertyDefinition(Presentation):
         """
 
     @object_dict_field(ConstraintClause)
-    def constraints(self):
+    def constraints():
         """
         The optional list of sequenced constraint clauses for the property.
         
@@ -72,7 +72,7 @@ class PropertyDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def entry_schema(self):
+    def entry_schema():
         """
         The optional key that is used to declare the name of the Datatype definition for entries of set types such as the TOSCA list or map.
         
@@ -90,7 +90,7 @@ class AttributeDefinition(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required data type for the attribute.
         
@@ -99,7 +99,7 @@ class AttributeDefinition(Presentation):
     
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the attribute.
         
@@ -111,7 +111,7 @@ class AttributeDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def default(self):
+    def default():
         """
         An optional key that may provide a value to be used as a default if not provided by another means.
 
@@ -123,7 +123,7 @@ class AttributeDefinition(Presentation):
     @field_default('supported')
     @field_type(str)
     @primitive_field
-    def status(self):
+    def status():
         """
         The optional status of the attribute relative to the specification or implementation.
         
@@ -132,7 +132,7 @@ class AttributeDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def entry_schema(self):
+    def entry_schema():
         """
         The optional key that is used to declare the name of the Datatype definition for entries of set types such as the TOSCA list or map.
         
@@ -149,7 +149,7 @@ class ParameterDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required data type for the parameter.
 
@@ -159,7 +159,7 @@ class ParameterDefinition(Presentation):
         """
 
     @primitive_field
-    def value(self):
+    def value():
         """
         The type-compatible value to assign to the named parameter. Parameter values may be provided as the result from the evaluation of an expression or a function.
         """
@@ -173,7 +173,7 @@ class InterfaceDefinition(Presentation):
     """
 
     @object_dict_field(ParameterDefinition)
-    def inputs(self):
+    def inputs():
         """
         The optional list of input property definitions available to all defined operations for interface definitions that are within TOSCA Node or Relationship Type definitions. This includes when interface definitions are included as part of a Requirement definition in a Node Type.
         
@@ -181,7 +181,7 @@ class InterfaceDefinition(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         The optional list of input property assignments (i.e., parameters assignments) for interface definitions that are within TOSCA Node or Relationship Template definitions. This includes when interface definitions are referenced as part of a Requirement assignment in a Node Template.
         
@@ -200,7 +200,7 @@ class RequirementDefinition(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def capability(self):
+    def capability():
         """
         The required reserved keyname used that can be used to provide the name of a valid Capability Type that can fulfill the requirement.
         
@@ -209,7 +209,7 @@ class RequirementDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def node(self):
+    def node():
         """
         The optional reserved keyname used to provide the name of a valid Node Type that contains the capability definition that can be used to fulfill the requirement.
         
@@ -218,7 +218,7 @@ class RequirementDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def relationship(self):
+    def relationship():
         """
         The optional reserved keyname used to provide the name of a valid Relationship Type to construct when fulfilling the requirement.
         
@@ -226,7 +226,7 @@ class RequirementDefinition(Presentation):
         """
 
     @object_field(Range)
-    def occurrences(self):
+    def occurrences():
         """ 	
         The optional minimum and maximum occurrences for the requirement.
 
@@ -246,7 +246,7 @@ class CapabilityDefinition(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required name of the Capability Type the capability definition is based upon.
         
@@ -255,7 +255,7 @@ class CapabilityDefinition(Presentation):
     
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description of the Capability definition.
         
@@ -265,7 +265,7 @@ class CapabilityDefinition(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         An optional list of property definitions for the Capability definition.
         
@@ -273,7 +273,7 @@ class CapabilityDefinition(Presentation):
         """
 
     @object_dict_field(AttributeDefinition)
-    def attributes(self):
+    def attributes():
         """
         An optional list of attribute definitions for the Capability definition.
         
@@ -282,7 +282,7 @@ class CapabilityDefinition(Presentation):
 
     @field_type(str)
     @primitive_list_field
-    def valid_source_types(self):
+    def valid_source_types():
         """
         An optional list of one or more valid names of Node Types that are supported as valid sources of any relationship established to the declared Capability Type.
         
@@ -290,7 +290,7 @@ class CapabilityDefinition(Presentation):
         """
 
     @object_field(Range)
-    def occurrences(self):
+    def occurrences():
         """
         The optional minimum and maximum occurrences for the capability. By default, an exported Capability should allow at least one relationship to be formed with it with a maximum of UNBOUNDED relationships.
 
@@ -311,7 +311,7 @@ class ArtifactDefinition(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required artifact type for the artifact definition.
         
@@ -321,7 +321,7 @@ class ArtifactDefinition(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def file(self):
+    def file():
         """
         The required URI string (relative or absolute) which can be used to locate the artifact's file.
             
@@ -330,7 +330,7 @@ class ArtifactDefinition(Presentation):
     
     @field_type(str)
     @primitive_field
-    def repository(self):
+    def repository():
         """
         The optional name of the repository definition which contains the location of the external repository that contains the artifact. The artifact is expected to be referenceable by its file URI within the repository.
         
@@ -339,7 +339,7 @@ class ArtifactDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the artifact definition.
         
@@ -350,7 +350,7 @@ class ArtifactDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def deploy_path(self):
+    def deploy_path():
         """
         The file path the associated file would be deployed into within the target node's container.
         
@@ -368,7 +368,7 @@ class GroupDefinition(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required name of the group type the group definition is based upon.
         
@@ -377,7 +377,7 @@ class GroupDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the group definition.
         
@@ -387,7 +387,7 @@ class GroupDefinition(Presentation):
         """
 
     @object_dict_field(PropertyAssignment)
-    def properties(self):
+    def properties():
         """
         An optional list of property value assignments for the group definition.
         
@@ -396,7 +396,7 @@ class GroupDefinition(Presentation):
 
     @field_type(str)
     @primitive_list_field
-    def members(self):
+    def members():
         """
         The optional list of one or more node template names that are members of this group definition.
         
@@ -404,7 +404,7 @@ class GroupDefinition(Presentation):
         """
 
     @object_dict_field(InterfaceDefinition)
-    def interfaces(self):
+    def interfaces():
         """
         An optional list of named interface definitions for the group definition.
         
@@ -422,7 +422,7 @@ class PolicyDefinition(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def type(self):
+    def type():
         """
         The required name of the policy type the policy definition is based upon.
         
@@ -431,7 +431,7 @@ class PolicyDefinition(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the policy definition.
         
@@ -441,7 +441,7 @@ class PolicyDefinition(Presentation):
         """
 
     @object_dict_field(PropertyAssignment)
-    def properties(self):
+    def properties():
         """
         An optional list of property value assignments for the policy definition.
         
@@ -449,7 +449,7 @@ class PolicyDefinition(Presentation):
         """
 
     @primitive_list_field
-    def targets(self):
+    def targets():
         """
         An optional list of valid Node Templates or Groups the Policy can be applied to.
         

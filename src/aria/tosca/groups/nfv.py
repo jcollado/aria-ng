@@ -17,7 +17,7 @@ class VNFFG(object):
     @required_property
     @property_type(str)
     @validated_property
-    def vendor(self):
+    def vendor():
         """
         Specify the vendor generating this VNFFG.
         """
@@ -25,7 +25,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.Version)
     @validated_property
-    def version(self):
+    def version():
         """
         Specify the identifier (e.g. name), version, and description of service this VNFFG is describing.
         """
@@ -33,7 +33,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.Integer)
     @validated_property
-    def number_of_endpoints(self):
+    def number_of_endpoints():
         """
         Count of the external endpoints included in this VNFFG, to form an index.
         """
@@ -41,7 +41,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.List(str))
     @validated_property
-    def dependent_virtual_link(self):
+    def dependent_virtual_link():
         """
         Reference to a list of VLD used in this Forwarding Graph.
         """
@@ -49,7 +49,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.List(str))
     @validated_property
-    def connection_point(self):
+    def connection_point():
         """
         Reference to Connection Points forming the VNFFG.
         """
@@ -57,7 +57,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.List(str))
     @validated_property
-    def constituent_vnfs(self):
+    def constituent_vnfs():
         """
         Reference to a list of  VNFD used in this VNF Forwarding Graph.
         """

@@ -13,7 +13,7 @@ class Repository(Presentation):
     
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the repository.
         
@@ -25,7 +25,7 @@ class Repository(Presentation):
     @required_field
     @field_type(str)
     @primitive_field
-    def url(self):
+    def url():
         """
         The required URL or network address used to access the repository.
         
@@ -33,7 +33,7 @@ class Repository(Presentation):
         """
 
     @object_field(Credential)
-    def credential(self):
+    def credential():
         """
         The optional Credential used to authorize access to the repository.
         
@@ -58,7 +58,7 @@ class Import(Presentation):
     @field_type(str)
     @field_getter(get_file)
     @primitive_field
-    def file(self):
+    def file():
         """
         The required symbolic name for the imported file.
         
@@ -67,7 +67,7 @@ class Import(Presentation):
 
     @field_type(str)
     @primitive_field
-    def repository(self):
+    def repository():
         """
         The optional symbolic name of the repository definition where the imported file can be found as a string.
         
@@ -76,7 +76,7 @@ class Import(Presentation):
 
     @field_type(str)
     @primitive_field
-    def namespace_uri(self):
+    def namespace_uri():
         """
         The optional namespace URI to that will be applied to type definitions found within the imported file as a string.
         
@@ -85,7 +85,7 @@ class Import(Presentation):
 
     @field_type(str)
     @primitive_field
-    def namespace_prefix(self):
+    def namespace_prefix():
         """
         The optional namespace prefix (alias) that will be used to indicate the namespace_uri when forming a qualified name (i.e., qname) when referencing type definitions from the imported file.
         
@@ -101,37 +101,37 @@ class ConstraintClause(Presentation):
     """
     
     @primitive_field
-    def equal(self):
+    def equal():
         """
         Constrains a property or parameter to a value equal to ('=') the value declared.
         """
     
     @primitive_field
-    def greater_than(self):
+    def greater_than():
         """
         Constrains a property or parameter to a value greater than ('>') the value declared.
         """
     
     @primitive_field
-    def greater_or_equal(self):
+    def greater_or_equal():
         """
         Constrains a property or parameter to a value greater than or equal to ('>=') the value declared.
         """
     
     @primitive_field
-    def less_than(self):
+    def less_than():
         """
         Constrains a property or parameter to a value less than ('<') the value declared.
         """
     
     @primitive_field
-    def less_or_equal(self):
+    def less_or_equal():
         """
         Constrains a property or parameter to a value less than or equal to ('<=') the value declared.
         """
     
     @primitive_field
-    def in_range(self):
+    def in_range():
         """
         Constrains a property or parameter to a value in range of (inclusive) the two values declared.
 
@@ -139,31 +139,31 @@ class ConstraintClause(Presentation):
         """
     
     @primitive_field
-    def valid_values(self):
+    def valid_values():
         """
         Constrains a property or parameter to a value that is in the list of declared values.
         """
     
     @primitive_field
-    def length(self):
+    def length():
         """
         Constrains the property or parameter to a value of a given length.
         """
     
     @primitive_field
-    def min_length(self):
+    def min_length():
         """
         Constrains the property or parameter to a value to a minimum length.
         """
     
     @primitive_field
-    def max_length(self):
+    def max_length():
         """
         Constrains the property or parameter to a value to a maximum length.
         """
 
     @primitive_field
-    def pattern(self):
+    def pattern():
         """
         Constrains the property or parameter to a value that is allowed by the provided regular expression.
 

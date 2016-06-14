@@ -169,7 +169,7 @@ class CodeClass(object):
                 if p.type:
                     w.write('#@property_type(%s)' % self.generator.get_classname(p.type))
                 w.write('@validated_property')
-                w.write('def %s(self):' % n)
+                w.write('def %s():' % n)
                 w.i()
                 if p.description:
                     w.write('"""')

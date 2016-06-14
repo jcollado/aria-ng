@@ -24,7 +24,7 @@ class Credential(Root):
     
     @property_type(str)
     @validated_property
-    def protocol(self):
+    def protocol():
         """
         The optional protocol name.
         """
@@ -33,7 +33,7 @@ class Credential(Root):
     @property_default('password')
     @property_type(str)
     @validated_property
-    def token_type(self):
+    def token_type():
         """
         The required token type.
         """
@@ -41,21 +41,21 @@ class Credential(Root):
     @required_property
     @property_type(str)
     @validated_property
-    def token(self):
+    def token():
         """
         The required token used as a credential for authorization or access to a networked resource.
         """
 
     @property_type(tosca.Map(str))
     @validated_property
-    def keys(self):
+    def keys():
         """
         The optional list of protocol-specific keys or assertions.
         """
 
     @property_type(str)
     @validated_property
-    def user(self):
+    def user():
         """
         The optional user (name or ID) used for non-token based credentials.
         """

@@ -8,32 +8,32 @@ from aria.presenter.tosca_simple import Profile as BaseProfile, PropertyDefiniti
 @has_fields
 class Profile(BaseProfile):
     @object_dict_field(PropertyDefinition)
-    def inputs(self):
+    def inputs():
         """
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
     @object_dict_field(Output)
-    def outputs(self):
+    def outputs():
         """
         :rtype: dict of str, :class:`Output`
         """
     
     @object_dict_field(NodeType)
-    def node_types(self):
+    def node_types():
         """
         :rtype: dict of str, :class:`NodeType`
         """
 
     @object_dict_field(RelationshipType)
-    def relationships(self):
+    def relationships():
         """
         :rtype: dict of str, :class:`RelationshipType`
         """
         return self._get_object_dict('relationships', RelationshipType)
     
     @object_dict_field(NodeTemplate)
-    def node_templates(self):
+    def node_templates():
         """
         :rtype: dict of str, :class:`NodeTemplate`
         """

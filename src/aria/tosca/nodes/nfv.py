@@ -16,21 +16,21 @@ class VNF(tosca.nodes.Root):
 
     @property_type(str)
     @validated_property
-    def id(self):
+    def id():
         """
         ID of this VNF.
         """
 
     @property_type(str)
     @validated_property
-    def vendor(self):
+    def vendor():
         """
         Name of the vendor who generate this VNF.
         """
 
     @property_type(str)
     @validated_property
-    def version(self):
+    def version():
         """
         Version of the software for this VNF.
         """
@@ -51,7 +51,7 @@ class VDU(tosca.nodes.Root):
 
     @property_type(tosca.capabilities.nfv.Metric)
     @validated_property
-    def monitoring_parameter(self):
+    def monitoring_parameter():
         """
         Monitoring parameter, which can be tracked for a VNFC based on this VDU.
 
@@ -60,7 +60,7 @@ class VDU(tosca.nodes.Root):
 
     @property_type(tosca.capabilities.network.Bindable)
     @validated_property
-    def virtualbinding(self):
+    def virtualbinding():
         """
         Defines ability of VirtualBindable.
         """
@@ -79,14 +79,14 @@ class CP(tosca.nodes.Root):
 
     @property_type(str)
     @validated_property
-    def type(self):
+    def type():
         """
         This may be, for example, a virtual port, a virtual NIC address, a SR-IOV port, a physical port, a physical NIC address or the endpoint of an IP VPN enabling network connectivity.
         """
 
     @property_type(str)
     @validated_property
-    def anti_spoof_protection(self):
+    def anti_spoof_protection():
         """
         Indicates of whether anti-spoofing rule need to be enabled for this vNIC. This is applicable only when CP type is virtual NIC (vPort).
         """
@@ -95,7 +95,7 @@ class CP(tosca.nodes.Root):
     
     @property_type(str)
     @validated_property
-    def address(self):
+    def address():
         """
         The actual virtual NIC address that is been assigned when instantiating the connection point.
         """
@@ -114,7 +114,7 @@ class VL(tosca.nodes.Root):
 
     @property_type(str)
     @validated_property
-    def vendor(self):
+    def vendor():
         """
         Vendor generating this VLD.
         """
@@ -175,7 +175,7 @@ class FP(VL):
 
     @property_type(str)
     @validated_property
-    def policy(self):
+    def policy():
         """
         A policy or rule to apply to the NFP.
         """

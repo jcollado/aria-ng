@@ -15,7 +15,7 @@ class Root(object):
     @required_property
     @property_type(str)
     @validated_property
-    def tosca_id(self):
+    def tosca_id():
         """
         A unique identifier of the realized instance of a Relationship Template that derives from any TOSCA normative type.
         """
@@ -23,7 +23,7 @@ class Root(object):
     @required_property
     @property_type(str)
     @validated_property
-    def tosca_name(self):
+    def tosca_name():
         """
         This attribute reflects the name of the Relationship Template as defined in the TOSCA service template. This name is not unique to the realized instance model of corresponding deployed application as each template in the model can result in one or more instances (e.g., scaled) when orchestrated to a provider environment.
         """
@@ -32,7 +32,7 @@ class Root(object):
     @property_default('initial')
     @property_type(str)
     @validated_property
-    def state(self):
+    def state():
         """
         The state of the relationship instance. See section "Relationship States" for allowed values.
         """
@@ -75,7 +75,7 @@ class ConnectsTo(Root):
 
     @property_type(tosca.datatypes.Credential)
     @validated_property
-    def credential(self):
+    def credential():
         """
         The security credential to use to present to the target endpoint to for either authentication or authorization purposes.
         """
@@ -95,14 +95,14 @@ class AttachesTo(Root):
     @required_property
     @property_type(str)
     @validated_property
-    def location(self):
+    def location():
         """
         The relative location (e.g., path on the file system), which provides the root location to address an attached node. e.g., a mount point / path such as '/usr/data'. Note: The user must provide it and it cannot be "root".
         """
 
     @property_type(str)
     @validated_property
-    def device(self):
+    def device():
         """
         The logical device name which for the attached device (which is represented by the target node in the model). e.g., '/dev/hda1'.
         """
@@ -111,7 +111,7 @@ class AttachesTo(Root):
 
     @property_type(str)
     @validated_property
-    def device(self):
+    def device():
         """
         The logical name of the device as exposed to the instance. Note: A runtime property that gets set when the model gets instantiated by the orchestrator.
         """

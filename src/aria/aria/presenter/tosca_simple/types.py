@@ -15,7 +15,7 @@ class ArtifactType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def derived_from(self):
+    def derived_from():
         """
         An optional parent Artifact Type name the Artifact Type derives from.
         
@@ -23,7 +23,7 @@ class ArtifactType(Presentation):
         """
 
     @object_field(Version)
-    def version(self):
+    def version():
         """
         An optional version for the Artifact Type definition.
         
@@ -32,7 +32,7 @@ class ArtifactType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         An optional description for the Artifact Type.
         
@@ -43,7 +43,7 @@ class ArtifactType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def mime_type(self):
+    def mime_type():
         """
         The required mime type property for the Artifact Type.
         
@@ -52,7 +52,7 @@ class ArtifactType(Presentation):
 
     @field_type(str)
     @primitive_list_field
-    def file_ext(self):
+    def file_ext():
         """
         The required file extension property for the Artifact Type.
         
@@ -60,7 +60,7 @@ class ArtifactType(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         An optional list of property definitions for the Artifact Type.
         
@@ -77,7 +77,7 @@ class DataType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def derived_from(self):
+    def derived_from():
         """
         The optional key used when a datatype is derived from an existing TOSCA Data Type.
         
@@ -85,7 +85,7 @@ class DataType(Presentation):
         """
 
     @object_field(Version)
-    def version(self):
+    def version():
         """
         An optional version for the Data Type definition.
         
@@ -94,7 +94,7 @@ class DataType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the Data Type.
         
@@ -104,7 +104,7 @@ class DataType(Presentation):
         """
 
     @object_dict_field(ConstraintClause)
-    def constraints(self):
+    def constraints():
         """
         The optional list of sequenced constraint clauses for the Data Type.
         
@@ -112,7 +112,7 @@ class DataType(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         The optional list property definitions that comprise the schema for a complex Data Type in TOSCA.
         
@@ -129,7 +129,7 @@ class CapabilityType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def derived_from(self):
+    def derived_from():
         """
         An optional parent capability type name this new Capability Type derives from.
         
@@ -137,7 +137,7 @@ class CapabilityType(Presentation):
         """
 
     @object_field(Version)
-    def version(self):
+    def version():
         """
         An optional version for the Capability Type definition.
         
@@ -146,7 +146,7 @@ class CapabilityType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         An optional description for the Capability Type.
         
@@ -156,7 +156,7 @@ class CapabilityType(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         An optional list of property definitions for the Capability Type.
         
@@ -164,7 +164,7 @@ class CapabilityType(Presentation):
         """
 
     @object_dict_field(AttributeDefinition)
-    def attributes(self):
+    def attributes():
         """
         An optional list of attribute definitions for the Capability Type.
         
@@ -173,7 +173,7 @@ class CapabilityType(Presentation):
 
     @field_type(str)
     @primitive_list_field
-    def valid_source_types(self):
+    def valid_source_types():
         """
         An optional list of one or more valid names of Node Types that are supported as valid sources of any relationship established to the declared Capability Type.
         
@@ -190,7 +190,7 @@ class InterfaceType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def derived_from(self):
+    def derived_from():
         """
         An optional parent Interface Type name this new Interface Type derives from.
         
@@ -198,7 +198,7 @@ class InterfaceType(Presentation):
         """
 
     @object_field(Version)
-    def version(self):
+    def version():
         """
         An optional version for the Interface Type definition.
         
@@ -207,7 +207,7 @@ class InterfaceType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         An optional description for the Interface Type.
         
@@ -217,7 +217,7 @@ class InterfaceType(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def inputs(self):
+    def inputs():
         """
         The optional list of input parameter definitions.
         
@@ -234,7 +234,7 @@ class RelationshipType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def derived_from(self):
+    def derived_from():
         """
         An optional parent Relationship Type name the Relationship Type derives from.
         
@@ -242,7 +242,7 @@ class RelationshipType(Presentation):
         """
 
     @object_field(Version)
-    def version(self):
+    def version():
         """
         An optional version for the Relationship Type definition.
         
@@ -251,7 +251,7 @@ class RelationshipType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         An optional description for the Relationship Type.
         
@@ -261,7 +261,7 @@ class RelationshipType(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         An optional list of property definitions for the Relationship Type.
         
@@ -269,7 +269,7 @@ class RelationshipType(Presentation):
         """
 
     @object_dict_field(AttributeDefinition)
-    def attributes(self):
+    def attributes():
         """
         An optional list of attribute definitions for the Relationship Type.
         
@@ -277,7 +277,7 @@ class RelationshipType(Presentation):
         """
 
     @object_dict_field(InterfaceDefinition)
-    def interfaces(self):
+    def interfaces():
         """
         An optional list of interface definitions interfaces supported by the Relationship Type.
         
@@ -286,7 +286,7 @@ class RelationshipType(Presentation):
 
     @field_type(str)
     @primitive_list_field
-    def valid_target_types(self):
+    def valid_target_types():
         """
         An optional list of one or more names of Capability Types that are valid targets for this relationship.
         
@@ -303,7 +303,7 @@ class NodeType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def derived_from(self):
+    def derived_from():
         """
         An optional parent Node Type name this new Node Type derives from.
         
@@ -311,7 +311,7 @@ class NodeType(Presentation):
         """
 
     @object_field(Version)
-    def version(self):
+    def version():
         """
         An optional version for the Node Type definition.
         
@@ -320,7 +320,7 @@ class NodeType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         An optional description for the Node Type.
         
@@ -330,7 +330,7 @@ class NodeType(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         An optional list of property definitions for the Node Type.
         
@@ -338,7 +338,7 @@ class NodeType(Presentation):
         """
 
     @object_dict_field(AttributeDefinition)
-    def attributes(self):
+    def attributes():
         """
         An optional list of attribute definitions for the Node Type.
         
@@ -346,7 +346,7 @@ class NodeType(Presentation):
         """
 
     @object_dict_field(RequirementDefinition)
-    def requirements(self):
+    def requirements():
         """
         An optional sequenced list of requirement definitions for the Node Type.
         
@@ -354,7 +354,7 @@ class NodeType(Presentation):
         """
 
     @object_dict_field(CapabilityDefinition)
-    def capabilities(self):
+    def capabilities():
         """
         An optional list of capability definitions for the Node Type.
         
@@ -362,7 +362,7 @@ class NodeType(Presentation):
         """
 
     @object_dict_field(InterfaceDefinition)
-    def interfaces(self):
+    def interfaces():
         """
         An optional list of interface definitions supported by the Node Type.
         
@@ -370,7 +370,7 @@ class NodeType(Presentation):
         """
 
     @object_dict_field(ArtifactDefinition)
-    def artifacts(self):
+    def artifacts():
         """
         An optional list of named artifact definitions for the Node Type.
         
@@ -389,7 +389,7 @@ class GroupType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def derived_from(self):
+    def derived_from():
         """
         An optional parent Group Type name the Group Type derives from.
         
@@ -397,7 +397,7 @@ class GroupType(Presentation):
         """
 
     @object_field(Version)
-    def version(self):
+    def version():
         """
         An optional version for the Group Type definition.
         
@@ -406,7 +406,7 @@ class GroupType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the Group Type.
         
@@ -416,7 +416,7 @@ class GroupType(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         An optional list of property definitions for the Group Type.
         
@@ -425,7 +425,7 @@ class GroupType(Presentation):
 
     @field_type(str)
     @primitive_list_field
-    def members(self):
+    def members():
         """
         An optional list of one or more names of Node Types that are valid (allowed) as members of the Group Type. 
 
@@ -435,7 +435,7 @@ class GroupType(Presentation):
         """
 
     @object_dict_field(InterfaceDefinition)
-    def interfaces(self):
+    def interfaces():
         """
         An optional list of interface definitions supported by the Group Type.
         
@@ -452,7 +452,7 @@ class PolicyType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def derived_from(self):
+    def derived_from():
         """
         An optional parent Policy Type name the Policy Type derives from.
         
@@ -460,7 +460,7 @@ class PolicyType(Presentation):
         """
 
     @object_field(Version)
-    def version(self):
+    def version():
         """
         An optional version for the Policy Type definition.
         
@@ -469,7 +469,7 @@ class PolicyType(Presentation):
 
     @field_type(str)
     @primitive_field
-    def description(self):
+    def description():
         """
         The optional description for the Policy Type.
         
@@ -479,7 +479,7 @@ class PolicyType(Presentation):
         """
 
     @object_dict_field(PropertyDefinition)
-    def properties(self):
+    def properties():
         """
         An optional list of property definitions for the Policy Type.
         
@@ -488,7 +488,7 @@ class PolicyType(Presentation):
 
     @field_type(str)
     @primitive_list_field
-    def targets(self):
+    def targets():
         """
         An optional list of valid Node Types or Group Types the Policy Type can be applied to.
 

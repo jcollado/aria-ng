@@ -19,7 +19,7 @@ class Root(object):
     @required_property
     @property_type(str)
     @validated_property
-    def tosca_id(self):
+    def tosca_id():
         """
         A unique identifier of the realized instance of a Node Template that derives from any TOSCA normative type.
         """
@@ -27,7 +27,7 @@ class Root(object):
     @required_property
     @property_type(str)
     @validated_property
-    def tosca_name(self):
+    def tosca_name():
         """
         This attribute reflects the name of the Node Template as defined in the TOSCA service template. This name is not unique to the realized instance model of corresponding deployed application as each template in the model can result in one or more instances (e.g., scaled) when orchestrated to a provider environment.
         """
@@ -36,7 +36,7 @@ class Root(object):
     @property_default('initial')
     @property_type(str)
     @validated_property
-    def state(self):
+    def state():
         """
         The state of the node instance. See section "Node States" for allowed values.
         """
@@ -57,28 +57,28 @@ class Compute(Root):
 
     @property_type(str)
     @validated_property
-    def private_address(self):
+    def private_address():
         """
         The primary private IP address assigned by the cloud provider that applications may use to access the Compute node.
         """
 
     @property_type(str)
     @validated_property
-    def public_address(self):
+    def public_address():
         """
         The primary public IP address assigned by the cloud provider that applications may use to access the Compute node.
         """
         
     @property_type(tosca.Map(tosca.datatypes.network.NetworkInfo))
     @validated_property
-    def networks(self):
+    def networks():
         """
         The list of logical networks assigned to the compute host instance and information about them.
         """
         
     @property_type(tosca.Map(tosca.datatypes.network.PortInfo))
     @validated_property
-    def ports(self):
+    def ports():
         """
         The list of logical ports assigned to the compute host instance and information about them.
         """
@@ -97,14 +97,14 @@ class SoftwareComponent(Root):
 
     @property_type(tosca.Version)
     @validated_property
-    def component_version(self):
+    def component_version():
         """
         The optional software component's version.
         """
 
     @property_type(tosca.datatypes.Credential)
     @validated_property
-    def admin_credential(self):
+    def admin_credential():
         """
         The optional credential that can be used to authenticate to the software component.
         """
@@ -135,7 +135,7 @@ class WebApplication(Root):
 
     @property_type(str)
     @validated_property
-    def context_root(self):
+    def context_root():
         """
         The web application's context root which designates the application's URL path within the web server it is hosted on.
         """
@@ -155,14 +155,14 @@ class DBMS(SoftwareComponent):
 
     @property_type(str)
     @validated_property
-    def root_password(self):
+    def root_password():
         """
         The optional root password for the DBMS server.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def port(self):
+    def port():
         """
         The DBMS server's port.
         """
@@ -182,28 +182,28 @@ class Database(Root):
     @required_property
     @property_type(str)
     @validated_property
-    def name(self):
+    def name():
         """
         The logical database Name.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def port(self):
+    def port():
         """
         The port the database service will use to listen for incoming data and requests.
         """
 
     @property_type(str)
     @validated_property
-    def user(self):
+    def user():
         """
         The special user account used for database administration.
         """
 
     @property_type(str)
     @validated_property
-    def password(self):
+    def password():
         """
         The password associated with the user account provided in the 'user' property.
         """
@@ -223,21 +223,21 @@ class ObjectStorage(Root):
     @required_property
     @property_type(str)
     @validated_property
-    def name(self):
+    def name():
         """
         The logical name of the object store (or container).
         """
 
     @property_type(tosca.Size)
     @validated_property
-    def size(self):
+    def size():
         """
         The requested initial storage size (default unit is in Gigabytes).
         """
 
     @property_type(tosca.Size)
     @validated_property
-    def maxsize(self):
+    def maxsize():
         """
         The requested maximum storage size (default unit is in Gigabytes).
         """
@@ -257,21 +257,21 @@ class BlockStorage(Root):
     @required_property
     @property_type(tosca.Size)
     @validated_property
-    def size(self):
+    def size():
         """
         The requested storage size (default unit is MB).
         """
 
     @property_type(str)
     @validated_property
-    def volume_id(self):
+    def volume_id():
         """
         ID of an existing volume (that is in the accessible scope of the requesting application).
         """
 
     @property_type(str)
     @validated_property
-    def snapshot_id(self):
+    def snapshot_id():
         """
         Some identifier that represents an existing snapshot that should be used when creating the block storage (volume).
         """

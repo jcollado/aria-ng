@@ -6,7 +6,7 @@ from aria.presenter.tosca_simple import NodeType as BaseNodeType, RelationshipTy
 @has_fields
 class NodeType(BaseNodeType):
     @object_dict_field(InterfaceDefinition)
-    def interfaces(self):
+    def interfaces():
         """
         :class:`InterfaceDefinition`
         """
@@ -14,7 +14,7 @@ class NodeType(BaseNodeType):
 @has_fields
 class RelationshipType(BaseRelationshipType):
     @object_dict_field(InterfaceDefinition)
-    def target_interfaces(self):
+    def target_interfaces():
         """
         :rtype: dict of str, :class:`InterfaceDefinition`
         """

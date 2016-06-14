@@ -106,6 +106,38 @@ class Field(object):
         elif hasattr(value, 'validate'):
             value.validate(issues)
 
+def has_fields_len(self):
+    return len(self.__class__.FIELDS)
+
+def has_fields_getitem(self, key):
+    if not isinstance(key, basestring):
+        raise TypeError('Key must be a string')
+    if key not in self.__class__.FIELDS:
+        raise KeyError('No \'%s\' property' % key)
+    return getattr(self, key)
+
+def has_fields_setitem(self, key, value):
+    if not isinstance(key, basestring):
+        raise TypeError('Key must be a string')
+    if key not in self.__class__.FIELDS:
+        raise KeyError('No \'%s\' property' % key)
+    return setattr(self, key, value)
+
+def has_fields_delitem(self, key):
+    if not isinstance(key, basestring):
+        raise TypeError('Key must be a string')
+    if key not in self.__class__.FIELDS:
+        raise KeyError('No \'%s\' property' % key)
+    return setattr(self, key, None)
+
+def has_fields_iter(self):
+    return self.__class__.FIELDS.iterkeys()
+
+def has_fields_contains(self, key):
+    if not isinstance(key, basestring):
+        raise TypeError('Key must be a string')
+    return key in self.__class__.FIELDS
+
 def has_fields(cls):
     """
     Class decorator for field support.
@@ -120,7 +152,7 @@ def has_fields(cls):
     
     # Make sure we have FIELDS
     if not hasattr(cls, 'FIELDS'):
-        cls.FIELDS = {}
+        cls.FIELDS = OrderedDict()
     
     # Inherit FIELDS from base classes 
     for base in cls.__bases__:
@@ -150,7 +182,15 @@ def has_fields(cls):
                 return property(fget=getter, fset=setter)
 
             setattr(cls, name, closure(field))
-                
+    
+    # Behave like a dict
+    setattr(cls, '__len__', MethodType(has_fields_len, None, cls))
+    setattr(cls, '__getitem__', MethodType(has_fields_getitem, None, cls))
+    setattr(cls, '__setitem__', MethodType(has_fields_setitem, None, cls))
+    setattr(cls, '__delitem__', MethodType(has_fields_delitem, None, cls))
+    setattr(cls, '__iter__', MethodType(has_fields_iter, None, cls))
+    setattr(cls, '__contains__', MethodType(has_fields_contains, None, cls))
+    
     return cls
 
 def primitive_field(f):

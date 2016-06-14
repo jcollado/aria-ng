@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.relationships
 	
 @has_validated_properties
+@tosca_specification('7.5.4')
 class LinksTo(tosca.relationships.DependsOn):
 	"""
 	This relationship type represents an association relationship between Port and Network node types.
@@ -15,6 +16,7 @@ class LinksTo(tosca.relationships.DependsOn):
 	TYPE_URI = 'tosca.relationships.network.LinksTo'
 
 @has_validated_properties
+@tosca_specification('7.5.5')
 class BindsTo(tosca.relationships.DependsOn):
 	"""
 	This type represents a network association relationship between Port and Compute node types.

@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.datatypes
 
 @has_validated_properties
+@tosca_specification('8.3.1', spec='tosca-simple-nfv-1.0')
 class CPUAllocation(tosca.datatypes.Root):
     """
     Granular CPU allocation requirements for NFV workloads.
@@ -50,6 +51,7 @@ class CPUAllocation(tosca.datatypes.Root):
         """
 
 @has_validated_properties
+@tosca_specification('8.3.2', spec='tosca-simple-nfv-1.0')
 class NUMA(tosca.datatypes.Root):
     """
     Granular Non-Uniform Memory Access (NUMA) topology requirements for NFV workloads.

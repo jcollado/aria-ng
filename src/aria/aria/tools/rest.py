@@ -42,7 +42,7 @@ ROUTES = {
 
 class ArgumentParser(CommonArgumentParser):
     def __init__(self):
-        super(ArgumentParser, self).__init__(description='CLI', prog='aria')
+        super(ArgumentParser, self).__init__(description='REST Server', prog='aria-rest')
         self.add_argument('--port', default=8080, help='HTTP port')
         self.add_argument('--root', default='.', help='web root directory')
         self.add_argument('--path', help='path for imports')

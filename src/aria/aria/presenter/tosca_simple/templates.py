@@ -1,11 +1,12 @@
 
-from aria import has_fields, primitive_field, primitive_list_field, object_dict_field, field_type, required_field
+from aria import tosca_specification, has_fields, primitive_field, primitive_list_field, object_dict_field, field_type, required_field
 from aria.presenter import Presentation
 from definitions import ParameterDefinition, GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinition, ArtifactDefinition
 from assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment
 from filters import NodeFilter
 
 @has_fields
+@tosca_specification('3.7.3')
 class NodeTemplate(Presentation):
     """
     A Node Template specifies the occurrence of a manageable software component as part of an application's topology model which is defined in a TOSCA Service Template. A Node template is an instance of a specified Node Type and can provide customized properties, constraints or operations which override the defaults provided by its Node Type and its implementations.
@@ -109,6 +110,7 @@ class NodeTemplate(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.7.4')
 class RelationshipTemplate(Presentation):
     """
     A Relationship Template specifies the occurrence of a manageable relationship between node templates as part of an application's topology model that is defined in a TOSCA Service Template. A Relationship template is an instance of a specified Relationship Type and can provide customized properties, constraints or operations which override the defaults provided by its Relationship Type and its implementations.
@@ -171,6 +173,7 @@ class RelationshipTemplate(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.8')
 class TopologyTemplate(Presentation):
     """
     This section defines the topology template of a cloud application. The main ingredients of the topology template are node templates representing components of the application and relationship templates representing links between the components. These elements are defined in the nested node_templates section and the nested relationship_templates sections, respectively. Furthermore, a topology template allows for defining input parameters, output parameters as well as grouping of node templates.

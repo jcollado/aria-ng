@@ -1,11 +1,12 @@
 
-from aria import has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field
+from aria import tosca_specification, has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field
 from aria.presenter import Presentation
 from misc import Repository, Import
 from types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from templates import TopologyTemplate
 
 @has_fields
+@tosca_specification('3')
 class Profile(Presentation):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc445238241>`__.

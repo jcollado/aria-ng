@@ -1,8 +1,10 @@
 
+from aria import tosca_specification
 from aria import has_fields
 from aria.presenter import Presentation
 
 @has_fields
+@tosca_specification('3.5.9')
 class PropertyAssignment(Presentation):
     """
     This section defines the grammar for assigning values to named properties within TOSCA Node and Relationship templates that are defined in their corresponding named types.
@@ -21,6 +23,7 @@ class PropertyAssignment(Presentation):
     #TODO
 
 @has_fields
+@tosca_specification('3.7.2')
 class RequirementAssignment(Presentation):
     """
     A Requirement assignment allows template authors to provide either concrete names of TOSCA templates or provide abstract selection criteria for providers to use to find matching TOSCA templates that are used to fulfill a named requirement's declared TOSCA Node Type.
@@ -31,6 +34,7 @@ class RequirementAssignment(Presentation):
     #TODO
 
 @has_fields
+@tosca_specification('3.7.1')
 class CapabilityAssignment(Presentation):
     """
     A capability assignment allows node template authors to assign values to properties and attributes for a named capability definition that is part of a Node Template's type definition.
@@ -41,6 +45,7 @@ class CapabilityAssignment(Presentation):
     #TODO
 
 @has_fields
+@tosca_specification('3.5.11')
 class AttributeAssignment(Presentation):
     """
     This section defines the grammar for assigning values to named attributes within TOSCA Node and Relationship templates which are defined in their corresponding named types.

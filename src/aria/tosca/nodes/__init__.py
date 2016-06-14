@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.datatypes.network
 
 @has_validated_properties
+@tosca_specification('5.8.1')
 class Root(object):
     """
     The TOSCA Root Node Type is the default type that all other TOSCA base Node Types derive from. This allows for all TOSCA nodes to have a consistent set of features for modeling and management (e.g., consistent definitions for requirements, capabilities and lifecycle interfaces).
@@ -42,6 +43,7 @@ class Root(object):
         """
 
 @has_validated_properties
+@tosca_specification('5.8.2')
 class Compute(Root):
     """
     The TOSCA Compute node represents one or more real or virtual processors of software applications or services along with other essential local resources. Collectively, the resources the compute node represents can logically be viewed as a (real or virtual) "server".
@@ -84,6 +86,7 @@ class Compute(Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.8.3')
 class SoftwareComponent(Root):
     """
     The TOSCA SoftwareComponent node represents a generic software component that can be managed and run by a TOSCA Compute Node Type.
@@ -110,6 +113,7 @@ class SoftwareComponent(Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.8.4')
 class WebServer(SoftwareComponent):
     """
     This TOSA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing management operations for one or more WebApplication nodes.
@@ -122,6 +126,7 @@ class WebServer(SoftwareComponent):
     TYPE_URI = 'tosca.nodes.WebServer'
 
 @has_validated_properties
+@tosca_specification('5.8.5')
 class WebApplication(Root):
     """
     The TOSCA WebApplication node represents a software application that can be managed and run by a TOSCA WebServer node. Specific types of web applications such as Java, etc. could be derived from this type.
@@ -141,6 +146,7 @@ class WebApplication(Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.8.6')
 class DBMS(SoftwareComponent):
     """
     The TOSCA DBMS node represents a typical relational, SQL Database Management System software component or service.
@@ -168,6 +174,7 @@ class DBMS(SoftwareComponent):
         """
 
 @has_validated_properties
+@tosca_specification('5.8.7')
 class Database(Root):
     """
     The TOSCA Database node represents a logical database that can be managed and hosted by a TOSCA DBMS node.
@@ -209,6 +216,7 @@ class Database(Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.8.8')
 class ObjectStorage(Root):
     """
     The TOSCA ObjectStorage node represents storage that provides the ability to store data as objects (or BLOBs of data) without consideration for the underlying filesystem or devices.
@@ -243,6 +251,7 @@ class ObjectStorage(Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.8.9')
 class BlockStorage(Root):
     """
     The TOSCA BlockStorage node currently represents a server-local block storage device (i.e., not shared) offering evenly sized blocks of data from which raw storage volumes can be created.
@@ -281,6 +290,7 @@ class Container(object):
     pass
     
 @has_validated_properties
+@tosca_specification('5.8.10')
 class Runtime(SoftwareComponent):
     """
     The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.
@@ -295,6 +305,7 @@ class Runtime(SoftwareComponent):
 Container.Runtime = Runtime
 
 @has_validated_properties
+@tosca_specification('5.8.11')
 class Application(Root):
     """
     The TOSCA Container Application node represents an application that requires Container-level virtualization technology.
@@ -309,6 +320,7 @@ class Application(Root):
 Container.Application = Application
 
 @has_validated_properties
+@tosca_specification('5.8.12')
 class LoadBalancer(Root):
     """
     The TOSCA Load Balancer node represents logical function that be used in conjunction with a Floating Address to distribute an application's traffic (load) across a number of instances of the application (e.g., for a clustered or scaled application).

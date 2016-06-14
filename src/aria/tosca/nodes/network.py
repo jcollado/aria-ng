@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.nodes
 
 @has_validated_properties
+@tosca_specification('7.5.1')
 class Network(tosca.nodes.Root):
     """
     The TOSCA Network node represents a simple, logical network service.
@@ -94,6 +95,7 @@ class Network(tosca.nodes.Root):
         """
 
 @has_validated_properties
+@tosca_specification('7.5.2')
 class Port(tosca.nodes.Root):
     """
     The TOSCA Port node represents a logical entity that associates between Compute and Network normative types.

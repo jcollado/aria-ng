@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca
     
 @has_validated_properties
+@tosca_specification('5.10.1')
 class Root(object):
     """
     This is the default (root) TOSCA Policy Type definition that is used to govern placement of TOSCA nodes or groups of nodes.
@@ -11,6 +12,7 @@ class Root(object):
     """
 
 @has_validated_properties
+@tosca_specification('5.10.2')
 class Placement(Root):
     """
     This is the default (root) TOSCA Policy Type definition that is used to govern placement of TOSCA nodes or groups of nodes.
@@ -19,6 +21,7 @@ class Placement(Root):
     """
 
 @has_validated_properties
+@tosca_specification('5.10.3')
 class Scaling(Root):
     """
     This is the default (root) TOSCA Policy Type definition that is used to govern scaling of TOSCA nodes or groups of nodes.
@@ -27,6 +30,7 @@ class Scaling(Root):
     """
 
 @has_validated_properties
+@tosca_specification('5.10.4')
 class Update(Root):
     """
     This is the default (root) TOSCA Policy Type definition that is used to govern update of TOSCA nodes or groups of nodes.
@@ -35,6 +39,7 @@ class Update(Root):
     """
 
 @has_validated_properties
+@tosca_specification('5.10.5')
 class Performance(Root):
     """
     This is the default (root) TOSCA Policy Type definition that is used to declare performance requirements for TOSCA nodes or groups of nodes.

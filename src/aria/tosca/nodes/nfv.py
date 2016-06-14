@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.nodes, tosca.capabilities.network, tosca.capabilities.nfv
 
 @has_validated_properties
+@tosca_specification('8.5.1', spec='tosca-simple-nfv-1.0')
 class VNF(tosca.nodes.Root):
     """
     The NFV VNF Node Type represents a Virtual Network Function as defined by [ETSI GS NFV-MAN 001 v1.1.1]. It is the default type that all other VNF Node Types derive from. This allows for all VNF nodes to have a consistent set of features for modeling and management (e.g., consistent definitions for requirements, capabilities and lifecycle interfaces). 
@@ -36,6 +37,7 @@ class VNF(tosca.nodes.Root):
         """
 
 @has_validated_properties
+@tosca_specification('8.5.2', spec='tosca-simple-nfv-1.0')
 class VDU(tosca.nodes.Root):
     """
     The NFV vdu node type represents a logical vdu entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
@@ -66,6 +68,7 @@ class VDU(tosca.nodes.Root):
         """
 
 @has_validated_properties
+@tosca_specification('8.5.3', spec='tosca-simple-nfv-1.0')
 class CP(tosca.nodes.Root):
     """
     The NFV CP node represents a logical connection point entity as defined by [ETSI GS NFV-MAN 001 v1.1.1]. A connection point may be, for example, a virtual port, a virtual NIC address, a physical port, a physical NIC address or the endpoint of an IP VPN enabling network connectivity. It is assumed that each type of connection point will be modeled using subtypes of the CP type.
@@ -101,6 +104,7 @@ class CP(tosca.nodes.Root):
         """
 
 @has_validated_properties
+@tosca_specification('9.1', spec='tosca-simple-nfv-1.0')
 class VL(tosca.nodes.Root):
     """
     The NFV VL node type represents a logical virtual link entity as defined by [ETSI GS NFV-MAN 001 v1.1.1]. It is the default type from which all other virtual link types derive.
@@ -120,6 +124,7 @@ class VL(tosca.nodes.Root):
         """
 
 @has_validated_properties
+@tosca_specification('9.2', spec='tosca-simple-nfv-1.0')
 class ELine(VL):
     """
     The NFV VL.ELine node represents an E-Line virtual link entity.
@@ -134,6 +139,7 @@ class ELine(VL):
 VL.ELine = ELine
 
 @has_validated_properties
+@tosca_specification('9.3', spec='tosca-simple-nfv-1.0')
 class ELAN(VL):
     """
     The NFV VL.ELan node represents an E-LAN virtual link entity.
@@ -148,6 +154,7 @@ class ELAN(VL):
 VL.ELAN = ELAN
 
 @has_validated_properties
+@tosca_specification('9.4', spec='tosca-simple-nfv-1.0')
 class ETree(VL):
     """
     The NFV VL.ETree node represents an E-Tree virtual link entity.
@@ -162,6 +169,7 @@ class ETree(VL):
 VL.ETree = ETree
 
 @has_validated_properties
+@tosca_specification('10.5.1', spec='tosca-simple-nfv-1.0')
 class FP(VL):
     """
     The NFV FP node type represents a logical network forwarding path entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].

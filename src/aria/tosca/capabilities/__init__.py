@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, property_status, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, property_status, required_property
 import tosca, tosca.datatypes.network, tosca.datatypes.compute
 
 @has_validated_properties
+@tosca_specification('5.4.1')
 class Root(object):
     """
     This is the default (root) TOSCA Capability Type definition that all other TOSCA Capability Types derive from.
@@ -11,6 +12,7 @@ class Root(object):
     """
 
 @has_validated_properties
+@tosca_specification('5.4.2')
 class Node(Root):
     """
     The Node capability indicates the base capabilities of a TOSCA Node Type.
@@ -23,6 +25,7 @@ class Node(Root):
     TYPE_URI = 'tosca.capabilities.Node'
 
 @has_validated_properties
+@tosca_specification('5.4.3')
 class Container(Root):
     """
     The Container capability, when included on a Node Type or Template definition, indicates that the node can act as a container for (or a host for) one or more other declared Node Types.
@@ -63,6 +66,7 @@ class Container(Root):
         """
 
 @has_validated_properties
+@tosca_specification('8.2.1', spec='tosca-simple-nfv-1.0')
 class Architecture(Container):
     """
     Enhance compute architecture capability that needs to be typically use for performance sensitive NFV workloads.
@@ -121,6 +125,7 @@ class Architecture(Container):
 Container.Architecture = Architecture
 
 @has_validated_properties
+@tosca_specification('5.4.4')
 class Endpoint(Root):
     """
     This is the default TOSCA type that should be used or extended to define a network endpoint capability. This includes the information to express a basic endpoint with a single port or a complex endpoint with multiple ports. By default the Endpoint is assumed to represent an address on a private network unless otherwise specified.
@@ -204,6 +209,7 @@ class Endpoint(Root):
         """
     
 @has_validated_properties
+@tosca_specification('5.4.5')
 class Public(Endpoint):
     """
     This capability represents a public endpoint which is accessible to the general internet (and its public IP address ranges).
@@ -245,6 +251,7 @@ class Public(Endpoint):
 Endpoint.Public = Public
 
 @has_validated_properties
+@tosca_specification('5.4.6')
 class Admin(Endpoint):
     """
     This is the default TOSCA type that should be used or extended to define a specialized administrator endpoint capability.
@@ -267,6 +274,7 @@ class Admin(Endpoint):
 Endpoint.Admin = Admin
 
 @has_validated_properties
+@tosca_specification('5.4.7')
 class Database(Endpoint):
     """
     This is the default TOSCA type that should be used or extended to define a specialized database endpoint capability.
@@ -281,6 +289,7 @@ class Database(Endpoint):
 Endpoint.Database = Database
 
 @has_validated_properties
+@tosca_specification('5.4.8')
 class Attachment(Root):
     """
     This is the default TOSCA type that should be used or extended to define an attachment capability of a (logical) infrastructure device node (e.g., BlockStorage node).
@@ -293,6 +302,7 @@ class Attachment(Root):
     TYPE_URI = 'tosca.capabilities.Attachment'
 
 @has_validated_properties
+@tosca_specification('5.4.9')
 class OperatingSystem(Root):
     """
     This is the default TOSCA type that should be used to express an Operating System capability for a node.
@@ -333,6 +343,7 @@ class OperatingSystem(Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.4.10')
 class Scalable(Root):
     """
     This is the default TOSCA type that should be used to express a scalability capability for a node.

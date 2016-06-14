@@ -1,9 +1,10 @@
 
-from aria import has_fields, primitive_field, object_field, field_type, field_getter, required_field
+from aria import tosca_specification, has_fields, primitive_field, object_field, field_type, field_getter, required_field
 from aria.presenter import Presentation
 from tosca.datatypes import Credential
 
 @has_fields
+@tosca_specification('3.5.5')
 class Repository(Presentation):
     """
     A repository definition defines a named external repository which contains deployment and implementation artifacts that are referenced within the TOSCA Service Template.
@@ -47,6 +48,7 @@ def get_file(field, raw):
         return field._get(raw)
 
 @has_fields
+@tosca_specification('3.5.7')
 class Import(Presentation):
     """
     An import definition is used within a TOSCA Service Template to locate and uniquely name another TOSCA Service Template file which has type and template definitions to be imported (included) and referenced within another Service Template.
@@ -93,6 +95,7 @@ class Import(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.5.2')
 class ConstraintClause(Presentation):
     """
     A constraint clause defines an operation along with one or more compatible values that can be used to define a constraint on a property or parameter's allowed values when it is defined in a TOSCA Service Template or one of its entities.

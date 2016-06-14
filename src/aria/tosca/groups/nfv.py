@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca
     
 @has_validated_properties
+@tosca_specification('10.6.1', spec='tosca-simple-nfv-1.0')
 class VNFFG(object):
     """
     The NFV VNFFG group type represents a logical VNF forwarding graph entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].

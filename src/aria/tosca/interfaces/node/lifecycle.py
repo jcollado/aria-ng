@@ -1,11 +1,12 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.interfaces
     
 @has_validated_properties
+@tosca_specification('5.7.4')
 class Standard(tosca.interfaces.Root):
     """
-    This lifecycle interface defines the essential, normative operations that TOSCA nodes may support. 
+    This lifecycle interface defines the essential, normative operations that TOSCA nodes may support.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#>`__ (wrong anchor)
     """

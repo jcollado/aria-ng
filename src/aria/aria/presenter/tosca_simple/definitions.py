@@ -1,11 +1,12 @@
 
-from aria import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_type, field_default, required_field
+from aria import tosca_specification, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_type, field_default, required_field
 from aria.presenter import Presentation
 from assignments import PropertyAssignment
 from misc import ConstraintClause
 from tosca import Range
 
 @has_fields
+@tosca_specification('3.5.8')
 class PropertyDefinition(Presentation):
     """
     A property definition defines a named, typed value and related data that can be associated with an entity defined in this specification (e.g., Node Types, Relationship Types, Capability Types, etc.). Properties are used by template authors to provide input values to TOSCA entities which indicate their "desired state" when they are instantiated. The value of a property can be retrieved using the get_property function within TOSCA Service Templates.
@@ -80,6 +81,7 @@ class PropertyDefinition(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.5.10')
 class AttributeDefinition(Presentation):
     """
     An attribute definition defines a named, typed value that can be associated with an entity defined in this specification (e.g., a Node, Relationship or Capability Type). Specifically, it is used to expose the "actual state" of some property of a TOSCA entity after it has been deployed and instantiated (as set by the TOSCA orchestrator). Attribute values can be retrieved via the get_attribute function from the instance model and used as values to other entities within TOSCA Service Templates.
@@ -140,6 +142,7 @@ class AttributeDefinition(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.5.12')
 class ParameterDefinition(Presentation):
     """
     A parameter definition is essentially a TOSCA property definition; however, it also allows a value to be assigned to it (as for a TOSCA property assignment). In addition, in the case of output parameters, it can optionally inherit the data type of the value assigned to it rather than have an explicit data type defined for it.
@@ -165,6 +168,7 @@ class ParameterDefinition(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.5.14')
 class InterfaceDefinition(Presentation):
     """
     An interface definition defines a named interface that can be associated with a Node or Relationship Type.
@@ -190,6 +194,7 @@ class InterfaceDefinition(Presentation):
         # TODO
 
 @has_fields
+@tosca_specification('3.6.2')
 class RequirementDefinition(Presentation):
     """
     The Requirement definition describes a named requirement (dependencies) of a TOSCA Node Type or Node template which needs to be fulfilled by a matching Capability definition declared by another TOSCA modelable entity. The requirement definition may itself include the specific name of the fulfilling entity (explicitly) or provide an abstract type, along with additional filtering characteristics, that a TOSCA orchestrator can use to fulfill the capability at runtime (implicitly).
@@ -236,6 +241,7 @@ class RequirementDefinition(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.6.1')
 class CapabilityDefinition(Presentation):
     """
     A capability definition defines a named, typed set of data that can be associated with Node Type or Node Template to describe a transparent capability or feature of the software component the node describes.
@@ -301,6 +307,7 @@ class CapabilityDefinition(Presentation):
         # TODO: range of integer
 
 @has_fields
+@tosca_specification('3.5.6')
 class ArtifactDefinition(Presentation):
     """
     An artifact definition defines a named, typed file that can be associated with Node Type or Node Template and used by orchestration engine to facilitate deployment and implementation of interface operations.
@@ -358,6 +365,7 @@ class ArtifactDefinition(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.7.5')
 class GroupDefinition(Presentation):
     """
     A group definition defines a logical grouping of node templates, typically for management purposes, but is separate from the application's topology template.
@@ -412,6 +420,7 @@ class GroupDefinition(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.7.6')
 class PolicyDefinition(Presentation):
     """
     A policy definition defines a policy that can be associated with a TOSCA topology or top-level entity definition (e.g., group definition, node template, etc.).

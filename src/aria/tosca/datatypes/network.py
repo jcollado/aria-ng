@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.datatypes
 
 @has_validated_properties
+@tosca_specification('5.2.3')
 class NetworkInfo(tosca.datatypes.Root):
     """
     The Network type is a complex TOSCA data type used to describe logical network information.
@@ -36,6 +37,7 @@ class NetworkInfo(tosca.datatypes.Root):
         """
     
 @has_validated_properties
+@tosca_specification('5.2.4')
 class PortInfo(tosca.datatypes.Root):
     """
     The PortInfo type is a complex TOSCA data type used to describe network port information.
@@ -83,6 +85,7 @@ class PortInfo(tosca.datatypes.Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.2.5')
 class PortDef(tosca.Integer):
     """
     The PortDef type is a TOSCA data Type used to define a network port.
@@ -98,6 +101,7 @@ class PortDef(tosca.Integer):
         'in_range': {'type': tosca.List(str)}}
 
 @has_validated_properties
+@tosca_specification('5.2.6')
 class PortSpec(tosca.datatypes.Root):
     """
     The PortSpec type is a complex TOSCA data Type used when describing port specifications for a network connection.

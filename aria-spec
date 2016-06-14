@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+HERE=$(dirname "$(readlink -f "$0")")
+ARIA_SRC="$HERE/src/aria"
+
+PYTHONPATH="$ARIA_SRC:$PYTHONPATH" \
+python -m aria.tools.spec "$@"

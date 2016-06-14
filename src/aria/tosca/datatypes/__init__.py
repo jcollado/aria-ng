@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca
 
 @has_validated_properties
+@tosca_specification('5.2.1')
 class Root(object):
     """
     This is the default (root) TOSCA Root Type definition that all complex TOSCA Data Types derive from.
@@ -11,6 +12,7 @@ class Root(object):
     """
 
 @has_validated_properties
+@tosca_specification('5.2.2')
 class Credential(Root):
     """
     The Credential type is a complex TOSCA data Type used when describing authorization credentials used to access network accessible resources.

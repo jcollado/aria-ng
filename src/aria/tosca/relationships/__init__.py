@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.datatypes
     
 @has_validated_properties
+@tosca_specification('5.6.1')
 class Root(object):
     """
     This is the default (root) TOSCA Relationship Type definition that all other TOSCA Relationship Types derive from.
@@ -38,6 +39,7 @@ class Root(object):
         """
 
 @has_validated_properties
+@tosca_specification('5.6.2')
 class DependsOn(Root):
     """
     This type represents a general dependency relationship between two nodes.
@@ -50,6 +52,7 @@ class DependsOn(Root):
     TYPE_URI = 'tosca.relationships.DependsOn'
 
 @has_validated_properties
+@tosca_specification('5.6.3')
 class HostedOn(Root):
     """
     This type represents a hosting relationship between two nodes.
@@ -62,6 +65,7 @@ class HostedOn(Root):
     TYPE_URI = 'tosca.relationships.HostedOn'
 
 @has_validated_properties
+@tosca_specification('5.6.4')
 class ConnectsTo(Root):
     """
     This type represents a network connection relationship between two nodes.
@@ -81,6 +85,7 @@ class ConnectsTo(Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.6.5')
 class AttachesTo(Root):
     """
     This type represents an attachment relationship between two nodes. For example, an AttachesTo relationship type would be used for attaching a storage node to a Compute node.
@@ -117,6 +122,7 @@ class AttachesTo(Root):
         """
 
 @has_validated_properties
+@tosca_specification('5.6.6')
 class RoutesTo(ConnectsTo):
     """
     This type represents an intentional network routing between two Endpoints in different networks.

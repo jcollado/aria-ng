@@ -1,8 +1,9 @@
 
-from aria import has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.relationships
 	
 @has_validated_properties
+@tosca_specification('8.4.1', spec='tosca-simple-nfv-1.0')
 class VirtualBindsTo(tosca.relationships.DependsOn):
 	"""
 	This relationship type represents an association relationship between VDU and CP node types.
@@ -15,6 +16,7 @@ class VirtualBindsTo(tosca.relationships.DependsOn):
 	TYPE_URI = 'tosca.relationships.nfv.VirtualBindsTo'
 
 @has_validated_properties
+@tosca_specification('8.4.2', spec='tosca-simple-nfv-1.0')
 class Monitor(tosca.relationships.ConnectsTo):
 	"""
 	This relationship type represents an association relationship to the Metric capability of VDU node types.
@@ -27,6 +29,7 @@ class Monitor(tosca.relationships.ConnectsTo):
 	TYPE_URI = 'tosca.relationships.nfv.Monitor'
 
 @has_validated_properties
+@tosca_specification('10.4.1', spec='tosca-simple-nfv-1.0')
 class ForwardsTo(tosca.relationships.Root):
 	"""
 	This relationship type represents a traffic flow between two connection point node types.
@@ -39,6 +42,7 @@ class ForwardsTo(tosca.relationships.Root):
 	TYPE_URI = 'tosca.relationships.nfv.ForwardsTo'
 
 @has_validated_properties
+@tosca_specification('11.4.1', spec='tosca-simple-nfv-1.0')
 class VirtualLinksTo(tosca.relationships.DependsOn):
 	"""
 	This relationship type represents an association relationship between VNFs and VL node types.

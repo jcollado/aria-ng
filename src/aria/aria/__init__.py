@@ -5,6 +5,7 @@ from properties import *
 from interfaces import *
 from issue import *
 from exceptions import *
+from specification import *
 
 VERSION = '0.1'
 
@@ -40,4 +41,6 @@ __all__ = (
     'Issue',
     'AriaError',
     'UnimplementedFunctionalityError',
-    'InvalidValueError')
+    'InvalidValueError',
+    'TOSCA_SPECIFICATION',
+    'tosca_specification')

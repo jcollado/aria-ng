@@ -1,9 +1,10 @@
 
-from aria import has_fields, object_list_field
+from aria import tosca_specification, has_fields, object_list_field
 from aria.presenter import Presentation
 from definitions import PropertyDefinition, CapabilityDefinition
 
 @has_fields
+@tosca_specification('3.5.4')
 class NodeFilter(Presentation):
     """
     A node filter definition defines criteria for selection of a TOSCA Node Template based upon the template's property values, capabilities and capability properties.
@@ -28,6 +29,7 @@ class NodeFilter(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.5.3')
 class PropertyFilter(Presentation):
     """
     A property filter definition defines criteria, using constraint clauses, for selection of a TOSCA entity based upon it property values.

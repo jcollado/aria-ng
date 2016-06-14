@@ -1,11 +1,12 @@
 
-from aria import has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type
+from aria import tosca_specification, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type
 from aria.presenter import Presentation
 from definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinition, RequirementDefinition, CapabilityDefinition, ArtifactDefinition
 from misc import ConstraintClause
 from tosca import Version
 
 @has_fields
+@tosca_specification('3.6.3')
 class ArtifactType(Presentation):
     """
     An Artifact Type is a reusable entity that defines the type of one or more files that are used to define implementation or deployment artifacts that are referenced by nodes or relationships on their operations.
@@ -68,6 +69,7 @@ class ArtifactType(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.6.5')
 class DataType(Presentation):
     """
     A Data Type definition defines the schema for new named datatypes in TOSCA.
@@ -120,6 +122,7 @@ class DataType(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.6.6')
 class CapabilityType(Presentation):
     """
     A Capability Type is a reusable entity that describes a kind of capability that a Node Type can declare to expose. Requirements (implicit or explicit) that are declared as part of one node can be matched to (i.e., fulfilled by) the Capabilities declared by another node.
@@ -181,6 +184,7 @@ class CapabilityType(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.6.4')
 class InterfaceType(Presentation):
     """
     An Interface Type is a reusable entity that describes a set of operations that can be used to interact with or manage a node or relationship in a TOSCA topology.
@@ -225,6 +229,7 @@ class InterfaceType(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.6.9')
 class RelationshipType(Presentation):
     """
     A Relationship Type is a reusable entity that defines the type of one or more relationships between Node Types or Node Templates.
@@ -294,6 +299,7 @@ class RelationshipType(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.6.8')
 class NodeType(Presentation):
     """
     A Node Type is a reusable entity that defines the type of one or more Node Templates. As such, a Node Type defines the structure of observable properties via a Properties Definition, the Requirements and Capabilities of the node as well as its supported interfaces.
@@ -378,6 +384,7 @@ class NodeType(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.6.10')
 class GroupType(Presentation):
     """
     A Group Type defines logical grouping types for nodes, typically for different management purposes. Groups can effectively be viewed as logical nodes that are not part of the physical deployment topology of an application, yet can have capabilities and the ability to attach policies and interfaces that can be applied (depending on the group type) to its member nodes.
@@ -443,6 +450,7 @@ class GroupType(Presentation):
         """
 
 @has_fields
+@tosca_specification('3.6.11')
 class PolicyType(Presentation):
     """
     A Policy Type defines a type of requirement that affects or governs an application or service's topology at some stage of its lifecycle, but is not explicitly part of the topology itself (i.e., it does not prevent the application or service from being deployed or run if it did not exist).

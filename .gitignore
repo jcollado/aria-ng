@@ -1,5 +1,4 @@
 *.pyc
-*.geany
 **/*.egg-info/
 
 env/
@@ -7,4 +6,6 @@ docs/
 out/
 
 .tox/
-**/.coverage/
+.coverage
+
+*.geany

@@ -2,10 +2,26 @@
 from aria import print_exception, TOSCA_SPECIFICATION
 from clint.textui import puts, colored, indent
 from utils import CommonArgumentParser
+import csv, sys
 
 class ArgumentParser(CommonArgumentParser):
     def __init__(self):
         super(ArgumentParser, self).__init__(description='Spec', prog='aria-spec')
+        self.add_argument('--csv', action='store_true', help='output as CSV')
+
+def iter_spec(spec):
+    sections = TOSCA_SPECIFICATION[spec]
+    keys = sections.keys()
+    def key(value):
+        k = 0.0
+        level = 1.0
+        for part in value.split('-')[0].split('.'):
+            k += float(part) / level
+            level *= 1000.0
+        return k
+    keys.sort(key=key)
+    for key in keys:
+        yield key, sections[key]
 
 def main():
     try:
@@ -32,25 +48,23 @@ def main():
         import tosca.relationships
         import tosca.relationships.network
         import tosca.relationships.nfv
+
+        if args.csv:
+            w = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
+            w.writerow(('Specification', 'Section', 'Code', 'URL'))
+            for spec in TOSCA_SPECIFICATION:
+                for section, details in iter_spec(spec):
+                    w.writerow((spec, section, details['code'], details['url']))
         
-        for spec, sections in TOSCA_SPECIFICATION.iteritems():
-            puts(colored.red(spec))
-            with indent(2):
-                keys = sections.keys()
-                def key(value):
-                    k = 0.0
-                    level = 1.0
-                    for part in value.split('-')[0].split('.'):
-                        k += float(part) / level
-                        level *= 1000.0
-                    return k
-                keys.sort(key=key)
-                for section in keys:
-                    details = sections[section]
-                    puts(colored.blue(section))
-                    with indent(2):
-                        for k, v in details.iteritems():
-                            puts('%s: %s' % (k, v))
+        else:
+            for spec in TOSCA_SPECIFICATION:
+                puts(colored.red(spec))
+                with indent(2):
+                    for section, details in iter_spec(spec):
+                        puts(colored.blue(section))
+                        with indent(2):
+                            for k, v in details.iteritems():
+                                puts('%s: %s' % (k, v))
         
     except Exception as e:
         print_exception(e)

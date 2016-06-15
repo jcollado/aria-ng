@@ -3,7 +3,6 @@ from .. import Presenter
 from .assignments import *
 from .definitions import *
 from .filters import *
-from .profile import *
 from .templates import *
 from .types import *
 from .misc import *
@@ -18,14 +17,14 @@ class ToscaSimplePresenter1_0(Presenter):
         return raw.get('tosca_definitions_version') == 'tosca_simple_yaml_1_0'
 
     def validate(self, issues):
-        self.profile.validate(issues)
+        self.service_template.validate(issues)
     
     @property
-    def profile(self):
-        return Profile(self.raw)
+    def service_template(self):
+        return ServiceTemplate(self.raw)
 
     def get_import_locators(self):
-        return [i.file for i in self.profile.imports] if (self.profile and self.profile.imports) else []
+        return [i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else []
 
 __all__ = (
     'PropertyAssignment',
@@ -43,10 +42,10 @@ __all__ = (
     'PolicyDefinition',
     'NodeFilter',
     'PropertyFilter',
-    'Profile',
     'TopologyTemplate',
     'NodeTemplate',
     'RelationshipTemplate',
+    'ServiceTemplate',
     'ArtifactType',
     'DataType',
     'CapabilityType',

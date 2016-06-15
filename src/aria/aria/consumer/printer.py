@@ -15,35 +15,35 @@ class Printer(Consumer):
             self._print_cloudify()
         
     def _print_cloudify(self):
-        profile = self.presentation.profile
+        service_template = self.presentation.service_template
 
-        if profile.description:
+        if service_template.description:
             puts(self._section('Description:'))
             with indent(self.indent):
-                self._print_description(profile.description)
+                self._print_description(service_template.description)
         
-        if profile.inputs:
+        if service_template.inputs:
             puts(self._section('Inputs:'))
             with indent(self.indent):
-                for name, input in profile.inputs.iteritems():
+                for name, input in service_template.inputs.iteritems():
                     puts(self._property(name))
                     with indent(self.indent):
                         self._print_description(input.description)
 
-        if profile.outputs:
+        if service_template.outputs:
             puts(self._section('Outputs:'))
             with indent(self.indent):
-                for name, output in profile.outputs.iteritems():
+                for name, output in service_template.outputs.iteritems():
                     puts(self._property(name))
                     with indent(self.indent):
                         self._print_description(output.description)
                         for k, v in output.value.iteritems():
                             self._print_assignment(k, v)
 
-        if profile.node_types:
+        if service_template.node_types:
             puts(self._section('Node types:'))
             with indent(self.indent):
-                for name, node_type in profile.node_types.iteritems():
+                for name, node_type in service_template.node_types.iteritems():
                     puts(self._type(name))
                     with indent(self.indent):
                         self._print_description(node_type.description)
@@ -66,10 +66,10 @@ class Printer(Consumer):
                                 for k, interface in node_type.interfaces.iteritems():
                                     self._print_interface(k, interface)
 
-        if profile.relationships:
+        if service_template.relationships:
             puts(self._section('Relationships:'))
             with indent(self.indent):
-                for name, relationship in profile.relationships.iteritems():
+                for name, relationship in service_template.relationships.iteritems():
                     puts(self._type(name))
                     self._print_description(relationship.description)
                     with indent(self.indent):
@@ -81,10 +81,10 @@ class Printer(Consumer):
                                 for k, target_interface in relationship.target_interfaces.iteritems():
                                     self._print_interface(k, target_interface)
         
-        if profile.node_templates:
+        if service_template.node_templates:
             puts(self._section('Node templates:'))
             with indent(self.indent):
-                for name, node_template in profile.node_templates.iteritems():
+                for name, node_template in service_template.node_templates.iteritems():
                     puts(self._node(name))
                     with indent(self.indent):
                         puts('Type: %s' % self._type(node_template.type))

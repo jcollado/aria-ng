@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, re, shutil, json, urllib, urllib2, BaseHTTPServer
-from argparse import ArgumentParser
+import sys, os, re, shutil, json, urllib2, BaseHTTPServer
 from clint.textui import puts, colored, indent
 
 # Fix issues with decoding HTTP responses

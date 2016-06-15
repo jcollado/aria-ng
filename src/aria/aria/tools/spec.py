@@ -2,7 +2,7 @@
 from .. import import_modules, print_exception, TOSCA_SPECIFICATION, iter_spec
 from .utils import BaseArgumentParser
 from clint.textui import puts, colored, indent
-import csv, sys, pkgutil
+import csv
 
 class ArgumentParser(BaseArgumentParser):
     def __init__(self):

@@ -1,8 +1,10 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
-description: >
+description1: &my_anchor
   This blueprint installs the Node Cellar application
   on hosts with known IP addresses.
+
+description: *my_anchor
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4m5/types.yaml

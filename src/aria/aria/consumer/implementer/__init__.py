@@ -9,7 +9,7 @@ class Context(object):
     Fake blueprint context used for validation.
     """
     def __init__(self):
-        self.profile = None
+        self.service_template = None
     
     def relate(self, source, relationship, target):
         """
@@ -48,14 +48,14 @@ class Implementer(Consumer):
         return blueprint
 
     def generate(self):
-        profile = self.presentation.profile
+        service_template = self.presentation.service_template
         
         generator = CodeGenerator()
         
-        generator.description = profile.description
+        generator.description = service_template.description
         
-        if profile.node_types:
-            for name, node_type in profile.node_types.iteritems():
+        if service_template.node_types:
+            for name, node_type in service_template.node_types.iteritems():
                 cls = generator.get_class(name)
                 if node_type.derived_from:
                     cls.base = node_type.derived_from
@@ -73,8 +73,8 @@ class Implementer(Consumer):
                                 for pname, p in w.inputs.iteritems():
                                     method.arguments[pname] = CodeProperty(generator, pname, p.description, p.type, p.default)
 
-        if profile.relationships:
-            for name, relationship in profile.relationships.iteritems():
+        if service_template.relationships:
+            for name, relationship in service_template.relationships.iteritems():
                 cls = generator.get_class(name)
                 if relationship.derived_from:
                     cls.base = relationship.derived_from
@@ -84,16 +84,16 @@ class Implementer(Consumer):
                     for name, p in relationship.properties.iteritems():
                         cls.properties[name] = CodeProperty(generator, name, p.description, p.type, p.default)
 
-        if profile.inputs:
-            for name, input in profile.inputs.iteritems():
+        if service_template.inputs:
+            for name, input in service_template.inputs.iteritems():
                 generator.inputs[name] = CodeProperty(generator, name, input.description, input.type, input.default)
 
-        if profile.outputs:
-            for name, output in profile.outputs.iteritems():
+        if service_template.outputs:
+            for name, output in service_template.outputs.iteritems():
                 generator.outputs[name] = CodeAssignment(generator, name, output.description, output.value)
         
-        if profile.node_templates:
-            for name, node in profile.node_templates.iteritems():
+        if service_template.node_templates:
+            for name, node in service_template.node_templates.iteritems():
                 n = CodeNodeTemplate(generator, name, node.type, node.description)
                 generator.nodes[name] = n
                 if node.properties:

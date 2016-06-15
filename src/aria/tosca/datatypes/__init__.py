@@ -61,3 +61,12 @@ class Credential(Root):
         """
         The optional user (name or ID) used for non-token based credentials.
         """
+
+MODULES = (
+    'compute',
+    'network')
+
+__all__ = (
+    'MODULES',
+    'Root',
+    'Credential')

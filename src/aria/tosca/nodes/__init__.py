@@ -127,7 +127,7 @@ class WebServer(SoftwareComponent):
 
 @has_validated_properties
 @tosca_specification('5.8.5')
-class WebApplication(Root):
+class WebApplication(Root): # seems a mistake in spec: it should inherit SoftwareComponent, no?
     """
     The TOSCA WebApplication node represents a software application that can be managed and run by a TOSCA WebServer node. Specific types of web applications such as Java, etc. could be derived from this type.
     
@@ -175,7 +175,7 @@ class DBMS(SoftwareComponent):
 
 @has_validated_properties
 @tosca_specification('5.8.7')
-class Database(Root):
+class Database(Root): # seems a mistake in spec: it should inherit SoftwareComponent, no?
     """
     The TOSCA Database node represents a logical database that can be managed and hosted by a TOSCA DBMS node.
     
@@ -291,7 +291,7 @@ class Container(object):
     
 @has_validated_properties
 @tosca_specification('5.8.10')
-class Runtime(SoftwareComponent):
+class _Runtime(SoftwareComponent):
     """
     The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.
     
@@ -302,11 +302,11 @@ class Runtime(SoftwareComponent):
     TYPE_QUALIFIED_NAME = 'tosca:Container.Runtime'
     TYPE_URI = 'tosca.nodes.Container.Runtime'
 
-Container.Runtime = Runtime
+Container.Runtime = _Runtime
 
 @has_validated_properties
 @tosca_specification('5.8.11')
-class Application(Root):
+class _Application(Root):
     """
     The TOSCA Container Application node represents an application that requires Container-level virtualization technology.
     
@@ -317,7 +317,7 @@ class Application(Root):
     TYPE_QUALIFIED_NAME = 'tosca:Container.Application'
     TYPE_URI = 'tosca.nodes.Container.Application'
 
-Container.Application = Application
+Container.Application = _Application
 
 @has_validated_properties
 @tosca_specification('5.8.12')
@@ -331,3 +331,19 @@ class LoadBalancer(Root):
     SHORTHAND_NAME = 'LoadBalancer'
     TYPE_QUALIFIED_NAME = 'tosca:LoadBalancer'
     TYPE_URI = 'tosca.nodes.LoadBalancer'
+
+MODULES = (
+    'network',
+    'nfv')
+
+__all__ = (
+    'MODULES',
+    'Root',
+    'Compute',
+    'SoftwareComponent',
+    'WebApplication',
+    'Database',
+    'ObjectStorage',
+    'BlockStorage',
+    'Container',
+    'LoadBalancer')

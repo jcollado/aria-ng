@@ -1,6 +1,7 @@
 
+from ... import make_agnostic
+from .writer import Writer, create_header, one_line, repr_assignment
 from collections import OrderedDict
-from writer import Writer, create_header, make_agnostic, one_line, repr_assignment
 import os
 
 class CodeModule(object):

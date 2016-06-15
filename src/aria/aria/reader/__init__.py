@@ -1,10 +1,10 @@
 
-from exceptions import *
-from reader import *
-from source import *
-from map import *
-from yaml import *
-from aria.loader import LiteralLoader
+from ..loader import LiteralLoader
+from .exceptions import *
+from .reader import *
+from .source import *
+from .map import *
+from .yaml import *
 
 class DefaultReaderSource(ReaderSource):
     """

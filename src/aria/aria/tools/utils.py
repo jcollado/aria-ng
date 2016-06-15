@@ -1,8 +1,12 @@
 
-from aria import VERSION, import_class
+from .. import VERSION, import_class
 from argparse import ArgumentParser
 
-class CommonArgumentParser(ArgumentParser):
+class BaseArgumentParser(ArgumentParser):
+    def __init__(self, description, **kwargs):
+        super(BaseArgumentParser, self).__init__(description='ARIA version %s %s' % (VERSION, description), **kwargs)
+
+class CommonArgumentParser(BaseArgumentParser):
     def __init__(self, description, **kwargs):
         super(CommonArgumentParser, self).__init__(description='ARIA version %s %s' % (VERSION, description), **kwargs)
         self.add_argument('--parser', default='aria.parser.DefaultParser', help='parser class')

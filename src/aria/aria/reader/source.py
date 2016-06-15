@@ -1,5 +1,5 @@
 
-from exceptions import ReaderNotFoundReaderError
+from .exceptions import ReaderNotFoundReaderError
 
 class ReaderSource(object):
     """

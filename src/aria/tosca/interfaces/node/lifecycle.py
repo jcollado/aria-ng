@@ -14,3 +14,6 @@ class Standard(tosca.interfaces.Root):
     SHORTHAND_NAME = 'Standard'
     TYPE_QUALIFIED_NAME = 'tosca:Standard'
     TYPE_URI = 'tosca.interfaces.node.lifecycle.Standard'
+
+__all__ = (
+    'Standard',)

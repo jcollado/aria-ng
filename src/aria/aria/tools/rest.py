@@ -1,10 +1,10 @@
 
-from aria import print_exception
-from aria.loader import PATHS, LiteralLoader
-from aria.consumer import Validator, Implementer
+from .. import print_exception
+from ..loader import PATHS, LiteralLoader
+from ..consumer import Validator, Implementer
+from .utils import CommonArgumentParser, create_parser_ns
 from clint.textui import puts, colored, indent
 from rest_server import start_server
-from utils import CommonArgumentParser, create_parser_ns
 import urllib
 
 def parse(uri):

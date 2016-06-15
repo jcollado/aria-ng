@@ -27,3 +27,7 @@ class BindsTo(tosca.relationships.DependsOn):
 	SHORTHAND_NAME = 'BindsTo'
 	TYPE_QUALIFIED_NAME = 'tosca:BindsTo'
 	TYPE_URI = 'tosca.relationships.network.BindsTo'
+
+__all__ = (
+    'LinksTo',
+    'BindsTo')

@@ -70,6 +70,16 @@ def import_class(name, paths=[]):
 
     raise ImportError('Cannot find import: %s' % name)
 
+def import_modules(name):
+    """
+    Imports a module and all its sub-modules, recursively. Relies on modules defining a 'MODULES' attribute
+    listing their sub-module names.
+    """
+    module = __import__(name, fromlist=['MODULES'], level=0)
+    if hasattr(module, 'MODULES'):
+        for m in module.MODULES:
+            import_modules('%s.%s' % (name, m))
+
 def print_exception(e, full=True, tb=None):
     """
     Prints the exception with nice colors and such.

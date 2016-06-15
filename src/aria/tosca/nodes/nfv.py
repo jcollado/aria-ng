@@ -125,7 +125,7 @@ class VL(tosca.nodes.Root):
 
 @has_validated_properties
 @tosca_specification('9.2', spec='tosca-simple-nfv-1.0')
-class ELine(VL):
+class _ELine(VL):
     """
     The NFV VL.ELine node represents an E-Line virtual link entity.
     
@@ -136,11 +136,11 @@ class ELine(VL):
     TYPE_QUALIFIED_NAME = 'tosca:ELine'
     TYPE_URI = 'tosca.nodes.nfv.VL.ELine'
 
-VL.ELine = ELine
+VL.ELine = _ELine
 
 @has_validated_properties
 @tosca_specification('9.3', spec='tosca-simple-nfv-1.0')
-class ELAN(VL):
+class _ELAN(VL):
     """
     The NFV VL.ELan node represents an E-LAN virtual link entity.
     
@@ -151,11 +151,11 @@ class ELAN(VL):
     TYPE_QUALIFIED_NAME = 'tosca:ELAN'
     TYPE_URI = 'tosca.nodes.nfv.VL.ELAN'
 
-VL.ELAN = ELAN
+VL.ELAN = _ELAN
 
 @has_validated_properties
 @tosca_specification('9.4', spec='tosca-simple-nfv-1.0')
-class ETree(VL):
+class _ETree(VL):
     """
     The NFV VL.ETree node represents an E-Tree virtual link entity.
     
@@ -166,7 +166,7 @@ class ETree(VL):
     TYPE_QUALIFIED_NAME = 'tosca:ETree'
     TYPE_URI = 'tosca.nodes.nfv.VL.ETree'
 
-VL.ETree = ETree
+VL.ETree = _ETree
 
 @has_validated_properties
 @tosca_specification('10.5.1', spec='tosca-simple-nfv-1.0')
@@ -187,3 +187,10 @@ class FP(VL):
         """
         A policy or rule to apply to the NFP.
         """
+
+__all__ = (
+    'VNF',
+    'VDU',
+    'CP',
+    'VL',
+    'FP')

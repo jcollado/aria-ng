@@ -67,7 +67,7 @@ class Container(Root):
 
 @has_validated_properties
 @tosca_specification('8.2.1', spec='tosca-simple-nfv-1.0')
-class Architecture(Container):
+class _Architecture(Container):
     """
     Enhance compute architecture capability that needs to be typically use for performance sensitive NFV workloads.
     
@@ -122,7 +122,7 @@ class Architecture(Container):
         NOTE: symmetric numa_node_count should not be specified.
         """
 
-Container.Architecture = Architecture
+Container.Architecture = _Architecture
 
 @has_validated_properties
 @tosca_specification('5.4.4')
@@ -210,7 +210,7 @@ class Endpoint(Root):
     
 @has_validated_properties
 @tosca_specification('5.4.5')
-class Public(Endpoint):
+class _Public(Endpoint):
     """
     This capability represents a public endpoint which is accessible to the general internet (and its public IP address ranges).
 
@@ -248,11 +248,11 @@ class Public(Endpoint):
         The optional name to register with DNS.
         """
 
-Endpoint.Public = Public
+Endpoint.Public = _Public
 
 @has_validated_properties
 @tosca_specification('5.4.6')
-class Admin(Endpoint):
+class _Admin(Endpoint):
     """
     This is the default TOSCA type that should be used or extended to define a specialized administrator endpoint capability.
     
@@ -271,11 +271,11 @@ class Admin(Endpoint):
         Requests for the endpoint to be secure and use credentials supplied on the ConnectsTo relationship.
         """
 
-Endpoint.Admin = Admin
+Endpoint.Admin = _Admin
 
 @has_validated_properties
 @tosca_specification('5.4.7')
-class Database(Endpoint):
+class _Database(Endpoint):
     """
     This is the default TOSCA type that should be used or extended to define a specialized database endpoint capability.
     
@@ -286,7 +286,7 @@ class Database(Endpoint):
     TYPE_QUALIFIED_NAME = 'tosca:Endpoint.Database'
     TYPE_URI = 'tosca.capabilities.Endpoint.Database'
 
-Endpoint.Database = Database
+Endpoint.Database = _Database
 
 @has_validated_properties
 @tosca_specification('5.4.8')
@@ -379,3 +379,17 @@ class Scalable(Root):
         """
         An optional property that indicates the requested default number of instances that should be the starting number of instances a TOSCA orchestrator should attempt to allocate. Note: The value for this property MUST be in the range between the values set for "min_instances" and "max_instances" properties.
         """
+
+MODULES = (
+    'network',
+    'nfv')
+
+__all__ = (
+    'MODULES',
+    'Root',
+    'Node',
+    'Container',
+    'Endpoint',
+    'Attachment',
+    'OperatingSystem',
+    'Scalable')

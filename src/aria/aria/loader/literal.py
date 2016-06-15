@@ -1,5 +1,5 @@
 
-from loader import Loader
+from .loader import Loader
 
 class LiteralLoader(Loader):
     """

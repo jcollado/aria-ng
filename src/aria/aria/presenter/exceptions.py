@@ -1,5 +1,5 @@
 
-from aria import AriaError
+from .. import AriaError
 
 class PresenterError(AriaError):
     """

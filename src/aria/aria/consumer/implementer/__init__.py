@@ -1,7 +1,7 @@
 
-from aria import make_agnostic
-from aria.consumer import Consumer
-from code_generator import CodeGenerator, CodeMethod, CodeProperty, CodeAssignment, CodeNodeTemplate, CodeRelationship
+from ... import make_agnostic
+from ..consumer import Consumer
+from .code_generator import CodeGenerator, CodeMethod, CodeProperty, CodeAssignment, CodeNodeTemplate, CodeRelationship
 import sys, inspect
 
 class Context(object):

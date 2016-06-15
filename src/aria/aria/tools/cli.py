@@ -1,8 +1,8 @@
 
-from aria import print_exception, import_class
-from aria.consumer import Validator
+from .. import print_exception, import_class
+from ..consumer import Validator
+from .utils import CommonArgumentParser, create_parser_ns
 from clint.textui import puts, colored, indent
-from utils import CommonArgumentParser, create_parser_ns
 
 class ArgumentParser(CommonArgumentParser):
     def __init__(self):

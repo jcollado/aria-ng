@@ -149,3 +149,8 @@ class PortSpec(tosca.datatypes.Root):
         """
         The optional range for target port.
         """
+
+__all__ = (
+    'NetworkInfo',
+    'PortInfo',
+    'PortSpec')

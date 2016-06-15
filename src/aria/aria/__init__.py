@@ -1,19 +1,30 @@
 
-from utils import *
-from fields import *
-from properties import *
-from interfaces import *
-from issue import *
-from exceptions import *
-from specification import *
+from .utils import *
+from .fields import *
+from .properties import *
+from .interfaces import *
+from .issue import *
+from .exceptions import *
+from .specification import *
 
 VERSION = '0.1'
 
+MODULES = (
+    'consumer',
+    'loader',
+    'parser',
+    'presenter',
+    'reader',
+    'tools')
+
 __all__ = (
+    'MODULES',
     'VERSION',
     'OpenClose',
     'classname',
     'merge',
+    'import_class',
+    'import_modules',
     'print_exception',
     'print_traceback',
     'make_agnostic',

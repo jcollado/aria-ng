@@ -133,3 +133,17 @@ class RoutesTo(ConnectsTo):
     SHORTHAND_NAME = 'RoutesTo'
     TYPE_QUALIFIED_NAME = 'tosca:RoutesTo'
     TYPE_URI = 'tosca.relationships.RoutesTo'
+
+MODULES = (
+    'network',
+    'nfv')
+
+__all__ = (
+    'MODULES',
+    'Root',
+    'DependsOn',
+    'HostedOn',
+    'ConnectsTo',
+    'AttachesTo',
+    'RoutesTo')
+

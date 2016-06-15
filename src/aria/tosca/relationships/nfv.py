@@ -53,3 +53,10 @@ class VirtualLinksTo(tosca.relationships.DependsOn):
 	SHORTHAND_NAME = 'VirtualLinksTo'
 	TYPE_QUALIFIED_NAME = 'tosca:VirtualLinksTo'
 	TYPE_URI = 'tosca.relationships.nfv.VirtualLinksTo'
+
+__all__ = (
+    'VirtualBindsTo',
+    'Monitor',
+    'ForwardsTo',
+    'VirtualLinksTo')
+

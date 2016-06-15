@@ -46,3 +46,10 @@ class Performance(Root):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_PERFORMANCE>`__
     """
+
+__all__ = (
+    'Root',
+    'Placement',
+    'Scaling',
+    'Update',
+    'Performance')

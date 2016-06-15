@@ -1,6 +1,6 @@
 
-from exceptions import LoaderNotFoundError
-from loader import Loader
+from .exceptions import LoaderNotFoundError
+from .loader import Loader
 
 class LoaderSource(object):
     """

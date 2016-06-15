@@ -1,5 +1,5 @@
 
-from exceptions import PresenterNotFoundError
+from .exceptions import PresenterNotFoundError
 
 class PresenterSource(object):
     """

@@ -28,3 +28,7 @@ class Linkable(tosca.capabilities.Node):
     SHORTHAND_NAME = 'Linkable'
     TYPE_QUALIFIED_NAME = 'tosca:Linkable'
     TYPE_URI = 'tosca.capabilities.network.Linkable'
+
+__all__ = (
+    'Bindable',
+    'Linkable')

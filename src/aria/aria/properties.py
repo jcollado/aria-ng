@@ -1,5 +1,5 @@
 
-from exceptions import InvalidValueError
+from .exceptions import InvalidValueError
 from functools import wraps
 from collections import OrderedDict
 

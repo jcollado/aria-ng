@@ -53,3 +53,9 @@ class VirtualLinkable(tosca.capabilities.Node):
     SHORTHAND_NAME = 'VirtualLinkable'
     TYPE_QUALIFIED_NAME = 'tosca:VirtualLinkable'
     TYPE_URI = 'tosca.capabilities.nfv.VirtualLinkable'
+
+__all__ = (
+    'VirtualBindable',
+    'Metric',
+    'Forwarder',
+    'VirtualLinkable')

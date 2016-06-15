@@ -1,6 +1,6 @@
 
-from consumer import Consumer
-from exceptions import ConsumerError
+from .consumer import Consumer
+from .exceptions import ConsumerError
 import ruamel.yaml as yaml
 import sys
 

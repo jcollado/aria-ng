@@ -1,6 +1,6 @@
 
-from loader import Loader
-from exceptions import LoaderError, SourceNotFoundError
+from .loader import Loader
+from .exceptions import LoaderError, SourceNotFoundError
 import urllib, os.path
 
 PATHS = []

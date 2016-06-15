@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field
-from aria.presenter import Presentation
-from misc import Repository, Import
-from types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
-from templates import TopologyTemplate
+from ... import tosca_specification, has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field
+from .. import Presentation
+from .misc import Repository, Import
+from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
+from .templates import TopologyTemplate
 
 @has_fields
 @tosca_specification('3')

@@ -1,8 +1,8 @@
 
-from aria import tosca_specification, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type
-from aria.presenter import Presentation
-from definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinition, RequirementDefinition, CapabilityDefinition, ArtifactDefinition
-from misc import ConstraintClause
+from ... import tosca_specification, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type
+from .. import Presentation
+from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinition, RequirementDefinition, CapabilityDefinition, ArtifactDefinition
+from .misc import ConstraintClause
 from tosca import Version
 
 @has_fields

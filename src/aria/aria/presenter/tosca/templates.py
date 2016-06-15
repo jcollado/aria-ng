@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_fields, primitive_field, primitive_list_field, object_dict_field, field_type, required_field
-from aria.presenter import Presentation
-from definitions import ParameterDefinition, GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinition, ArtifactDefinition
-from assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment
-from filters import NodeFilter
+from ... import tosca_specification, has_fields, primitive_field, primitive_list_field, object_dict_field, field_type, required_field
+from .. import Presentation
+from .definitions import ParameterDefinition, GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinition, ArtifactDefinition
+from .assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment
+from .filters import NodeFilter
 
 @has_fields
 @tosca_specification('3.7.3')

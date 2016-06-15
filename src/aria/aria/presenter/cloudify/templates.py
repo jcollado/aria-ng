@@ -1,7 +1,7 @@
 
-from misc import Relationship
-from aria import has_fields, object_list_field
-from aria.presenter.tosca_simple import NodeTemplate as BaseNodeTemplate
+from ... import has_fields, object_list_field
+from ..tosca import NodeTemplate as BaseNodeTemplate
+from .misc import Relationship
 
 @has_fields
 class NodeTemplate(BaseNodeTemplate):

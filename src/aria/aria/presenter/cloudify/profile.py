@@ -1,9 +1,9 @@
 
-from misc import Output
-from types import NodeType, RelationshipType
-from templates import NodeTemplate
-from aria import has_fields, object_dict_field
-from aria.presenter.tosca_simple import Profile as BaseProfile, PropertyDefinition
+from ... import has_fields, object_dict_field
+from ..tosca import Profile as BaseProfile, PropertyDefinition
+from .misc import Output
+from .types import NodeType, RelationshipType
+from .templates import NodeTemplate
 
 @has_fields
 class Profile(BaseProfile):

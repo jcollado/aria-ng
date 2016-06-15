@@ -1,9 +1,9 @@
 
-from exceptions import *
-from loader import *
-from source import *
-from literal import *
-from uri import *
+from .exceptions import *
+from .loader import *
+from .source import *
+from .literal import *
+from .uri import *
 
 import urlparse
 

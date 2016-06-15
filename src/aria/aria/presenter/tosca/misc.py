@@ -1,6 +1,6 @@
 
-from aria import tosca_specification, has_fields, primitive_field, object_field, field_type, field_getter, required_field
-from aria.presenter import Presentation
+from ... import tosca_specification, has_fields, primitive_field, object_field, field_type, field_getter, required_field
+from .. import Presentation
 from tosca.datatypes import Credential
 
 @has_fields

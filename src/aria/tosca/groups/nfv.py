@@ -62,3 +62,6 @@ class VNFFG(object):
         """
         Reference to a list of  VNFD used in this VNF Forwarding Graph.
         """
+
+__all__ = (
+    'VNFFG',)

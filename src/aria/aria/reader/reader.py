@@ -1,5 +1,5 @@
 
-from aria import UnimplementedFunctionalityError, OpenClose, classname
+from .. import UnimplementedFunctionalityError, OpenClose, classname
 
 class Reader(object):
     """

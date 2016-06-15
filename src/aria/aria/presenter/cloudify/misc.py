@@ -1,7 +1,7 @@
 
-from aria import has_fields, primitive_field, object_dict_field, field_type, field_getter, required_field
-from aria.presenter import Presentation
-from aria.presenter.tosca_simple import PropertyDefinition
+from ... import has_fields, primitive_field, object_dict_field, field_type, field_getter, required_field
+from .. import Presentation
+from ..tosca import PropertyDefinition
 
 @has_fields
 class Output(Presentation):

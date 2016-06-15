@@ -85,3 +85,7 @@ class NUMA(tosca.datatypes.Root):
         """
         Size of memory allocated from this NUMA memory bank.
         """
+
+__all__ = (
+    'CPUAllocation',
+    'NUMA')

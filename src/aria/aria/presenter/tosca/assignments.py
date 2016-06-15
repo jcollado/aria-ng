@@ -1,7 +1,7 @@
 
-from aria import tosca_specification
-from aria import has_fields
-from aria.presenter import Presentation
+from ... import tosca_specification
+from ... import has_fields
+from .. import Presentation
 
 @has_fields
 @tosca_specification('3.5.9')

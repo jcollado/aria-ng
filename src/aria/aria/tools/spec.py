@@ -1,10 +1,10 @@
 
-from aria import print_exception, TOSCA_SPECIFICATION
+from .. import import_modules, print_exception, TOSCA_SPECIFICATION
+from .utils import BaseArgumentParser
 from clint.textui import puts, colored, indent
-from utils import CommonArgumentParser
-import csv, sys
+import csv, sys, pkgutil
 
-class ArgumentParser(CommonArgumentParser):
+class ArgumentParser(BaseArgumentParser):
     def __init__(self):
         super(ArgumentParser, self).__init__(description='Spec', prog='aria-spec')
         self.add_argument('--csv', action='store_true', help='output as CSV')
@@ -27,27 +27,10 @@ def main():
     try:
         args, unknown_args = ArgumentParser().parse_known_args()
 
-        import aria.presenter.tosca_simple
-        import aria.presenter.cloudify
-        import tosca.artifacts
-        import tosca.capabilities
-        import tosca.capabilities.network
-        import tosca.capabilities.nfv
-        import tosca.datatypes
-        import tosca.datatypes.compute
-        import tosca.datatypes.network
-        import tosca.groups
-        import tosca.groups.nfv
-        import tosca.interfaces
-        import tosca.interfaces.node
-        import tosca.interfaces.node.lifecycle
-        import tosca.nodes
-        import tosca.nodes.network
-        import tosca.nodes.nfv
-        import tosca.policies
-        import tosca.relationships
-        import tosca.relationships.network
-        import tosca.relationships.nfv
+        # By importing all modules, we will make sure that their classes are defined
+        # and that TOSCA_SPECIFICATION gets properly filled.
+        import_modules('aria')
+        import_modules('tosca')
 
         if args.csv:
             w = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
@@ -58,13 +41,13 @@ def main():
         
         else:
             for spec in TOSCA_SPECIFICATION:
-                puts(colored.red(spec))
+                puts(colored.cyan(spec))
                 with indent(2):
                     for section, details in iter_spec(spec):
                         puts(colored.blue(section))
                         with indent(2):
                             for k, v in details.iteritems():
-                                puts('%s: %s' % (k, v))
+                                puts('%s: %s' % (colored.magenta(k), v))
         
     except Exception as e:
         print_exception(e)

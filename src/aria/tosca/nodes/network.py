@@ -145,3 +145,7 @@ class Port(tosca.nodes.Root):
         """
         Defines the ending IP of a range to be allocated for the compute instances that are associated by this Port. Without setting this property the IP allocation is done from the entire CIDR block of the network.
         """
+
+__all__ = (
+    'Network',
+    'Port')

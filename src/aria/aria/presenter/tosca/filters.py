@@ -1,7 +1,7 @@
 
-from aria import tosca_specification, has_fields, object_list_field
-from aria.presenter import Presentation
-from definitions import PropertyDefinition, CapabilityDefinition
+from ... import tosca_specification, has_fields, object_list_field
+from .. import Presentation
+from .definitions import PropertyDefinition, CapabilityDefinition
 
 @has_fields
 @tosca_specification('3.5.4')

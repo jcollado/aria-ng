@@ -1,13 +1,12 @@
 
-from assignments import *
-from definitions import *
-from filters import *
-from profile import *
-from templates import *
-from types import *
-from misc import *
-
-from aria.presenter import Presenter
+from .. import Presenter
+from .assignments import *
+from .definitions import *
+from .filters import *
+from .profile import *
+from .templates import *
+from .types import *
+from .misc import *
 
 class ToscaSimplePresenter1_0(Presenter):
     """

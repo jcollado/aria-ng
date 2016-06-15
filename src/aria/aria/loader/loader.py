@@ -1,5 +1,5 @@
 
-from aria import UnimplementedFunctionalityError, classname
+from .. import UnimplementedFunctionalityError, classname
 
 class Loader(object):
     """

@@ -1,5 +1,5 @@
 
-from aria import UnimplementedFunctionalityError, classname, merge
+from .. import UnimplementedFunctionalityError, classname, merge
 
 class Presenter(object):
     """

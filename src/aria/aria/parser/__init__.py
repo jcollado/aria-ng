@@ -1,8 +1,8 @@
 
-from exceptions import *
-from parser import *
-from aria.consumer import Validator
-from aria.presenter import PresenterNotFoundError
+from ..consumer import Validator
+from ..presenter import PresenterNotFoundError
+from .exceptions import *
+from .parser import *
 
 class DefaultParser(Parser):
     """

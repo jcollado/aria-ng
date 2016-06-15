@@ -1,5 +1,5 @@
 
-from consumer import Consumer
+from .consumer import Consumer
 
 class Validator(Consumer):
     """

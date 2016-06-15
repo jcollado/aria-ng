@@ -1,6 +1,6 @@
 
-from issue import Issue
-from exceptions import InvalidValueError
+from .issue import Issue
+from .exceptions import InvalidValueError
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict

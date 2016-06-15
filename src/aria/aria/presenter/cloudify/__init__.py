@@ -1,11 +1,10 @@
 
-from definitions import *
-from misc import *
-from profile import *
-from templates import *
-from types import *
-
-from aria.presenter.tosca_simple import ToscaSimplePresenter1_0
+from ..tosca import ToscaSimplePresenter1_0
+from .definitions import *
+from .misc import *
+from .profile import *
+from .templates import *
+from .types import *
 
 class CloudifyPresenter1_3(ToscaSimplePresenter1_0):
     """

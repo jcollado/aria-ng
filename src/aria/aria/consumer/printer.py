@@ -1,6 +1,6 @@
 
-from consumer import Consumer
-from aria.presenter.cloudify import CloudifyPresenter1_3
+from ..consumer import Consumer
+from ..presenter.cloudify import CloudifyPresenter1_3
 from clint.textui import puts, colored, indent
 
 class Printer(Consumer):

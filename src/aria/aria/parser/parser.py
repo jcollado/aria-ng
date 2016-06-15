@@ -1,8 +1,8 @@
 
-from aria import UnimplementedFunctionalityError, classname
-from aria.loader import DefaultLoaderSource
-from aria.reader import DefaultReaderSource
-from aria.presenter import DefaultPresenterSource
+from .. import UnimplementedFunctionalityError, classname
+from ..loader import DefaultLoaderSource
+from ..reader import DefaultReaderSource
+from ..presenter import DefaultPresenterSource
 
 class Parser(object):
     """

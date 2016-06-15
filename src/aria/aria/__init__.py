@@ -54,4 +54,5 @@ __all__ = (
     'UnimplementedFunctionalityError',
     'InvalidValueError',
     'TOSCA_SPECIFICATION',
-    'tosca_specification')
+    'tosca_specification',
+    'iter_spec')

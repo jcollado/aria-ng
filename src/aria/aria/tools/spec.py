@@ -1,5 +1,5 @@
 
-from .. import import_modules, print_exception, TOSCA_SPECIFICATION
+from .. import import_modules, print_exception, TOSCA_SPECIFICATION, iter_spec
 from .utils import BaseArgumentParser
 from clint.textui import puts, colored, indent
 import csv, sys, pkgutil
@@ -8,20 +8,6 @@ class ArgumentParser(BaseArgumentParser):
     def __init__(self):
         super(ArgumentParser, self).__init__(description='Spec', prog='aria-spec')
         self.add_argument('--csv', action='store_true', help='output as CSV')
-
-def iter_spec(spec):
-    sections = TOSCA_SPECIFICATION[spec]
-    keys = sections.keys()
-    def key(value):
-        k = 0.0
-        level = 1.0
-        for part in value.split('-')[0].split('.'):
-            k += float(part) / level
-            level *= 1000.0
-        return k
-    keys.sort(key=key)
-    for key in keys:
-        yield key, sections[key]
 
 def main():
     try:

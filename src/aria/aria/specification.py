@@ -40,3 +40,20 @@ def tosca_specification(section, spec='tosca-simple-profile-1.0'):
             pass
         return o
     return decorator
+
+def iter_spec(spec):
+    sections = TOSCA_SPECIFICATION[spec]
+    keys = sections.keys()
+    def key(value):
+        k = 0.0
+        level = 1.0
+        parts = value.split('-', 1)
+        for part in parts[0].split('.'):
+            k += float(part) / level
+            level *= 1000.0
+        if len(parts) > 1:
+            k += float(parts[1]) / level
+        return k
+    keys.sort(key=key)
+    for key in keys:
+        yield key, sections[key]

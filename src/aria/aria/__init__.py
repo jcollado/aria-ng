@@ -21,6 +21,7 @@ __all__ = (
     'MODULES',
     'VERSION',
     'OpenClose',
+    'LockedList',
     'classname',
     'merge',
     'import_class',

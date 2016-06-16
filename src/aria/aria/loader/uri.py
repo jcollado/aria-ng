@@ -17,7 +17,8 @@ class UriLoader(Loader):
     tried in order if the file cannot be found.
     """
 
-    def __init__(self, uri, paths=[]):
+    def __init__(self, source, uri, paths=[]):
+        self.source = source
         self.uri = uri
         self.paths = PATHS + paths
         self.location = uri

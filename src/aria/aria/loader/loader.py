@@ -12,7 +12,7 @@ class Loader(object):
     """
     
     def load(self):
-        raise UnimplementedFunctionalityError(classname(self) + '.read')
+        raise UnimplementedFunctionalityError(classname(self) + '.load')
     
     def open(self):
         pass

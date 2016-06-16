@@ -33,7 +33,7 @@ class Field(object):
 
         if value is None:
             if self.required:
-                raise InvalidValueError('Required field must have a value: %s, at %s' % (self.name, get_location(raw, self.name)))
+                raise InvalidValueError('required field must have a value: %s, at %s' % (self.name, get_location(raw, self.name)))
             else:
                 return None
 
@@ -42,19 +42,19 @@ class Field(object):
                 try:
                     return self.cls(value)
                 except ValueError:
-                    raise InvalidValueError('Field must be coercible to %s: %s=%s' % (self.cls.__name__, self.name, repr(value)))
+                    raise InvalidValueError('field must be coercible to %s: %s=%s' % (self.cls.__name__, self.name, repr(value)))
             return value
 
         elif self.type == 'primitive_list':
             if not isinstance(value, list):
-                raise InvalidValueError('Field must be a list: %s=%s' % (self.name, repr(value)))
+                raise InvalidValueError('field must be a list: %s=%s' % (self.name, repr(value)))
             if self.cls:
                 for i in range(len(value)):
                     if not InvalidValueError(value[i], self.cls):
                         try:
                             value[i] = self.cls(value[i])
                         except ValueError:
-                            raise InvalidValueError('Field must be coercible to a list of %s: %s[%d]=%s' % (self.cls.__name__, self.name, i, repr(value[i])))
+                            raise InvalidValueError('field must be coercible to a list of %s: %s[%d]=%s' % (self.cls.__name__, self.name, i, repr(value[i])))
             return value
 
         elif self.type == 'object':
@@ -62,16 +62,16 @@ class Field(object):
 
         elif self.type == 'object_list':
             if not isinstance(value, list):
-                raise InvalidValueError('Field must be a list: %s=%s' % (self.name, repr(value)))
+                raise InvalidValueError('field must be a list: %s=%s' % (self.name, repr(value)))
             return [self.cls(v) for v in value]
 
         elif self.type == 'object_dict':
             if not isinstance(value, dict):
-                raise InvalidValueError('Field must be a dict: %s=%s' % (self.name, repr(value)))
+                raise InvalidValueError('field must be a dict: %s=%s' % (self.name, repr(value)))
             return OrderedDict([(k, self.cls(v)) for k, v in value.iteritems()])
             
         else:
-            raise AttributeError('Unsupported field type: %s' % self.type)
+            raise AttributeError('unsupported field type: %s' % self.type)
 
     def set(self, raw, value):
         old = raw.get(self.name)
@@ -111,23 +111,23 @@ def has_fields_len(self):
 
 def has_fields_getitem(self, key):
     if not isinstance(key, basestring):
-        raise TypeError('Key must be a string')
+        raise TypeError('key must be a string')
     if key not in self.__class__.FIELDS:
-        raise KeyError('No \'%s\' property' % key)
+        raise KeyError('no \'%s\' property' % key)
     return getattr(self, key)
 
 def has_fields_setitem(self, key, value):
     if not isinstance(key, basestring):
-        raise TypeError('Key must be a string')
+        raise TypeError('key must be a string')
     if key not in self.__class__.FIELDS:
-        raise KeyError('No \'%s\' property' % key)
+        raise KeyError('no \'%s\' property' % key)
     return setattr(self, key, value)
 
 def has_fields_delitem(self, key):
     if not isinstance(key, basestring):
-        raise TypeError('Key must be a string')
+        raise TypeError('key must be a string')
     if key not in self.__class__.FIELDS:
-        raise KeyError('No \'%s\' property' % key)
+        raise KeyError('no \'%s\' property' % key)
     return setattr(self, key, None)
 
 def has_fields_iter(self):
@@ -135,7 +135,7 @@ def has_fields_iter(self):
 
 def has_fields_contains(self, key):
     if not isinstance(key, basestring):
-        raise TypeError('Key must be a string')
+        raise TypeError('key must be a string')
     return key in self.__class__.FIELDS
 
 def has_fields(cls):

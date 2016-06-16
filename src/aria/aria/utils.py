@@ -1,5 +1,6 @@
 
 from clint.textui import puts, colored, indent
+from threading import Lock
 import sys, traceback, linecache
 
 class OpenClose(object):
@@ -20,6 +21,20 @@ class OpenClose(object):
             self.wrapped.close()
         return False
 
+class LockedList(list):
+    """
+    A list that supports the "with" keyword with a built-in lock.
+    """
+    def __init__(self):
+        super(LockedList, self).__init__()
+        self.lock = Lock()
+    
+    def __enter__(self):
+        return self.lock.__enter__()
+        
+    def __exit__(self, type, value, traceback):
+        return self.lock.__exit__(type, value, traceback)
+        
 def classname(o):
     """
     The full class name of an object.
@@ -40,7 +55,7 @@ def merge(a, b, path=None, strict=True):
             if isinstance(value_a, dict) and isinstance(value_b, dict):
                 merge(value_a, value_b, path + [str(key)], strict)
             elif strict and (value_a != value_b):
-                raise ValueError('Dict merge conflict at %s' % '.'.join(path + [str(key)]))
+                raise ValueError('dict merge conflict at %s' % '.'.join(path + [str(key)]))
         else:
             a[key] = value_b
     return a
@@ -57,7 +72,7 @@ def import_class(name, paths=[]):
             module_name, class_name = name.rsplit('.', 1)
             return getattr(__import__(module_name, fromlist=[class_name], level=0), class_name)
         else:
-            raise ImportError('Cannot find import: %s' % name)
+            raise ImportError('class not found: %s' % name)
     
     try:
         return do_import(name)
@@ -65,10 +80,10 @@ def import_class(name, paths=[]):
         for p in paths:
             try:
                 return do_import('%s.%s' % (p, name))
-            except:
-                pass
+            except Exception as e:
+                raise ImportError('cannot import class %s, because %s' % (name, e))
 
-    raise ImportError('Cannot find import: %s' % name)
+    raise ImportError('class not found: %s' % name)
 
 def import_modules(name):
     """
@@ -80,13 +95,23 @@ def import_modules(name):
         for m in module.MODULES:
             import_modules('%s.%s' % (name, m))
 
-def print_exception(e, full=True, tb=None):
+def print_exception(e, full=True, cause=False, tb=None):
     """
     Prints the exception with nice colors and such.
     """
-    puts(colored.red('%s:' % e.__class__.__name__, bold=True) + ' ' + colored.red(str(e)))
+    def format(e):
+        return '%s%s: %s' % (colored.red('Caused by ') if cause else '', colored.red(e.__class__.__name__, bold=True), colored.red(str(e)))
+        
+    puts(format(e))
     if full:
-        print_traceback(tb)
+        if cause:
+            if tb:
+                print_traceback(tb)
+        else:
+            print_traceback()
+    if hasattr(e, 'cause') and e.cause:
+        tb = e.cause_tb if hasattr(e, 'cause_tb') else None
+        print_exception(e.cause, full=full, cause=True, tb=tb)
 
 def print_traceback(tb=None):
     """
@@ -119,3 +144,4 @@ def make_agnostic(value):
         for i in range(len(value)):
             value[i] = make_agnostic(value[i])
     return value
+

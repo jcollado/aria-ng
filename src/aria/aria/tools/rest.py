@@ -1,6 +1,6 @@
 
 from .. import print_exception
-from ..loader import PATHS, LiteralLoader
+from ..loader import PATHS, LiteralLocation
 from ..consumer import Validator, Implementer
 from .utils import CommonArgumentParser, create_parser_ns
 from clint.textui import puts, colored, indent
@@ -25,12 +25,12 @@ def implement_get(handler):
 
 def validate_post(handler):
     payload = handler.get_payload()
-    presentation, issues = parse(LiteralLoader(payload))
+    presentation, issues = parse(LiteralLocation(payload))
     return issues or ['No issues']
 
 def implement_post(handler):
     payload = handler.get_payload()
-    presentation, issues = parse(LiteralLoader(payload))
+    presentation, issues = parse(LiteralLocation(payload))
     if not issues:
         Implementer(presentation).consume()
     return issues or ['No issues']

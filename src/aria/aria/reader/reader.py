@@ -1,5 +1,6 @@
 
 from .. import UnimplementedFunctionalityError, OpenClose, classname
+from .exceptions import ReaderError
 
 class Reader(object):
     """
@@ -8,12 +9,17 @@ class Reader(object):
     Readers provide agnostic raw data by consuming :class:`aria.loader.Loader` instances.
     """
     
-    def __init__(self, loader):
+    def __init__(self, source, location, loader):
+        self.source = source
+        self.location = location
         self.loader = loader
 
     def load(self):
         with OpenClose(self.loader) as loader:
-            return loader.load()
+            data = loader.load()
+            if data is None:
+                raise ReaderError('loader did not provide data: %s' % self.loader)
+            return data
     
     def read(self):
         raise UnimplementedFunctionalityError(classname(self) + '.read')

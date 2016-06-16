@@ -23,7 +23,7 @@ class ToscaSimplePresenter1_0(Presenter):
     def service_template(self):
         return ServiceTemplate(self.raw)
 
-    def get_import_locators(self):
+    def get_import_locations(self):
         return [i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else []
 
 __all__ = (

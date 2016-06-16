@@ -31,6 +31,7 @@ class YamlReader(Reader):
     def read(self):
         data = self.load()
         try:
+            data = str(data)
             yaml_loader = yaml.RoundTripLoader(data)
             node = yaml_loader.get_single_node()
             map = YamlMap(self.loader.location, 0, 0)

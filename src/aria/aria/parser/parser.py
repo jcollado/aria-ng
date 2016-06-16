@@ -16,13 +16,13 @@ class Parser(object):
     for example if the agnostic raw data has dependencies that must also be parsed.
     """
     
-    def __init__(self, locator, reader=None, presenter_class=None, loader_source=DefaultLoaderSource(), reader_source=DefaultReaderSource(), presenter_source=DefaultPresenterSource()):
-        self.locator = locator
+    def __init__(self, location, reader=None, presenter_class=None, loader_source=DefaultLoaderSource(), reader_source=DefaultReaderSource(), presenter_source=DefaultPresenterSource()):
+        self.location = location
         self.reader = reader
         self.presenter_class = presenter_class
         self.loader_source = loader_source
         self.reader_source = reader_source
         self.presenter_source = presenter_source
 
-    def consume(self, locator):
+    def parse(self, location):
         raise UnimplementedFunctionalityError(classname(self) + '.parse')

@@ -14,7 +14,7 @@ class Prop(object):
     def validate(self, value):
         if value is None:
             if self.required:
-                raise InvalidValueError('Required property must have a value: %s' % self.name)
+                raise InvalidValueError('required property must have a value: %s' % self.name)
             else:
                 return None
 
@@ -22,7 +22,7 @@ class Prop(object):
             try:
                 return self.cls(value)
             except ValueError:
-                raise InvalidValueError('Property must be coercible to %s: %s=%s' % (self.cls.__name__, self.name, repr(value)))
+                raise InvalidValueError('property must be coercible to %s: %s=%s' % (self.cls.__name__, self.name, repr(value)))
 
         return value
 

@@ -1,6 +1,6 @@
 
 from ... import make_agnostic
-from ..consumer import Consumer
+from .. import Consumer, BadImplementationError
 from .code_generator import CodeGenerator, CodeMethod, CodeProperty, CodeAssignment, CodeNodeTemplate, CodeRelationship
 import sys, inspect
 
@@ -41,11 +41,17 @@ class Implementer(Consumer):
         runtime will then load this code by compiling it.
         """
         sys.path.append(self.root)
-        from blueprint import Blueprint
-        args = len(inspect.getargspec(Blueprint.__init__).args) - 2
-        context = Context()
-        blueprint = Blueprint(context, *([None] * args))
-        return blueprint
+        try:
+            from blueprint import Blueprint
+            args = len(inspect.getargspec(Blueprint.__init__).args) - 2
+        except Exception as e:
+            raise BadImplementationError('blueprint code could not be compiled', e)
+        try:
+            context = Context()
+            blueprint = Blueprint(context, *([None] * args))
+            return blueprint
+        except Exception as e:
+            raise BadImplementationError('blueprint could not be instantiated', e)
 
     def generate(self):
         service_template = self.presentation.service_template

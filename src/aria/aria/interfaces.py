@@ -19,7 +19,7 @@ def get_interface(self, name):
     if interface is None:
         interface_template = self.__class__.INTERFACES.get(name)
         if interface_template is None:
-            raise AttributeError('No interface: %s' % name)
+            raise AttributeError('no interface: %s' % name)
         interface = Interface()
         for method in interface_template.itervalues():
             setattr(interface, method.name, MethodType(method.fn, self, None))
@@ -55,7 +55,7 @@ def has_interfaces(cls):
             # Bind stub method
             def closure(name):
                 def stub(*args, **kwargs):
-                    raise AttributeError('Method must be called via its interface: %s' % name)
+                    raise AttributeError('method must be called via its interface: %s' % name)
                 return stub
             setattr(cls, name, MethodType(closure(name), None, cls))
     

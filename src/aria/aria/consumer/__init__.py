@@ -8,6 +8,7 @@ from .yaml import *
 
 __all__ = (
     'ConsumerError',
+    'BadImplementationError',
     'Consumer',
     'Printer',
     'Validator',

@@ -1,6 +1,10 @@
 
 from .loader import Loader
 
+class LiteralLocation(object):
+    def __init__(self, value):
+        self.value = value
+
 class LiteralLoader(Loader):
     """
     ARIA string loader.

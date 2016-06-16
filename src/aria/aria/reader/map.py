@@ -25,7 +25,7 @@ class Map(object):
                     try:
                         self.children[k].link(r)
                     except KeyError:
-                        raise ValueError('Map does not match agnostic raw data: %s' % k)
+                        raise ValueError('map does not match agnostic raw data: %s' % k)
     
     def merge(self, map):
         if isinstance(self.children, dict) and isinstance(map.children, dict):

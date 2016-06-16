@@ -20,7 +20,7 @@ def tosca_specification(section, spec='tosca-simple-profile-1.0'):
             sp = {}
             TOSCA_SPECIFICATION[spec] = sp
         if section in sp:
-            raise Exception('You cannot specify the same @tosca_specification twice, consider adding \'-1\', \'-2\', etc.: %s' % section)
+            raise Exception('you cannot specify the same @tosca_specification twice, consider adding \'-1\', \'-2\', etc.: %s' % section)
 
         url = URL.get(spec)
         if url:

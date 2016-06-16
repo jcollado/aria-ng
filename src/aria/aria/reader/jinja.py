@@ -16,7 +16,7 @@ class JinjaReader(Reader):
     """
     ARIA Jinja reader.
     
-    Forwards the result to the reader source's literal reader.
+    Forwards the rendered result to the reader source's literal reader.
     """
 
     def read(self):

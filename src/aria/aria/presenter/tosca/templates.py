@@ -271,7 +271,7 @@ class ServiceTemplate(Presentation):
     @primitive_field
     def metadata():
         """
-        Defines a section used to declare additional metadata information.  Domain-specific TOSCA profile specifications may define keynames that are required for their implementations.
+        Defines a section used to declare additional metadata information. Domain-specific TOSCA profile specifications may define keynames that are required for their implementations.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379455048>`__
         """
@@ -291,7 +291,9 @@ class ServiceTemplate(Presentation):
     @primitive_field
     def dsl_definitions():
         """
-        Declares optional DSL-specific definitions and conventions.  For example, in YAML, this allows defining reusable YAML macros (i.e., YAML alias anchors) for use throughout the TOSCA Service Template.
+        Declares optional DSL-specific definitions and conventions. For example, in YAML, this allows defining reusable YAML macros (i.e., YAML alias anchors) for use throughout the TOSCA Service Template.
+
+        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc397688790>`__
         """
         
     @object_list_field(Repository)

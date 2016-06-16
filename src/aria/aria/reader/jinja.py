@@ -5,13 +5,18 @@ from .reader import Reader
 from .exceptions import ReaderError
 from .yaml import YamlReader
 from jinja2 import Template
+import os
 
+# TODO: we could put a lot of other useful stuff here.
 CONTEXT = {
-    'ARIA_VERSION': VERSION}
+    'ARIA_VERSION': VERSION,
+    'ENV': os.environ}
 
 class JinjaReader(Reader):
     """
     ARIA Jinja reader.
+    
+    Forwards the result to the reader source's literal reader.
     """
 
     def read(self):

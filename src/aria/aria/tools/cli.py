@@ -14,7 +14,11 @@ def main():
     try:
         args, unknown_args = ArgumentParser().parse_known_args()
         
-        consumer_class = import_class(args.consumer, ['aria.consumer'])
+        consumer_class_name = args.consumer
+        if '.' not in consumer_class_name:
+            consumer_class_name = consumer_class_name.title()
+        
+        consumer_class = import_class(consumer_class_name, ['aria.consumer'])
         
         parser = create_parser_ns(args)
         presentation, issues = parser.validate()

@@ -6,7 +6,7 @@ import csv
 
 class ArgumentParser(BaseArgumentParser):
     def __init__(self):
-        super(ArgumentParser, self).__init__(description='Spec', prog='aria-spec')
+        super(ArgumentParser, self).__init__(description='Specification Tool', prog='aria-spec')
         self.add_argument('--csv', action='store_true', help='output as CSV')
 
 def main():

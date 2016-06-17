@@ -304,7 +304,7 @@ class ServiceTemplate(Presentation):
         :rtype: list of :class:`Repository`
         """
 
-    @object_dict_field(Import)
+    @object_list_field(Import)
     def imports():
         """
         Declares import statements external TOSCA Definitions documents. For example, these may be file location or URIs relative to the service template file within the same TOSCA CSAR file.

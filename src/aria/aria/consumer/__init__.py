@@ -5,6 +5,7 @@ from .printer import *
 from .validator import *
 from .implementer import *
 from .yaml import *
+from .style import *
 
 __all__ = (
     'ConsumerError',
@@ -13,5 +14,5 @@ __all__ = (
     'Printer',
     'Validator',
     'Implementer',
-    'YamlWriter')
-    
+    'YamlWriter',
+    'Style')

@@ -12,9 +12,9 @@ class LiteralLoader(Loader):
     This loader is a trivial holder for the provided string value.
     """
 
-    def __init__(self, value):
+    def __init__(self, value, location='<literal>'):
         self.value = value
-        self.location = '<literal>'
+        self.location = location
     
     def load(self):
         return str(self.value)

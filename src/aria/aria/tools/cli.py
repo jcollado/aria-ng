@@ -20,8 +20,10 @@ def main():
         presentation, issues = parser.validate()
         
         if issues:
-            for issue in issues:
-                puts(colored.red('%s' % issue))
+            puts(colored.red('Validation errors:'))
+            with indent(2):
+                for issue in issues:
+                    puts('%s' % issue)
             exit(0)
 
         consumer_class(presentation, unknown_args).consume()

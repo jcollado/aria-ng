@@ -33,7 +33,6 @@ class DefaultParser(Parser):
             presentation = self.parse()
             issues = Validator(presentation).validate()
         except Exception as e:
-            print e
             issues = ['%s: %s' % (e.__class__.__name__, e)]
         return presentation, issues
 

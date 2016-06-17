@@ -33,7 +33,8 @@ class Field(object):
 
         if value is None:
             if self.required:
-                raise InvalidValueError('required field must have a value: %s, at %s' % (self.name, get_location(raw, self.name)))
+                location = get_location(raw, self.name)
+                raise InvalidValueError('required field must have a value: %s, at %s' % (self.name, location))
             else:
                 return None
 
@@ -42,19 +43,22 @@ class Field(object):
                 try:
                     return self.cls(value)
                 except ValueError:
-                    raise InvalidValueError('field must be coercible to %s: %s=%s' % (self.cls.__name__, self.name, repr(value)))
+                    location = get_location(raw, self.name)
+                    raise InvalidValueError('field must be coercible to %s: %s=%s, at %s' % (self.cls.__name__, self.name, repr(value), location))
             return value
 
         elif self.type == 'primitive_list':
             if not isinstance(value, list):
-                raise InvalidValueError('field must be a list: %s=%s' % (self.name, repr(value)))
+                location = get_location(raw, self.name)
+                raise InvalidValueError('field must be a list: %s=%s, at %s' % (self.name, repr(value), location))
             if self.cls:
                 for i in range(len(value)):
                     if not InvalidValueError(value[i], self.cls):
                         try:
                             value[i] = self.cls(value[i])
                         except ValueError:
-                            raise InvalidValueError('field must be coercible to a list of %s: %s[%d]=%s' % (self.cls.__name__, self.name, i, repr(value[i])))
+                            location = get_location(raw, self.name)
+                            raise InvalidValueError('field must be coercible to a list of %s: %s[%d]=%s, at %s' % (self.cls.__name__, self.name, i, repr(value[i]), location))
             return value
 
         elif self.type == 'object':
@@ -62,16 +66,19 @@ class Field(object):
 
         elif self.type == 'object_list':
             if not isinstance(value, list):
-                raise InvalidValueError('field must be a list: %s=%s' % (self.name, repr(value)))
+                location = get_location(raw, self.name)
+                raise InvalidValueError('field must be a list: %s=%s, at %s' % (self.name, repr(value), location))
             return [self.cls(v) for v in value]
 
         elif self.type == 'object_dict':
             if not isinstance(value, dict):
-                raise InvalidValueError('field must be a dict: %s=%s' % (self.name, repr(value)))
+                location = get_location(raw, self.name)
+                raise InvalidValueError('field must be a dict: %s=%s, at %s' % (self.name, repr(value), location))
             return OrderedDict([(k, self.cls(v)) for k, v in value.iteritems()])
             
         else:
-            raise AttributeError('unsupported field type: %s' % self.type)
+            location = get_location(raw, self.name)
+            raise AttributeError('unsupported field type: %s, at %s' % (self.type, location))
 
     def set(self, raw, value):
         old = raw.get(self.name)

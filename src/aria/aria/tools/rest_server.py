@@ -134,5 +134,5 @@ def start_server(routes, port, static_root):
         http_server.serve_forever()
     except KeyboardInterrupt:
         pass
-    print puts(colored.red('Stopping HTTP server'))
+    puts(colored.red('Stopping HTTP server'))
     http_server.server_close()

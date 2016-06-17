@@ -336,18 +336,18 @@ class CodeGenerator(object):
             if m.name:
                 file = os.path.join(root, m.file)
                 self.write_file(file, m)
-        file = os.path.join(root, 'blueprint.py')
-        self.write_file(file, self.blueprint)
+        file = os.path.join(root, 'service.py')
+        self.write_file(file, self.service)
 
     @property
-    def blueprint(self):
+    def service(self):
         with Writer() as w:
             w.write(create_header())
             for m in self.module.all_modules:
                 if m.fullname:
                     w.write('import %s' % m.fullname)
             w.write()
-            w.write('class Blueprint(object):')
+            w.write('class Service(object):')
             w.i()
             if self.description or self.inputs:
                 w.write('"""')
@@ -357,6 +357,14 @@ class CodeGenerator(object):
                     for i in self.inputs.itervalues():
                         w.write(i.docstring)
                 w.write('"""')
+            w.write()
+            if self.inputs:
+                w.write('INPUTS = %s' % repr(tuple(self.inputs.keys())))
+            if self.outputs:
+                w.write('OUTPUTS = %s' % repr(tuple(self.outputs.keys())))
+            if self.nodes:
+                w.write('NODES = %s' % repr(tuple(self.nodes.keys())))
+            w.write()
             w.put_indent()
             w.put('def __init__(self, context')
             if self.inputs:
@@ -365,7 +373,7 @@ class CodeGenerator(object):
             w.put('):\n')
             w.i()
             w.write('self.context = context')
-            w.write('self.context.profile = self')
+            w.write('self.context.service = self')
             if self.inputs:
                 w.write()
                 w.write('# Inputs')
@@ -374,7 +382,7 @@ class CodeGenerator(object):
             if self.nodes:
                 w.write()
                 for n in self.nodes.itervalues():
-                    w.write(n.description or 'Node template: %s' % n.name, prefix='# ')
+                    w.write(n.description or 'Node: %s' % n.name, prefix='# ')
                     w.write(n)
                 w.write('# Relationships')
                 for n in self.nodes.itervalues():

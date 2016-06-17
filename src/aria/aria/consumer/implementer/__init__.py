@@ -1,21 +1,81 @@
 
-from ... import make_agnostic
+from ... import make_agnostic, classname
 from .. import Consumer, BadImplementationError
 from .code_generator import CodeGenerator, CodeMethod, CodeProperty, CodeAssignment, CodeNodeTemplate, CodeRelationship
-import sys, inspect
+from clint.textui import puts, colored, indent
+from inspect import getargspec
+import sys
+
+class Relationship(object):
+    def __init__(self, source, relationship, target):
+        self.source = source
+        self.relationship = relationship
+        self.target = target
 
 class Context(object):
     """
-    Fake blueprint context used for validation.
+    Service context used for validation.
     """
     def __init__(self):
-        self.service_template = None
+        self.service = None
+        self.relationships = []
     
     def relate(self, source, relationship, target):
         """
-        A real context would build a node graph here.
+        Creates the graph.
         """
-        pass
+        self.relationships.append(Relationship(source, relationship, target))
+    
+    def get_relationship_from(self, source):
+        relationships = []
+        for relationship in self.relationships:
+            if relationship.source == source:
+                relationships.append(relationship)
+        return relationships
+    
+    @property
+    def inputs(self):
+        return self.service.__class__.INPUTS if hasattr(self.service.__class__, 'INPUTS') else []
+
+    @property
+    def outputs(self):
+        return self.service.__class__.OUTPUTS if hasattr(self.service.__class__, 'OUTPUTS') else []
+    
+    @property
+    def nodes(self):
+        return self.service.__class__.NODES if hasattr(self.service.__class__, 'NODES') else []
+    
+    def get_node_name(self, node):
+        for name in self.nodes:
+            the_node = getattr(self.service, name)
+            if node == the_node:
+                return name
+        return None
+    
+    def dump(self):
+        if self.inputs:
+            puts(colored.red('Inputs:'))
+            with indent(2):
+                for name in self.inputs:
+                    puts('%s' % name)
+        if self.outputs:
+            puts(colored.red('Outputs:'))
+            with indent(2):
+                for name in self.outputs:
+                    prop = getattr(self.service.__class__, name)
+                    puts('%s: %s' % (name, prop.__doc__.strip()))
+        if self.nodes:
+            puts(colored.red('Nodes:'))
+            with indent(2):
+                for name in self.nodes:
+                    node = getattr(self.service, name)
+                    puts('%s: %s' % (colored.blue(name), colored.cyan(classname(node))))
+                    relationships = self.get_relationship_from(node)
+                    if relationships:
+                        with indent(2):
+                            for relationship in relationships:
+                                puts('%s %s' % (colored.cyan(classname(relationship.relationship)), colored.blue(self.get_node_name(relationship.target))))
+                    
 
 class Implementer(Consumer):
     """
@@ -30,28 +90,28 @@ class Implementer(Consumer):
 
     def consume(self):
         self.generate()
-        print self.blueprint
+        self.service.context.dump()
     
     @property
-    def blueprint(self):
+    def service(self):
         """
-        Gets the implemented blueprint instance.
+        Gets the implemented service instance.
         
-        For this to work, the blueprint source code must have been generated. The Python
+        For this to work, the service source code must have been generated. The Python
         runtime will then load this code by compiling it.
         """
         sys.path.append(self.root)
         try:
-            from blueprint import Blueprint
-            args = len(inspect.getargspec(Blueprint.__init__).args) - 2
+            from service import Service
+            args = len(getargspec(Service.__init__).args) - 2
         except Exception as e:
-            raise BadImplementationError('blueprint code could not be compiled', e)
+            raise BadImplementationError('service code could not be compiled', e)
         try:
             context = Context()
-            blueprint = Blueprint(context, *([None] * args))
-            return blueprint
+            service = Service(context, *([None] * args))
+            return service
         except Exception as e:
-            raise BadImplementationError('blueprint could not be instantiated', e)
+            raise BadImplementationError('Service class could not be instantiated', e)
 
     def generate(self):
         service_template = self.presentation.service_template
@@ -99,14 +159,14 @@ class Implementer(Consumer):
                 generator.outputs[name] = CodeAssignment(generator, name, output.description, output.value)
         
         if service_template.node_templates:
-            for name, node in service_template.node_templates.iteritems():
-                n = CodeNodeTemplate(generator, name, node.type, node.description)
+            for name, node_template in service_template.node_templates.iteritems():
+                n = CodeNodeTemplate(generator, name, node_template.type, node_template.description)
                 generator.nodes[name] = n
-                if node.properties:
-                    for name, p in node.properties.iteritems():
+                if node_template.properties:
+                    for name, p in node_template.properties.iteritems():
                         n.assignments[name] = p.value
-                if node.relationships:
-                    for r in node.relationships:
+                if node_template.relationships:
+                    for r in node_template.relationships:
                         n.relationships.append(CodeRelationship(generator, r.type, r.target))
         
         generator.write(self.root)

@@ -10,7 +10,7 @@ def translate_assignment(a):
     if isinstance(a, dict):
         for k, v in a.iteritems():
             if k == 'get_input':
-                return '$$context.profile.%s$$' % v
+                return '$$context.service.%s$$' % v
             elif k == 'get_property':
                 return '$$self.%s$$' % '.'.join(v)
             else:

@@ -14,7 +14,8 @@ class ToscaSimplePresenter1_0(Presenter):
     
     @staticmethod
     def can_present(raw):
-        return raw.get('tosca_definitions_version') == 'tosca_simple_yaml_1_0'
+        dsl = raw.get('tosca_definitions_version')
+        return dsl == 'tosca_simple_yaml_1_0'
 
     def validate(self, issues):
         self.service_template.validate(issues)

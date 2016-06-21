@@ -277,7 +277,7 @@ class ServiceTemplate(Presentation):
         """
 
     @field_type(str)
-    @required_field # test
+    #@required_field # test
     @primitive_field
     def description():
         """

@@ -1,7 +1,7 @@
 
 from .. import Consumer, BadImplementationError
 from ..style import Style
-from .code_generator import CodeGenerator, CodeMethod, CodeProperty, CodeAssignment, CodeNodeTemplate, CodeRelationship
+from .code_generator import CodeGenerator, CodeMethod, CodeProperty, CodeAssignment, CodeNodeTemplate, CodeRelationship, CodeWorkflow
 from .context import Context
 from inspect import getargspec
 import sys
@@ -19,7 +19,7 @@ class Implementer(Consumer):
         self.style = style
 
     def consume(self):
-        self.generate()
+        self.implement()
         self.service.context.dump()
     
     @property
@@ -43,7 +43,7 @@ class Implementer(Consumer):
         except Exception as e:
             raise BadImplementationError('Service class could not be instantiated', e)
 
-    def generate(self):
+    def implement(self):
         service_template = self.presentation.service_template
         
         generator = CodeGenerator()
@@ -98,16 +98,15 @@ class Implementer(Consumer):
                 if node_template.relationships:
                     for r in node_template.relationships:
                         n.relationships.append(CodeRelationship(generator, r.type, r.target))
+
+        if service_template.workflows:
+            for name, workflow in service_template.workflows.iteritems():
+                w = CodeWorkflow(generator, name, workflow.description, workflow.mapping)
+                generator.workflows[name] = w
+                if workflow.parameters:
+                    for name, p in workflow.parameters.iteritems():
+                        w.parameters[name] = CodeProperty(generator, name, p.description, p.type, p.default)
         
         generator.write(self.root)
         
         return generator
-
-    def dump(self):
-        generator = self.implement()
-        for m in generator.module.modules:
-            if m.name:
-                puts(colored.red(m.file))
-            with indent(2):
-                for c in m.classes.itervalues():
-                    puts(str(c))

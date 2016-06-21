@@ -12,7 +12,8 @@ class CloudifyPresenter1_3(ToscaSimplePresenter1_0):
 
     @staticmethod
     def can_present(raw):
-        return raw.get('tosca_definitions_version') == 'cloudify_dsl_1_3'
+        dsl = raw.get('tosca_definitions_version')
+        return dsl == 'cloudify_dsl_1_3' or dsl == 'cloudify_dsl_1_2' or dsl == 'cloudify_dsl_1_1'
 
     @property
     def service_template(self):

@@ -1,7 +1,7 @@
 
-from ... import has_fields, primitive_field, object_dict_field, field_type, field_getter, required_field
+from ... import has_fields, primitive_field, object_field, object_dict_field, field_type, field_getter, required_field
 from .. import Presentation
-from ..tosca import PropertyDefinition
+from ..tosca import PropertyDefinition, Version
 
 @has_fields
 class Output(Presentation):
@@ -45,9 +45,25 @@ def get_implementation(field, raw):
 @has_fields
 class Workflow(Presentation):
     @field_type(str)
+    @primitive_field
+    def description():
+        """
+        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
+        """
+
+    @field_type(str)
     @field_getter(get_implementation)
     @primitive_field
     def implementation():
+        """
+        :rtype: str
+        """
+
+    @field_type(str)
+    @primitive_field
+    def mapping():
         """
         :rtype: str
         """
@@ -63,4 +79,78 @@ class Workflow(Presentation):
     def inputs():
         """
         :rtype: dict of str, :class:`PropertyDefinition`
+        """
+
+    @object_dict_field(PropertyDefinition)
+    def parameters():
+        """
+        :rtype: dict of str, :class:`PropertyDefinition`
+        """
+
+@has_fields
+class Plugin(Presentation):
+    @field_type(str)
+    @primitive_field
+    def source():
+        """
+        :rtype: str
+        """
+
+    @field_type(str)
+    @primitive_field
+    def executor():
+        """
+        :rtype: str
+        """
+
+    @field_type(bool)
+    @primitive_field
+    def install():
+        """
+        :rtype: bool
+        """
+
+    @primitive_field
+    def install_arguments():
+        """
+        """
+
+    @field_type(str)
+    @primitive_field
+    def package_name():
+        """
+        :rtype: str
+        """
+
+    @object_field(Version)
+    def package_version():
+        """
+        :rtype: :class:`Version`
+        """
+
+    @field_type(str)
+    @primitive_field
+    def supported_platform():
+        """
+        :rtype: str
+        """
+
+    @field_type(str)
+    @primitive_field
+    def distribution():
+        """
+        :rtype: str
+        """
+
+    @object_field(Version)
+    def distribution_version():
+        """
+        :rtype: :class:`Version`
+        """
+
+    @field_type(str)
+    @primitive_field
+    def distribution_release():
+        """
+        :rtype: str
         """

@@ -42,6 +42,10 @@ class Context(object):
     @property
     def nodes(self):
         return self.service.__class__.NODES if hasattr(self.service.__class__, 'NODES') else []
+
+    @property
+    def workflows(self):
+        return self.service.__class__.WORKFLOWS if hasattr(self.service.__class__, 'WORKFLOWS') else []
     
     def get_node_name(self, node):
         for name in self.nodes:

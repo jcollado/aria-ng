@@ -159,6 +159,13 @@ class CodeClass(object):
             w.i()
             if self.description:
                 w.write_docstring(self.description)
+            #if self.properties or self.methods:
+            #    w.write()
+            #    if self.properties:
+            #        w.write('PROPERTIES = %s' % repr(tuple(self.properties.keys())))
+            #    if self.methods:
+            #        w.write('METHODS = %s' % repr(tuple('%s.%s' % (m.interface, m.name) for m in self.methods.itervalues())))
+            #    w.write()
             w.write('def __init__(self, context):')
             w.i()
             w.write('self.context = context')
@@ -289,6 +296,14 @@ class CodeRelationship(object):
         self.type = type
         self.target = target
 
+class CodeWorkflow(object):
+    def __init__(self, generator, name, description, mapping):
+        self.generator = generator
+        self.name = name
+        self.description = description
+        self.mapping = mapping
+        self.parameters = {}
+
 class CodeGenerator(object):
     def __init__(self):
         self.description = None
@@ -296,6 +311,7 @@ class CodeGenerator(object):
         self.inputs = OrderedDict()
         self.outputs = OrderedDict()
         self.nodes = OrderedDict()
+        self.workflows = OrderedDict()
         self.translate_classes = {}
         self.common_module_name = 'common'
     
@@ -357,14 +373,17 @@ class CodeGenerator(object):
                     for i in self.inputs.itervalues():
                         w.write(i.docstring)
                 w.write('"""')
-            w.write()
-            if self.inputs:
-                w.write('INPUTS = %s' % repr(tuple(self.inputs.keys())))
-            if self.outputs:
-                w.write('OUTPUTS = %s' % repr(tuple(self.outputs.keys())))
-            if self.nodes:
-                w.write('NODES = %s' % repr(tuple(self.nodes.keys())))
-            w.write()
+            if self.inputs or self.outputs or self.nodes or self.workflows:
+                w.write()
+                if self.inputs:
+                    w.write('INPUTS = %s' % repr(tuple(self.inputs.keys())))
+                if self.outputs:
+                    w.write('OUTPUTS = %s' % repr(tuple(self.outputs.keys())))
+                if self.nodes:
+                    w.write('NODES = %s' % repr(tuple(self.nodes.keys())))
+                if self.workflows:
+                    w.write('WORKFLOWS = %s' % repr(tuple(self.workflows.keys())))
+                w.write()
             w.put_indent()
             w.put('def __init__(self, context')
             if self.inputs:
@@ -384,11 +403,20 @@ class CodeGenerator(object):
                 for n in self.nodes.itervalues():
                     w.write(n.description or 'Node: %s' % n.name, prefix='# ')
                     w.write(n)
-                w.write('# Relationships')
+                has_relationships = False
                 for n in self.nodes.itervalues():
-                    n.relate(w)
+                    if n.relationships:
+                        has_relationships = True
+                        break
+                if has_relationships:
+                    w.write('# Relationships')
+                    for n in self.nodes.itervalues():
+                        n.relate(w)
             w.o()
             if self.outputs:
+                w.write()
+                w.write('# Outputs')
+                w.write()
                 for o in self.outputs.itervalues():
                     w.write()
                     w.write('@property')
@@ -397,5 +425,35 @@ class CodeGenerator(object):
                     if o.description:
                         w.write_docstring(o.description)
                     w.write('return %s' % repr_assignment(o.value))
+                    w.o()
+            if self.workflows:
+                w.write()
+                w.write('# Workflows')
+                w.write()
+                for name, workflow in self.workflows.iteritems():
+                    w.put_indent()
+                    w.put('def %s(self' % name)
+                    if workflow.parameters:
+                        for p in workflow.parameters.itervalues():
+                            w.put(', %s' % p.signature)
+                    w.put('):\n')
+                    w.i()
+                    if workflow.description or workflow.parameters:
+                        w.write('"""')
+                        if workflow.description:
+                            w.write(workflow.description)
+                        if workflow.parameters:
+                            for p in workflow.parameters.itervalues():
+                                w.write('%s' % p.docstring)
+                        w.write('"""')
+                    if workflow.mapping:
+                        w.put_indent()
+                        w.put('self.context.%s(self' % workflow.mapping)
+                        if workflow.parameters:
+                            for p in workflow.parameters:
+                                w.put(', %s' % p)
+                        w.put(')\n')
+                    else:
+                        w.write('pass')
                     w.o()
             return str(w)

@@ -15,9 +15,9 @@ def prepare_deployment_plan(plan, inputs=None, **kwargs):
     #service = implementer.service
     #node_instances = [create_node_instance(name, getattr(service, name)) for name in service.context.nodes]
     
-    return Wrapper(plan).plan
+    return DeploymentPlan(plan).plan
 
-class Wrapper(object):
+class DeploymentPlan(object):
     def __init__(self, presentation):
         self.presentation = presentation
         self.plugins = [self.create_plugin(name, p) for name, p in self.presentation.service_template.plugins.iteritems()]
@@ -39,13 +39,16 @@ class Wrapper(object):
     def append_from_type(self, r, node_type):
         node_type = self.get_node_type(node_type)
         if node_type.properties:
-            for nn, p in node_type.properties.iteritems():
+            for property_name, p in node_type.properties.iteritems():
                 if p.default is not None:
-                    r['properties'][nn] = p.default
+                    r['properties'][property_name] = p.default
         if node_type.interfaces:
-            for i in node_type.interfaces.itervalues():
-                for nn, w in i.workflows.iteritems():
-                    r['operations'][nn] = self.create_workflow(w)
+            for interface_name, i in node_type.interfaces.iteritems():
+                for workflow_name, w in i.workflows.iteritems():
+                    # Some tests seem to expect the first format, some the latter
+                    r['operations']['%s.%s' % (interface_name, workflow_name)] = self.create_workflow(w)
+                    if not workflow_name in r['operations']:
+                        r['operations'][workflow_name] = self.create_workflow(w)
         if node_type.derived_from:
             r['type_hierarchy'].append(node_type.derived_from)
             self.append_from_type(r, node_type.derived_from)
@@ -65,12 +68,12 @@ class Wrapper(object):
         r['properties'] = {}
         r['operations'] = {}
         r['type_hierarchy'] = []
+        self.append_from_type(r, node_template.type)
         if node_template.type:
             r['type_hierarchy'].append(node_template.type)
-        self.append_from_type(r, node_template.type)
         if node_template.properties:
-            for nn, p in node_template.properties.iteritems():
-                r['properties'][nn] = p.value
+            for property_name, p in node_template.properties.iteritems():
+                r['properties'][property_name] = p.value
         #r['relationships'] =
         #r['blueprint_id'] =
         r['plugins'] = self.plugins
@@ -78,7 +81,7 @@ class Wrapper(object):
         #r['planned_number_of_instances'] =
         #r['deploy_number_of_instances'] =
         #r['host_id'] =
-        #r['type'] =
+        r['type'] = node_template.type
         return r
 
     def create_node_instance(self, name, node_template):
@@ -91,9 +94,6 @@ class Wrapper(object):
         #node_instance['host_id'] =
         #node_instance['deployment_id'] =
         #node_instance['runtime_properties'] = {}
-        #if node_template.type:
-        #    node_instance['runtime_properties']['type'] = node_template.type
-        #    node_instance['runtime_properties']['type_hierarchy'] = [node_template.type]
         #node_instance['state'] =
         #node_instance['version'] =
         return node_instance

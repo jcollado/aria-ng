@@ -1,13 +1,13 @@
 
 from ... import has_fields
 from ..tosca import InterfaceDefinition as BaseInterfaceDefinition
-from .misc import Workflow
+from .misc import Operation
 
 @has_fields
 class InterfaceDefinition(BaseInterfaceDefinition):
     @property
-    def workflows(self):
+    def operations(self):
         """
-        :rtype: dict of str, :class:`Workflow`
+        :rtype: dict of str, :class:`Operation`
         """
-        return {k: Workflow(v) for k, v in self.raw.iteritems()}
+        return {k: Operation(v) for k, v in self.raw.iteritems()}

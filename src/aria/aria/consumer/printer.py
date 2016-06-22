@@ -120,21 +120,21 @@ class Printer(Consumer):
     def print_interface(self, k, interface):
         puts(self.style.type(k))
         with self.style.indent:
-            if interface.workflows:
+            if interface.operations:
                 puts('Workflows:')
                 with self.style.indent:
-                    for kk, workflow in interface.workflows.iteritems():
+                    for kk, operation in interface.operations.iteritems():
                         puts(self.style.property(kk))
                         with self.style.indent:
-                            if workflow.implementation:
-                                if '/' in workflow.implementation:
-                                    puts('Implementation: %s' % self.style.literal(workflow.implementation))
+                            if operation.implementation:
+                                if '/' in operation.implementation:
+                                    puts('Implementation: %s' % self.style.literal(operation.implementation))
                                 else:
-                                    puts('Implementation: %s' % self.style.type(workflow.implementation))
-                            if workflow.executor:
-                                puts('Executor: %s' % self.style.node(workflow.executor))
-                            if workflow.inputs:
+                                    puts('Implementation: %s' % self.style.type(operation.implementation))
+                            if operation.executor:
+                                puts('Executor: %s' % self.style.node(operation.executor))
+                            if operation.inputs:
                                 puts('Inputs:') # TODO
                                 with self.style.indent:
-                                    for kkk, v in workflow.inputs.iteritems():
+                                    for kkk, v in operation.inputs.iteritems():
                                         self.print_assignment(kkk, v)

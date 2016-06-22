@@ -1,7 +1,6 @@
 
 from primitives import *
 
-
 MODULES = (
     'artifacts',
     'capabilities',

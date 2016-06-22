@@ -1,5 +1,5 @@
 
-from .. import LockedList
+from .. import LockedList, Issue, AriaError, print_exception
 from ..consumer import Validator
 from ..presenter import PresenterNotFoundError
 from .exceptions import *
@@ -33,7 +33,9 @@ class DefaultParser(Parser):
             presentation = self.parse()
             issues = Validator(presentation).validate()
         except Exception as e:
-            issues = ['%s: %s' % (e.__class__.__name__, e)]
+            issues = [Issue('%s: %s' % (e.__class__.__name__, e), e)]
+            if not isinstance(e, AriaError):
+                print_exception(e)
         return presentation, issues
 
     def _parse_all(self, location, origin_location, presenter_class, presentations=None):

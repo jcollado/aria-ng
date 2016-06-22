@@ -14,6 +14,31 @@ class Standard(tosca.interfaces.Root):
     SHORTHAND_NAME = 'Standard'
     TYPE_QUALIFIED_NAME = 'tosca:Standard'
     TYPE_URI = 'tosca.interfaces.node.lifecycle.Standard'
+    
+    def create(self, context):
+        """
+        Standard lifecycle create operation.
+        """
+    
+    def configure(self, context):
+        """
+        Standard lifecycle configure operation.
+        """
+    
+    def start(self, context):
+        """
+        Standard lifecycle start operation.
+        """
+    
+    def stop(self, context):
+        """
+        Standard lifecycle stop operation.
+        """
+    
+    def delete(self, context):
+        """
+        Standard lifecycle delete operation.
+        """
 
 __all__ = (
     'Standard',)

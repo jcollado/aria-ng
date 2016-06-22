@@ -1,6 +1,7 @@
 
 from .exceptions import InvalidValueError
 from functools import wraps
+from types import MethodType
 from collections import OrderedDict
 
 class Prop(object):
@@ -25,6 +26,14 @@ class Prop(object):
                 raise InvalidValueError('property must be coercible to %s: %s=%s' % (self.cls.__name__, self.name, repr(value)))
 
         return value
+
+def has_validated_properties_iter_validated_property_names(self):
+    for name in self.__class__.PROPERTIES:
+        yield name
+
+def has_validated_properties_iter_validated_properties(self):
+    for name in self.__class__.PROPERTIES:
+        yield name, self.__dict__[name]
 
 def has_validated_properties(cls):
     """
@@ -75,6 +84,10 @@ def has_validated_properties(cls):
                 return property(fget=getter, fset=setter)
                 
             setattr(cls, name, closure(prop))
+
+    # Bind methods
+    setattr(cls, 'iter_validated_property_names', MethodType(has_validated_properties_iter_validated_property_names, None, cls))
+    setattr(cls, 'iter_validated_properties', MethodType(has_validated_properties_iter_validated_properties, None, cls))
                 
     return cls
 

@@ -43,7 +43,7 @@ def get_implementation(field, raw):
         return field._get(raw)
 
 @has_fields
-class Workflow(Presentation):
+class Operation(Presentation):
     @field_type(str)
     @primitive_field
     def description():

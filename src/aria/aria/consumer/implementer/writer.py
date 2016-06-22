@@ -62,7 +62,7 @@ class Writer(object):
     
     def write_docstring(self, s):
         self.write('"""')
-        self.write(s)
+        self.write(s.strip())
         self.write('"""')
     
     def i(self):

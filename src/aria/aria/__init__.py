@@ -15,6 +15,7 @@ MODULES = (
     'parser',
     'presenter',
     'reader',
+    'executor',
     'tools')
 
 __all__ = (

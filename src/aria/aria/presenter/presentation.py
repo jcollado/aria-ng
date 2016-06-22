@@ -4,6 +4,6 @@ class Presentation(object):
         self.raw = raw
         
     def validate(self, issues):
-        if hasattr(self.__class__, 'FIELDS'):
-            for field in self.__class__.FIELDS.itervalues():
+        if hasattr(self, 'iter_fields'):
+            for _, field in self.iter_fields():
                 field.validate(self, issues)

@@ -75,6 +75,9 @@ class Version(object):
     
     SHORTHAND_NAME = 'version'
     TYPE_QUALIFIED_NAME = 'tosca:version'
+    
+    def __init__(self, raw):
+        self.raw = raw
 
 @tosca_specification('3.2.4')
 class List(object):

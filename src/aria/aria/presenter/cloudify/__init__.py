@@ -24,7 +24,7 @@ __all__ = (
     'InterfaceDefinition',
     'Output',
     'Relationship',
-    'Workflow',
+    'Operation',
     'NodeTemplate',
     'ServiceTemplate',
     'NodeType',

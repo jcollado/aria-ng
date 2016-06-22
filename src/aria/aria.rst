@@ -13,6 +13,16 @@ This is core ARIA API.
 
 .. automodule:: aria.consumer
 
+:mod:`aria.executor`
+--------------------
+
+.. automodule:: aria.executor
+
+:mod:`aria.executor.cloudify`
+-----------------------------
+
+.. automodule:: aria.executor.cloudify
+
 :mod:`aria.loader`
 ------------------
 
@@ -33,10 +43,10 @@ This is core ARIA API.
 
 .. automodule:: aria.presenter.cloudify
 
-:mod:`aria.presenter.tosca_simple`
-----------------------------------
+:mod:`aria.presenter.tosca`
+---------------------------
 
-.. automodule:: aria.presenter.tosca_simple
+.. automodule:: aria.presenter.tosca
 
 :mod:`aria.reader`
 ------------------

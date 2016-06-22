@@ -44,7 +44,7 @@ class Field(object):
                     return self.cls(value)
                 except ValueError:
                     location = get_location(raw, self.name)
-                    raise InvalidValueError('field must be coercible to %s: %s=%s, at %s' % (self.cls.__name__, self.name, repr(value), location))
+                    raise InvalidValueError('field must be coercible to %s.%s: %s=%s, at %s' % (self.cls.__module__, self.cls.__name__, self.name, repr(value), location))
             return value
 
         elif self.type == 'primitive_list':
@@ -58,11 +58,15 @@ class Field(object):
                             value[i] = self.cls(value[i])
                         except ValueError:
                             location = get_location(raw, self.name)
-                            raise InvalidValueError('field must be coercible to a list of %s: %s[%d]=%s, at %s' % (self.cls.__name__, self.name, i, repr(value[i]), location))
+                            raise InvalidValueError('field must be coercible to a list of %s.%s: %s[%d]=%s, at %s' % (self.cls.__module__, self.cls.__name__, self.name, i, repr(value[i]), location))
             return value
 
         elif self.type == 'object':
-            return self.cls(value)
+            try:
+                return self.cls(value)
+            except TypeError as e:
+                location = get_location(raw, self.name)
+                raise InvalidValueError('could not initialize field to type %s.%s: %s, at %s\n%s' % (self.cls.__module__, self.cls.__name__, self.name, location, e))
 
         elif self.type == 'object_list':
             if not isinstance(value, list):
@@ -112,6 +116,13 @@ class Field(object):
                     v.validate(issues)
         elif hasattr(value, 'validate'):
             value.validate(issues)
+
+def has_fields_iter_field_names(self):
+    for name in self.__class__.FIELDS:
+        yield name
+
+def has_fields_iter_fields(self):
+    return self.FIELDS.iteritems()
 
 def has_fields_len(self):
     return len(self.__class__.FIELDS)
@@ -189,6 +200,10 @@ def has_fields(cls):
                 return property(fget=getter, fset=setter)
 
             setattr(cls, name, closure(field))
+
+    # Bind methods
+    setattr(cls, 'iter_field_names', MethodType(has_fields_iter_field_names, None, cls))
+    setattr(cls, 'iter_fields', MethodType(has_fields_iter_fields, None, cls))
     
     # Behave like a dict
     setattr(cls, '__len__', MethodType(has_fields_len, None, cls))

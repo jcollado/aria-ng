@@ -10,7 +10,7 @@ class InterfaceMethod(object):
 class Interface(object):
     pass
 
-def get_interface(self, name):
+def has_interfaces_interface(self, name):
     if not hasattr(self, '_interfaces'):
         setattr(self, '_interfaces', {})
 
@@ -27,6 +27,14 @@ def get_interface(self, name):
 
     return interface
 
+def has_interfaces_iter_interface_names(self):
+    return self.__class__.INTERFACES.iterkeys()
+
+def has_interfaces_iter_interface_methods(self):
+    for interface_name, interface in self.__class__.INTERFACES.iteritems():
+        for method_name in interface:
+            yield interface_name, method_name
+
 def has_interfaces(cls):
     # Make sure we have INTERFACES
     if not hasattr(cls, 'INTERFACES'):
@@ -36,9 +44,6 @@ def has_interfaces(cls):
     for base in cls.__bases__:
         if hasattr(base, 'INTERFACES'):
             cls.INTERFACES.update(base.INTERFACES)
-
-    # Bind interface method
-    setattr(cls, 'interface', MethodType(get_interface, None, cls))
 
     for name, method in cls.__dict__.iteritems():
         if isinstance(method, InterfaceMethod):
@@ -58,6 +63,11 @@ def has_interfaces(cls):
                     raise AttributeError('method must be called via its interface: %s' % name)
                 return stub
             setattr(cls, name, MethodType(closure(name), None, cls))
+
+    # Bind methods
+    setattr(cls, 'interface', MethodType(has_interfaces_interface, None, cls))
+    setattr(cls, 'iter_interface_names', MethodType(has_interfaces_iter_interface_names, None, cls))
+    setattr(cls, 'iter_interface_methods', MethodType(has_interfaces_iter_interface_methods, None, cls))
     
     return cls
 

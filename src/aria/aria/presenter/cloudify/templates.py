@@ -3,7 +3,7 @@ from ... import has_fields, object_list_field, object_dict_field
 from ..tosca import NodeTemplate as BaseNodeTemplate, ServiceTemplate as BaseServiceTemplate
 from ..tosca import PropertyDefinition
 from .types import NodeType, RelationshipType
-from .misc import Relationship, Output, Workflow, Plugin
+from .misc import Relationship, Output, Operation, Plugin
 
 @has_fields
 class NodeTemplate(BaseNodeTemplate):
@@ -46,10 +46,10 @@ class ServiceTemplate(BaseServiceTemplate):
         :rtype: dict of str, :class:`NodeTemplate`
         """
 
-    @object_dict_field(Workflow)
+    @object_dict_field(Operation)
     def workflows():
         """
-        :rtype: dict of str, :class:`Workflow`
+        :rtype: dict of str, :class:`Operation`
         """
     
     @object_dict_field(Plugin)

@@ -111,6 +111,12 @@ class CodeModule(object):
             for c in self.classes.itervalues():
                 if (c.base != 'object') and (c.base.module != self):
                     imports.add(c.base.module.fullname)
+                for p in c.properties.itervalues():
+                    if p.type:
+                        cc = self.generator.get_class(p.type, False)
+                        if cc:
+                            if cc.module != self:
+                                imports.add(cc.module.fullname)
             for i in imports:
                 w.write('import %s' % i)
             w.write()
@@ -159,13 +165,6 @@ class CodeClass(object):
             w.i()
             if self.description:
                 w.write_docstring(self.description)
-            #if self.properties or self.methods:
-            #    w.write()
-            #    if self.properties:
-            #        w.write('PROPERTIES = %s' % repr(tuple(self.properties.keys())))
-            #    if self.methods:
-            #        w.write('METHODS = %s' % repr(tuple('%s.%s' % (m.interface, m.name) for m in self.methods.itervalues())))
-            #    w.write()
             w.write('def __init__(self, context):')
             w.i()
             w.write('self.context = context')
@@ -175,14 +174,17 @@ class CodeClass(object):
                 if p.default is not None:
                     w.write('@property_default(%s)' % repr(make_agnostic(p.default)))
                 if p.type:
-                    w.write('#@property_type(%s)' % self.generator.get_classname(p.type))
+                    w.write('@property_type(%s)' % self.generator.get_classname(p.type))
                 w.write('@validated_property')
                 w.write('def %s():' % n)
                 w.i()
-                if p.description:
+                if p.description or p.type is not None:
                     w.write('"""')
-                    w.write(p.description)
+                    if p.description:
+                        w.write(p.description.strip())
                     if p.type is not None:
+                        if p.description:
+                            w.write()
                         w.write(':rtype: :class:`%s`' % self.generator.get_classname(p.type))
                     w.write('"""')
                 else:
@@ -213,9 +215,9 @@ class CodeProperty(object):
     @property
     def signature(self):
         with Writer() as w:
-            w.put('%s' % self.name)
-            if self.default is not None:
-                w.put('=%s' % repr(make_agnostic(self.default)))
+            w.put('%s=%s' % (self.name, repr(make_agnostic(self.default))))
+            #if self.default is not None:
+            #    w.put('=%s' % repr(make_agnostic(self.default)))
             return str(w)
 
 class CodeAssignment(object):
@@ -226,36 +228,43 @@ class CodeAssignment(object):
         self.value = value
 
 class CodeMethod(object):
-    def __init__(self, generator, name, interface, implementation, executor):
+    def __init__(self, generator, name, interface, description, implementation, executor):
         self.generator = generator
         self.name = name
         self.interface = interface
+        self.description = description
         self.implementation = implementation
         self.executor = executor
         self.arguments = OrderedDict()
     
     def __str__(self):
         with Writer() as w:
-            w.write('@interfacemethod(%s)' % repr(self.interface))
+            if self.interface:
+                w.write('@interfacemethod(%s)' % repr(self.interface))
             w.put('def %s(self' % self.name)
             if self.arguments:
                 for a in self.arguments.itervalues():
                     w.put(', %s' % a.signature)
             w.put('):\n')
             w.i()
-            if self.arguments:
+            if self.description or self.arguments:
                 w.write('"""')
-                for n, a in self.arguments.iteritems():
-                    w.write(a.docstring)
+                if self.description:
+                    self.write(description.strip())
+                if self.arguments:
+                    if self.description:
+                        self.write()
+                    for n, a in self.arguments.iteritems():
+                        w.write(a.docstring)
                 w.write('"""')
             w.put_indent()
             if self.implementation:
                 if self.executor:
                     w.put('self.context.executor(%s).' % repr(self.executor))
                 else:
-                    w.put('self.context.')
+                    w.put('self.context.executor().')
                 if '/' in self.implementation:
-                    w.put('execute(self, %s' % repr(self.implementation))
+                    w.put('selc.context.executor().execute(self, %s' % repr(self.implementation))
                 else:
                     w.put('%s(self' % self.implementation)
                 if self.arguments:
@@ -283,7 +292,7 @@ class CodeNodeTemplate(object):
     def __str__(self):
         with Writer() as w:
             if self.description:
-                w.write('%s' % self.description, prefix='# ')
+                w.write('%s' % self.description.strip(), prefix='# ')
             w.write('self.%s = %s(context)' % (self.name, self.generator.get_classname(self.type)))
             if self.assignments:
                 for k, v in self.assignments.iteritems():
@@ -296,14 +305,6 @@ class CodeRelationship(object):
         self.type = type
         self.target = target
 
-class CodeWorkflow(object):
-    def __init__(self, generator, name, description, mapping):
-        self.generator = generator
-        self.name = name
-        self.description = description
-        self.mapping = mapping
-        self.parameters = {}
-
 class CodeGenerator(object):
     def __init__(self):
         self.description = None
@@ -312,7 +313,10 @@ class CodeGenerator(object):
         self.outputs = OrderedDict()
         self.nodes = OrderedDict()
         self.workflows = OrderedDict()
-        self.translate_classes = {}
+        self.translate_classes = {
+            'string': 'str',
+            'integer': 'int',
+            'boolean': 'bool'}
         self.common_module_name = 'common'
     
     def get_class(self, name, create=True):
@@ -320,7 +324,8 @@ class CodeGenerator(object):
 
     def get_classname(self, name):
         if name in self.translate_classes:
-            return self.translate_classes[name].fullname
+            r = self.translate_classes[name]
+            return r if isinstance(r, str) else r.fullname
         return name
 
     def link_classes(self):
@@ -368,8 +373,10 @@ class CodeGenerator(object):
             if self.description or self.inputs:
                 w.write('"""')
                 if self.description:
-                    w.write(self.description)
+                    w.write(self.description.strip())
                 if self.inputs:
+                    if self.description:
+                        w.write()
                     for i in self.inputs.itervalues():
                         w.write(i.docstring)
                 w.write('"""')
@@ -416,7 +423,6 @@ class CodeGenerator(object):
             if self.outputs:
                 w.write()
                 w.write('# Outputs')
-                w.write()
                 for o in self.outputs.itervalues():
                     w.write()
                     w.write('@property')
@@ -429,31 +435,7 @@ class CodeGenerator(object):
             if self.workflows:
                 w.write()
                 w.write('# Workflows')
-                w.write()
-                for name, workflow in self.workflows.iteritems():
-                    w.put_indent()
-                    w.put('def %s(self' % name)
-                    if workflow.parameters:
-                        for p in workflow.parameters.itervalues():
-                            w.put(', %s' % p.signature)
-                    w.put('):\n')
-                    w.i()
-                    if workflow.description or workflow.parameters:
-                        w.write('"""')
-                        if workflow.description:
-                            w.write(workflow.description)
-                        if workflow.parameters:
-                            for p in workflow.parameters.itervalues():
-                                w.write('%s' % p.docstring)
-                        w.write('"""')
-                    if workflow.mapping:
-                        w.put_indent()
-                        w.put('self.context.%s(self' % workflow.mapping)
-                        if workflow.parameters:
-                            for p in workflow.parameters:
-                                w.put(', %s' % p)
-                        w.put(')\n')
-                    else:
-                        w.write('pass')
-                    w.o()
+                for workflow in self.workflows.itervalues():
+                    w.write()
+                    w.write(str(workflow))
             return str(w)

@@ -1,5 +1,7 @@
 
-from ... import classname
+from .. import classname
+from .exceptions import ExecutorNotFoundError
+from .cloudify import HostAgentExecutor, CentralDeploymentAgentExecutor
 from clint.textui import puts, colored, indent
 from inspect import getargs
 
@@ -11,18 +13,26 @@ class Relationship(object):
 
 class Context(object):
     """
-    Service context used for validation.
+    Service execution context.
     """
     def __init__(self, style):
         self.service = None
         self.relationships = []
         self.style = style
+        self.executors = {}
+        self.executors['host_agent'] = HostAgentExecutor()
+        self.executors['central_deployment_agent'] = CentralDeploymentAgentExecutor()
     
     def relate(self, source, relationship, target):
         """
         Creates the graph.
         """
         self.relationships.append(Relationship(source, relationship, target))
+        
+    def executor(self, name):
+        if name not in self.executors:
+            raise ExecutorNotFoundError(name)
+        return self.executors[name]
     
     def get_relationship_from(self, source):
         relationships = []
@@ -30,6 +40,13 @@ class Context(object):
             if relationship.source == source:
                 relationships.append(relationship)
         return relationships
+    
+    def get_node_name(self, node):
+        for name in self.nodes:
+            the_node = getattr(self.service, name)
+            if node == the_node:
+                return name
+        return None
     
     @property
     def inputs(self):
@@ -46,13 +63,6 @@ class Context(object):
     @property
     def workflows(self):
         return self.service.__class__.WORKFLOWS if hasattr(self.service.__class__, 'WORKFLOWS') else []
-    
-    def get_node_name(self, node):
-        for name in self.nodes:
-            the_node = getattr(self.service, name)
-            if node == the_node:
-                return name
-        return None
     
     def dump(self):
         if self.inputs:

@@ -88,10 +88,10 @@ class DeploymentPlan(object):
             if node_template.relationships:
                 relationships = []
                 for relationship in node_template.relationships:
-                    if self.is_contained_relationship(relationship.type):
-                        node_instance['host_id'] = target['id']
                     targets = self.get_node_instances(relationship.target)
                     for target in targets:
+                        if self.is_contained_relationship(relationship.type):
+                            node_instance['host_id'] = target['id']
                         r = {}
                         r['type'] = relationship.type
                         r['target_name'] = relationship.target
@@ -162,7 +162,7 @@ class DeploymentPlan(object):
         r['capabilities'] = {}
         r['capabilities']['scalable'] = {}
         r['capabilities']['scalable']['properties'] = {}
-        r['capabilities']['scalable']['properties']['current_instances'] = None
+        r['capabilities']['scalable']['properties']['current_instances'] = 1
         r['capabilities']['scalable']['properties']['default_instances'] = None
         r['capabilities']['scalable']['properties']['min_instances'] = None
         r['capabilities']['scalable']['properties']['max_instances'] = None
@@ -190,9 +190,9 @@ class DeploymentPlan(object):
                 r['relationships'].append(rr)
         #r['blueprint_id'] =
         r['plugins'] = self.plugins
-        #r['number_of_instances'] =
-        #r['planned_number_of_instances'] =
-        #r['deploy_number_of_instances'] =
+        #r['number_of_instances'] = 1
+        #r['planned_number_of_instances'] = 1
+        #r['deploy_number_of_instances'] = 1
         #r['host_id'] = 
         r['type'] = node_template.type
         return r

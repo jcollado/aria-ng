@@ -51,8 +51,8 @@ def has_validated_properties(cls):
     """
 
     # Make sure we have PROPERTIES
-    if not hasattr(cls, 'PROPERTIES'):
-        cls.PROPERTIES = OrderedDict()
+    if 'PROPERTIES' not in cls.__dict__:
+        setattr(cls, 'PROPERTIES', OrderedDict())
     
     # Inherit PROPERTIES from base classes 
     for base in cls.__bases__:

@@ -122,6 +122,9 @@ class Range(object):
     SHORTHAND_NAME = 'range'
     TYPE_QUALIFIED_NAME = 'tosca:range'
 
+    def __init__(self, value):
+        self.value = value
+
 @tosca_specification('3.2.6.4')
 class Size(object):
     """

@@ -86,7 +86,7 @@ class Field(object):
             raise AttributeError('unsupported field type: %s, at %s' % (self.type, location))
 
     def set(self, raw, value):
-        return self.set(raw, value)
+        return self._set(raw, value)
 
     def _set(self, raw, value):
         old = raw.get(self.name)
@@ -180,8 +180,8 @@ def has_fields(cls):
     """
     
     # Make sure we have FIELDS
-    if not hasattr(cls, 'FIELDS'):
-        cls.FIELDS = OrderedDict()
+    if 'FIELDS' not in cls.__dict__:
+        setattr(cls, 'FIELDS', OrderedDict())
     
     # Inherit FIELDS from base classes 
     for base in cls.__bases__:

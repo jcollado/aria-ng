@@ -154,3 +154,12 @@ class Plugin(Presentation):
         """
         :rtype: str
         """
+
+@has_fields
+class Instances(Presentation):
+    @field_type(int)
+    @primitive_field
+    def deploy():
+        """
+        :rtype: int
+        """

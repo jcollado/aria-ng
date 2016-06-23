@@ -9,7 +9,7 @@ class LiteralLoader(Loader):
     """
     ARIA string loader.
     
-    This loader is a trivial holder for the provided string value.
+    This loader is a trivial holder for the provided value.
     """
 
     def __init__(self, value, location='<literal>'):
@@ -17,4 +17,4 @@ class LiteralLoader(Loader):
         self.location = location
     
     def load(self):
-        return str(self.value)
+        return self.value

@@ -25,6 +25,7 @@ __all__ = (
     'Output',
     'Relationship',
     'Operation',
+    'Instances',
     'NodeTemplate',
     'ServiceTemplate',
     'NodeType',

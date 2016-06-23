@@ -8,10 +8,11 @@ def parse_from_path(dsl_file_path,
                     additional_resource_sources=()):
     print '!!! parse_from_path'
     print dsl_file_path
-    print resources_base_url
-    print resolver
-    print validate_version
-    print additional_resource_sources
+    #print resources_base_url
+    #print resolver
+    #print validate_version
+    #print additional_resource_sources
+    
     parser = DefaultParser(dsl_file_path)
     #presentation = parser.parse()
     presentation, issues = parser.validate()

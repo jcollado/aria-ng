@@ -11,7 +11,7 @@ def evaluate_outputs(outputs_def,
     :param get_node_method: A method for getting a node.
     :return: Outputs dict.
     """
-    pass
+    print '!!! evaluate_outputs'
     
 def evaluate_functions(payload, context,
                        get_node_instances_method,
@@ -26,4 +26,4 @@ def evaluate_functions(payload, context,
     :param get_node_method: A method for getting a node.
     :return: payload.
     """
-    pass
+    print '!!! evaluate_functsion'

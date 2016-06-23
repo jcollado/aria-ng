@@ -191,7 +191,6 @@ class InterfaceDefinition(Presentation):
         
         :rtype: dict of str, :class:`PropertyDefinition` or :class:`PropertyAssignment`
         """
-        # TODO
 
 @has_fields
 @tosca_specification('3.6.2')

@@ -1,16 +1,25 @@
 
-from ... import has_fields, object_field, object_list_field, object_dict_field
-from ..tosca import NodeTemplate as BaseNodeTemplate, ServiceTemplate as BaseServiceTemplate
+from ... import has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type
+from ..tosca import NodeTemplate as BaseNodeTemplate, ServiceTemplate as BaseServiceTemplate, RelationshipTemplate as BaseRelationshipTemplate
 from ..tosca import PropertyDefinition
 from .types import NodeType, RelationshipType
-from .misc import Relationship, Output, Operation, Plugin, Instances
+from .misc import Output, Operation, Plugin, Instances
+
+@has_fields
+class RelationshipTemplate(BaseRelationshipTemplate):
+    @field_type(str)
+    @primitive_field
+    def target():
+        """
+        :rtype: str
+        """
 
 @has_fields
 class NodeTemplate(BaseNodeTemplate):
-    @object_list_field(Relationship)
+    @object_list_field(RelationshipTemplate)
     def relationships():
         """
-        :rtype: list of :class:`Relationship`
+        :rtype: list of :class:`RelationshipTemplate`
         """
     
     @object_field(Instances)

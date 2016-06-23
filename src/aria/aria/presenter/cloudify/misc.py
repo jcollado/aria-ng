@@ -19,23 +19,6 @@ class Output(Presentation):
     def value():
         pass
 
-@has_fields
-class Relationship(Presentation):
-    @required_field
-    @field_type(str)
-    @primitive_field
-    def type():
-        """
-        :rtype: str
-        """
-
-    @field_type(str)
-    @primitive_field
-    def target():
-        """
-        :rtype: str
-        """
-
 def get_implementation(field, raw):
     if isinstance(raw, basestring):
         return raw
@@ -73,6 +56,20 @@ class Operation(Presentation):
     def executor():
         """
         :rtype: str
+        """
+
+    @field_type(int)
+    @primitive_field
+    def max_retries():
+        """
+        :rtype: int
+        """
+
+    @field_type(int)
+    @primitive_field
+    def retry_interval():
+        """
+        :rtype: int
         """
 
     @object_dict_field(PropertyDefinition)

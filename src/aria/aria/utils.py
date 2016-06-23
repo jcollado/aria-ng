@@ -1,6 +1,7 @@
 
-from clint.textui import puts, colored, indent
 from threading import Lock
+from collections import OrderedDict
+from clint.textui import puts, colored, indent
 import sys, traceback, linecache
 
 class OpenClose(object):
@@ -34,12 +35,107 @@ class LockedList(list):
         
     def __exit__(self, type, value, traceback):
         return self.lock.__exit__(type, value, traceback)
+
+class ReadOnlyList(list):
+    """
+    A read-only list.
+    """
+    def __init__(self, *args, **kwargs):
+        self.locked = False
+        super(ReadOnlyList, self).__init__(*args, **kwargs)
+        self.locked = True
+
+    def __setitem__(self, key, value):
+        if self.locked:
+            raise TypeError('read-only list')
+        return super(ReadOnlyList, self).__setitem__(key, value)
+
+    def __delitem__(self, key):
+        if self.locked:
+            raise TypeError('read-only list')
+        return super(ReadOnlyList, self).__delitem__(key)
+
+class ReadOnlyDict(OrderedDict):
+    """
+    A read-only ordered dict.
+    """
+    def __init__(self, *args, **kwargs):
+        self.locked = False
+        super(ReadOnlyDict, self).__init__(*args, **kwargs)
+        self.locked = True
+
+    def __setitem__(self, key, value):
+        if self.locked:
+            raise TypeError('read-only dict')
+        return super(ReadOnlyDict, self).__setitem__(key, value)
+
+    def __delitem__(self, key):
+        if self.locked:
+            raise TypeError('read-only dict')
+        return super(ReadOnlyDict, self).__delitem__(key)
+
+class StrictList(list):
+    """
+    A list that raises TypeError exceptions when objects of the wrong type are inserted.
+    """
+    def __init__(self, value_class, items=None, wrapper_fn=None, unwrapper_fn=None):
+        super(StrictList, self).__init__()
+        self.value_class = value_class
+        self.wrapper_fn = wrapper_fn
+        self.unwrapper_fn = unwrapper_fn
+        if items:
+            for item in items:
+                self.append(item)
+
+    def __getitem__(self, key):
+        value = super(StrictList, self).__getitem__(key)
+        if self.unwrapper_fn:
+            value = self.unwrapper_fn(value)
+        return value
+        
+    def __setitem__(self, key, value):
+        if not isinstance(value, self.value_class):
+            raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
+        if self.wrapper_fn:
+            value = self.wrapper_fn(value)
+        return super(StrictList, self).__setitem__(key, value)
+
+class StrictDict(OrderedDict):
+    """
+    An ordered dict that raises TypeError exceptions when keys or values of the wrong type are used.
+    """
+    def __init__(self, key_class, value_class, items=None, wrapper_fn=None, unwrapper_fn=None):
+        super(StrictDict, self).__init__()
+        self.key_class = key_class
+        self.value_class = value_class
+        self.wrapper_fn = wrapper_fn
+        self.unwrapper_fn = unwrapper_fn
+        if items:
+            for k, v in items:
+                self[k] = v
+    
+    def __getitem__(self, key):
+        if not isinstance(key, self.key_class):
+            raise TypeError('key must be a %s.%s' % (self.key_class.__module__, self.key_class.__name__))
+        value = super(StrictDict, self).__getitem__(key)
+        if self.unwrapper_fn:
+            value = self.unwrapper_fn(value)
+        return value
+        
+    def __setitem__(self, key, value):
+        if not isinstance(key, self.key_class):
+            raise TypeError('key must be a %s.%s' % (self.key_class.__module__, self.key_class.__name__))
+        if not isinstance(value, self.value_class):
+            raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
+        if self.wrapper_fn:
+            value = self.wrapper_fn(value)
+        return super(StrictDict, self).__setitem__(key, value)
         
 def classname(o):
     """
     The full class name of an object.
     """
-    return o.__module__ + '.' + o.__class__.__name__
+    return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
 
 def merge(a, b, path=None, strict=True):
     """

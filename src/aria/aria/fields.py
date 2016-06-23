@@ -1,6 +1,7 @@
 
 from .issue import Issue
 from .exceptions import InvalidValueError
+from .utils import ReadOnlyList, ReadOnlyDict
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict
@@ -53,13 +54,13 @@ class Field(object):
                 raise InvalidValueError('field must be a list: %s=%s, at %s' % (self.name, repr(value), location))
             if self.cls:
                 for i in range(len(value)):
-                    if not InvalidValueError(value[i], self.cls):
+                    if not isinstance(value[i], self.cls):
                         try:
                             value[i] = self.cls(value[i])
                         except ValueError:
                             location = get_location(raw, self.name)
                             raise InvalidValueError('field must be coercible to a list of %s.%s: %s[%d]=%s, at %s' % (self.cls.__module__, self.cls.__name__, self.name, i, repr(value[i]), location))
-            return value
+            return ReadOnlyList(value)
 
         elif self.type == 'object':
             try:
@@ -72,19 +73,22 @@ class Field(object):
             if not isinstance(value, list):
                 location = get_location(raw, self.name)
                 raise InvalidValueError('field must be a list: %s=%s, at %s' % (self.name, repr(value), location))
-            return [self.cls(v) for v in value]
+            return ReadOnlyList([self.cls(v) for v in value])
 
         elif self.type == 'object_dict':
             if not isinstance(value, dict):
                 location = get_location(raw, self.name)
                 raise InvalidValueError('field must be a dict: %s=%s, at %s' % (self.name, repr(value), location))
-            return OrderedDict([(k, self.cls(v)) for k, v in value.iteritems()])
+            return ReadOnlyDict([(k, self.cls(v)) for k, v in value.iteritems()])
             
         else:
             location = get_location(raw, self.name)
             raise AttributeError('unsupported field type: %s, at %s' % (self.type, location))
 
     def set(self, raw, value):
+        return self.set(raw, value)
+
+    def _set(self, raw, value):
         old = raw.get(self.name)
         raw[self.name] = value
         try:
@@ -288,7 +292,23 @@ def field_getter(getter_fn):
             f.get = MethodType(getter_fn, f, Field)
             return f
         else:
-            raise AttributeError('@field_validator must be used with a Field')
+            raise AttributeError('@field_getter must be used with a Field')
+    return decorator
+
+def field_setter(setter_fn):
+    """
+    Function decorator for overriding the setter function of a field.
+    
+    The signature of the setter function must be: f(field, raw, value).
+    
+    The function must already be decorated with a field decorator.
+    """
+    def decorator(f):
+        if isinstance(f, Field):
+            f.set = MethodType(setter_fn, f, Field)
+            return f
+        else:
+            raise AttributeError('@field_setter must be used with a Field')
     return decorator
 
 def field_validator(validator_fn):

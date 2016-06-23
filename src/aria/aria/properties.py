@@ -45,6 +45,9 @@ def has_validated_properties(cls):
     
     2. Generates automatic `@property` implementations for the fields
        with the help of a set of special function decorators.
+
+    The class will also gain two utility methods,
+    `iter_validated_property_names` and `iter_validated_properties`.
     """
 
     # Make sure we have PROPERTIES

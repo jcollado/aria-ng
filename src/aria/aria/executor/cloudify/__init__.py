@@ -7,5 +7,5 @@ __all__ = (
     'Agent',
     'MockAgent',
     'AgentExecutor',
-    'HostAgentExecutor'
+    'HostAgentExecutor',
     'CentralDeploymentAgentExecutor')

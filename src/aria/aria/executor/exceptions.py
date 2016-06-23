@@ -8,5 +8,5 @@ class ExecutorError(AriaError):
 
 class ExecutorNotFoundError(ExecutorError):
     """
-    ARIA executor error.
+    ARIA executor not found error.
     """

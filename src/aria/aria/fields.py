@@ -170,6 +170,13 @@ def has_fields(cls):
     
     2. Generates automatic `@property` implementations for the fields
        with the help of a set of special function decorators.
+
+    The class also works with the Python dict protocol, so that
+    fields can be accessed via dict semantics. The funcionatliy is
+    identical to that of using attribute access.
+
+    The class will also gain two utility methods, `iter_field_names`
+    and `iter_fields`.
     """
     
     # Make sure we have FIELDS
@@ -284,6 +291,7 @@ def field_getter(getter_fn):
     Function decorator for overriding the getter function of a field.
     
     The signature of the getter function must be: f(field, raw).
+    The default getter can be accessed as field.\_get().
     
     The function must already be decorated with a field decorator.
     """
@@ -300,6 +308,7 @@ def field_setter(setter_fn):
     Function decorator for overriding the setter function of a field.
     
     The signature of the setter function must be: f(field, raw, value).
+    The default setter can be accessed as field.\_set().
     
     The function must already be decorated with a field decorator.
     """
@@ -316,6 +325,7 @@ def field_validator(validator_fn):
     Function decorator for overriding the validator function of a field.
     
     The signature of the validator function must be: f(field, presentation, issues).
+    The default validator can be accessed as field.\_validate().
     
     The function must already be decorated with a field decorator.
     """

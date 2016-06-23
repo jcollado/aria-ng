@@ -7,7 +7,7 @@ MODULES = (
     'cloudify',)
 
 __all__ = (
-    'ExecutorError'
+    'ExecutorError',
     'ExecutorNotFoundError',
     'Executor')
     

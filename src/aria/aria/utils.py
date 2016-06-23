@@ -39,6 +39,9 @@ class LockedList(list):
 class ReadOnlyList(list):
     """
     A read-only list.
+    
+    After initialization it will raise TypeError exceptions if modification
+    is attempted.
     """
     def __init__(self, *args, **kwargs):
         self.locked = False
@@ -58,6 +61,9 @@ class ReadOnlyList(list):
 class ReadOnlyDict(OrderedDict):
     """
     A read-only ordered dict.
+    
+    After initialization it will raise TypeError exceptions if modification
+    is attempted.
     """
     def __init__(self, *args, **kwargs):
         self.locked = False

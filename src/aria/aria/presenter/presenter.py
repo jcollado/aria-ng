@@ -1,7 +1,8 @@
 
-from .. import UnimplementedFunctionalityError, classname, merge
+from .. import merge
+from .presentation import Presentation
 
-class Presenter(object):
+class Presenter(Presentation):
     """
     Base class for ARIA presenters.
     
@@ -10,9 +11,6 @@ class Presenter(object):
     
     def __init__(self, raw={}):
         self.raw = raw
-
-    def validate(self, issues):
-        raise UnimplementedFunctionalityError(classname(self) + '.validate')
 
     def merge_import(self, presentation):
         merge(self.raw, presentation.raw)

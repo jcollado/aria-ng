@@ -1,6 +1,5 @@
 
 from ..consumer import Consumer
-from ..presenter.cloudify import CloudifyPresenter1_3
 from .style import Style
 from clint.textui import puts, colored, indent
 
@@ -14,39 +13,34 @@ class Printer(Consumer):
         with self.style.indent:
             puts(self.presentation.__class__.__name__)
 
-        if isinstance(self.presentation, CloudifyPresenter1_3):
-            self.print_cloudify()
-        
-    def print_cloudify(self):
-        service_template = self.presentation.service_template
-
-        if service_template.description:
+        if self.presentation.service_template.description:
             puts(self.style.section('Description:'))
             with self.style.indent:
-                self.print_description(service_template.description)
+                self.print_description(self.presentation.service_template.description)
         
-        if service_template.inputs:
+        if self.presentation.inputs:
             puts(self.style.section('Inputs:'))
             with self.style.indent:
-                for name, input in service_template.inputs.iteritems():
+                for name, input in self.presentation.inputs.iteritems():
                     puts(self.style.property(name))
-                    with self.style.indent:
-                        self.print_description(input.description)
+                    if hasattr(input, 'description') and input.description: # cloudify_dsl
+                        with self.style.indent:
+                            self.print_description(input.description)
 
-        if service_template.outputs:
+        if self.presentation.outputs:
             puts(self.style.section('Outputs:'))
             with self.style.indent:
-                for name, output in service_template.outputs.iteritems():
+                for name, output in self.presentation.outputs.iteritems():
                     puts(self.style.property(name))
                     with self.style.indent:
                         self.print_description(output.description)
                         for k, v in output.value.iteritems():
                             self.print_assignment(k, v)
 
-        if service_template.node_types:
+        if self.presentation.node_types:
             puts(self.style.section('Node types:'))
             with self.style.indent:
-                for name, node_type in service_template.node_types.iteritems():
+                for name, node_type in self.presentation.node_types.iteritems():
                     puts(self.style.type(name))
                     with self.style.indent:
                         self.print_description(node_type.description)
@@ -69,25 +63,25 @@ class Printer(Consumer):
                                 for k, interface in node_type.interfaces.iteritems():
                                     self.print_interface(k, interface)
 
-        if service_template.relationships:
-            puts(self.style.section('Relationships:'))
+        if self.presentation.relationship_types:
+            puts(self.style.section('Relationship types:'))
             with self.style.indent:
-                for name, relationship in service_template.relationships.iteritems():
+                for name, relationship_type in self.presentation.relationship_types.iteritems():
                     puts(self.style.type(name))
-                    self.print_description(relationship.description)
+                    self.print_description(relationship_type.description)
                     with self.style.indent:
-                        if relationship.derived_from:
-                            puts('Derived from: %s' % self.style.type(relationship.derived_from))
-                        if relationship.target_interfaces:
+                        if relationship_type.derived_from:
+                            puts('Derived from: %s' % self.style.type(relationship_type.derived_from))
+                        if relationship_type.target_interfaces:
                             puts('Target interfaces:')
                             with self.style.indent:
-                                for k, target_interface in relationship.target_interfaces.iteritems():
+                                for k, target_interface in relationship_type.target_interfaces.iteritems():
                                     self.print_interface(k, target_interface)
         
-        if service_template.node_templates:
+        if self.presentation.node_templates:
             puts(self.style.section('Node templates:'))
             with self.style.indent:
-                for name, node_template in service_template.node_templates.iteritems():
+                for name, node_template in self.presentation.node_templates.iteritems():
                     puts(self.style.node(name))
                     with self.style.indent:
                         puts('Type: %s' % self.style.type(node_template.type))
@@ -96,7 +90,7 @@ class Printer(Consumer):
                             with self.style.indent:
                                 for k, v in node_template.properties.iteritems():
                                     self.print_assignment(k, v.value)
-                        if node_template.relationships:
+                        if hasattr(node_template, 'node_template.relationships') and node_template.relationships: # cloudify_dsl
                             puts('Relationships:')
                             with self.style.indent:
                                 for relationship in node_template.relationships:
@@ -121,7 +115,7 @@ class Printer(Consumer):
         puts(self.style.type(k))
         with self.style.indent:
             if interface.operations:
-                puts('Workflows:')
+                puts('Operations:')
                 with self.style.indent:
                     for kk, operation in interface.operations.iteritems():
                         puts(self.style.property(kk))

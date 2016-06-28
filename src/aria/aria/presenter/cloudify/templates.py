@@ -53,7 +53,6 @@ class ServiceTemplate(BaseServiceTemplate):
         """
         :rtype: dict of str, :class:`RelationshipType`
         """
-        return self._get_object_dict('relationships', RelationshipType)
     
     @object_dict_field(NodeTemplate)
     def node_templates():

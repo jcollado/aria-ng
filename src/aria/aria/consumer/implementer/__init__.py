@@ -44,22 +44,22 @@ class Implementer(Consumer):
             raise BadImplementationError('Service class could not be instantiated', e)
 
     def implement(self):
-        service_template = self.presentation.service_template
-        
         generator = CodeGenerator()
         
-        generator.description = service_template.description
+        generator.description = self.presentation.service_template.description
         
-        if service_template.inputs:
-            for name, input in service_template.inputs.iteritems():
-                generator.inputs[name] = CodeProperty(generator, name, input.description, input.type, input.default)
+        if self.presentation.inputs:
+            for name, input in self.presentation.inputs.iteritems():
+                description = input.description if hasattr(input, 'description') else None # cloudify_dsl
+                the_default = input.default if hasattr(input, 'default') else None # cloudify_dsl
+                generator.inputs[name] = CodeProperty(generator, name, description, input.type, the_default)
 
-        if service_template.outputs:
-            for name, output in service_template.outputs.iteritems():
+        if self.presentation.outputs:
+            for name, output in self.presentation.outputs.iteritems():
                 generator.outputs[name] = CodeAssignment(generator, name, output.description, output.value)
         
-        if service_template.node_types:
-            for name, node_type in service_template.node_types.iteritems():
+        if self.presentation.node_types:
+            for name, node_type in self.presentation.node_types.iteritems():
                 cls = generator.get_class(name)
                 if node_type.derived_from:
                     cls.base = node_type.derived_from
@@ -77,8 +77,8 @@ class Implementer(Consumer):
                                 for pname, prop in operation.inputs.iteritems():
                                     m.arguments[pname] = CodeProperty(generator, pname, prop.description, prop.type, prop.default)
 
-        if service_template.data_types:
-            for name, data_type in service_template.data_types.iteritems():
+        if self.presentation.data_types:
+            for name, data_type in self.presentation.data_types.iteritems():
                 cls = generator.get_class(name)
                 if data_type.derived_from:
                     cls.base = data_type.derived_from
@@ -88,30 +88,30 @@ class Implementer(Consumer):
                     for pname, prop in data_type.properties.iteritems():
                         cls.properties[pname] = CodeProperty(generator, pname, prop.description, prop.type, prop.default)
 
-        if service_template.relationships:
-            for name, relationship in service_template.relationships.iteritems():
+        if self.presentation.relationship_types:
+            for name, relationship_type in self.presentation.relationship_types.iteritems():
                 cls = generator.get_class(name)
-                if relationship.derived_from:
-                    cls.base = relationship.derived_from
-                if relationship.description:
-                    cls.description = relationship.description
-                if relationship.properties:
-                    for name, p in relationship.properties.iteritems():
+                if relationship_type.derived_from:
+                    cls.base = relationship_type.derived_from
+                if relationship_type.description:
+                    cls.description = relationship_type.description
+                if relationship_type.properties:
+                    for name, p in relationship_type.properties.iteritems():
                         cls.properties[name] = CodeProperty(generator, name, p.description, p.type, p.default)
 
-        if service_template.node_templates:
-            for name, node_template in service_template.node_templates.iteritems():
+        if self.presentation.node_templates:
+            for name, node_template in self.presentation.node_templates.iteritems():
                 n = CodeNodeTemplate(generator, name, node_template.type, node_template.description)
                 generator.nodes[name] = n
                 if node_template.properties:
                     for name, prop in node_template.properties.iteritems():
                         n.assignments[name] = prop.value
-                if node_template.relationships:
+                if hasattr(node_template, 'relationships') and node_template.relationships: # cloudify_dsl
                     for relationship in node_template.relationships:
                         n.relationships.append(CodeRelationship(generator, relationship.type, relationship.target))
 
-        if service_template.workflows:
-            for name, operation in service_template.workflows.iteritems():
+        if self.presentation.workflows:
+            for name, operation in self.presentation.workflows.iteritems():
                 m = CodeMethod(generator, name, None, operation.description, operation.mapping, operation.executor)
                 generator.workflows[name] = m
                 if operation.parameters:

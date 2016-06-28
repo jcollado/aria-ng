@@ -20,3 +20,43 @@ class Presenter(Presentation):
     def link(self):
         map = self.raw._map
         map.link(self.raw)
+
+    @property
+    def inputs(self):
+        return None
+            
+    @property
+    def outputs(self):
+        return None
+
+    @property
+    def data_types(self):
+        return None
+    
+    @property
+    def node_types(self):
+        return None
+    
+    @property
+    def relationship_types(self):
+        return None
+    
+    @property
+    def group_types(self):
+        return None
+    
+    @property
+    def node_templates(self):
+        return None
+    
+    @property
+    def relationship_templates(self):
+        return None
+
+    @property
+    def groups(self):
+        return None
+
+    @property
+    def workflows(self):
+        return None

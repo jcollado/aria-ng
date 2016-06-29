@@ -84,6 +84,7 @@ class Printer(Consumer):
                 for name, node_template in self.presentation.node_templates.iteritems():
                     puts(self.style.node(name))
                     with self.style.indent:
+                        self.print_description(node_template.description)
                         puts('Type: %s' % self.style.type(node_template.type))
                         if node_template.properties:
                             puts('Properties:')
@@ -114,7 +115,7 @@ class Printer(Consumer):
     def print_interface(self, k, interface):
         puts(self.style.type(k))
         with self.style.indent:
-            if interface.operations:
+            if hasattr(interface, 'operations') and interface.operations: # cloudify_dsl
                 puts('Operations:')
                 with self.style.indent:
                     for kk, operation in interface.operations.iteritems():

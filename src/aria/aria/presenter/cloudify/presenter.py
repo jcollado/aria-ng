@@ -1,13 +1,10 @@
 
 from ..tosca import ToscaSimplePresenter1_0
-from .definitions import *
-from .misc import *
-from .templates import *
-from .types import *
+from .templates import ServiceTemplate
 
 class CloudifyPresenter1_3(ToscaSimplePresenter1_0):
     """
-    ARIA presenter for Cloudify.
+    ARIA presenter for the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/overview/>`__.
     """
 
     @staticmethod

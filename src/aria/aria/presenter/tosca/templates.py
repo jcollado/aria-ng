@@ -1,7 +1,7 @@
 
 from ... import tosca_specification, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_type, required_field
 from .. import Presentation
-from .misc import Repository, Import
+from .misc import MetaData, Repository, Import
 from .definitions import ParameterDefinition, GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinition, ArtifactDefinition
 from .assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
@@ -259,26 +259,33 @@ class ServiceTemplate(Presentation):
     
     @field_type(str)
     @primitive_field
+    @tosca_specification('versioning', spec='cloudify-1.3')
+    @tosca_specification('3.9.3.1')
     def tosca_definitions_version():
         """
         Defines the version of the TOSCA Simple Profile specification the template (grammar) complies with. 
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379455047>`__
         
+        See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-versioning/>`__
+        
         :rtype: str
         """
 
-    @primitive_field
+    @object_field(MetaData)
     def metadata():
         """
         Defines a section used to declare additional metadata information. Domain-specific TOSCA profile specifications may define keynames that are required for their implementations.
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379455048>`__
+        
+        :rtype: :class:`MetaData`
         """
 
     @field_type(str)
     #@required_field # test
     @primitive_field
+    @tosca_specification('3.9.3.6')
     def description():
         """
         Declares a description for this Service Template and its contents.
@@ -289,6 +296,7 @@ class ServiceTemplate(Presentation):
         """
     
     @primitive_field
+    @tosca_specification('3.9.3.7')
     def dsl_definitions():
         """
         Declares optional DSL-specific definitions and conventions. For example, in YAML, this allows defining reusable YAML macros (i.e., YAML alias anchors) for use throughout the TOSCA Service Template.
@@ -297,6 +305,7 @@ class ServiceTemplate(Presentation):
         """
         
     @object_list_field(Repository)
+    @tosca_specification('3.9.3.8')
     def repositories():
         """
         Declares the list of external repositories which contain artifacts that are referenced in the service template along with their addresses and necessary credential information used to connect to them in order to retrieve the artifacts.
@@ -305,6 +314,7 @@ class ServiceTemplate(Presentation):
         """
 
     @object_list_field(Import)
+    @tosca_specification('3.9.3.9')
     def imports():
         """
         Declares import statements external TOSCA Definitions documents. For example, these may be file location or URIs relative to the service template file within the same TOSCA CSAR file.
@@ -313,6 +323,7 @@ class ServiceTemplate(Presentation):
         """
         
     @object_dict_field(ArtifactType)
+    @tosca_specification('3.9.3.10')
     def artifact_types():
         """
         This section contains an optional list of artifact type definitions for use in the service template.
@@ -321,6 +332,7 @@ class ServiceTemplate(Presentation):
         """
         
     @object_dict_field(DataType)
+    @tosca_specification('3.9.3.11')
     def data_types():
         """
         Declares a list of optional TOSCA Data Type definitions.
@@ -329,6 +341,7 @@ class ServiceTemplate(Presentation):
         """
         
     @object_dict_field(CapabilityType)
+    @tosca_specification('3.9.3.12')
     def capability_types():
         """
         This section contains an optional list of capability type definitions for use in the service template.
@@ -337,6 +350,7 @@ class ServiceTemplate(Presentation):
         """
         
     @object_dict_field(InterfaceType)
+    @tosca_specification('3.9.3.13')
     def interface_types():
         """
         This section contains an optional list of interface type definitions for use in the service template.
@@ -345,6 +359,7 @@ class ServiceTemplate(Presentation):
         """
         
     @object_dict_field(RelationshipType)
+    @tosca_specification('3.9.3.14')
     def relationship_types():
         """
         This section contains a set of relationship type definitions for use in the service template.
@@ -353,6 +368,7 @@ class ServiceTemplate(Presentation):
         """
 
     @object_dict_field(NodeType)
+    @tosca_specification('3.9.3.15')
     def node_types():
         """
         This section contains a set of node type definitions for use in the service template.
@@ -361,6 +377,7 @@ class ServiceTemplate(Presentation):
         """
 
     @object_dict_field(GroupType)
+    @tosca_specification('3.9.3.16')
     def group_types():
         """
         This section contains a list of group type definitions for use in the service template.
@@ -369,6 +386,7 @@ class ServiceTemplate(Presentation):
         """
 
     @object_dict_field(PolicyType)
+    @tosca_specification('3.9.3.17')
     def policy_types():
         """
         This section contains a list of policy type definitions for use in the service template.

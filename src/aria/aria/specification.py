@@ -25,11 +25,12 @@ def tosca_specification(section, spec='tosca-simple-profile-1.0'):
         url = URL.get(spec)
         if url:
             doc = o.__doc__
-            url_start = doc.find(url)
-            if url_start != -1:
-                url_end = doc.find('>', url_start + len(url))
-                if url_end != -1:
-                    url = doc[url_start:url_end]
+            if doc is not None:
+                url_start = doc.find(url)
+                if url_start != -1:
+                    url_end = doc.find('>', url_start + len(url))
+                    if url_end != -1:
+                        url = doc[url_start:url_end]
 
         sp[section] = OrderedDict((
             ('code', '%s.%s' % (o.__module__, o.__name__)),
@@ -45,15 +46,18 @@ def iter_spec(spec):
     sections = TOSCA_SPECIFICATION[spec]
     keys = sections.keys()
     def key(value):
-        k = 0.0
-        level = 1.0
-        parts = value.split('-', 1)
-        for part in parts[0].split('.'):
-            k += float(part) / level
-            level *= 1000.0
-        if len(parts) > 1:
-            k += float(parts[1]) / level
-        return k
+        try:
+            k = 0.0
+            level = 1.0
+            parts = value.split('-', 1)
+            for part in parts[0].split('.'):
+                k += float(part) / level
+                level *= 1000.0
+            if len(parts) > 1:
+                k += float(parts[1]) / level
+            return k
+        except ValueError:
+            return value
     keys.sort(key=key)
     for key in keys:
         yield key, sections[key]

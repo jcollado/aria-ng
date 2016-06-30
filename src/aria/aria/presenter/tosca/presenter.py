@@ -1,11 +1,6 @@
 
 from .. import Presenter
-from .assignments import *
-from .definitions import *
-from .filters import *
-from .templates import *
-from .types import *
-from .misc import *
+from .templates import ServiceTemplate
 
 class ToscaSimplePresenter1_0(Presenter):
     """

@@ -35,5 +35,6 @@ __all__ = (
     'NodeType',
     'GroupType',
     'PolicyType',
+    'MetaData',
     'Repository',
     'Import')

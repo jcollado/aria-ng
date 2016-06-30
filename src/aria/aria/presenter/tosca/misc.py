@@ -4,6 +4,33 @@ from .. import Presentation
 from tosca.datatypes import Credential
 
 @has_fields
+@tosca_specification('3.9.3.2')
+class MetaData(Presentation):
+    @field_type(str)
+    @primitive_field
+    @tosca_specification('3.9.3.3')
+    def template_name():
+        """
+        This optional metadata keyname can be used to declare the name of service template as a single-line string value.
+        """
+
+    @field_type(str)
+    @primitive_field
+    @tosca_specification('3.9.3.4')
+    def template_author():
+        """
+        This optional metadata keyname can be used to declare the author(s) of the service template as a single-line string value.
+        """
+
+    @field_type(str)
+    @primitive_field
+    @tosca_specification('3.9.3.5')
+    def template_version():
+        """
+        This optional metadata keyname can be used to declare a domain specific version of the service template as a single-line string value.
+        """
+
+@has_fields
 @tosca_specification('3.5.5')
 class Repository(Presentation):
     """
@@ -48,12 +75,15 @@ def get_file(field, raw):
         return field._get(raw)
 
 @has_fields
+@tosca_specification('imports', spec='cloudify-1.3')
 @tosca_specification('3.5.7')
 class Import(Presentation):
     """
     An import definition is used within a TOSCA Service Template to locate and uniquely name another TOSCA Service Template file which has type and template definitions to be imported (included) and referenced within another Service Template.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_IMPORT_DEF>`__
+    
+    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-imports/>`__
     """
     
     @required_field

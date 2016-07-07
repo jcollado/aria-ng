@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
-import tosca, tosca.datatypes
+from aria import dsl_specification, has_validated_properties, validated_property, property_type
+import tosca.datatypes
 
 @has_validated_properties
-@tosca_specification('8.3.1', spec='tosca-simple-nfv-1.0')
+@dsl_specification('8.3.1', 'tosca-simple-nfv-1.0')
 class CPUAllocation(tosca.datatypes.Root):
     """
     Granular CPU allocation requirements for NFV workloads.
@@ -17,41 +17,41 @@ class CPUAllocation(tosca.datatypes.Root):
     
     @property_type(str)
     @validated_property
-    def cpu_affinity():
+    def cpu_affinity(self):
         """
         Describes whether vCPU need to be pinned to dedicated CPU core or shared dynamically.
         """
 
     @property_type(str)
     @validated_property
-    def thread_allocation():
+    def thread_allocation(self):
         """
         Describe thread allocation requirement.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def socket_count():
+    def socket_count(self):
         """
         Number of CPU sockets.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def core_count():
+    def core_count(self):
         """
         Number of cores per socket.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def thread_count():
+    def thread_count(self):
         """
         Number of threads per core.
         """
 
 @has_validated_properties
-@tosca_specification('8.3.2', spec='tosca-simple-nfv-1.0')
+@dsl_specification('8.3.2', 'tosca-simple-nfv-1.0')
 class NUMA(tosca.datatypes.Root):
     """
     Granular Non-Uniform Memory Access (NUMA) topology requirements for NFV workloads.
@@ -65,14 +65,14 @@ class NUMA(tosca.datatypes.Root):
 
     @property_type(tosca.Integer)
     @validated_property
-    def id():
+    def id(self):
         """
         CPU socket identifier.
         """
 
     @property_type(tosca.Map(tosca.Integer))
     @validated_property
-    def vcpus():
+    def vcpus(self):
         """
         List of specific host cpu numbers within a NUMA socket complex.
 
@@ -81,7 +81,7 @@ class NUMA(tosca.datatypes.Root):
 
     @property_type(tosca.Size)
     @validated_property
-    def mem_size():
+    def mem_size(self):
         """
         Size of memory allocated from this NUMA memory bank.
         """

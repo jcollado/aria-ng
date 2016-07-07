@@ -18,7 +18,7 @@ class AriaError(Exception):
 
 class UnimplementedFunctionalityError(AriaError):
     """
-    ARIA error: funcionality is unimplemented.
+    ARIA error: functionality is unimplemented.
     """
 
 class InvalidValueError(AriaError):

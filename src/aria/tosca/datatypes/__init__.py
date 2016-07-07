@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import dsl_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca
 
 @has_validated_properties
-@tosca_specification('5.2.1')
+@dsl_specification('5.2.1', 'tosca-simple-profile-1.0')
 class Root(object):
     """
     This is the default (root) TOSCA Root Type definition that all complex TOSCA Data Types derive from.
@@ -12,7 +12,7 @@ class Root(object):
     """
 
 @has_validated_properties
-@tosca_specification('5.2.2')
+@dsl_specification('5.2.2', 'tosca-simple-profile-1.0')
 class Credential(Root):
     """
     The Credential type is a complex TOSCA data Type used when describing authorization credentials used to access network accessible resources.
@@ -26,7 +26,7 @@ class Credential(Root):
     
     @property_type(str)
     @validated_property
-    def protocol():
+    def protocol(self):
         """
         The optional protocol name.
         """
@@ -35,7 +35,7 @@ class Credential(Root):
     @property_default('password')
     @property_type(str)
     @validated_property
-    def token_type():
+    def token_type(self):
         """
         The required token type.
         """
@@ -43,21 +43,21 @@ class Credential(Root):
     @required_property
     @property_type(str)
     @validated_property
-    def token():
+    def token(self):
         """
         The required token used as a credential for authorization or access to a networked resource.
         """
 
     @property_type(tosca.Map(str))
     @validated_property
-    def keys():
+    def keys(self):
         """
         The optional list of protocol-specific keys or assertions.
         """
 
     @property_type(str)
     @validated_property
-    def user():
+    def user(self):
         """
         The optional user (name or ID) used for non-token based credentials.
         """

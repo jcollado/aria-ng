@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, property_status, required_property
-import tosca, tosca.capabilities
+from aria import dsl_specification, has_validated_properties
+import tosca.capabilities
     
 @has_validated_properties
-@tosca_specification('5.4.11')
+@dsl_specification('5.4.11', 'tosca-simple-profile-1.0')
 class Bindable(tosca.capabilities.Node):
     """
     A node type that includes the Bindable capability indicates that it can be bound to a logical network association via a network port.
@@ -16,7 +16,7 @@ class Bindable(tosca.capabilities.Node):
     TYPE_URI = 'tosca.capabilities.network.Bindable'
 
 @has_validated_properties
-@tosca_specification('7.5.3')
+@dsl_specification('7.5.3', 'tosca-simple-profile-1.0')
 class Linkable(tosca.capabilities.Node):
     """
     A node type that includes the Linkable capability indicates that it can be pointed by tosca.relationships.network.LinksTo relationship type.

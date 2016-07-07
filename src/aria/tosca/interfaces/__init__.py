@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import dsl_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca
     
 @has_validated_properties
-@tosca_specification('5.7.3')
+@dsl_specification('5.7.3', 'tosca-simple-profile-1.0')
 class Root(object):
     """
     This is the default (root) TOSCA Interface Type definition that all other TOSCA Interface Types derive from.

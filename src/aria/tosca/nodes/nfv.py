@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
-import tosca, tosca.nodes, tosca.capabilities.network, tosca.capabilities.nfv
+from aria import dsl_specification, has_validated_properties, validated_property, property_type
+import tosca.nodes, tosca.capabilities.network, tosca.capabilities.nfv
 
 @has_validated_properties
-@tosca_specification('8.5.1', spec='tosca-simple-nfv-1.0')
+@dsl_specification('8.5.1', 'tosca-simple-nfv-1.0')
 class VNF(tosca.nodes.Root):
     """
     The NFV VNF Node Type represents a Virtual Network Function as defined by [ETSI GS NFV-MAN 001 v1.1.1]. It is the default type that all other VNF Node Types derive from. This allows for all VNF nodes to have a consistent set of features for modeling and management (e.g., consistent definitions for requirements, capabilities and lifecycle interfaces). 
@@ -17,27 +17,27 @@ class VNF(tosca.nodes.Root):
 
     @property_type(str)
     @validated_property
-    def id():
+    def id(self):
         """
         ID of this VNF.
         """
 
     @property_type(str)
     @validated_property
-    def vendor():
+    def vendor(self):
         """
         Name of the vendor who generate this VNF.
         """
 
     @property_type(str)
     @validated_property
-    def version():
+    def version(self):
         """
         Version of the software for this VNF.
         """
 
 @has_validated_properties
-@tosca_specification('8.5.2', spec='tosca-simple-nfv-1.0')
+@dsl_specification('8.5.2', 'tosca-simple-nfv-1.0')
 class VDU(tosca.nodes.Root):
     """
     The NFV vdu node type represents a logical vdu entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
@@ -53,7 +53,7 @@ class VDU(tosca.nodes.Root):
 
     @property_type(tosca.capabilities.nfv.Metric)
     @validated_property
-    def monitoring_parameter():
+    def monitoring_parameter(self):
         """
         Monitoring parameter, which can be tracked for a VNFC based on this VDU.
 
@@ -62,13 +62,13 @@ class VDU(tosca.nodes.Root):
 
     @property_type(tosca.capabilities.network.Bindable)
     @validated_property
-    def virtualbinding():
+    def virtualbinding(self):
         """
         Defines ability of VirtualBindable.
         """
 
 @has_validated_properties
-@tosca_specification('8.5.3', spec='tosca-simple-nfv-1.0')
+@dsl_specification('8.5.3', 'tosca-simple-nfv-1.0')
 class CP(tosca.nodes.Root):
     """
     The NFV CP node represents a logical connection point entity as defined by [ETSI GS NFV-MAN 001 v1.1.1]. A connection point may be, for example, a virtual port, a virtual NIC address, a physical port, a physical NIC address or the endpoint of an IP VPN enabling network connectivity. It is assumed that each type of connection point will be modeled using subtypes of the CP type.
@@ -82,14 +82,14 @@ class CP(tosca.nodes.Root):
 
     @property_type(str)
     @validated_property
-    def type():
+    def type(self):
         """
         This may be, for example, a virtual port, a virtual NIC address, a SR-IOV port, a physical port, a physical NIC address or the endpoint of an IP VPN enabling network connectivity.
         """
 
     @property_type(str)
     @validated_property
-    def anti_spoof_protection():
+    def anti_spoof_protection(self):
         """
         Indicates of whether anti-spoofing rule need to be enabled for this vNIC. This is applicable only when CP type is virtual NIC (vPort).
         """
@@ -98,13 +98,13 @@ class CP(tosca.nodes.Root):
     
     @property_type(str)
     @validated_property
-    def address():
+    def address(self):
         """
         The actual virtual NIC address that is been assigned when instantiating the connection point.
         """
 
 @has_validated_properties
-@tosca_specification('9.1', spec='tosca-simple-nfv-1.0')
+@dsl_specification('9.1', 'tosca-simple-nfv-1.0')
 class VL(tosca.nodes.Root):
     """
     The NFV VL node type represents a logical virtual link entity as defined by [ETSI GS NFV-MAN 001 v1.1.1]. It is the default type from which all other virtual link types derive.
@@ -118,13 +118,13 @@ class VL(tosca.nodes.Root):
 
     @property_type(str)
     @validated_property
-    def vendor():
+    def vendor(self):
         """
         Vendor generating this VLD.
         """
 
 @has_validated_properties
-@tosca_specification('9.2', spec='tosca-simple-nfv-1.0')
+@dsl_specification('9.2', 'tosca-simple-nfv-1.0')
 class _ELine(VL):
     """
     The NFV VL.ELine node represents an E-Line virtual link entity.
@@ -139,7 +139,7 @@ class _ELine(VL):
 VL.ELine = _ELine
 
 @has_validated_properties
-@tosca_specification('9.3', spec='tosca-simple-nfv-1.0')
+@dsl_specification('9.3', 'tosca-simple-nfv-1.0')
 class _ELAN(VL):
     """
     The NFV VL.ELan node represents an E-LAN virtual link entity.
@@ -154,7 +154,7 @@ class _ELAN(VL):
 VL.ELAN = _ELAN
 
 @has_validated_properties
-@tosca_specification('9.4', spec='tosca-simple-nfv-1.0')
+@dsl_specification('9.4', 'tosca-simple-nfv-1.0')
 class _ETree(VL):
     """
     The NFV VL.ETree node represents an E-Tree virtual link entity.
@@ -169,7 +169,7 @@ class _ETree(VL):
 VL.ETree = _ETree
 
 @has_validated_properties
-@tosca_specification('10.5.1', spec='tosca-simple-nfv-1.0')
+@dsl_specification('10.5.1', 'tosca-simple-nfv-1.0')
 class FP(VL):
     """
     The NFV FP node type represents a logical network forwarding path entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
@@ -183,7 +183,7 @@ class FP(VL):
 
     @property_type(str)
     @validated_property
-    def policy():
+    def policy(self):
         """
         A policy or rule to apply to the NFP.
         """

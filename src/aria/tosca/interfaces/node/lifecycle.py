@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
-import tosca, tosca.interfaces
+from aria import dsl_specification, has_validated_properties
+import tosca.interfaces
     
 @has_validated_properties
-@tosca_specification('5.7.4')
+@dsl_specification('5.7.4', 'tosca-simple-profile-1.0')
 class Standard(tosca.interfaces.Root):
     """
     This lifecycle interface defines the essential, normative operations that TOSCA nodes may support.

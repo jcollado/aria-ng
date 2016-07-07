@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import dsl_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.datatypes
     
 @has_validated_properties
-@tosca_specification('5.6.1')
+@dsl_specification('5.6.1', 'tosca-simple-profile-1.0')
 class Root(object):
     """
     This is the default (root) TOSCA Relationship Type definition that all other TOSCA Relationship Types derive from.
@@ -16,7 +16,7 @@ class Root(object):
     @required_property
     @property_type(str)
     @validated_property
-    def tosca_id():
+    def tosca_id(self):
         """
         A unique identifier of the realized instance of a Relationship Template that derives from any TOSCA normative type.
         """
@@ -24,7 +24,7 @@ class Root(object):
     @required_property
     @property_type(str)
     @validated_property
-    def tosca_name():
+    def tosca_name(self):
         """
         This attribute reflects the name of the Relationship Template as defined in the TOSCA service template. This name is not unique to the realized instance model of corresponding deployed application as each template in the model can result in one or more instances (e.g., scaled) when orchestrated to a provider environment.
         """
@@ -33,13 +33,13 @@ class Root(object):
     @property_default('initial')
     @property_type(str)
     @validated_property
-    def state():
+    def state(self):
         """
         The state of the relationship instance. See section "Relationship States" for allowed values.
         """
 
 @has_validated_properties
-@tosca_specification('5.6.2')
+@dsl_specification('5.6.2', 'tosca-simple-profile-1.0')
 class DependsOn(Root):
     """
     This type represents a general dependency relationship between two nodes.
@@ -52,7 +52,7 @@ class DependsOn(Root):
     TYPE_URI = 'tosca.relationships.DependsOn'
 
 @has_validated_properties
-@tosca_specification('5.6.3')
+@dsl_specification('5.6.3', 'tosca-simple-profile-1.0')
 class HostedOn(Root):
     """
     This type represents a hosting relationship between two nodes.
@@ -65,7 +65,7 @@ class HostedOn(Root):
     TYPE_URI = 'tosca.relationships.HostedOn'
 
 @has_validated_properties
-@tosca_specification('5.6.4')
+@dsl_specification('5.6.4', 'tosca-simple-profile-1.0')
 class ConnectsTo(Root):
     """
     This type represents a network connection relationship between two nodes.
@@ -79,13 +79,13 @@ class ConnectsTo(Root):
 
     @property_type(tosca.datatypes.Credential)
     @validated_property
-    def credential():
+    def credential(self):
         """
         The security credential to use to present to the target endpoint to for either authentication or authorization purposes.
         """
 
 @has_validated_properties
-@tosca_specification('5.6.5')
+@dsl_specification('5.6.5', 'tosca-simple-profile-1.0')
 class AttachesTo(Root):
     """
     This type represents an attachment relationship between two nodes. For example, an AttachesTo relationship type would be used for attaching a storage node to a Compute node.
@@ -100,14 +100,14 @@ class AttachesTo(Root):
     @required_property
     @property_type(str)
     @validated_property
-    def location():
+    def location(self):
         """
         The relative location (e.g., path on the file system), which provides the root location to address an attached node. e.g., a mount point / path such as '/usr/data'. Note: The user must provide it and it cannot be "root".
         """
 
     @property_type(str)
     @validated_property
-    def device():
+    def device(self):
         """
         The logical device name which for the attached device (which is represented by the target node in the model). e.g., '/dev/hda1'.
         """
@@ -116,13 +116,13 @@ class AttachesTo(Root):
 
     @property_type(str)
     @validated_property
-    def device():
+    def device2(self): # TODO
         """
         The logical name of the device as exposed to the instance. Note: A runtime property that gets set when the model gets instantiated by the orchestrator.
         """
 
 @has_validated_properties
-@tosca_specification('5.6.6')
+@dsl_specification('5.6.6', 'tosca-simple-profile-1.0')
 class RoutesTo(ConnectsTo):
     """
     This type represents an intentional network routing between two Endpoints in different networks.

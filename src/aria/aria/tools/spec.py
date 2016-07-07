@@ -1,5 +1,5 @@
 
-from .. import import_modules, print_exception, TOSCA_SPECIFICATION, iter_spec
+from .. import import_modules, print_exception, DSL_SPECIFICATION, iter_spec
 from .utils import BaseArgumentParser
 from clint.textui import puts, colored, indent
 import csv, sys
@@ -11,22 +11,22 @@ class ArgumentParser(BaseArgumentParser):
 
 def main():
     try:
-        args, unknown_args = ArgumentParser().parse_known_args()
+        args, _ = ArgumentParser().parse_known_args()
 
         # By importing all modules, we will make sure that their classes are defined
-        # and that TOSCA_SPECIFICATION gets properly filled.
+        # and that DSL_SPECIFICATION gets properly filled.
         import_modules('aria')
         import_modules('tosca')
 
         if args.csv:
             w = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
             w.writerow(('Specification', 'Section', 'Code', 'URL'))
-            for spec in TOSCA_SPECIFICATION:
+            for spec in DSL_SPECIFICATION:
                 for section, details in iter_spec(spec):
                     w.writerow((spec, section, details['code'], details['url']))
         
         else:
-            for spec in TOSCA_SPECIFICATION:
+            for spec in DSL_SPECIFICATION:
                 puts(colored.cyan(spec))
                 with indent(2):
                     for section, details in iter_spec(spec):

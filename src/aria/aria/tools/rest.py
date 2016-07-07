@@ -1,9 +1,8 @@
 
 from .. import print_exception
-from ..loader import PATHS, LiteralLocation
-from ..consumer import Validator, Implementer
+from ..loading import PATHS, LiteralLocation
+from ..consumption import Implementer
 from .utils import CommonArgumentParser, create_parser_ns
-from clint.textui import puts, colored, indent
 from rest_server import start_server
 import urllib
 
@@ -13,7 +12,7 @@ def parse(uri):
 
 def validate_get(handler):
     path = urllib.unquote(handler.path[10:])
-    presentation, issues = parse(path)
+    _, issues = parse(path)
     return issues or ['No issues']
 
 def implement_get(handler):
@@ -25,7 +24,7 @@ def implement_get(handler):
 
 def validate_post(handler):
     payload = handler.get_payload()
-    presentation, issues = parse(LiteralLocation(payload))
+    _, issues = parse(LiteralLocation(payload))
     return issues or ['No issues']
 
 def implement_post(handler):
@@ -50,7 +49,7 @@ class ArgumentParser(CommonArgumentParser):
 def main():
     try:
         global args
-        args, unknown_args = ArgumentParser().parse_known_args()
+        args, _ = ArgumentParser().parse_known_args()
         if args.path:
             PATHS.append(args.path)
         start_server(ROUTES, args.port, args.root)

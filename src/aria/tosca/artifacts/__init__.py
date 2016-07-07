@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, property_status, required_property
+from aria import dsl_specification, has_validated_properties, validated_property, property_type, property_default, property_status, required_property
 import tosca
 
 @has_validated_properties
-@tosca_specification('5.3.1')
+@dsl_specification('5.3.1', 'tosca-simple-profile-1.0')
 class Root(object):
     """
     This is the default (root) TOSCA Artifact Type definition that all other TOSCA base Artifact Types derive from.
@@ -12,7 +12,7 @@ class Root(object):
     """
 
 @has_validated_properties
-@tosca_specification('5.3.2')
+@dsl_specification('5.3.2', 'tosca-simple-profile-1.0')
 class File(Root):
     """
     This artifact type is used when an artifact definition needs to have its associated file simply treated as a file and no special handling/handlers are invoked (i.e., it is not treated as either an implementation or deployment artifact type).
@@ -25,7 +25,7 @@ class File(Root):
     TYPE_URI = 'tosca.artifacts.File'
 
 @has_validated_properties
-@tosca_specification('5.3.3.1')
+@dsl_specification('5.3.3.1', 'tosca-simple-profile-1.0')
 class Deployment(Root):
     """
     This artifact type represents the parent type for all deployment artifacts in TOSCA. This class of artifacts typically represents a binary packaging of an application or service that is used to install/create or deploy it as part of a node's lifecycle.
@@ -38,7 +38,7 @@ class Deployment(Root):
     TYPE_URI = 'tosca.artifacts.Deployment'
 
 @has_validated_properties
-@tosca_specification('5.3.3.3')
+@dsl_specification('5.3.3.3', 'tosca-simple-profile-1.0')
 class Image(Deployment):
     """
     This artifact type represents a parent type for any "image" which is an opaque packaging of a TOSCA Node's deployment (whether real or virtual) whose contents are typically already installed and pre-configured (i.e., "stateful") and prepared to be run on a known target container.
@@ -53,7 +53,7 @@ class Image(Deployment):
 Deployment.Image = Image
 
 @has_validated_properties
-@tosca_specification('5.3.3.4')
+@dsl_specification('5.3.3.4', 'tosca-simple-profile-1.0')
 class VM(Deployment):
     """
     This artifact represents the parent type for all Virtual Machine (VM) image and container formatted deployment artifacts. These images contain a stateful capture of a machine (e.g., server) including operating system and installed software along with any configurations and can be run on another machine using a hypervisor which virtualizes typical server (i.e., hardware) resources.
@@ -68,7 +68,7 @@ class VM(Deployment):
 Deployment.Image.VM = VM
 
 @has_validated_properties
-@tosca_specification('5.3.4.1')
+@dsl_specification('5.3.4.1', 'tosca-simple-profile-1.0')
 class Implementation(Root):
     """
     This artifact type represents the parent type for all implementation artifacts in TOSCA. These artifacts are used to implement operations of TOSCA interfaces either directly (e.g., scripts) or indirectly (e.g., config. files).
@@ -81,7 +81,7 @@ class Implementation(Root):
     TYPE_URI = 'tosca.artifacts.Implementation'
 
 @has_validated_properties
-@tosca_specification('5.3.4.3')
+@dsl_specification('5.3.4.3', 'tosca-simple-profile-1.0')
 class Bash(Implementation):
     """
     This artifact type represents a Bash script type that contains Bash commands that can be executed on the Unix Bash shell.
@@ -99,7 +99,7 @@ class Bash(Implementation):
 Implementation.Bash = Bash
 
 @has_validated_properties
-@tosca_specification('5.3.4.4')
+@dsl_specification('5.3.4.4', 'tosca-simple-profile-1.0')
 class Python(Implementation):
     """
     This artifact type represents a Python file that contains Python language constructs that can be executed within a Python interpreter.

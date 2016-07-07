@@ -1,5 +1,5 @@
 
-from aria.parser import DefaultParser
+from aria.parsing import DefaultParser
 
 def parse_from_path(dsl_file_path,
                     resources_base_url=None,

@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import dsl_specification, has_validated_properties, validated_property, property_type, property_default, required_property
 import tosca, tosca.datatypes.network
 
 @has_validated_properties
-@tosca_specification('5.8.1')
+@dsl_specification('5.8.1', 'tosca-simple-profile-1.0')
 class Root(object):
     """
     The TOSCA Root Node Type is the default type that all other TOSCA base Node Types derive from. This allows for all TOSCA nodes to have a consistent set of features for modeling and management (e.g., consistent definitions for requirements, capabilities and lifecycle interfaces).
@@ -20,7 +20,7 @@ class Root(object):
     @required_property
     @property_type(str)
     @validated_property
-    def tosca_id():
+    def tosca_id(self):
         """
         A unique identifier of the realized instance of a Node Template that derives from any TOSCA normative type.
         """
@@ -28,7 +28,7 @@ class Root(object):
     @required_property
     @property_type(str)
     @validated_property
-    def tosca_name():
+    def tosca_name(self):
         """
         This attribute reflects the name of the Node Template as defined in the TOSCA service template. This name is not unique to the realized instance model of corresponding deployed application as each template in the model can result in one or more instances (e.g., scaled) when orchestrated to a provider environment.
         """
@@ -37,13 +37,13 @@ class Root(object):
     @property_default('initial')
     @property_type(str)
     @validated_property
-    def state():
+    def state(self):
         """
         The state of the node instance. See section "Node States" for allowed values.
         """
 
 @has_validated_properties
-@tosca_specification('5.8.2')
+@dsl_specification('5.8.2', 'tosca-simple-profile-1.0')
 class Compute(Root):
     """
     The TOSCA Compute node represents one or more real or virtual processors of software applications or services along with other essential local resources. Collectively, the resources the compute node represents can logically be viewed as a (real or virtual) "server".
@@ -59,34 +59,34 @@ class Compute(Root):
 
     @property_type(str)
     @validated_property
-    def private_address():
+    def private_address(self):
         """
         The primary private IP address assigned by the cloud provider that applications may use to access the Compute node.
         """
 
     @property_type(str)
     @validated_property
-    def public_address():
+    def public_address(self):
         """
         The primary public IP address assigned by the cloud provider that applications may use to access the Compute node.
         """
         
     @property_type(tosca.Map(tosca.datatypes.network.NetworkInfo))
     @validated_property
-    def networks():
+    def networks(self):
         """
         The list of logical networks assigned to the compute host instance and information about them.
         """
         
     @property_type(tosca.Map(tosca.datatypes.network.PortInfo))
     @validated_property
-    def ports():
+    def ports(self):
         """
         The list of logical ports assigned to the compute host instance and information about them.
         """
 
 @has_validated_properties
-@tosca_specification('5.8.3')
+@dsl_specification('5.8.3', 'tosca-simple-profile-1.0')
 class SoftwareComponent(Root):
     """
     The TOSCA SoftwareComponent node represents a generic software component that can be managed and run by a TOSCA Compute Node Type.
@@ -100,20 +100,20 @@ class SoftwareComponent(Root):
 
     @property_type(tosca.Version)
     @validated_property
-    def component_version():
+    def component_version(self):
         """
         The optional software component's version.
         """
 
     @property_type(tosca.datatypes.Credential)
     @validated_property
-    def admin_credential():
+    def admin_credential(self):
         """
         The optional credential that can be used to authenticate to the software component.
         """
 
 @has_validated_properties
-@tosca_specification('5.8.4')
+@dsl_specification('5.8.4', 'tosca-simple-profile-1.0')
 class WebServer(SoftwareComponent):
     """
     This TOSA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing management operations for one or more WebApplication nodes.
@@ -126,7 +126,7 @@ class WebServer(SoftwareComponent):
     TYPE_URI = 'tosca.nodes.WebServer'
 
 @has_validated_properties
-@tosca_specification('5.8.5')
+@dsl_specification('5.8.5', 'tosca-simple-profile-1.0')
 class WebApplication(Root): # seems a mistake in spec: it should inherit SoftwareComponent, no?
     """
     The TOSCA WebApplication node represents a software application that can be managed and run by a TOSCA WebServer node. Specific types of web applications such as Java, etc. could be derived from this type.
@@ -140,13 +140,13 @@ class WebApplication(Root): # seems a mistake in spec: it should inherit Softwar
 
     @property_type(str)
     @validated_property
-    def context_root():
+    def context_root(self):
         """
         The web application's context root which designates the application's URL path within the web server it is hosted on.
         """
 
 @has_validated_properties
-@tosca_specification('5.8.6')
+@dsl_specification('5.8.6', 'tosca-simple-profile-1.0')
 class DBMS(SoftwareComponent):
     """
     The TOSCA DBMS node represents a typical relational, SQL Database Management System software component or service.
@@ -161,20 +161,20 @@ class DBMS(SoftwareComponent):
 
     @property_type(str)
     @validated_property
-    def root_password():
+    def root_password(self):
         """
         The optional root password for the DBMS server.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def port():
+    def port(self):
         """
         The DBMS server's port.
         """
 
 @has_validated_properties
-@tosca_specification('5.8.7')
+@dsl_specification('5.8.7', 'tosca-simple-profile-1.0')
 class Database(Root): # seems a mistake in spec: it should inherit SoftwareComponent, no?
     """
     The TOSCA Database node represents a logical database that can be managed and hosted by a TOSCA DBMS node.
@@ -189,34 +189,34 @@ class Database(Root): # seems a mistake in spec: it should inherit SoftwareCompo
     @required_property
     @property_type(str)
     @validated_property
-    def name():
+    def name(self):
         """
         The logical database Name.
         """
 
     @property_type(tosca.Integer)
     @validated_property
-    def port():
+    def port(self):
         """
         The port the database service will use to listen for incoming data and requests.
         """
 
     @property_type(str)
     @validated_property
-    def user():
+    def user(self):
         """
         The special user account used for database administration.
         """
 
     @property_type(str)
     @validated_property
-    def password():
+    def password(self):
         """
         The password associated with the user account provided in the 'user' property.
         """
 
 @has_validated_properties
-@tosca_specification('5.8.8')
+@dsl_specification('5.8.8', 'tosca-simple-profile-1.0')
 class ObjectStorage(Root):
     """
     The TOSCA ObjectStorage node represents storage that provides the ability to store data as objects (or BLOBs of data) without consideration for the underlying filesystem or devices.
@@ -231,27 +231,27 @@ class ObjectStorage(Root):
     @required_property
     @property_type(str)
     @validated_property
-    def name():
+    def name(self):
         """
         The logical name of the object store (or container).
         """
 
     @property_type(tosca.Size)
     @validated_property
-    def size():
+    def size(self):
         """
         The requested initial storage size (default unit is in Gigabytes).
         """
 
     @property_type(tosca.Size)
     @validated_property
-    def maxsize():
+    def maxsize(self):
         """
         The requested maximum storage size (default unit is in Gigabytes).
         """
 
 @has_validated_properties
-@tosca_specification('5.8.9')
+@dsl_specification('5.8.9', 'tosca-simple-profile-1.0')
 class BlockStorage(Root):
     """
     The TOSCA BlockStorage node currently represents a server-local block storage device (i.e., not shared) offering evenly sized blocks of data from which raw storage volumes can be created.
@@ -266,21 +266,21 @@ class BlockStorage(Root):
     @required_property
     @property_type(tosca.Size)
     @validated_property
-    def size():
+    def size(self):
         """
         The requested storage size (default unit is MB).
         """
 
     @property_type(str)
     @validated_property
-    def volume_id():
+    def volume_id(self):
         """
         ID of an existing volume (that is in the accessible scope of the requesting application).
         """
 
     @property_type(str)
     @validated_property
-    def snapshot_id():
+    def snapshot_id(self):
         """
         Some identifier that represents an existing snapshot that should be used when creating the block storage (volume).
         """
@@ -290,7 +290,7 @@ class Container(object):
     pass
     
 @has_validated_properties
-@tosca_specification('5.8.10')
+@dsl_specification('5.8.10', 'tosca-simple-profile-1.0')
 class _Runtime(SoftwareComponent):
     """
     The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.
@@ -305,7 +305,7 @@ class _Runtime(SoftwareComponent):
 Container.Runtime = _Runtime
 
 @has_validated_properties
-@tosca_specification('5.8.11')
+@dsl_specification('5.8.11', 'tosca-simple-profile-1.0')
 class _Application(Root):
     """
     The TOSCA Container Application node represents an application that requires Container-level virtualization technology.
@@ -320,7 +320,7 @@ class _Application(Root):
 Container.Application = _Application
 
 @has_validated_properties
-@tosca_specification('5.8.12')
+@dsl_specification('5.8.12', 'tosca-simple-profile-1.0')
 class LoadBalancer(Root):
     """
     The TOSCA Load Balancer node represents logical function that be used in conjunction with a Floating Address to distribute an application's traffic (load) across a number of instances of the application (e.g., for a clustered or scaled application).

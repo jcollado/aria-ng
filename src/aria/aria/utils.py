@@ -2,7 +2,7 @@
 from threading import Lock
 from collections import OrderedDict
 from clint.textui import puts, colored, indent
-import sys, traceback, linecache
+import sys, linecache
 
 class OpenClose(object):
     """

@@ -10,12 +10,13 @@ from .specification import *
 VERSION = '0.1'
 
 MODULES = (
-    'consumer',
-    'loader',
-    'parser',
-    'presenter',
-    'reader',
-    'executor',
+    'consumption',
+    'deployment',
+    'execution',
+    'loading',
+    'parsing',
+    'presentation',
+    'reading',
     'tools')
 
 __all__ = (
@@ -60,6 +61,6 @@ __all__ = (
     'AriaError',
     'UnimplementedFunctionalityError',
     'InvalidValueError',
-    'TOSCA_SPECIFICATION',
-    'tosca_specification',
+    'DSL_SPECIFICATION',
+    'dsl_specification',
     'iter_spec')

@@ -6,15 +6,9 @@ from functools import wraps
 from types import MethodType
 from collections import OrderedDict
 
-def get_location(raw, name):
-    if hasattr(raw, '_map'):
-        map = raw._map
-        map = map.children.get(name, map)
-        return str(map)
-    return '<unknown>'
-
 class Field(object):
     def __init__(self, fn, type, cls=None, name=None, default=None, required=False):
+        self.container = None
         self.fn = fn
         self.type = type
         self.cls = cls
@@ -34,8 +28,8 @@ class Field(object):
 
         if value is None:
             if self.required:
-                location = get_location(raw, self.name)
-                raise InvalidValueError('required field must have a value: %s, at %s' % (self.name, location))
+                location = self._get_location(raw)
+                raise InvalidValueError('required %s must have a value, %s' % (self.fullname, location))
             else:
                 return None
 
@@ -44,46 +38,46 @@ class Field(object):
                 try:
                     return self.cls(value)
                 except ValueError:
-                    location = get_location(raw, self.name)
-                    raise InvalidValueError('field must be coercible to %s.%s: %s=%s, at %s' % (self.cls.__module__, self.cls.__name__, self.name, repr(value), location))
+                    location = self._get_location(raw)
+                    raise InvalidValueError('%s must be coercible to %s: %s, %s' % (self.fullname, self.fullclass, repr(value), location))
             return value
 
         elif self.type == 'primitive_list':
             if not isinstance(value, list):
-                location = get_location(raw, self.name)
-                raise InvalidValueError('field must be a list: %s=%s, at %s' % (self.name, repr(value), location))
+                location = self._get_location(raw)
+                raise InvalidValueError('%s must be a list: %s, %s' % (self.fullname, repr(value), location))
             if self.cls:
                 for i in range(len(value)):
                     if not isinstance(value[i], self.cls):
                         try:
                             value[i] = self.cls(value[i])
                         except ValueError:
-                            location = get_location(raw, self.name)
-                            raise InvalidValueError('field must be coercible to a list of %s.%s: %s[%d]=%s, at %s' % (self.cls.__module__, self.cls.__name__, self.name, i, repr(value[i]), location))
+                            location = self._get_location(raw)
+                            raise InvalidValueError('%s must be coercible to a list of %s: element %d is %s, %s' % (self.fullname, self.fullclass, i, repr(value[i]), location))
             return ReadOnlyList(value)
 
         elif self.type == 'object':
             try:
                 return self.cls(value)
             except TypeError as e:
-                location = get_location(raw, self.name)
-                raise InvalidValueError('could not initialize field to type %s.%s: %s, at %s\n%s' % (self.cls.__module__, self.cls.__name__, self.name, location, e))
+                location = self._get_location(raw)
+                raise InvalidValueError('could not initialize %s to type %s: %s, %s\n%s' % (self.fullname, self.fullclass, location, e))
 
         elif self.type == 'object_list':
             if not isinstance(value, list):
-                location = get_location(raw, self.name)
-                raise InvalidValueError('field must be a list: %s=%s, at %s' % (self.name, repr(value), location))
+                location = self._get_location(raw)
+                raise InvalidValueError('%s must be a list: %s, %s' % (self.fullname, repr(value), location))
             return ReadOnlyList([self.cls(v) for v in value])
 
         elif self.type == 'object_dict':
             if not isinstance(value, dict):
-                location = get_location(raw, self.name)
-                raise InvalidValueError('field must be a dict: %s=%s, at %s' % (self.name, repr(value), location))
+                location = self._get_location(raw)
+                raise InvalidValueError('%s must be a dict: %s, %s' % (self.fullname, repr(value), location))
             return ReadOnlyDict([(k, self.cls(v)) for k, v in value.iteritems()])
             
         else:
-            location = get_location(raw, self.name)
-            raise AttributeError('unsupported field type: %s, at %s' % (self.type, location))
+            location = self._get_location(raw)
+            raise AttributeError('%s has unsupported type: %s, %s' % (self.fullname, self.type, location))
 
     def set(self, raw, value):
         return self._set(raw, value)
@@ -121,6 +115,21 @@ class Field(object):
         elif hasattr(value, 'validate'):
             value.validate(issues)
 
+    @property
+    def fullname(self):
+        return 'field "%s" in %s.%s' % (self.name, self.container.__module__, self.container.__name__)
+
+    @property
+    def fullclass(self):
+        return '%s.%s' % (self.cls.__module__, self.cls.__name__)
+
+    def _get_location(self, raw):
+        if hasattr(raw, '_map'):
+            map = raw._map
+            map = map.children.get(self.name, map)
+            return 'at %s' % map
+        return 'at unknown location'
+    
 def has_fields_iter_field_names(self):
     for name in self.__class__.FIELDS:
         yield name
@@ -172,7 +181,7 @@ def has_fields(cls):
        with the help of a set of special function decorators.
 
     The class also works with the Python dict protocol, so that
-    fields can be accessed via dict semantics. The funcionatliy is
+    fields can be accessed via dict semantics. The functionality is
     identical to that of using attribute access.
 
     The class will also gain two utility methods, `iter_field_names`
@@ -194,6 +203,7 @@ def has_fields(cls):
             cls.FIELDS[name] = field
             
             field.name = name
+            field.container = cls
             
             # Convert to Python property
             def closure(field):

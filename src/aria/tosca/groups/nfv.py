@@ -1,9 +1,9 @@
 
-from aria import tosca_specification, has_validated_properties, validated_property, property_type, property_default, required_property
+from aria import dsl_specification, has_validated_properties, validated_property, property_type, required_property
 import tosca
     
 @has_validated_properties
-@tosca_specification('10.6.1', spec='tosca-simple-nfv-1.0')
+@dsl_specification('10.6.1', 'tosca-simple-nfv-1.0')
 class VNFFG(object):
     """
     The NFV VNFFG group type represents a logical VNF forwarding graph entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
@@ -18,7 +18,7 @@ class VNFFG(object):
     @required_property
     @property_type(str)
     @validated_property
-    def vendor():
+    def vendor(self):
         """
         Specify the vendor generating this VNFFG.
         """
@@ -26,7 +26,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.Version)
     @validated_property
-    def version():
+    def version(self):
         """
         Specify the identifier (e.g. name), version, and description of service this VNFFG is describing.
         """
@@ -34,7 +34,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.Integer)
     @validated_property
-    def number_of_endpoints():
+    def number_of_endpoints(self):
         """
         Count of the external endpoints included in this VNFFG, to form an index.
         """
@@ -42,7 +42,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.List(str))
     @validated_property
-    def dependent_virtual_link():
+    def dependent_virtual_link(self):
         """
         Reference to a list of VLD used in this Forwarding Graph.
         """
@@ -50,7 +50,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.List(str))
     @validated_property
-    def connection_point():
+    def connection_point(self):
         """
         Reference to Connection Points forming the VNFFG.
         """
@@ -58,7 +58,7 @@ class VNFFG(object):
     @required_property
     @property_type(tosca.List(str))
     @validated_property
-    def constituent_vnfs():
+    def constituent_vnfs(self):
         """
         Reference to a list of  VNFD used in this VNF Forwarding Graph.
         """

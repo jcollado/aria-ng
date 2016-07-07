@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import sys, os, re, shutil, json, urllib2, BaseHTTPServer
-from clint.textui import puts, colored, indent
+from clint.textui import puts, colored
 
 # Fix issues with decoding HTTP responses
 reload(sys)
-sys.setdefaultencoding('utf8')
+sys.setdefaultencoding('utf8') # @UndefinedVariable
 
 def rest_call_json(url, payload=None, with_payload_method='PUT'):
     'REST call with JSON decoding of the response and JSON payloads'

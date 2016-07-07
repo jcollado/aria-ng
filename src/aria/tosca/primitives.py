@@ -1,7 +1,7 @@
 
-from aria import tosca_specification
+from aria import dsl_specification
 
-@tosca_specification('3.2.1-1')
+@dsl_specification('3.2.1-1', 'tosca-simple-profile-1.0')
 class String(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc373867862>`__
@@ -11,7 +11,7 @@ class String(object):
     
     SHORTHAND_NAME = 'string'
         
-@tosca_specification('3.2.1-2')
+@dsl_specification('3.2.1-2', 'tosca-simple-profile-1.0')
 class Integer(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc373867862>`__
@@ -23,7 +23,7 @@ class Integer(object):
     
     #TODO constraints
 
-@tosca_specification('3.2.1-3')
+@dsl_specification('3.2.1-3', 'tosca-simple-profile-1.0')
 class Float(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc373867862>`__
@@ -35,7 +35,7 @@ class Float(object):
 
     #TODO constraints
 
-@tosca_specification('3.2.1-4')
+@dsl_specification('3.2.1-4', 'tosca-simple-profile-1.0')
 class Boolean(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc373867862>`__
@@ -45,7 +45,7 @@ class Boolean(object):
     
     SHORTHAND_NAME = 'boolean'
 
-@tosca_specification('3.2.1-5')
+@dsl_specification('3.2.1-5', 'tosca-simple-profile-1.0')
 class Timestamp(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc373867862>`__
@@ -55,7 +55,7 @@ class Timestamp(object):
     
     SHORTHAND_NAME = 'timestamp'
 
-@tosca_specification('3.2.1-6')
+@dsl_specification('3.2.1-6', 'tosca-simple-profile-1.0')
 class Null(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc373867862>`__
@@ -65,7 +65,7 @@ class Null(object):
     
     SHORTHAND_NAME = 'null'
 
-@tosca_specification('3.2.2')
+@dsl_specification('3.2.2', 'tosca-simple-profile-1.0')
 class Version(object):
     """
     TOSCA supports the concept of "reuse" of type definitions, as well as template definitions which could be version and change over time. It is important to provide a reliable, normative means to represent a version string which enables the comparison and management of types and templates over time. Therefore, the TOSCA TC intends to provide a normative version type (string) for this purpose in future Working Drafts of this specification.
@@ -79,7 +79,7 @@ class Version(object):
     def __init__(self, raw):
         self.raw = raw
 
-@tosca_specification('3.2.4')
+@dsl_specification('3.2.4', 'tosca-simple-profile-1.0')
 class List(object):
     """
     The list type allows for specifying multiple values for a parameter of property. For example, if an application allows for being configured to listen on multiple ports, a list of ports could be configured using the list data type.
@@ -95,7 +95,7 @@ class List(object):
     def __init__(self, type):
         self.type = type
 
-@tosca_specification('3.2.5')
+@dsl_specification('3.2.5', 'tosca-simple-profile-1.0')
 class Map(object):
     """
     The map type allows for specifying multiple values for a parameter of property as a map. In contrast to the list type, where each entry can only be addressed by its index in the list, entries in a map are named elements that can be addressed by their keys.
@@ -111,7 +111,7 @@ class Map(object):
     def __init__(self, type):
         self.type = type
 
-@tosca_specification('3.2.3')
+@dsl_specification('3.2.3', 'tosca-simple-profile-1.0')
 class Range(object):
     """
     The range type can be used to define numeric ranges with a lower and upper boundary. For example, this allows for specifying a range of ports to be opened in a firewall.
@@ -125,7 +125,7 @@ class Range(object):
     def __init__(self, value):
         self.value = value
 
-@tosca_specification('3.2.6.4')
+@dsl_specification('3.2.6.4', 'tosca-simple-profile-1.0')
 class Size(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_SCALAR_UNIT_SIZE>`__
@@ -134,7 +134,7 @@ class Size(object):
     SHORTHAND_NAME = 'scalar-unit.size'
     TYPE_QUALIFIED_NAME = 'tosca:scalar-unit.size'
 
-@tosca_specification('3.2.6.5')
+@dsl_specification('3.2.6.5', 'tosca-simple-profile-1.0')
 class Time(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_SCALAR_UNIT_TIME>`__
@@ -143,7 +143,7 @@ class Time(object):
     SHORTHAND_NAME = 'scalar-unit.time'
     TYPE_QUALIFIED_NAME = 'tosca:scalar-unit.time'
 
-@tosca_specification('3.2.6.6')
+@dsl_specification('3.2.6.6', 'tosca-simple-profile-1.0')
 class Frequency(object):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_SCALAR_UNIT_FREQUENCY>`__

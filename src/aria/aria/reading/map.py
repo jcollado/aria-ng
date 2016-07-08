@@ -50,4 +50,4 @@ class Map(object):
                     m.dump(k)
 
     def __str__(self):
-        return '"%s"@%d:%d' % (self.location, self.line, self.column)
+        return '"%s":%d:%d' % (self.location, self.line, self.column)

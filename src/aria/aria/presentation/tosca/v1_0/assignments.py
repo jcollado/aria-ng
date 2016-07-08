@@ -1,7 +1,6 @@
 
 from .... import dsl_specification
-from .... import has_fields
-from ... import Presentation
+from ... import Presentation, has_fields
 
 @has_fields
 @dsl_specification('3.5.9', 'tosca-simple-profile-1.0')
@@ -11,14 +10,18 @@ class PropertyAssignment(Presentation):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_VALUE_ASSIGNMENT>`__
     """
+
+    def __init__(self, *args, **kwargs):
+        super(PropertyAssignment, self).__init__(*args, **kwargs)
+        self._allow_unknown_fields = True
     
     @property
     def value(self):
-        return self.raw
+        return self._raw
     
     @value.setter
     def value(self, value):
-        self.raw = value
+        self._raw = value
         
     #TODO
 

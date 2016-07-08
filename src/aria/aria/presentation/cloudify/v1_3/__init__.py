@@ -20,6 +20,7 @@ __all__ = (
     'Workflow',
     'Plugin',
     'Scalable',
+    'PolicyTrigger',
     'RelationshipTemplate',
     'NodeTemplate',
     'ServiceTemplate',

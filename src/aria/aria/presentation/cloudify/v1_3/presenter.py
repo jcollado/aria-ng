@@ -19,7 +19,7 @@ class CloudifyPresenter1_3(ToscaSimplePresenter1_0):
 
     @property
     def service_template(self):
-        return ServiceTemplate(self.raw)
+        return ServiceTemplate(raw=self._raw)
 
     @property
     def inputs(self):

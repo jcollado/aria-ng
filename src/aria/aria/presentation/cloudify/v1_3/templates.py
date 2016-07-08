@@ -1,11 +1,11 @@
 
-from .... import dsl_specification, has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, object_field, object_list_field, object_dict_field, field_type, required_field, field_validator, type_validator
 from ...tosca.v1_0 import NodeTemplate as BaseNodeTemplate, ServiceTemplate as BaseServiceTemplate, PropertyDefinition
 from ..v1_2 import Instances
 from .definitions import InterfaceDefinition, GroupDefinition, PolicyDefinition
-from .types import NodeType, RelationshipType
-from .misc import Output, Workflow, Plugin, Scalable
+from .types import NodeType, RelationshipType, PolicyType
+from .misc import Output, Workflow, Plugin, Scalable, PolicyTrigger
 
 @has_fields
 @dsl_specification('relationships', 'cloudify-1.3')
@@ -16,6 +16,7 @@ class RelationshipTemplate(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-relationships/>`__
     """
 
+    @field_validator(type_validator('relationship', 'relationship_types'))
     @required_field
     @field_type(str)
     @primitive_field
@@ -109,40 +110,32 @@ class ServiceTemplate(BaseServiceTemplate):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
-    @object_dict_field(Output)
-    def outputs(self):
-        """
-        :rtype: dict of str, :class:`Output`
-        """
-    
+    # Override TOSCA
+
     @object_dict_field(NodeType)
     def node_types(self):
         """
         :rtype: dict of str, :class:`NodeType`
         """
 
-    @object_dict_field(RelationshipType)
-    def relationships(self):
+    @object_dict_field(PolicyType)
+    def policy_types(self):
         """
-        :rtype: dict of str, :class:`RelationshipType`
+        :rtype: dict of str, :class:`PolicyType`
         """
-    
+
+    # Additions to TOSCA
+
     @object_dict_field(NodeTemplate)
     def node_templates(self):
         """
         :rtype: dict of str, :class:`NodeTemplate`
         """
 
-    @object_dict_field(Workflow)
-    def workflows(self):
+    @object_dict_field(RelationshipType)
+    def relationships(self):
         """
-        :rtype: dict of str, :class:`Workflow`
-        """
-    
-    @object_dict_field(Plugin)
-    def plugins(self):
-        """
-        :rtype: dict of str, :class:`Plugin`
+        :rtype: dict of str, :class:`RelationshipType`
         """
 
     @object_dict_field(GroupDefinition)
@@ -155,4 +148,28 @@ class ServiceTemplate(BaseServiceTemplate):
     def policies(self):
         """
         :rtype: dict of str, :class:`PolicyDefinition`
+        """
+
+    @object_dict_field(PolicyTrigger)
+    def policy_triggers(self):
+        """
+        :rtype: dict of str, :class:`PolicyTrigger`
+        """
+    
+    @object_dict_field(Plugin)
+    def plugins(self):
+        """
+        :rtype: dict of str, :class:`Plugin`
+        """
+    
+    @object_dict_field(Workflow)
+    def workflows(self):
+        """
+        :rtype: dict of str, :class:`Workflow`
+        """
+
+    @object_dict_field(Output)
+    def outputs(self):
+        """
+        :rtype: dict of str, :class:`Output`
         """

@@ -12,15 +12,15 @@ class ToscaSimplePresenter1_0(Presenter):
         dsl = raw.get('tosca_definitions_version')
         return dsl == 'tosca_simple_yaml_1_0'
 
-    def validate(self, issues):
-        self.service_template.validate(issues)
+    def _validate(self, consumption_context):
+        self.service_template._validate(consumption_context)
     
-    def get_import_locations(self):
+    def _get_import_locations(self):
         return [i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else []
 
     @property
     def service_template(self):
-        return ServiceTemplate(self.raw)
+        return ServiceTemplate(raw=self._raw)
 
     @property
     def inputs(self):

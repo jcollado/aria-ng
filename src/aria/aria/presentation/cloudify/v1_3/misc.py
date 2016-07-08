@@ -1,6 +1,6 @@
 
-from .... import has_fields, primitive_field, object_field, object_dict_field, field_type, field_default, field_getter, required_field, dsl_specification
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, object_field, object_dict_field, field_type, field_default, field_getter, required_field 
 from ...tosca.v1_0 import PropertyDefinition, Version
 
 @has_fields
@@ -98,6 +98,10 @@ class Workflow(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-workflows/>`__.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(Workflow, self).__init__(*args, **kwargs)
+        self._allow_short_form = True
+    
     @field_type(str)
     @field_getter(get_mapping)
     @primitive_field
@@ -252,4 +256,31 @@ class Scalable(Presentation):
         UNBOUNDED may be used literally as the value for max_instances. Internally, it is stored as -1, which may also be used.
         
         :rtype: int
+        """
+
+@has_fields
+@dsl_specification('policy-triggers', 'cloudify-1.3')
+class PolicyTrigger(Presentation):
+    """
+    policy_triggers specify the implementation of actions invoked by policies and declare the properties that define the trigger's behavior.
+    
+    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policy-triggers/>`__.
+    """
+
+    @required_field
+    @field_type(str)
+    @primitive_field
+    def source(self):
+        """
+        The policy trigger implementation source (URL or a path relative to the blueprint root directory).
+        
+        :rtype: str
+        """
+
+    @object_dict_field(PropertyDefinition)
+    def parameters(self):
+        """
+        Optional parameters schema for the policy trigger.
+        
+        :rtype: dict of str, :class:`PropertyDefinition`
         """

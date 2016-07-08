@@ -17,7 +17,7 @@ node_types:
   # configurable properties:
   #   - port
   ###########################################################
-
+  
   nodecellar.nodes.MongoDatabase:
     derived_from: cloudify.nodes.DBMS
     properties:

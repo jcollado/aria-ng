@@ -1,6 +1,6 @@
 
-from .... import dsl_specification, has_fields, primitive_field, primitive_list_field, object_dict_field, required_field, field_type, ReadOnlyDict
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, primitive_list_field, object_dict_field, required_field, field_type, ReadOnlyDict
 from ...tosca.v1_0 import PropertyAssignment
 from .assignments import PolicyAssignment
 from .misc import Operation
@@ -14,12 +14,16 @@ class InterfaceDefinition(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-interfaces/>`__.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(InterfaceDefinition, self).__init__(*args, **kwargs)
+        self._allow_unknown_fields = True
+
     @property
     def operations(self):
         """
         :rtype: dict of str, :class:`Operation`
         """
-        return ReadOnlyDict([(k, Operation(v)) for k, v in self.raw.iteritems()])
+        return ReadOnlyDict([(k, Operation(raw=v)) for k, v in self._raw.iteritems()])
 
 @has_fields
 @dsl_specification('groups', 'cloudify-1.3')

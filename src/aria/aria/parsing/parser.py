@@ -15,7 +15,7 @@ class Parser(object):
     :class:`aria.loader.Loader`, :class:`aria.reader.Reader`, and :class:`aria.presenter.Presenter`
     instances.
     
-    Note that parsing may internally trigger more than one loading/reading/presenting cycle,
+    Note that parsing may internally trigger more than one loading/reading/presentation cycle,
     for example if the agnostic raw data has dependencies that must also be parsed.
     """
     
@@ -33,7 +33,7 @@ class Parser(object):
 class DefaultParser(Parser):
     """
     The default ARIA parser supports agnostic raw data composition for presenters
-    that have `get_import_locations` and `merge_import`.
+    that have `_get_import_locations` and `_merge_import`.
     
     To improve performance, loaders are called asynchronously on separate threads.
     """
@@ -43,24 +43,21 @@ class DefaultParser(Parser):
         :rtype: :class:`aria.presenter.Presenter`
         """
         presentation = self._parse_all(self.location, None, self.presenter_class)
-        if presentation:
-            presentation.link()
+        if presentation and hasattr(presentation, '_link'):
+            presentation._link()
         return presentation
     
-    def validate(self):
+    def parse_and_validate(self, consumption_context):
         """
         :rtype: :class:`aria.presenter.Presenter`, list of str
         """
-        presentation = None
-        issues = []
         try:
-            presentation = self.parse()
-            issues = Validator(presentation).validate()
+            consumption_context.presentation = self.parse()
+            Validator(consumption_context).consume()
         except Exception as e:
-            issues = [Issue('%s: %s' % (e.__class__.__name__, e), e)]
+            consumption_context.validation.issues.append(Issue('%s: %s' % (e.__class__.__name__, e), e))
             if not isinstance(e, AriaError):
                 print_exception(e)
-        return presentation, issues
 
     def _parse_all(self, location, origin_location, presenter_class, presentations=None):
         raw = self._parse_one(location, origin_location)
@@ -71,11 +68,11 @@ class DefaultParser(Parser):
             except PresenterNotFoundError:
                 pass
         
-        presentation = presenter_class(raw) if presenter_class else None
+        presentation = presenter_class(raw=raw) if presenter_class else None
         
         # Handle imports
-        if presentation and hasattr(presentation, 'get_import_locations') and hasattr(presentation, 'merge_import'):
-            import_locations = presentation.get_import_locations()
+        if presentation and hasattr(presentation, '_get_import_locations') and hasattr(presentation, '_merge_import'):
+            import_locations = presentation._get_import_locations()
             if import_locations:
                 # TODO: this is a trivial multithreaded solution, but it may be good enough!
                 # However, it can be improved by using a Queue with a thread pool
@@ -89,7 +86,7 @@ class DefaultParser(Parser):
                 for t in import_threads:
                     t.join()
                 for imported_presentation in imported_presentations:
-                    presentation.merge_import(imported_presentation)
+                    presentation._merge_import(imported_presentation)
         
         if presentation and presentations is not None:
             with presentations:

@@ -1,6 +1,6 @@
 
-from .... import dsl_specification, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type, field_validator, derived_from_validator
 from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinition, RequirementDefinition, CapabilityDefinition, ArtifactDefinition
 from .misc import ConstraintClause
 from tosca import Version
@@ -14,6 +14,7 @@ class ArtifactType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_ARTIFACT_TYPE>`__
     """
 
+    @field_validator(derived_from_validator('artifact_types'))
     @field_type(str)
     @primitive_field
     def derived_from(self):
@@ -77,6 +78,7 @@ class DataType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_DATA_TYPE>`__
     """
 
+    @field_validator(derived_from_validator('data_types'))
     @field_type(str)
     @primitive_field
     def derived_from(self):
@@ -130,6 +132,7 @@ class CapabilityType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_CAPABILITY_TYPE>`__
     """
 
+    @field_validator(derived_from_validator('capability_types'))
     @field_type(str)
     @primitive_field
     def derived_from(self):
@@ -192,6 +195,7 @@ class InterfaceType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_INTERFACE_TYPE>`__
     """
 
+    @field_validator(derived_from_validator('interface_types'))
     @field_type(str)
     @primitive_field
     def derived_from(self):
@@ -237,6 +241,7 @@ class RelationshipType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_RELATIONSHIP_TYPE>`__
     """
 
+    @field_validator(derived_from_validator('relationship_types'))
     @field_type(str)
     @primitive_field
     def derived_from(self):
@@ -307,6 +312,7 @@ class NodeType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_NODE_TYPE>`__
     """
 
+    @field_validator(derived_from_validator('node_types'))
     @field_type(str)
     @primitive_field
     def derived_from(self):
@@ -394,6 +400,7 @@ class GroupType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_GROUP_TYPE>`__
     """
 
+    @field_validator(derived_from_validator('group_types'))
     @field_type(str)
     @primitive_field
     def derived_from(self):
@@ -458,6 +465,7 @@ class PolicyType(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_POLICY_TYPE>`__
     """
 
+    @field_validator(derived_from_validator('policy_types'))
     @field_type(str)
     @primitive_field
     def derived_from(self):

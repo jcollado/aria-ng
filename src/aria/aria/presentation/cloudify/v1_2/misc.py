@@ -1,6 +1,6 @@
 
-from .... import has_fields, primitive_field, field_type, field_default, dsl_specification
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, field_type, field_default
 
 @has_fields
 @dsl_specification('node-templates', 'cloudify-1.2')

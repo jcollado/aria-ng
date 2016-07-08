@@ -1,6 +1,6 @@
 
-from .... import dsl_specification, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type, field_default, required_field
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, field_type, field_default, required_field
 from .assignments import PropertyAssignment
 from .misc import ConstraintClause
 from tosca import Range

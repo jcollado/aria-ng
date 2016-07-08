@@ -10,7 +10,7 @@ class Relationship(object):
         self.relationship = relationship
         self.target = target
 
-class Context(object):
+class ExecutionContext(object):
     """
     Service execution context.
     """

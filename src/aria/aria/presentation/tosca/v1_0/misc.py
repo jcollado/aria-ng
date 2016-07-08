@@ -1,6 +1,6 @@
 
-from .... import dsl_specification, has_fields, primitive_field, object_field, field_type, field_getter, required_field
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, object_field, field_type, field_getter, required_field
 from tosca.datatypes import Credential
 
 @has_fields
@@ -85,6 +85,10 @@ class Import(Presentation):
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-imports/>`__
     """
+    
+    def __init__(self, *args, **kwargs):
+        super(Import, self).__init__(*args, **kwargs)
+        self._allow_short_form = True
     
     @required_field
     @field_type(str)

@@ -1,6 +1,6 @@
 
-from .... import dsl_specification, has_fields, object_list_field
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, object_list_field
 from .definitions import PropertyDefinition, CapabilityDefinition
 
 @has_fields

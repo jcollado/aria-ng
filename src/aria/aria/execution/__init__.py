@@ -10,5 +10,7 @@ __all__ = (
     'MODULES',
     'ExecutorError',
     'ExecutorNotFoundError',
-    'Executor')
+    'Executor',
+    'Relationship',
+    'ExecutionContext')
     

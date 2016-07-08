@@ -9,9 +9,8 @@ class Consumer(object):
     
     """
     
-    def __init__(self, presentation, args=[]):
-        self.presentation = presentation
-        self.args = args
+    def __init__(self, context):
+        self.context = context
     
     def consume(self):
         raise UnimplementedFunctionalityError(classname(self) + '.consume')

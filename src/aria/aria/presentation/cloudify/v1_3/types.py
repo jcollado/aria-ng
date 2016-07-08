@@ -1,6 +1,7 @@
 
-from .... import dsl_specification, has_fields, primitive_field, object_dict_field, field_type
-from ...tosca.v1_0 import NodeType as BaseNodeType, RelationshipType as BaseRelationshipType
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, object_dict_field, field_type, required_field
+from ...tosca.v1_0 import NodeType as BaseNodeType, RelationshipType as BaseRelationshipType, PropertyDefinition
 from .definitions import InterfaceDefinition
 
 @has_fields
@@ -51,4 +52,31 @@ class RelationshipType(BaseRelationshipType):
         valid values: all_to_all and all_to_one
         
         :rtype: str
+        """
+
+@has_fields
+@dsl_specification('policy-types', 'cloudify-1.3')
+class PolicyType(Presentation):
+    """
+    policies provide a way of analyzing a stream of events that correspond to a group of nodes (and their instances).
+    
+    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policy-types/>`__.
+    """
+
+    @required_field
+    @field_type(str)
+    @primitive_field
+    def source(self):
+        """
+        The policy trigger implementation source (URL or a path relative to the blueprint root directory).
+        
+        :rtype: str
+        """
+
+    @object_dict_field(PropertyDefinition)
+    def properties(self):
+        """
+        Optional properties schema for the policy type.
+        
+        :rtype: dict of str, :class:`PropertyDefinition`
         """

@@ -1,6 +1,5 @@
 
-from .... import has_fields, primitive_field, object_dict_field, required_field, field_type
-from ... import Presentation
+from ... import Presentation, has_fields, primitive_field, object_dict_field, required_field, field_type
 from ...tosca.v1_0 import PropertyAssignment
 
 @has_fields

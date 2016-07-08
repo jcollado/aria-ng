@@ -1,7 +1,7 @@
 
 from .. import print_exception, import_class
+from ..consumption import ConsumptionContext
 from .utils import CommonArgumentParser, create_parser_ns
-from clint.textui import puts, colored, indent
 
 class ArgumentParser(CommonArgumentParser):
     def __init__(self):
@@ -18,18 +18,17 @@ def main():
             consumer_class_name = consumer_class_name.title()
         
         consumer_class = import_class(consumer_class_name, ['aria.consumption'])
-        
         parser = create_parser_ns(args)
-        presentation, issues = parser.validate()
+
+        context = ConsumptionContext()
+        context.args = unknown_args
         
-        if issues:
-            puts(colored.red('Validation errors:'))
-            with indent(2):
-                for issue in issues:
-                    puts('%s' % issue)
+        parser.parse_and_validate(context)
+        
+        if context.validation.dump_issues():
             exit(0)
 
-        consumer_class(presentation, unknown_args).consume()
+        consumer_class(context).consume()
     except Exception as e:
         print_exception(e)
 

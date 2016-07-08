@@ -1,8 +1,10 @@
 
 from .exceptions import *
-from .presentation import *
 from .presenter import *
+from .presentation import *
 from .source import *
+from .fields import *
+from .validators import *
 
 class DefaultPresenterSource(PresenterSource):
     """
@@ -34,4 +36,19 @@ __all__ = (
     'Presenter',
     'Presentation',
     'PresenterSource',
-    'DefaultPresenterSource')
+    'DefaultPresenterSource',
+    'Field',
+    'has_fields',
+    'primitive_field',
+    'primitive_list_field',
+    'object_field',
+    'object_list_field',
+    'object_dict_field',
+    'field_type',
+    'field_getter',
+    'field_setter',
+    'field_validator',
+    'field_default',
+    'required_field',
+    'type_validator',
+    'derived_from_validator')

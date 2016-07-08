@@ -1,6 +1,6 @@
 
-from .... import dsl_specification, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_type, required_field
-from ... import Presentation
+from .... import dsl_specification
+from ... import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_type, required_field, field_validator, type_validator
 from .misc import MetaData, Repository, Import
 from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinition, ArtifactDefinition
 from .assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment
@@ -16,6 +16,7 @@ class NodeTemplate(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_NODE_TEMPLATE>`__
     """
 
+    @field_validator(type_validator('node', 'node_types'))
     @required_field
     @field_type(str)
     @primitive_field
@@ -120,6 +121,7 @@ class RelationshipTemplate(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_RELATIONSHIP_TEMPLATE>`__
     """
 
+    @field_validator(type_validator('relationship', 'relationship_types'))
     @required_field
     @field_type(str)
     @primitive_field

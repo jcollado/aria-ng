@@ -2,7 +2,6 @@
 from .consumer import Consumer
 from .exceptions import ConsumerError
 import ruamel.yaml as yaml
-import sys
 
 class YamlWriter(Consumer):
     """
@@ -11,13 +10,9 @@ class YamlWriter(Consumer):
     Outputs the presentation's raw data as YAML text.
     """
     
-    def __init__(self, presentation, args=[], out=sys.stdout):
-        super(YamlWriter, self).__init__(presentation, args)
-        self.out = out
-        
     def consume(self):
         try:
-            text = yaml.dump(self.presentation.raw, Dumper=yaml.RoundTripDumper)
-            self.out.write(text)
+            text = yaml.dump(self.context.presentation.raw, Dumper=yaml.RoundTripDumper)
+            self.context.out.write(text)
         except Exception as e:
             raise ConsumerError('YamlWriter', e)

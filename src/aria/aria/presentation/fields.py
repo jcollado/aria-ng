@@ -1,7 +1,7 @@
 
-from .issue import Issue
-from .exceptions import InvalidValueError
-from .utils import ReadOnlyList, ReadOnlyDict
+from ..issue import Issue
+from ..exceptions import InvalidValueError
+from ..utils import ReadOnlyList, ReadOnlyDict
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict
@@ -58,7 +58,7 @@ class Field(object):
 
         elif self.type == 'object':
             try:
-                return self.cls(value)
+                return self.cls(raw=value)
             except TypeError as e:
                 location = self._get_location(raw)
                 raise InvalidValueError('could not initialize %s to type %s: %s, %s\n%s' % (self.fullname, self.fullclass, location, e))
@@ -67,13 +67,13 @@ class Field(object):
             if not isinstance(value, list):
                 location = self._get_location(raw)
                 raise InvalidValueError('%s must be a list: %s, %s' % (self.fullname, repr(value), location))
-            return ReadOnlyList([self.cls(v) for v in value])
+            return ReadOnlyList([self.cls(raw=v) for v in value])
 
         elif self.type == 'object_dict':
             if not isinstance(value, dict):
                 location = self._get_location(raw)
                 raise InvalidValueError('%s must be a dict: %s, %s' % (self.fullname, repr(value), location))
-            return ReadOnlyDict([(k, self.cls(v)) for k, v in value.iteritems()])
+            return ReadOnlyDict([(k, self.cls(name=k, raw=v)) for k, v in value.iteritems()])
             
         else:
             location = self._get_location(raw)
@@ -93,27 +93,27 @@ class Field(object):
             raise e
         return old
 
-    def validate(self, presentation, issues):
-        self._validate(presentation, issues)
+    def validate(self, presentation, consumption_context):
+        self._validate(presentation, consumption_context)
     
-    def _validate(self, presentation, issues):
+    def _validate(self, presentation, consumption_context):
         value = None
         
         try:
             value = getattr(presentation, self.name)
         except InvalidValueError as e:
-            issues.append(Issue(str(e), exception=e))
+            consumption_context.validation.issues.append(Issue(str(e), exception=e))
             
         if isinstance(value, list):
             for v in value:
-                if hasattr(v, 'validate'):
-                    v.validate(issues)
+                if hasattr(v, '_validate'):
+                    v._validate(consumption_context)
         elif isinstance(value, dict):
             for v in value.itervalues():
-                if hasattr(v, 'validate'):
-                    v.validate(issues)
-        elif hasattr(value, 'validate'):
-            value.validate(issues)
+                if hasattr(v, '_validate'):
+                    v._validate(consumption_context)
+        elif hasattr(value, '_validate'):
+            value._validate(consumption_context)
 
     @property
     def fullname(self):
@@ -184,8 +184,8 @@ def has_fields(cls):
     fields can be accessed via dict semantics. The functionality is
     identical to that of using attribute access.
 
-    The class will also gain two utility methods, `iter_field_names`
-    and `iter_fields`.
+    The class will also gain two utility methods, `_iter_field_names`
+    and `_iter_fields`.
     """
     
     # Make sure we have FIELDS
@@ -213,18 +213,18 @@ def has_fields(cls):
 
                 @wraps(field.fn)
                 def getter(self):
-                    return field.get(self.raw)
+                    return field.get(self._raw)
                     
                 def setter(self, value):
-                    field.set(self.raw, value)
+                    field.set(self._raw, value)
 
                 return property(fget=getter, fset=setter)
 
             setattr(cls, name, closure(field))
 
     # Bind methods
-    setattr(cls, 'iter_field_names', MethodType(has_fields_iter_field_names, None, cls))
-    setattr(cls, 'iter_fields', MethodType(has_fields_iter_fields, None, cls))
+    setattr(cls, '_iter_field_names', MethodType(has_fields_iter_field_names, None, cls))
+    setattr(cls, '_iter_fields', MethodType(has_fields_iter_fields, None, cls))
     
     # Behave like a dict
     setattr(cls, '__len__', MethodType(has_fields_len, None, cls))
@@ -334,7 +334,7 @@ def field_validator(validator_fn):
     """
     Function decorator for overriding the validator function of a field.
     
-    The signature of the validator function must be: f(field, presentation, issues).
+    The signature of the validator function must be: f(field, presentation, consumption_context).
     The default validator can be accessed as field.\_validate().
     
     The function must already be decorated with a field decorator.

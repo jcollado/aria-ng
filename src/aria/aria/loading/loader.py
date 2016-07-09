@@ -5,9 +5,9 @@ class Loader(object):
     """
     Base class for ARIA loaders.
     
-    Loaders extract data by consuming a data source.
+    Loaders extract a document by consuming a document source.
     
-    Though the extracted data is often textual (a string or string-like
+    Though the extracted document is often textual (a string or string-like
     data), loaders may provide any format.
     """
     

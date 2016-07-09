@@ -11,7 +11,7 @@ class LoaderNotFoundError(LoaderError):
     ARIA loader error: loader not found for source.
     """
 
-class SourceNotFoundError(LoaderError):
+class DocumentNotFoundError(LoaderError):
     """
-    ARIA loader error: resource not found.
+    ARIA loader error: document not found.
     """

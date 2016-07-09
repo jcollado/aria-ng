@@ -7,7 +7,7 @@ class LiteralLocation(object):
 
 class LiteralLoader(Loader):
     """
-    ARIA string loader.
+    ARIA literal loader.
     
     This loader is a trivial holder for the provided value.
     """

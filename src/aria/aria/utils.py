@@ -1,5 +1,5 @@
 
-from threading import Lock
+from threading import Thread, Lock
 from collections import OrderedDict
 from clint.textui import puts, colored, indent
 import sys, linecache
@@ -22,9 +22,50 @@ class OpenClose(object):
             self.wrapped.close()
         return False
 
+class MultithreadedExecutor(object):
+    """
+    Executes functions on their own threads.
+    
+    Makes sure to gather all thrown exceptions in one place.
+    """
+
+    # TODO: this is a trivial multithreaded solution, but it would be good enough
+    # for many simple use cases. It's not a good solution if you need the threads
+    # submitting new threads to the executor, or re-submitting existing threads.
+    # Of course, it can be improved by using a Queue with a thread pool.
+    
+    def __init__(self):
+        self.lock = Lock()
+        self.threads = []
+        self.exceptions = []
+    
+    def submit(self, fn, args):
+        def wrapper(executor, fn, args):
+            try:
+                fn(*args)
+            except Exception as e:
+                with executor.lock:
+                    executor.exceptions.append(e)
+                    print_exception(e)
+        
+        thread = Thread(target=wrapper, args=(self, fn, args))
+        self.threads.append(thread)
+        thread.start()
+        return thread
+
+    def join_all(self):
+        for thread in self.threads:
+            thread.join()
+        if self.exceptions:
+            raise self.exceptions[0]
+
 class LockedList(list):
     """
     A list that supports the "with" keyword with a built-in lock.
+    
+    Though Python lists are thread-safe in that they will not raise exceptions
+    during concurrent access, they do not guarantee atomicity. This class will
+    let you gain atomicity when needed.
     """
     def __init__(self):
         super(LockedList, self).__init__()
@@ -246,4 +287,3 @@ def make_agnostic(value):
         for i in range(len(value)):
             value[i] = make_agnostic(value[i])
     return value
-

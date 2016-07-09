@@ -22,6 +22,7 @@ __all__ = (
     'MODULES',
     'VERSION',
     'OpenClose',
+    'MultithreadedExecutor',
     'LockedList',
     'ReadOnlyList',
     'ReadOnlyDict',

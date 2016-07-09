@@ -1,11 +1,10 @@
 
-from .. import LockedList, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
+from .. import MultithreadedExecutor, LockedList, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
 from ..consumption import Validator
 from ..presentation import PresenterNotFoundError
 from ..loading import DefaultLoaderSource
 from ..reading import DefaultReaderSource
 from ..presentation import DefaultPresenterSource
-from threading import Thread
 
 class Parser(object):
     """
@@ -74,17 +73,12 @@ class DefaultParser(Parser):
         if presentation and hasattr(presentation, '_get_import_locations') and hasattr(presentation, '_merge_import'):
             import_locations = presentation._get_import_locations()
             if import_locations:
-                # TODO: this is a trivial multithreaded solution, but it may be good enough!
-                # However, it can be improved by using a Queue with a thread pool
-                
+                executor = MultithreadedExecutor()
                 imported_presentations = LockedList()
-                # The imports inherit the parent presenter class
-                import_threads = [Thread(target=self._parse_all, args=(import_location, location, presenter_class, imported_presentations))
-                    for import_location in import_locations]
-                for t in import_threads:
-                    t.start()
-                for t in import_threads:
-                    t.join()
+                for import_location in import_locations:
+                    # The imports inherit the parent presenter class
+                    executor.submit(self._parse_all, (import_location, location, presenter_class, imported_presentations))
+                executor.join_all()
                 for imported_presentation in imported_presentations:
                     presentation._merge_import(imported_presentation)
         

@@ -54,7 +54,10 @@ class DefaultParser(Parser):
             consumption_context.presentation = self.parse()
             Validator(consumption_context).consume()
         except Exception as e:
-            consumption_context.validation.issues.append(Issue('%s: %s' % (e.__class__.__name__, e), e))
+            if hasattr(e, 'issue') and isinstance(e.issue, Issue):
+                consumption_context.validation.issues.append(e.issue)
+            else:
+                consumption_context.validation.issues.append(Issue('%s' % e.__class__.__name__, cause=e))
             if not isinstance(e, AriaError):
                 print_exception(e)
 

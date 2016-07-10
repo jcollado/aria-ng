@@ -40,9 +40,9 @@ class UriLoader(Loader):
                 self.response = None
                 raise LoaderError('URI request error %d: "%s"' % (status, self.location))
         except ConnectionError as e:
-            raise LoaderError('URI connection error: "%s"' % self.location, e)
+            raise LoaderError('URI connection error: "%s"' % self.location, cause=e)
         except Exception as e:
-            raise LoaderError('URI error: "%s"' % self.location, e)
+            raise LoaderError('URI error: "%s"' % self.location, cause=e)
 
 class UriTextLoader(UriLoader):
     """
@@ -54,5 +54,5 @@ class UriTextLoader(UriLoader):
             try:
                 return self.response.text
             except Exception as e:
-                raise LoaderError('URI: %s' % self.location, e)
+                raise LoaderError('URI: %s' % self.location, cause=e)
         return None

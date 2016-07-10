@@ -15,4 +15,4 @@ class YamlWriter(Consumer):
             text = yaml.dump(self.context.presentation.raw, Dumper=yaml.RoundTripDumper)
             self.context.out.write(text)
         except Exception as e:
-            raise ConsumerError('YamlWriter', e)
+            raise ConsumerError('YamlWriter: %s' % e, cause=e)

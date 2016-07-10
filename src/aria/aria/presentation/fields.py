@@ -28,8 +28,7 @@ class Field(object):
 
         if value is None:
             if self.required:
-                location = self._get_location(raw)
-                raise InvalidValueError('required %s must have a value, %s' % (self.fullname, location))
+                raise InvalidValueError('required %s must have a value' % self.fullname, map=self.get_map(raw))
             else:
                 return None
 
@@ -38,46 +37,42 @@ class Field(object):
                 try:
                     return self.cls(value)
                 except ValueError:
-                    location = self._get_location(raw)
-                    raise InvalidValueError('%s must be coercible to %s: %s, %s' % (self.fullname, self.fullclass, repr(value), location))
+                    raise InvalidValueError('%s must be coercible to %s: %s' % (self.fullname, self.fullclass, repr(value)), map=self.get_map(raw))
             return value
 
         elif self.type == 'primitive_list':
             if not isinstance(value, list):
                 location = self._get_location(raw)
-                raise InvalidValueError('%s must be a list: %s, %s' % (self.fullname, repr(value), location))
+                raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), map=self.get_map(raw))
             if self.cls:
                 for i in range(len(value)):
                     if not isinstance(value[i], self.cls):
                         try:
                             value[i] = self.cls(value[i])
                         except ValueError:
-                            location = self._get_location(raw)
-                            raise InvalidValueError('%s must be coercible to a list of %s: element %d is %s, %s' % (self.fullname, self.fullclass, i, repr(value[i]), location))
+                            raise InvalidValueError('%s must be coercible to a list of %s: element %d is %s' % (self.fullname, self.fullclass, i, repr(value[i])), map=self.get_map(raw))
             return ReadOnlyList(value)
 
         elif self.type == 'object':
             try:
                 return self.cls(raw=value)
             except TypeError as e:
-                location = self._get_location(raw)
-                raise InvalidValueError('could not initialize %s to type %s: %s, %s\n%s' % (self.fullname, self.fullclass, location, e))
+                raise InvalidValueError('could not initialize %s to type %s: %s' % (self.fullname, self.fullclass), cause=e, map=self.get_map(raw))
 
         elif self.type == 'object_list':
             if not isinstance(value, list):
-                location = self._get_location(raw)
-                raise InvalidValueError('%s must be a list: %s, %s' % (self.fullname, repr(value), location))
+                raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), map=self.get_map(raw))
             return ReadOnlyList([self.cls(raw=v) for v in value])
 
         elif self.type == 'object_dict':
             if not isinstance(value, dict):
-                location = self._get_location(raw)
-                raise InvalidValueError('%s must be a dict: %s, %s' % (self.fullname, repr(value), location))
+                raise InvalidValueError('%s must be a dict: %s' % (self.fullname, repr(value)), map=self.get_map(raw))
             return ReadOnlyDict([(k, self.cls(name=k, raw=v)) for k, v in value.iteritems()])
             
         else:
-            location = self._get_location(raw)
-            raise AttributeError('%s has unsupported type: %s, %s' % (self.fullname, self.type, location))
+            map = self.get_map(raw)
+            location = (', at %s' % map) if map is not None else ''
+            raise AttributeError('%s has unsupported type: %s%s' % (self.fullname, self.type, location))
 
     def set(self, raw, value):
         return self._set(raw, value)
@@ -123,12 +118,10 @@ class Field(object):
     def fullclass(self):
         return '%s.%s' % (self.cls.__module__, self.cls.__name__)
 
-    def _get_location(self, raw):
+    def get_map(self, raw):
         if hasattr(raw, '_map'):
-            map = raw._map
-            map = map.children.get(self.name, map)
-            return 'at %s' % map
-        return 'at unknown location'
+            return raw._map.children.get(self.name) or raw._map
+        return None
     
 def has_fields_iter_field_names(self):
     for name in self.__class__.FIELDS:

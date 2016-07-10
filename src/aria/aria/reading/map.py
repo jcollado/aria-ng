@@ -37,9 +37,9 @@ class Map(object):
 
     def dump(self, key=None):
         if key:
-            puts('%s %s %d,%d' % (colored.red(key), colored.blue(self.location), self.line, self.column))
+            puts('%s "%s":%d:%d' % (colored.red(key), colored.blue(self.location), self.line, self.column))
         else:
-            puts('%s %d,%d' % (colored.blue(self.location), self.line, self.column))
+            puts('"%s":%d:%d' % (colored.blue(self.location), self.line, self.column))
         if isinstance(self.children, list):
             with indent(2):
                 for m in self.children:
@@ -50,4 +50,5 @@ class Map(object):
                     m.dump(k)
 
     def __str__(self):
+        # Should be in same format as Issue.location_as_str
         return '"%s":%d:%d' % (self.location, self.line, self.column)

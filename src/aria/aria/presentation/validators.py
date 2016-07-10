@@ -31,12 +31,16 @@ def derived_from_validator(types_dict_name):
                 hierarchy = [presentation._name]
                 p = presentation
                 while p.derived_from is not None:
-                    if p.derived_from not in types_dict:
-                        # This should cause a validation issue elsewhere
+                    if p.derived_from == p._name:
+                        # This should cause a validation issue at that type
+                        break
+                    elif p.derived_from not in types_dict:
+                        # This should cause a validation issue at that type
                         break
                     p = types_dict[p.derived_from]
                     if p._name in hierarchy:
                         presentation._append_issue_for_circular_type_hierarchy(consumption_context, field.name)
                         break
+                    hierarchy.append(p._name)
 
     return fn

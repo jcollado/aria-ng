@@ -36,28 +36,28 @@ class FileTextLoader(Loader):
                         return
                     except IOError as e:
                         if e.errno != 2:
-                            raise LoaderError('file I/O error: "%s"' % path, e)
-                raise DocumentNotFoundError('file not found: "%s"' % self.location, e)
+                            raise LoaderError('file I/O error: "%s"' % path, cause=e)
+                raise DocumentNotFoundError('file not found: "%s"' % self.location, cause=e)
             else:
-                raise LoaderError('file I/O error: "%s"' % self.location, e)
+                raise LoaderError('file I/O error: "%s"' % self.location, cause=e)
         except Exception as e:
-            raise LoaderError('file error: "%s"' % self.location, e)
+            raise LoaderError('file error: "%s"' % self.location, cause=e)
 
     def close(self):
         if self.file is not None:
             try:
                 self.file.close()
             except IOError as e:
-                raise LoaderError('file I/O error: "%s"' % self.location, e)
+                raise LoaderError('file I/O error: "%s"' % self.location, cause=e)
             except Exception as e:
-                raise LoaderError('file error: "%s"' % self.location, e)
+                raise LoaderError('file error: "%s"' % self.location, cause=e)
 
     def load(self):
         if self.file is not None:
             try:
                 return self.file.read()
             except IOError as e:
-                raise LoaderError('file I/O error: "%s"' % self.location, e)
+                raise LoaderError('file I/O error: "%s"' % self.location, cause=e)
             except Exception as e:
-                raise LoaderError('file error %s' % self.location, e)
+                raise LoaderError('file error %s' % self.location, cause=e)
         return None

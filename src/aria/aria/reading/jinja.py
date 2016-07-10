@@ -35,4 +35,4 @@ class JinjaReader(Reader):
                 next_reader = self.source.get_reader(LiteralLocation(literal), LiteralLoader(literal))
             return next_reader.read()
         except Exception as e:
-            raise ReaderError('Jinja: %s' % e, e)
+            raise ReaderError('Jinja: %s' % e, cause=e)

@@ -9,7 +9,7 @@ from .jinja import *
 
 __all__ = (
     'ReaderError',
-    'ReaderNotFoundReaderError',
+    'ReaderNotFoundError',
     'Reader',
     'ReaderSource',
     'RawReader',

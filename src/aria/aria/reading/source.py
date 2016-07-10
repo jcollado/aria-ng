@@ -1,6 +1,6 @@
 
 from ..loading import LiteralLocation
-from .exceptions import ReaderNotFoundReaderError
+from .exceptions import ReaderNotFoundError
 from .yaml import YamlReader
 from .jinja import JinjaReader
 
@@ -12,7 +12,7 @@ class ReaderSource(object):
     """
 
     def get_reader(self, location, loader):
-        raise ReaderNotFoundReaderError(location)
+        raise ReaderNotFoundError(location)
 
 EXTENSIONS = {
     '.yaml': YamlReader,

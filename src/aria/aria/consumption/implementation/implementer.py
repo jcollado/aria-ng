@@ -35,13 +35,13 @@ class Implementer(Consumer):
             from service import Service # @UnresolvedImport
             args = len(getargspec(Service.__init__).args) - 2
         except Exception as e:
-            raise BadImplementationError('service code could not be compiled', e)
+            raise BadImplementationError('service code could not be compiled', cause=e)
         try:
             context = ExecutionContext(self.context.style)
             service = Service(context, *([None] * args))
             return service
         except Exception as e:
-            raise BadImplementationError('Service class could not be instantiated', e)
+            raise BadImplementationError('Service class could not be instantiated', cause=e)
 
     def implement(self):
         generator = CodeGenerator()

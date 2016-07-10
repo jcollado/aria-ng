@@ -49,6 +49,6 @@ class YamlReader(Reader):
                 line = e.problem_mark.line
                 column = e.problem_mark.column
                 snippet = e.problem_mark.get_snippet()
-                raise ReaderError('YAML %s: %s %s in "%s" line %d column %d\n%s' % (e.__class__.__name__, problem, context, self.loader.location, line, column, snippet), e)
+                raise ReaderError('YAML %s: %s %s' % (e.__class__.__name__, problem, context), location=self.loader.location, line=line, column=column, snippet=snippet, cause=e)
             else:
-                raise ReaderError('YAML: %s' % e, e)
+                raise ReaderError('YAML: %s' % e, cause=e)

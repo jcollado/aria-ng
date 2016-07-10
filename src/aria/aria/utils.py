@@ -38,6 +38,7 @@ class MultithreadedExecutor(object):
         self.lock = Lock()
         self.threads = []
         self.exceptions = []
+        self.print_exceptions = False
     
     def submit(self, fn, args):
         def wrapper(executor, fn, args):
@@ -46,7 +47,8 @@ class MultithreadedExecutor(object):
             except Exception as e:
                 with executor.lock:
                     executor.exceptions.append(e)
-                    print_exception(e)
+                    if self.print_exceptions:
+                        print_exception(e)
         
         thread = Thread(target=wrapper, args=(self, fn, args))
         self.threads.append(thread)

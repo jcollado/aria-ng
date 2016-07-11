@@ -1,5 +1,5 @@
 
-from .. import print_exception
+from .. import install_aria_extensions, print_exception
 from ..loading import PATHS, LiteralLocation
 from ..consumption import Implementer
 from .utils import CommonArgumentParser, create_parser_ns
@@ -48,6 +48,8 @@ class ArgumentParser(CommonArgumentParser):
 
 def main():
     try:
+        install_aria_extensions()
+        
         global args
         args, _ = ArgumentParser().parse_known_args()
         if args.path:

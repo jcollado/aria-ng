@@ -20,15 +20,14 @@ class Presentation(object):
         self._name = name
         self._raw = raw
         self._allow_unknown_fields = False
-        self._allow_short_form = False
         
     def _validate(self, consumption_context):
         # Check for short form
-        if (not self._allow_short_form) and not isinstance(self._raw, dict):
+        if not hasattr(self.__class__, 'SHORT_FORM_FIELD') and not isinstance(self._raw, dict):
             consumption_context.validation.issues.append(Issue('short form not allowed for %s' % self._fullname, map=self._map))
         
         # Check for unknown fields
-        if (not self._allow_unknown_fields) and (not consumption_context.validation.allow_unknown_fields) and isinstance(self._raw, dict):
+        if (not self._allow_unknown_fields) and (not consumption_context.validation.allow_unknown_fields) and isinstance(self._raw, dict) and hasattr(self, 'FIELDS'):
             for k in self._raw:
                 if k not in self.FIELDS:
                     consumption_context.validation.issues.append(Issue('unknown field "%s" in %s' % (k, self._fullname), map=self._get_child_map(k)))

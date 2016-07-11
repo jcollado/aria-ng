@@ -34,6 +34,8 @@ class YamlReader(Reader):
             data = str(data)
             yaml_loader = yaml.RoundTripLoader(data)
             node = yaml_loader.get_single_node()
+            if node is None:
+                return {}
             map = YamlMap(self.loader.location, 0, 0)
             map.parse(node, self.loader.location)
             #map.dump()

@@ -1,8 +1,17 @@
 
+from .utils import classname
+
 class Issue(object):
-    def __init__(self, message, exception=None, location=None, line=None, column=None, map=None, snippet=None):
-        self.message = str(message)
+    def __init__(self, message=None, exception=None, location=None, line=None, column=None, map=None, snippet=None):
+        if message is not None:
+            self.message = str(message)
+        elif exception is not None:
+            self.message = 'exception was raised'
+        else:
+            self.message = 'unknown issue'
+            
         self.exception = exception
+        
         if map is not None:
             self.location = map.location
             self.line = map.line
@@ -11,6 +20,7 @@ class Issue(object):
             self.location = location
             self.line = line
             self.column = column
+            
         self.snippet = snippet
 
     @property
@@ -34,5 +44,5 @@ class Issue(object):
         if self.snippet is not None:
             r += '\n%s' % self.snippet
         if self.exception is not None:
-            r += '\n%s' % self.exception
+            r += '\n  %s: %s' % (classname(self.exception), self.exception)
         return r

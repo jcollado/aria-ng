@@ -7,30 +7,39 @@ from types import MethodType
 from collections import OrderedDict
 
 class Field(object):
-    def __init__(self, fn, type, cls=None, name=None, default=None, required=False):
+    def __init__(self, type, fn, cls=None, default=None, allowed=None, required=False):
         self.container = None
-        self.fn = fn
+        self.name = None
         self.type = type
+        self.fn = fn
         self.cls = cls
-        self.name = name
         self.default = default
+        self.allowed = allowed
         self.required = required
     
     def get(self, raw):
         return self._get(raw)
     
     def _get(self, raw):
-        if not isinstance(raw, dict):
-            # Only dicts are supported
-            return None
-        
-        value = raw.get(self.name, self.default)
+        short_form = (self.container.SHORT_FORM_FIELD == self.name) if hasattr(self.container, 'SHORT_FORM_FIELD') else False
+
+        if short_form:
+            value = raw
+        else:
+            if isinstance(raw, dict):
+                value = raw.get(self.name, self.default)
+            else:
+                value = None
 
         if value is None:
             if self.required:
                 raise InvalidValueError('required %s must have a value' % self.fullname, map=self.get_map(raw))
             else:
                 return None
+        
+        if self.allowed is not None:
+            if value not in self.allowed:
+                raise InvalidValueError('%s must be %s' % (self.fullname, ' or '.join([repr(v) for v in self.allowed])), map=self.get_map(raw))
 
         if self.type == 'primitive':
             if self.cls and not isinstance(value, self.cls):
@@ -96,8 +105,11 @@ class Field(object):
         
         try:
             value = getattr(presentation, self.name)
-        except InvalidValueError as e:
-            consumption_context.validation.issues.append(Issue(str(e), exception=e))
+        except Exception as e:
+            if hasattr(e, 'issue') and isinstance(e.issue, Issue):
+                consumption_context.validation.issues.append(e.issue)
+            else:
+                consumption_context.validation.issues.append(Issue(exception=e))
             
         if isinstance(value, list):
             for v in value:
@@ -164,7 +176,7 @@ def has_fields_contains(self, key):
 
 def has_fields(cls):
     """
-    Class decorator for field support.
+    Class decorator for validated field support.
     
     1. Adds a `FIELDS` class property that is a dict of all the fields.
        Will inherit and merge `FIELDS` properties from base classes if
@@ -229,64 +241,68 @@ def has_fields(cls):
     
     return cls
 
-def primitive_field(f):
+def short_form_field(name):
+    """
+    Class decorator for specifying the short form field.
+    
+    The class must be decorated with :func:`has\_fields`.
+    """
+    def decorator(cls):
+        if hasattr(cls, name) and hasattr(cls, 'FIELDS') and (name in cls.FIELDS):
+            setattr(cls, 'SHORT_FORM_FIELD', name)
+            return cls
+        else:
+            raise AttributeError('@short_form_field must be used with a @property name')
+    return decorator
+
+def primitive_field(cls=None, default=None, allowed=None, required=False):
     """
     Function decorator for primitive fields.
     
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
-    return Field(f, 'primitive')
+    def decorator(fn):
+        return Field(type='primitive', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+    return decorator
 
-def primitive_list_field(f):
+def primitive_list_field(cls=None, default=None, allowed=None, required=False):
     """
     Function decorator for list of primitive fields.
     
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
-    return Field(f, 'primitive_list')
+    def decorator(fn):
+        return Field(type='primitive_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+    return decorator
 
-def object_field(cls):
+def object_field(cls, default=None, allowed=None, required=False):
     """
     Function decorator for object fields.
     
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
-    def decorator(f):
-        return Field(f, 'object', cls)
+    def decorator(fn):
+        return Field(type='object', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
-def object_list_field(cls):
+def object_list_field(cls, default=None, allowed=None, required=False):
     """
     Function decorator for list of object fields.
     
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
-    def decorator(f):
-        return Field(f, 'object_list', cls)
+    def decorator(fn):
+        return Field(type='object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
-def object_dict_field(cls):
+def object_dict_field(cls, default=None, allowed=None, required=False):
     """
     Function decorator for dict of object fields.
     
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
-    def decorator(f):
-        return Field(f, 'object_dict', cls)
-    return decorator
-
-def field_type(type):
-    """
-    Function decorator for setting the type of a field.
-    
-    The function must already be decorated with :func:`primitive\_field` or :func:`primitive\_list\_field`.
-    """
-    def decorator(f):
-        if isinstance(f, Field):
-            f.cls = type
-            return f
-        else:
-            raise AttributeError('@field_type must be used with a Field')
+    def decorator(fn):
+        return Field(type='object_dict', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def field_getter(getter_fn):
@@ -298,10 +314,10 @@ def field_getter(getter_fn):
     
     The function must already be decorated with a field decorator.
     """
-    def decorator(f):
-        if isinstance(f, Field):
-            f.get = MethodType(getter_fn, f, Field)
-            return f
+    def decorator(field):
+        if isinstance(field, Field):
+            field.get = MethodType(getter_fn, field, Field)
+            return field
         else:
             raise AttributeError('@field_getter must be used with a Field')
     return decorator
@@ -315,10 +331,10 @@ def field_setter(setter_fn):
     
     The function must already be decorated with a field decorator.
     """
-    def decorator(f):
-        if isinstance(f, Field):
-            f.set = MethodType(setter_fn, f, Field)
-            return f
+    def decorator(field):
+        if isinstance(field, Field):
+            field.set = MethodType(setter_fn, field, Field)
+            return field
         else:
             raise AttributeError('@field_setter must be used with a Field')
     return decorator
@@ -332,36 +348,10 @@ def field_validator(validator_fn):
     
     The function must already be decorated with a field decorator.
     """
-    def decorator(f):
-        if isinstance(f, Field):
-            f.validate = MethodType(validator_fn, f, Field)
-            return f
+    def decorator(field):
+        if isinstance(field, Field):
+            field.validate = MethodType(validator_fn, field, Field)
+            return field
         else:
             raise AttributeError('@field_validator must be used with a Field')
     return decorator
-
-def field_default(default):
-    """
-    Function decorator for setting the default value of a field.
-    
-    The function must already be decorated with a field decorator.
-    """
-    def decorator(f):
-        if isinstance(f, Field):
-            f.default = default
-            return f
-        else:
-            raise AttributeError('@field_default must be used with a Field')
-    return decorator
-
-def required_field(f):
-    """
-    Function decorator for setting the field as required.
-    
-    The function must already be decorated with a field decorator.
-    """
-    if isinstance(f, Field):
-        f.required = True
-        return f
-    else:
-        raise AttributeError('@required_field must be used with a Field')

@@ -12,7 +12,7 @@ class ReaderSource(object):
     """
 
     def get_reader(self, location, loader):
-        raise ReaderNotFoundError(location)
+        raise ReaderNotFoundError('location: %s' % location)
 
 EXTENSIONS = {
     '.yaml': YamlReader,

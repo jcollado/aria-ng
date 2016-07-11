@@ -18,7 +18,7 @@ class LoaderSource(object):
     def get_loader(self, location, origin_location):
         if isinstance(location, LiteralLocation):
             return LiteralLoader(location.value)
-        raise LoaderNotFoundError(location)
+        raise LoaderNotFoundError('location: %s' % location)
 
 class DefaultLoaderSource(LoaderSource):
     """

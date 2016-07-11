@@ -2,6 +2,7 @@
 from collections import OrderedDict
 
 DSL_SPECIFICATION = {}
+DSL_SPECIFICATION_PACKAGES = []
 
 URL = {
     'tosca-simple-profile-1.0': 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html',
@@ -20,7 +21,7 @@ def dsl_specification(section, spec):
             sp = {}
             DSL_SPECIFICATION[spec] = sp
         if section in sp:
-            raise Exception('you cannot specify the same @dsl_specification twice, consider adding \'-1\', \'-2\', etc.: %s' % section)
+            raise Exception('you cannot specify the same @dsl_specification twice, consider adding \'-1\', \'-2\', etc.: %s, %s' % (spec, section))
 
         url = URL.get(spec)
         if url:

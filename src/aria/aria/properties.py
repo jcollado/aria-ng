@@ -5,12 +5,13 @@ from types import MethodType
 from collections import OrderedDict
 
 class Prop(object):
-    def __init__(self, fn=None, cls=None, status='supported', name=None, default=None, required=False):
+    def __init__(self, fn=None, cls=None, default=None, required=False, status='supported'):
+        self.name = None
         self.fn = fn
         self.cls = cls
-        self.name = name
         self.default = default
-        self.required = False
+        self.required = required
+        self.status = status
     
     def validate(self, value):
         if value is None:
@@ -44,10 +45,11 @@ def has_validated_properties(cls):
        they have them.
     
     2. Generates automatic `@property` implementations for the fields
-       with the help of a set of special function decorators.
+       with the help of a set of special function decorators. The unvalidated
+       value can be accessed via the "_" prefix.
 
     The class will also gain two utility methods,
-    `iter_validated_property_names` and `iter_validated_properties`.
+    `_iter_validated_property_names` and `_iter_validated_properties`.
     """
 
     # Make sure we have PROPERTIES
@@ -89,69 +91,17 @@ def has_validated_properties(cls):
             setattr(cls, name, closure(prop))
 
     # Bind methods
-    setattr(cls, 'iter_validated_property_names', MethodType(has_validated_properties_iter_validated_property_names, None, cls))
-    setattr(cls, 'iter_validated_properties', MethodType(has_validated_properties_iter_validated_properties, None, cls))
+    setattr(cls, '_iter_validated_property_names', MethodType(has_validated_properties_iter_validated_property_names, None, cls))
+    setattr(cls, '_iter_validated_properties', MethodType(has_validated_properties_iter_validated_properties, None, cls))
                 
     return cls
 
-def validated_property(f):
+def validated_property(cls, default=None, required=False, status='supported'):
     """
     Function decorator for primitive fields.
     
     The function must be a method in a class decorated with :func:`has\_validated\_properties`.
     """
-    return Prop(fn=f)
-
-def property_type(cls):
-    """
-    Function decorator for setting the type of a property.
-    
-    The function must already be decorated with :func:`validated\_property`.
-    """
-    def decorator(f):
-        if isinstance(f, Prop):
-            f.cls = cls
-            return f
-        else:
-            raise AttributeError('@property_type must be used with a validated propery')
+    def decorator(fn):
+        return Prop(fn=fn, cls=cls, default=default, required=required, status=status)
     return decorator
-
-def property_default(default):
-    """
-    Function decorator for setting the default value of a property.
-    
-    The function must already be decorated with :func:`validated\_property`.
-    """
-    def decorator(f):
-        if isinstance(f, Prop):
-            f.default = default
-            return f
-        else:
-            raise AttributeError('@property_default must be used with a validated propery')
-    return decorator
-
-def property_status(status):
-    """
-    Function decorator for setting the default value of a property.
-    
-    The function must already be decorated with  func:`validated\_property`.
-    """
-    def decorator(f):
-        if isinstance(f, Prop):
-            f.status = status
-            return f
-        else:
-            raise AttributeError('@property_status must be used with a validated propery')
-    return decorator
-
-def required_property(f):
-    """
-    Function decorator for setting the property as required.
-    
-    The function must already be decorated with a :func:`validated\_property`.
-    """
-    if isinstance(f, Prop):
-        f.required = True
-        return f
-    else:
-        raise AttributeError('@required_property must be used with a validated propery')

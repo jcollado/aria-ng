@@ -1,5 +1,5 @@
 
-from .. import print_exception, import_class
+from .. import install_aria_extensions, print_exception, import_class
 from ..consumption import ConsumptionContext
 from .utils import CommonArgumentParser, create_parser_ns
 
@@ -17,6 +17,8 @@ def main():
         if '.' not in consumer_class_name:
             consumer_class_name = consumer_class_name.title()
         
+        install_aria_extensions()
+
         consumer_class = import_class(consumer_class_name, ['aria.consumption'])
         parser = create_parser_ns(args)
 

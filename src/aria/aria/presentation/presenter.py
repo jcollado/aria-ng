@@ -8,6 +8,9 @@ class Presenter(Presentation):
     
     Presenters provide a robust API over agnostic raw data.
     """
+
+    def _get_import_locations(self):
+        return []
     
     def _merge_import(self, presentation):
         merge(self._raw, presentation._raw)

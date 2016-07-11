@@ -1,7 +1,6 @@
 
-from .. import MultithreadedExecutor, LockedList, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
+from .. import MultithreadedExecutor, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
 from ..consumption import Validator
-from ..presentation import PresenterNotFoundError
 from ..loading import DefaultLoaderSource
 from ..reading import DefaultReaderSource
 from ..presentation import DefaultPresenterSource
@@ -41,7 +40,14 @@ class DefaultParser(Parser):
         """
         :rtype: :class:`aria.presenter.Presenter`
         """
-        presentation = self._parse_all(self.location, None, self.presenter_class)
+        executor = MultithreadedExecutor()
+        presentation = self._parse_all(self.location, None, self.presenter_class, executor)
+        executor.join_all()
+        executor.raise_first()
+        imported_presentations = executor.returns
+        if imported_presentations and hasattr(presentation, '_merge_import'):
+            for imported_presentation in imported_presentations:
+                presentation._merge_import(imported_presentation)
         if presentation and hasattr(presentation, '_link'):
             presentation._link()
         return presentation
@@ -57,37 +63,25 @@ class DefaultParser(Parser):
             if hasattr(e, 'issue') and isinstance(e.issue, Issue):
                 consumption_context.validation.issues.append(e.issue)
             else:
-                consumption_context.validation.issues.append(Issue('%s' % e.__class__.__name__, cause=e))
+                consumption_context.validation.issues.append(Issue(exception=e))
             if not isinstance(e, AriaError):
                 print_exception(e)
 
-    def _parse_all(self, location, origin_location, presenter_class, presentations=None):
+    def _parse_all(self, location, origin_location, presenter_class, executor):
         raw = self._parse_one(location, origin_location)
         
-        if not presenter_class:
-            try:
-                presenter_class = self.presenter_source.get_presenter(raw)
-            except PresenterNotFoundError:
-                pass
+        if presenter_class is None:
+            presenter_class = self.presenter_source.get_presenter(raw)
         
-        presentation = presenter_class(raw=raw) if presenter_class else None
+        presentation = presenter_class(raw=raw)
         
-        # Handle imports
-        if presentation and hasattr(presentation, '_get_import_locations') and hasattr(presentation, '_merge_import'):
+        # Submit imports to executor
+        if hasattr(presentation, '_get_import_locations'):
             import_locations = presentation._get_import_locations()
             if import_locations:
-                executor = MultithreadedExecutor()
-                imported_presentations = LockedList()
                 for import_location in import_locations:
-                    # The imports inherit the parent presenter class
-                    executor.submit(self._parse_all, (import_location, location, presenter_class, imported_presentations))
-                executor.join_all()
-                for imported_presentation in imported_presentations:
-                    presentation._merge_import(imported_presentation)
-        
-        if presentation and presentations is not None:
-            with presentations:
-                presentations.append(presentation)
+                    # The imports inherit the parent presenter class and use the current location as their origin location
+                    executor.submit(self._parse_all, import_location, location, presenter_class, executor)
         
         return presentation
     

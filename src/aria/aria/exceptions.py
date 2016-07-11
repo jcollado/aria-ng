@@ -7,8 +7,8 @@ class AriaError(Exception):
     Base class for ARIA errors.
     """
     
-    def __init__(self, message, cause=None, cause_tb=None):
-        super(AriaError, self).__init__(str(message))
+    def __init__(self, message=None, cause=None, cause_tb=None):
+        super(AriaError, self).__init__(message)
         self.cause = cause
         if cause_tb is None:
             _, e, tb = sys.exc_info()

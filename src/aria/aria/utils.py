@@ -29,37 +29,69 @@ class MultithreadedExecutor(object):
     Makes sure to gather all thrown exceptions in one place.
     """
 
-    # TODO: this is a trivial multithreaded solution, but it would be good enough
-    # for many simple use cases. It's not a good solution if you need the threads
-    # submitting new threads to the executor, or re-submitting existing threads.
-    # Of course, it can be improved by using a Queue with a thread pool.
+    # This is a trivial multithreaded solution, but it should be good enough for
+    # most simple use cases. It can be improved by using a Queue with a thread pool.
     
     def __init__(self):
-        self.lock = Lock()
-        self.threads = []
-        self.exceptions = []
         self.print_exceptions = False
+        self._lock = Lock()
+        self._threads = []
+        self._index = 0
+        self._returns = {}
+        self._exceptions = {}
     
-    def submit(self, fn, args):
-        def wrapper(executor, fn, args):
+    def submit(self, fn, *args):
+        """
+        Non-blocking: submits a task function to the execution. The task will be
+        called ASAP on another thread.
+        """
+        def wrapper(executor, index, fn, args):
             try:
-                fn(*args)
+                r = fn(*args)
+                with executor._lock:
+                    executor._returns[index] = r
             except Exception as e:
-                with executor.lock:
-                    executor.exceptions.append(e)
-                    if self.print_exceptions:
+                with executor._lock:
+                    executor.exceptions[index] = e
+                    if executor.print_exceptions:
                         print_exception(e)
         
-        thread = Thread(target=wrapper, args=(self, fn, args))
-        self.threads.append(thread)
+        thread = Thread(target=wrapper, args=(self, self._index, fn, args))
         thread.start()
-        return thread
+        self._threads.append(thread)
+        self._index += 1
 
     def join_all(self):
-        for thread in self.threads:
+        """
+        Blocks until all tasks finish execution.
+        """
+        for thread in self._threads:
             thread.join()
-        if self.exceptions:
-            raise self.exceptions[0]
+
+    @property
+    def returns(self):
+        """
+        The returned values from all task functions, in order of submission.
+        """
+        return [self._returns[k] for k in sorted(self._returns)]
+
+    @property
+    def exceptions(self):
+        """
+        The raised exceptions from all task functions, in order of submission.
+        """
+        return [self._exceptions[k] for k in sorted(self._exceptions)]
+
+    def raise_first(self):
+        """
+        If exceptions were thrown by any task, then the first one will be raised.
+        
+        This is rather arbitrary: proper handling would involve iterating all
+        the exceptions. 
+        """
+        exceptions = self.exceptions
+        if exceptions:
+            raise exceptions[0]
 
 class LockedList(list):
     """

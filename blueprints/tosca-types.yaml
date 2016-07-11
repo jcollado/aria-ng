@@ -1,0 +1,6 @@
+
+node_types:
+
+  MyNode:
+    description: |
+      My node type.

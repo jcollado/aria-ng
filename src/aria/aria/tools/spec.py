@@ -1,5 +1,5 @@
 
-from .. import import_modules, print_exception, DSL_SPECIFICATION, iter_spec
+from .. import install_aria_extensions, print_exception, import_modules, DSL_SPECIFICATION_PACKAGES, DSL_SPECIFICATION, iter_spec
 from .utils import BaseArgumentParser
 from clint.textui import puts, colored, indent
 import csv, sys
@@ -13,10 +13,11 @@ def main():
     try:
         args, _ = ArgumentParser().parse_known_args()
 
-        # By importing all modules, we will make sure that their classes are defined
-        # and that DSL_SPECIFICATION gets properly filled.
-        import_modules('aria')
-        import_modules('tosca')
+        install_aria_extensions()
+        
+        # Make sure that all @dsl_specification decorators are processed
+        for p in DSL_SPECIFICATION_PACKAGES:
+            import_modules(p)
 
         if args.csv:
             w = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)

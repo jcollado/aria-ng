@@ -2,7 +2,7 @@
 from .utils import classname
 
 class Issue(object):
-    def __init__(self, message=None, exception=None, location=None, line=None, column=None, map=None, snippet=None):
+    def __init__(self, message=None, exception=None, location=None, line=None, column=None, locator=None, snippet=None):
         if message is not None:
             self.message = str(message)
         elif exception is not None:
@@ -12,10 +12,10 @@ class Issue(object):
             
         self.exception = exception
         
-        if map is not None:
-            self.location = map.location
-            self.line = map.line
-            self.column = map.column
+        if locator is not None:
+            self.location = locator.location
+            self.line = locator.line
+            self.column = locator.column
         else:
             self.location = location
             self.line = line
@@ -24,7 +24,7 @@ class Issue(object):
         self.snippet = snippet
 
     @property
-    def location_as_str(self):
+    def locator_as_str(self):
         if self.location is not None:
             if self.line is not None:
                 if self.column is not None:
@@ -38,9 +38,9 @@ class Issue(object):
 
     def __str__(self):
         r = self.message
-        location = self.location_as_str
-        if location is not None:
-            r += ', at %s' % location
+        locator = self.locator_as_str
+        if locator is not None:
+            r += ', at %s' % locator
         if self.snippet is not None:
             r += '\n%s' % self.snippet
         if self.exception is not None:

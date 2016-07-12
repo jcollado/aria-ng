@@ -1,8 +1,8 @@
 
-from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field
 from .assignments import PropertyAssignment
 from .misc import ConstraintClause
+from aria import dsl_specification
+from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field
 from tosca import Range
 
 @has_fields
@@ -14,8 +14,7 @@ class PropertyDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_DEFN>`__
     """
     
-    #@required_field # TODO: cloudify ignores this
-    @primitive_field
+    @primitive_field(str, required=True)
     def type(self):
         """
         The required data type for the property.
@@ -41,7 +40,7 @@ class PropertyDefinition(Presentation):
         :rtype: bool
         """
 
-    @primitive_field
+    @primitive_field()
     def default(self):
         """
         An optional key that may provide a value to be used as a default if not provided by another means.
@@ -153,28 +152,37 @@ class ParameterDefinition(Presentation):
         """
 
 @has_fields
-@dsl_specification('3.5.14', 'tosca-simple-profile-1.0')
-class InterfaceDefinition(Presentation):
+@dsl_specification('3.5.14-1', 'tosca-simple-profile-1.0')
+class InterfaceDefinitionForType(Presentation):
     """
     An interface definition defines a named interface that can be associated with a Node or Relationship Type.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_INTERFACE_DEF>`__
     """
 
-    @object_dict_field(ParameterDefinition)
+    @object_dict_field(PropertyDefinition)
     def inputs(self):
         """
         The optional list of input property definitions available to all defined operations for interface definitions that are within TOSCA Node or Relationship Type definitions. This includes when interface definitions are included as part of a Requirement definition in a Node Type.
         
-        :rtype: dict of str, :class:`ParameterDefinition`
+        :rtype: dict of str, :class:`PropertyDefinition`
         """
 
-    @object_dict_field(PropertyDefinition)
-    def properties(self):
+@has_fields
+@dsl_specification('3.5.14-2', 'tosca-simple-profile-1.0')
+class InterfaceDefinitionForTemplate(Presentation):
+    """
+    An interface definition defines a named interface that can be associated with a Node or Relationship Type.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_INTERFACE_DEF>`__
+    """
+
+    @object_dict_field(PropertyAssignment)
+    def inputs(self):
         """
         The optional list of input property assignments (i.e., parameters assignments) for interface definitions that are within TOSCA Node or Relationship Template definitions. This includes when interface definitions are referenced as part of a Requirement assignment in a Node Template.
         
-        :rtype: dict of str, :class:`PropertyDefinition` or :class:`PropertyAssignment`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
 
 @has_fields
@@ -376,7 +384,7 @@ class GroupDefinition(Presentation):
         :rtype: list of str
         """
 
-    @object_dict_field(InterfaceDefinition)
+    @object_dict_field(InterfaceDefinitionForType)
     def interfaces(self):
         """
         An optional list of named interface definitions for the group definition.
@@ -419,7 +427,7 @@ class PolicyDefinition(Presentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
-    @primitive_list_field
+    @primitive_list_field(str)
     def targets(self):
         """
         An optional list of valid Node Templates or Groups the Policy can be applied to.

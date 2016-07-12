@@ -1,7 +1,7 @@
 
+from .definitions import PropertyDefinition, CapabilityDefinition
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, object_list_field
-from .definitions import PropertyDefinition, CapabilityDefinition
 
 @has_fields
 @dsl_specification('3.5.4', 'tosca-simple-profile-1.0')

@@ -1,7 +1,7 @@
 
 from clint.textui import puts, colored, indent
 
-class Map(object):
+class Locator(object):
     """
     Stores location information (line and column numbers) for agnostic raw data.
     """
@@ -13,13 +13,13 @@ class Map(object):
     
     def link(self, raw):
         if isinstance(raw, list):
-            setattr(raw, '_map', self)
+            setattr(raw, '_locator', self)
             for i in range(len(raw)):
                 r = raw[i]
                 if isinstance(r, list) or isinstance(r, dict):
                     self.children[i].link(r)
         elif isinstance(raw, dict):
-            setattr(raw, '_map', self)
+            setattr(raw, '_locator', self)
             for k, r in raw.iteritems():
                 if isinstance(r, list) or isinstance(r, dict):
                     try:
@@ -27,9 +27,9 @@ class Map(object):
                     except KeyError:
                         raise ValueError('map does not match agnostic raw data: %s' % k)
     
-    def merge(self, map):
-        if isinstance(self.children, dict) and isinstance(map.children, dict):
-            for k, m in map.children.iteritems():
+    def merge(self, locator):
+        if isinstance(self.children, dict) and isinstance(locator.children, dict):
+            for k, m in locator.children.iteritems():
                 if k in self.children:
                     self.children[k].merge(m)
                 else:
@@ -50,5 +50,5 @@ class Map(object):
                     m.dump(k)
 
     def __str__(self):
-        # Should be in same format as Issue.location_as_str
+        # Should be in same format as Issue.locator_as_str
         return '"%s":%d:%d' % (self.location, self.line, self.column)

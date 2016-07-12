@@ -22,12 +22,12 @@ def main():
         if args.csv:
             w = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
             w.writerow(('Specification', 'Section', 'Code', 'URL'))
-            for spec in DSL_SPECIFICATION:
+            for spec in sorted(DSL_SPECIFICATION):
                 for section, details in iter_spec(spec):
                     w.writerow((spec, section, details['code'], details['url']))
         
         else:
-            for spec in DSL_SPECIFICATION:
+            for spec in sorted(DSL_SPECIFICATION):
                 puts(colored.cyan(spec))
                 with indent(2):
                     for section, details in iter_spec(spec):

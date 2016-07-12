@@ -11,8 +11,8 @@ VERSION = '0.1'
 
 def install_aria_extensions():
     """
-    Iterates all Python packages with names beginning with "aria_extension_" and calls
-    their "install_aria_extension" function if they have it.
+    Iterates all Python packages with names beginning with "aria\_extension\_" and calls
+    their "install\_aria\_extension" function if they have it.
     """
     
     for loader, module_name, _ in pkgutil.iter_modules():

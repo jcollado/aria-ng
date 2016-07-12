@@ -29,17 +29,17 @@ class DefaultPresenterSource(PresenterSource):
         return super(DefaultPresenterSource, self).get_presenter(raw)
 
 __all__ = (
-    'MODULES',
     'PresenterError',
     'PresenterNotFoundError',
     'Presenter',
     'Presentation',
     'PresenterSource',
-    'PRESENTER_CLASSES'
+    'PRESENTER_CLASSES',
     'DefaultPresenterSource',
     'Field',
     'has_fields',
     'short_form_field',
+    'allow_unknown_fields',
     'primitive_field',
     'primitive_list_field',
     'object_field',

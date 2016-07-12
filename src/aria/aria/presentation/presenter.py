@@ -14,12 +14,12 @@ class Presenter(Presentation):
     
     def _merge_import(self, presentation):
         merge(self._raw, presentation._raw)
-        if hasattr(self._raw, '_map') and hasattr(presentation._raw, '_map'):
-            self._raw._map.merge(presentation._raw._map)
+        if hasattr(self._raw, '_locator') and hasattr(presentation._raw, '_locator'):
+            self._raw._locator.merge(presentation._raw._locator)
 
     def _link(self):
-        map = self._raw._map
-        map.link(self._raw)
+        locator = self._raw._locator
+        locator.link(self._raw)
 
     @property
     def deployment_plan(self):

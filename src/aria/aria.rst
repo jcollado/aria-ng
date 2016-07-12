@@ -1,7 +1,7 @@
 `aria` Package
 ==============
 
-This is core ARIA API.
+This is the core ARIA API.
 
 :mod:`aria`
 -----------
@@ -42,31 +42,6 @@ This is core ARIA API.
 ------------------------
 
 .. automodule:: aria.presentation
-
-:mod:`aria.presentation.cloudify`
----------------------------------
-
-.. automodule:: aria.presentation.cloudify
-
-:mod:`aria.presentation.cloudify.v1_2`
---------------------------------------
-
-.. automodule:: aria.presentation.cloudify.v1_2
-
-:mod:`aria.presentation.cloudify.v1_3`
---------------------------------------
-
-.. automodule:: aria.presentation.cloudify.v1_3
-
-:mod:`aria.presentation.tosca`
-------------------------------
-
-.. automodule:: aria.presentation.tosca
-
-:mod:`aria.presentation.tosca.v1_0`
------------------------------------
-
-.. automodule:: aria.presentation.tosca.v1_0
 
 :mod:`aria.reading`
 -------------------

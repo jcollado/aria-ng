@@ -7,10 +7,10 @@ from types import MethodType
 from collections import OrderedDict
 
 class Field(object):
-    def __init__(self, type, fn, cls=None, default=None, allowed=None, required=False):
+    def __init__(self, field_type, fn, cls=None, default=None, allowed=None, required=False):
         self.container = None
         self.name = None
-        self.type = type
+        self.field_type = field_type
         self.fn = fn
         self.cls = cls
         self.default = default
@@ -33,55 +33,55 @@ class Field(object):
 
         if value is None:
             if self.required:
-                raise InvalidValueError('required %s must have a value' % self.fullname, map=self.get_map(raw))
+                raise InvalidValueError('required %s must have a value' % self.fullname, locator=self.get_locator(raw))
             else:
                 return None
         
         if self.allowed is not None:
             if value not in self.allowed:
-                raise InvalidValueError('%s must be %s' % (self.fullname, ' or '.join([repr(v) for v in self.allowed])), map=self.get_map(raw))
+                raise InvalidValueError('%s must be %s' % (self.fullname, ' or '.join([repr(v) for v in self.allowed])), locator=self.get_locator(raw))
 
-        if self.type == 'primitive':
+        if self.field_type == 'primitive':
             if self.cls and not isinstance(value, self.cls):
                 try:
                     return self.cls(value)
                 except ValueError:
-                    raise InvalidValueError('%s must be coercible to %s: %s' % (self.fullname, self.fullclass, repr(value)), map=self.get_map(raw))
+                    raise InvalidValueError('%s must be coercible to %s: %s' % (self.fullname, self.fullclass, repr(value)), locator=self.get_locator(raw))
             return value
 
-        elif self.type == 'primitive_list':
+        elif self.field_type == 'primitive_list':
             if not isinstance(value, list):
                 location = self._get_location(raw)
-                raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), map=self.get_map(raw))
+                raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             if self.cls:
                 for i in range(len(value)):
                     if not isinstance(value[i], self.cls):
                         try:
                             value[i] = self.cls(value[i])
                         except ValueError:
-                            raise InvalidValueError('%s must be coercible to a list of %s: element %d is %s' % (self.fullname, self.fullclass, i, repr(value[i])), map=self.get_map(raw))
+                            raise InvalidValueError('%s must be coercible to a list of %s: element %d is %s' % (self.fullname, self.fullclass, i, repr(value[i])), locator=self.get_locator(raw))
             return ReadOnlyList(value)
 
-        elif self.type == 'object':
+        elif self.field_type == 'object':
             try:
                 return self.cls(raw=value)
             except TypeError as e:
-                raise InvalidValueError('could not initialize %s to type %s: %s' % (self.fullname, self.fullclass), cause=e, map=self.get_map(raw))
+                raise InvalidValueError('could not initialize %s to field_type %s: %s' % (self.fullname, self.fullclass), cause=e, locator=self.get_locator(raw))
 
-        elif self.type == 'object_list':
+        elif self.field_type == 'object_list':
             if not isinstance(value, list):
-                raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), map=self.get_map(raw))
+                raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             return ReadOnlyList([self.cls(raw=v) for v in value])
 
-        elif self.type == 'object_dict':
+        elif self.field_type == 'object_dict':
             if not isinstance(value, dict):
-                raise InvalidValueError('%s must be a dict: %s' % (self.fullname, repr(value)), map=self.get_map(raw))
+                raise InvalidValueError('%s must be a dict: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             return ReadOnlyDict([(k, self.cls(name=k, raw=v)) for k, v in value.iteritems()])
             
         else:
-            map = self.get_map(raw)
-            location = (', at %s' % map) if map is not None else ''
-            raise AttributeError('%s has unsupported type: %s%s' % (self.fullname, self.type, location))
+            locator = self.get_locator(raw)
+            location = (', at %s' % locator) if locator is not None else ''
+            raise AttributeError('%s has unsupported field_type: %s%s' % (self.fullname, self.field_type, location))
 
     def set(self, raw, value):
         return self._set(raw, value)
@@ -130,9 +130,9 @@ class Field(object):
     def fullclass(self):
         return '%s.%s' % (self.cls.__module__, self.cls.__name__)
 
-    def get_map(self, raw):
-        if hasattr(raw, '_map'):
-            return raw._map.children.get(self.name) or raw._map
+    def get_locator(self, raw):
+        if hasattr(raw, '_locator'):
+            return raw._locator.children.get(self.name) or raw._locator
         return None
     
 def has_fields_iter_field_names(self):
@@ -252,8 +252,21 @@ def short_form_field(name):
             setattr(cls, 'SHORT_FORM_FIELD', name)
             return cls
         else:
-            raise AttributeError('@short_form_field must be used with a @property name')
+            raise AttributeError('@short_form_field must be used with a Field name in @has_fields class')
     return decorator
+
+def allow_unknown_fields(cls):
+    """
+    Class decorator specifying that the class allows unknown fields.
+    
+    The class must be decorated with :func:`has\_fields`.
+    """
+    if hasattr(cls, 'FIELDS'):
+        setattr(cls, 'ALLOW_UNKNOWN_FIELDS', True)
+        return cls
+    else:
+        raise AttributeError('@allow_unknown_fields must be used with a @has_fields class')
+
 
 def primitive_field(cls=None, default=None, allowed=None, required=False):
     """
@@ -262,7 +275,7 @@ def primitive_field(cls=None, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(type='primitive', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_type='primitive', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def primitive_list_field(cls=None, default=None, allowed=None, required=False):
@@ -272,7 +285,7 @@ def primitive_list_field(cls=None, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(type='primitive_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_type='primitive_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_field(cls, default=None, allowed=None, required=False):
@@ -282,7 +295,7 @@ def object_field(cls, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(type='object', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_type='object', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_list_field(cls, default=None, allowed=None, required=False):
@@ -292,7 +305,7 @@ def object_list_field(cls, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(type='object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_type='object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_dict_field(cls, default=None, allowed=None, required=False):
@@ -302,7 +315,7 @@ def object_dict_field(cls, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(type='object_dict', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_type='object_dict', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def field_getter(getter_fn):

@@ -1,6 +1,6 @@
 
-from aria.presentation import Presenter
 from .templates import ServiceTemplate
+from aria.presentation import Presenter
 
 class ToscaSimplePresenter1_0(Presenter):
     """

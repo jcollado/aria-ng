@@ -13,4 +13,7 @@ topology_template:
     my_node:
       description: |
         My node template.
-      type: MyNode
+      type: MyNode2
+      properties:
+        p1: 3
+        p3: goodbye

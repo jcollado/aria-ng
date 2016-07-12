@@ -1,10 +1,42 @@
 
-from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_dict_field, ReadOnlyDict
-from aria_extension_tosca.v1_0 import PropertyAssignment
-from .assignments import PolicyAssignment
+from .assignments import PropertyAssignment, PolicyAssignment
 from .misc import Operation
+from aria import dsl_specification
+from aria.presentation import Presentation, has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_dict_field, ReadOnlyDict
 
+@has_fields
+class PropertyDefinition(Presentation):
+    @primitive_field(str)
+    def description(self):
+        """
+        Description for the property.
+        
+        :rtype: str
+        """
+
+    @primitive_field(str)
+    def type(self):
+        """
+        Property type. Not specifying a data type means the type can be anything (including types not listed in the valid types). Valid types: string, integer, float, boolean or a custom data type.
+        
+        :rtype: str
+        """
+
+    @primitive_field()
+    def default(self):
+        """
+        An optional default value for the property.        
+        """
+
+    @primitive_field(bool, default=True)
+    def required(self):
+        """
+        Specifies whether the property is required. (Default: true, Supported since: cloudify_dsl_1_2)
+        
+        :rtype: bool
+        """
+
+@allow_unknown_fields
 @has_fields
 @dsl_specification('interfaces', 'cloudify-1.3')
 class InterfaceDefinition(Presentation):
@@ -13,10 +45,6 @@ class InterfaceDefinition(Presentation):
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-interfaces/>`__.
     """
-
-    def __init__(self, *args, **kwargs):
-        super(InterfaceDefinition, self).__init__(*args, **kwargs)
-        self._allow_unknown_fields = True
 
     @property
     def operations(self):

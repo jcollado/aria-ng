@@ -49,19 +49,19 @@ class ExecutionContext(object):
     
     @property
     def inputs(self):
-        return self.service.__class__.INPUTS if hasattr(self.service.__class__, 'INPUTS') else []
+        return getattr(self.service.__class__, 'INPUTS', [])
 
     @property
     def outputs(self):
-        return self.service.__class__.OUTPUTS if hasattr(self.service.__class__, 'OUTPUTS') else []
+        return getattr(self.service.__class__, 'OUTPUTS', [])
     
     @property
     def nodes(self):
-        return self.service.__class__.NODES if hasattr(self.service.__class__, 'NODES') else []
+        return getattr(self.service.__class__, 'NODES', [])
 
     @property
     def workflows(self):
-        return self.service.__class__.WORKFLOWS if hasattr(self.service.__class__, 'WORKFLOWS') else []
+        return getattr(self.service.__class__, 'WORKFLOWS', [])
     
     def dump(self):
         if self.inputs:

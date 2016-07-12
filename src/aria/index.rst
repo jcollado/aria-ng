@@ -13,6 +13,8 @@ Packages
    :maxdepth: 2
 
    aria
+   tosca_extension
+   cloudify_extension
    tosca
 
 

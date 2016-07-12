@@ -1,7 +1,7 @@
 
 from .consumer import Consumer
 from .exceptions import ConsumerError
-import ruamel.yaml as yaml
+import ruamel.yaml as yaml # @UnresolvedImport
 
 class YamlWriter(Consumer):
     """

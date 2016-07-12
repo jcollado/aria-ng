@@ -1,7 +1,8 @@
 
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields
+from aria.presentation import Presentation, has_fields, allow_unknown_fields
 
+@allow_unknown_fields
 @has_fields
 @dsl_specification('3.5.9', 'tosca-simple-profile-1.0')
 class PropertyAssignment(Presentation):
@@ -10,10 +11,6 @@ class PropertyAssignment(Presentation):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_VALUE_ASSIGNMENT>`__
     """
-
-    def __init__(self, *args, **kwargs):
-        super(PropertyAssignment, self).__init__(*args, **kwargs)
-        self._allow_unknown_fields = True
     
     @property
     def value(self):
@@ -23,7 +20,8 @@ class PropertyAssignment(Presentation):
     def value(self, value):
         self._raw = value
         
-    #TODO
+    def _validate(self, consumption_context):
+        pass
 
 @has_fields
 @dsl_specification('3.7.2', 'tosca-simple-profile-1.0')

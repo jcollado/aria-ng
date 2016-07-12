@@ -218,21 +218,21 @@ def classname(o):
     """
     return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
 
-def merge(a, b, path=None, strict=True):
+def merge(a, b, path=[], strict=True):
     """
     Deep merge dicts.
     """
     #TODO: a.add_yaml_merge(b), see https://bitbucket.org/ruamel/yaml/src/86622a1408e0f171a12e140d53c4ffac4b6caaa3/comments.py?fileviewer=file-view-default
-    
-    if path is None:
-        path = []
     for key, value_b in b.iteritems():
         if key in a:
             value_a = a[key]
             if isinstance(value_a, dict) and isinstance(value_b, dict):
                 merge(value_a, value_b, path + [str(key)], strict)
-            elif strict and (value_a != value_b):
-                raise ValueError('dict merge conflict at %s' % '.'.join(path + [str(key)]))
+            elif value_a != value_b:
+                if strict:
+                    raise ValueError('dict merge conflict at %s' % '.'.join(path + [str(key)]))
+                else:
+                    a[key] = value_b
         else:
             a[key] = value_b
     return a

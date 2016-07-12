@@ -1,20 +1,30 @@
 
-from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
-from aria_extension_tosca.v1_0 import NodeTemplate as BaseNodeTemplate, PropertyDefinition
 from ..v1_2 import Instances
-from .definitions import InterfaceDefinition, GroupDefinition, PolicyDefinition
+from .definitions import PropertyDefinition, InterfaceDefinition, GroupDefinition, PolicyDefinition
+from .assignments import PropertyAssignment
 from .types import NodeType, RelationshipType, PolicyType
 from .misc import Output, Workflow, Plugin, Scalable, PolicyTrigger
+from aria import dsl_specification
+from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
+
+from aria_extension_tosca.v1_0.types import DataType
 
 @has_fields
-@dsl_specification('relationships', 'cloudify-1.3')
+@dsl_specification('relationships-1', 'cloudify-1.3')
 class RelationshipTemplate(Presentation):
     """
     Relationships let you define how nodes relate to one another. For example, a web_server node can be contained_in a vm node or an application node can be connected_to a database node.
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-relationships/>`__
     """
+
+    @primitive_field(str)
+    def description(self):
+        """
+        Not mentioned in the spec.
+        
+        :rtype: str
+        """
 
     @field_validator(type_validator('relationship', 'relationship_types'))
     @primitive_field(str, required=True)
@@ -59,7 +69,7 @@ class RelationshipTemplate(Presentation):
 
 @has_fields
 @dsl_specification('node-templates', 'cloudify-1.3')
-class NodeTemplate(BaseNodeTemplate):
+class NodeTemplate(Presentation):
     """
     node_templates represent the actual instances of node types which would eventually represent a running application/service as described in the blueprint.
 
@@ -67,13 +77,30 @@ class NodeTemplate(BaseNodeTemplate):
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-templates/>`__
     """
-    
-    @object_list_field(RelationshipTemplate)
-    def relationships(self):
+
+    @primitive_field(str)
+    def description(self):
         """
-        Used for specifying the relationships this node template has with other node templates.
+        Not mentioned in the spec.
         
-        :rtype: list of :class:`RelationshipTemplate`
+        :rtype: str
+        """
+
+    @field_validator(type_validator('node type', 'node_types'))
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        The node-type of this node template.
+        
+        :rtype: str
+        """
+
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        The properties of the node template matching its node type properties schema.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
     
     @object_field(Instances)
@@ -83,11 +110,27 @@ class NodeTemplate(BaseNodeTemplate):
         
         :rtype: :class:`Instances`
         """
-    
-    @object_field(Scalable)
-    def capabilities_scalable(self):
+
+    @object_dict_field(InterfaceDefinition)
+    def interfaces(self):
         """
-        :rtype: :class:`Scalable`
+        Used for mapping plugins to interfaces operation or for specifying inputs for already mapped node type operations.
+        
+        :rtype: dict of str, :class:`InterfaceDefinition`
+        """
+    
+    @object_list_field(RelationshipTemplate)
+    def relationships(self):
+        """
+        Used for specifying the relationships this node template has with other node templates.
+        
+        :rtype: list of :class:`RelationshipTemplate`
+        """
+    
+    @object_dict_field(Scalable)
+    def capabilities(self):
+        """
+        :rtype: dict of str, :class:`Scalable`
         """
 
 @has_fields
@@ -139,28 +182,40 @@ class ServiceTemplate(Presentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
-    @object_dict_field(NodeType)
-    def node_types(self):
-        """
-        :rtype: dict of str, :class:`NodeType`
-        """
-
-    @object_dict_field(PolicyType)
-    def policy_types(self):
-        """
-        :rtype: dict of str, :class:`PolicyType`
-        """
-
     @object_dict_field(NodeTemplate)
     def node_templates(self):
         """
         :rtype: dict of str, :class:`NodeTemplate`
         """
 
+    @object_dict_field(NodeType)
+    def node_types(self):
+        """
+        :rtype: dict of str, :class:`NodeType`
+        """
+
+    @object_dict_field(Output)
+    def outputs(self):
+        """
+        :rtype: dict of str, :class:`Output`
+        """
+
     @object_dict_field(RelationshipType)
     def relationships(self):
         """
         :rtype: dict of str, :class:`RelationshipType`
+        """
+
+    @object_dict_field(Plugin)
+    def plugins(self):
+        """
+        :rtype: dict of str, :class:`Plugin`
+        """
+    
+    @object_dict_field(Workflow)
+    def workflows(self):
+        """
+        :rtype: dict of str, :class:`Workflow`
         """
 
     @object_dict_field(GroupDefinition)
@@ -175,26 +230,20 @@ class ServiceTemplate(Presentation):
         :rtype: dict of str, :class:`PolicyDefinition`
         """
 
+    @object_dict_field(PolicyType)
+    def policy_types(self):
+        """
+        :rtype: dict of str, :class:`PolicyType`
+        """
+
     @object_dict_field(PolicyTrigger)
     def policy_triggers(self):
         """
         :rtype: dict of str, :class:`PolicyTrigger`
         """
-    
-    @object_dict_field(Plugin)
-    def plugins(self):
-        """
-        :rtype: dict of str, :class:`Plugin`
-        """
-    
-    @object_dict_field(Workflow)
-    def workflows(self):
-        """
-        :rtype: dict of str, :class:`Workflow`
-        """
 
-    @object_dict_field(Output)
-    def outputs(self):
+    @object_dict_field(DataType)
+    def data_types(self):
         """
-        :rtype: dict of str, :class:`Output`
+        :rtype: dict of str, :class:`DataType`
         """

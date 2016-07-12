@@ -1,7 +1,8 @@
 
+from .assignments import PropertyAssignment
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field 
-from aria_extension_tosca.v1_0 import PropertyDefinition, Version
+from tosca import Version
 
 @has_fields
 @dsl_specification('outputs', 'cloudify-1.3')
@@ -39,12 +40,12 @@ class Operation(Presentation):
         :rtype: str
         """
 
-    @object_dict_field(PropertyDefinition)
+    @object_dict_field(PropertyAssignment)
     def inputs(self):
         """
         Schema of inputs that will be passed to the implementation as kwargs.
         
-        :rtype: dict of str, :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
 
     @primitive_field(str)
@@ -89,12 +90,12 @@ class Workflow(Presentation):
         :rtype: str
         """
 
-    @object_dict_field(PropertyDefinition)
+    @object_dict_field(PropertyAssignment)
     def parameters(self):
         """
         A map of parameters to be passed to the workflow implementation
         
-        :rtype: dict of str, :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """
     
 
@@ -236,10 +237,10 @@ class PolicyTrigger(Presentation):
         :rtype: str
         """
 
-    @object_dict_field(PropertyDefinition)
+    @object_dict_field(PropertyAssignment)
     def parameters(self):
         """
         Optional parameters schema for the policy trigger.
         
-        :rtype: dict of str, :class:`PropertyDefinition`
+        :rtype: dict of str, :class:`PropertyAssignment`
         """

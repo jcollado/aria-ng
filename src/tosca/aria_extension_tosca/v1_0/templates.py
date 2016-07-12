@@ -1,11 +1,11 @@
 
-from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
 from .misc import MetaData, Repository, Import
-from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinition, ArtifactDefinition
+from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinitionForTemplate, ArtifactDefinition
 from .assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
+from aria import dsl_specification
+from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
 
 @has_fields
 @dsl_specification('3.7.3', 'tosca-simple-profile-1.0')
@@ -75,12 +75,12 @@ class NodeTemplate(Presentation):
         :rtype: dict of str, :class:`CapabilityAssignment`
         """
 
-    @object_dict_field(InterfaceDefinition)
+    @object_dict_field(InterfaceDefinitionForTemplate)
     def interfaces(self):
         """
         An optional list of named interface definitions for the Node Template.
         
-        :rtype: dict of str, :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
         """
 
     @object_dict_field(ArtifactDefinition)
@@ -106,6 +106,22 @@ class NodeTemplate(Presentation):
         
         :rtype: str
         """
+    
+    def _get_type(self, consumption_context):
+        return consumption_context.presentation.node_types.get(self.type)
+
+    def _get_properties(self, consumption_context):
+        node_type = consumption_context.presentation.node_types.get(self.type)
+        property_definitions = node_type._get_properties(consumption_context)
+        return self._assign_defined_dict(consumption_context, 'property', self.properties, property_definitions)
+    
+    def _validate(self, consumption_context):
+        super(NodeTemplate, self)._validate(consumption_context)
+        
+        self._get_properties(consumption_context)
+        
+        #properties = self._get_properties(consumption_context)
+        #print properties
 
 @has_fields
 @dsl_specification('3.7.4', 'tosca-simple-profile-1.0')
@@ -151,12 +167,12 @@ class RelationshipTemplate(Presentation):
         :rtype: dict of str, :class:`AttributeAssignment`
         """
 
-    @object_dict_field(InterfaceDefinition)
+    @object_dict_field(InterfaceDefinitionForTemplate)
     def interfaces(self):
         """
         An optional list of named interface definitions for the Node Template.
         
-        :rtype: dict of str, :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
         """
 
     @primitive_field(str)
@@ -166,6 +182,9 @@ class RelationshipTemplate(Presentation):
         
         :rtype: str
         """
+
+    def _get_type(self, consumption_context):
+        return consumption_context.presentation.relationship_types.get(self.type)
 
 @has_fields
 @dsl_specification('3.8', 'tosca-simple-profile-1.0')

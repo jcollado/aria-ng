@@ -10,8 +10,10 @@ from .deployment_plan import *
 __all__ = (
     'CloudifyPresenter1_3',
     'CloudifyDeploymentPlan',
+    'PropertyAssignment',
     'TriggerAssignment',
     'PolicyAssignment',
+    'PropertyDefinition',
     'InterfaceDefinition',
     'GroupDefinition',
     'PolicyDefinition',
@@ -25,4 +27,6 @@ __all__ = (
     'NodeTemplate',
     'ServiceTemplate',
     'NodeType',
-    'RelationshipType')
+    'RelationshipType',
+    'PolicyType',
+    'DataType')

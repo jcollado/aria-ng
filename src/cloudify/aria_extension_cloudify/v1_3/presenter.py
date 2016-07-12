@@ -1,7 +1,7 @@
 
-from aria.presentation import Presenter
-from .deployment_plan import CloudifyDeploymentPlan
 from .templates import ServiceTemplate
+from .deployment_plan import CloudifyDeploymentPlan
+from aria.presentation import Presenter
 
 class CloudifyPresenter1_3(Presenter):
     """

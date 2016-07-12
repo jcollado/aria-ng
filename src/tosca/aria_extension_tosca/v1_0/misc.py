@@ -1,7 +1,7 @@
 
+from tosca.datatypes import Credential
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, object_field
-from tosca.datatypes import Credential
 
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')

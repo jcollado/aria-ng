@@ -49,10 +49,10 @@ class Implementer(Consumer):
         generator.description = self.context.presentation.service_template.description
         
         if self.context.presentation.inputs:
-            for name, input in self.context.presentation.inputs.iteritems():
-                description = input.description if hasattr(input, 'description') else None # cloudify_dsl
-                the_default = input.default if hasattr(input, 'default') else None # cloudify_dsl
-                generator.inputs[name] = CodeProperty(generator, name, description, input.type, the_default)
+            for name, i in self.context.presentation.inputs.iteritems():
+                description = getattr(i, 'description', None) # cloudify_dsl
+                the_default = getattr(i, 'default', None) # cloudify_dsl
+                generator.inputs[name] = CodeProperty(generator, name, description, i.type, the_default)
 
         if self.context.presentation.outputs:
             for name, output in self.context.presentation.outputs.iteritems():
@@ -71,7 +71,7 @@ class Implementer(Consumer):
                 if node_type.interfaces:
                     for name, i in node_type.interfaces.iteritems():
                         for oname, operation in i.operations.iteritems():
-                            m = CodeMethod(generator, oname, name, operation.description if hasattr(operation, 'description') else None, operation.implementation, operation.executor)
+                            m = CodeMethod(generator, oname, name, getattr(operation, 'description', None), operation.implementation, operation.executor)
                             cls.methods[oname] = m
                             if operation.inputs:
                                 for pname, prop in operation.inputs.iteritems():
@@ -112,7 +112,7 @@ class Implementer(Consumer):
 
         if self.context.presentation.workflows:
             for name, operation in self.context.presentation.workflows.iteritems():
-                m = CodeMethod(generator, name, None, operation.description if hasattr(operation, 'description') else None, operation.mapping, operation.executor if hasattr(operation, 'executor') else None)
+                m = CodeMethod(generator, name, None, getattr(operation, 'description', None), operation.mapping, operation.executor if hasattr(operation, 'executor') else None)
                 generator.workflows[name] = m
                 if operation.parameters:
                     for pname, prop in operation.parameters.iteritems():

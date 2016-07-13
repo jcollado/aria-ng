@@ -8,7 +8,7 @@ def type_validator(type_type, types_dict_name):
         if value is not None:
             types_dict = getattr(consumption_context.presentation, types_dict_name)
             if value not in types_dict:
-                presentation._append_issue_for_unknown_type(consumption_context, type_type, field.name)
+                presentation._append_value_error_for_unknown_type(consumption_context, type_type, field.name)
         
     return fn
 

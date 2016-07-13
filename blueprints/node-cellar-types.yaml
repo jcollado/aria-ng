@@ -1,0 +1,105 @@
+
+capability_types:
+  
+  CanServeData:
+    description: |
+      The capability to serve data.
+    properties:
+      class:
+        description: \'relational\' or \'object\'
+        type: str
+  
+  CanHost:
+    description: |
+      The capability to host applications.
+    #derived_from: tosca.capabilities.Container 
+
+relationship_types:
+
+  InstalledIn:
+    description: |
+      Relationship between an application and its host.
+    #derived_from: tosca.relationships.HostedOn
+
+node_types:
+
+  Application:
+    description: |
+      A generic application.
+    properties:
+      port:
+        description: The user port.
+        type: int
+    interfaces:
+      lifecycle:
+        inputs:
+          username:
+            description: The admin username.
+            type: str
+    requirements:
+      - host:
+          capability: CanHost
+          relationship: InstalledIn
+      # short form:
+      #- host: tosca.capabilities.Container
+
+  WebApplication:
+    description: |
+      A generic web application.
+    derived_from: Application
+    properties:
+      port:
+        type: int
+        default: 8080
+      root_url:
+        description: The root URL.
+        type: str
+        default: /
+      locale:
+        description: The locale (optional).
+        type: str
+        required: false
+
+  NodeJsWebApplication:
+    description: |
+      A Node.js-based web application.
+    derived_from: WebApplication
+    properties:
+      package_url:
+        description: URL to the Node.js application package. 
+        type: str
+
+  DatabaseApplication:
+    description: |
+      A generic database application.
+    derived_from: Application
+    capabilities:
+      data: CanServeData
+
+  MongoDbApplication:
+    description: |
+      MongoDB database application.
+    derived_from: DatabaseApplication
+    properties:
+      port:
+        type: int
+        default: 27017
+    capabilities:
+      data:
+        type: CanServeData
+        properties:
+          class:
+            type: str
+            default: object
+
+  Host:
+    description: |
+      A host.
+    properties:
+      ip_address:
+        description: The IP address.
+        type: str
+    capabilities:
+      host:
+        type: CanHost
+        occurrences: 10 # for testing only

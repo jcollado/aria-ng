@@ -53,6 +53,7 @@ __all__ = (
     'print_exception',
     'print_traceback',
     'make_agnostic',
+    'is_primitive',
     'Prop',
     'has_validated_properties',
     'validated_property',

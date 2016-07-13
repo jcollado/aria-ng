@@ -67,7 +67,7 @@ class Printer(Consumer):
                     with self.context.style.indent:
                         if relationship_type.derived_from:
                             puts('Derived from: %s' % self.context.style.type(relationship_type.derived_from))
-                        if relationship_type.target_interfaces:
+                        if hasattr(relationship_type, 'target_interfaces') and relationship_type.target_interfaces: # cloudify_dsl
                             puts('Target interfaces:')
                             with self.context.style.indent:
                                 for k, target_interface in relationship_type.target_interfaces.iteritems():

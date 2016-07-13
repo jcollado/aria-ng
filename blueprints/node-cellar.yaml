@@ -1,0 +1,58 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+description: |
+  Node Cellar TOSCA blueprint.
+
+imports:
+  - node-cellar-types.yaml
+
+topology_template:
+
+  relationship_templates:
+  
+    node_cellar_installed_in:
+      description: |
+        Node Cellar installation relationship.
+      type: InstalledIn
+
+  node_templates:
+  
+    # Application nodes
+
+    node_cellar:
+      description: |
+        Node Cellar Node.js web application.
+      type: NodeJsWebApplication
+      properties:
+        port: 8081
+        package_url: https://github.com/cloudify-cosmo/nodecellar/archive/master.tar.gz
+      requirements:
+        - host:
+            relationship: node_cellar_installed_in # we can use either a relationship template or a relationship type
+            node: application_host # we can use either a node template or a node type
+        - data:
+            capability: ServesData
+            node: Host
+    
+    mongodb:
+      description: |
+        MongoDB database application.
+      type: MongoDbApplication
+      requirements:
+        - host: database_host
+
+    # Host nodes
+
+    application_host:
+      description: |
+        Host for applications.
+      type: Host
+      properties:
+        ip_address: 192.168.1.100
+
+    database_host:
+      description: |
+        Host for databases.
+      type: Host
+      properties:
+        ip_address: 192.168.1.101

@@ -1,18 +1,8 @@
 
-from aria.presentation import Presentation, has_fields, allow_unknown_fields, primitive_field, object_dict_field
+from aria.presentation import Presentation, AsIsPresentation, has_fields, primitive_field, object_dict_field
 
-@allow_unknown_fields
-@has_fields
-class PropertyAssignment(Presentation):
-    @property
-    def value(self):
-        return self._raw
-    
-    @value.setter
-    def value(self, value):
-        self._raw = value
-        
-    #TODO
+class PropertyAssignment(AsIsPresentation):
+    pass
 
 @has_fields
 class TriggerAssignment(Presentation):

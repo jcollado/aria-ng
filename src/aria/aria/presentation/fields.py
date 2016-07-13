@@ -21,15 +21,14 @@ class Field(object):
         return self._get(raw)
     
     def _get(self, raw):
-        short_form = (self.container.SHORT_FORM_FIELD == self.name) if hasattr(self.container, 'SHORT_FORM_FIELD') else False
+        is_short_form_field = (self.container.SHORT_FORM_FIELD == self.name) if hasattr(self.container, 'SHORT_FORM_FIELD') else False
+        is_dict = isinstance(raw, dict)
 
-        if short_form:
+        value = None
+        if is_short_form_field and not is_dict:
             value = raw
-        else:
-            if isinstance(raw, dict):
-                value = raw.get(self.name, self.default)
-            else:
-                value = None
+        elif is_dict:
+            value = raw.get(self.name, self.default)
 
         if value is None:
             if self.required:
@@ -77,7 +76,20 @@ class Field(object):
             if not isinstance(value, dict):
                 raise InvalidValueError('%s must be a dict: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             return ReadOnlyDict([(k, self.cls(name=k, raw=v)) for k, v in value.iteritems()])
-            
+
+        elif self.field_type == 'sequenced_object_list':
+            if not isinstance(value, list):
+                raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+            sequence = []
+            for v in value:
+                if not isinstance(v, dict):
+                    raise InvalidValueError('%s list elements must be dicts: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                if len(v) != 1:
+                    raise InvalidValueError('%s list elements must be dicts with exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                k, vv = v.items()[0]
+                sequence.append((k, self.cls(raw=vv)))
+            return ReadOnlyList(sequence)
+
         else:
             locator = self.get_locator(raw)
             location = (', at %s' % locator) if locator is not None else ''
@@ -110,16 +122,23 @@ class Field(object):
                 consumption_context.validation.issues.append(e.issue)
             else:
                 consumption_context.validation.issues.append(Issue(exception=e))
-            
+        
         if isinstance(value, list):
-            for v in value:
-                if hasattr(v, '_validate'):
-                    v._validate(consumption_context)
+            if self.field_type == 'object_list':
+                for v in value:
+                    if hasattr(v, '_validate'):
+                        v._validate(consumption_context)
+            elif self.field_type == 'sequenced_object_list':
+                for _, v in value:
+                    if hasattr(v, '_validate'):
+                        v._validate(consumption_context)
         elif isinstance(value, dict):
-            for v in value.itervalues():
-                if hasattr(v, '_validate'):
-                    v._validate(consumption_context)
-        elif hasattr(value, '_validate'):
+            if self.field_type == 'object_dict':
+                for v in value.itervalues():
+                    if hasattr(v, '_validate'):
+                        v._validate(consumption_context)
+        
+        if hasattr(value, '_validate'):
             value._validate(consumption_context)
 
     @property
@@ -318,12 +337,22 @@ def object_dict_field(cls, default=None, allowed=None, required=False):
         return Field(field_type='object_dict', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
+def object_sequenced_list_field(cls, default=None, allowed=None, required=False):
+    """
+    Function decorator for sequenced list of object fields.
+    
+    The function must be a method in a class decorated with :func:`has\_fields`.
+    """
+    def decorator(fn):
+        return Field(field_type='sequenced_object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+    return decorator
+
 def field_getter(getter_fn):
     """
     Function decorator for overriding the getter function of a field.
     
     The signature of the getter function must be: f(field, raw).
-    The default getter can be accessed as field.\_get().
+    The default getter can be accessed as field.\_get(raw).
     
     The function must already be decorated with a field decorator.
     """
@@ -340,7 +369,7 @@ def field_setter(setter_fn):
     Function decorator for overriding the setter function of a field.
     
     The signature of the setter function must be: f(field, raw, value).
-    The default setter can be accessed as field.\_set().
+    The default setter can be accessed as field.\_set(raw, value).
     
     The function must already be decorated with a field decorator.
     """
@@ -357,7 +386,7 @@ def field_validator(validator_fn):
     Function decorator for overriding the validator function of a field.
     
     The signature of the validator function must be: f(field, presentation, consumption_context).
-    The default validator can be accessed as field.\_validate().
+    The default validator can be accessed as field.\_validate(presentation, consumption_context).
     
     The function must already be decorated with a field decorator.
     """

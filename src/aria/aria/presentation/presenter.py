@@ -48,6 +48,18 @@ class Presenter(Presentation):
     @property
     def group_types(self):
         return None
+
+    @property
+    def capability_types(self):
+        return None
+
+    @property
+    def artifact_types(self):
+        return None
+
+    @property
+    def policy_types(self):
+        return None
     
     @property
     def node_templates(self):

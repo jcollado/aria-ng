@@ -77,7 +77,7 @@ class Version(object):
     TYPE_QUALIFIED_NAME = 'tosca:version'
     
     def __init__(self, raw):
-        self.raw = raw
+        self._raw = raw
 
 @dsl_specification('3.2.4', 'tosca-simple-profile-1.0')
 class List(object):
@@ -122,8 +122,8 @@ class Range(object):
     SHORTHAND_NAME = 'range'
     TYPE_QUALIFIED_NAME = 'tosca:range'
 
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, raw):
+        self._raw = raw
 
 @dsl_specification('3.2.6.4', 'tosca-simple-profile-1.0')
 class Size(object):

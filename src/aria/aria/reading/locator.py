@@ -1,6 +1,26 @@
 
 from clint.textui import puts, colored, indent
 
+# We are inheriting the primitive types in order to add the ability to set an attribute (_locator) on them.
+
+class LocatorString(str):
+    pass
+
+class LocatorInt(int):
+    pass
+
+class LocatorFloat(float):
+    pass
+
+def wrap(value):
+    if isinstance(value, basestring):
+        return True, LocatorString(value)
+    elif isinstance(value, int):
+        return True, LocatorInt(value)
+    elif isinstance(value, float):
+        return True, LocatorFloat(value)
+    return False, value
+
 class Locator(object):
     """
     Stores location information (line and column numbers) for agnostic raw data.
@@ -11,21 +31,43 @@ class Locator(object):
         self.column = column
         self.children = None
     
+    def get_child(self, name):
+        if self.children is not None:
+            return self.children.get(name, self)
+        return self
+
+    def get_grandchild(self, name1, name2):
+        if self.children is not None:
+            locator1 = self.children.get(name1)
+            if (locator1 is not None) and (locator1.children is not None):
+                return locator1.children.get(name2, locator1)
+        return self
+    
     def link(self, raw):
-        if isinstance(raw, list):
+        try:
             setattr(raw, '_locator', self)
+        except AttributeError:
+            pass
+        
+        if isinstance(raw, list):
             for i in range(len(raw)):
                 r = raw[i]
-                if isinstance(r, list) or isinstance(r, dict):
+                wrapped, r = wrap(r)
+                if wrapped:
+                    raw[i] = r
+                try:
                     self.children[i].link(r)
+                except KeyError:
+                    raise ValueError('map does not match agnostic raw data: %d' % i)
         elif isinstance(raw, dict):
-            setattr(raw, '_locator', self)
             for k, r in raw.iteritems():
-                if isinstance(r, list) or isinstance(r, dict):
-                    try:
-                        self.children[k].link(r)
-                    except KeyError:
-                        raise ValueError('map does not match agnostic raw data: %s' % k)
+                wrapped, r = wrap(r)
+                if wrapped:
+                    raw[k] = r
+                try:
+                    self.children[k].link(r)
+                except KeyError:
+                    raise ValueError('map does not match agnostic raw data: %s' % k)
     
     def merge(self, locator):
         if isinstance(self.children, dict) and isinstance(locator.children, dict):

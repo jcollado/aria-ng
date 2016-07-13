@@ -27,6 +27,6 @@ class InvalidValueError(AriaError):
     ARIA error: value is invalid.
     """
 
-    def __init__(self, message, cause=None, cause_tb=None, location=None, line=None, column=None, locator=None, snippet=None):
+    def __init__(self, message, cause=None, cause_tb=None, location=None, line=None, column=None, locator=None, snippet=None, level=2):
         super(InvalidValueError, self).__init__(message, cause, cause_tb)
-        self.issue = Issue(message, location=location, line=line, column=column, locator=locator, snippet=snippet)
+        self.issue = Issue(message, location=location, line=line, column=column, locator=locator, snippet=snippet, level=level)

@@ -43,7 +43,19 @@ class ToscaSimplePresenter1_0(Presenter):
     @property
     def group_types(self):
         return self.service_template.group_types
-    
+
+    @property
+    def capability_types(self):
+        return self.service_template.capability_types
+
+    @property
+    def artifact_types(self):
+        return self.service_template.aritfact_types
+
+    @property
+    def policy_types(self):
+        return self.service_template.policy_types
+
     @property
     def node_templates(self):
         return self.service_template.topology_template.node_templates

@@ -2,11 +2,21 @@
 from .utils import classname
 
 class Issue(object):
-    def __init__(self, message=None, exception=None, location=None, line=None, column=None, locator=None, snippet=None):
+    """
+    Issue levels:
+    
+    0: Internal error (usually due to a bug in ARIA)
+    1: Format (e.g. YAML, XML, JSON)
+    2: Single field
+    3: Relationships between fields within the type (grammar)
+    4: Relationships between types (e.g. inheritance, static requirements and capabilities)
+    5: External (e.g. live requirements and capabilities)
+    """
+    def __init__(self, message=None, exception=None, location=None, line=None, column=None, locator=None, snippet=None, level=0):
         if message is not None:
             self.message = str(message)
         elif exception is not None:
-            self.message = 'exception was raised'
+            self.message = '%s was raised' % classname(exception)
         else:
             self.message = 'unknown issue'
             
@@ -22,6 +32,7 @@ class Issue(object):
             self.column = column
             
         self.snippet = snippet
+        self.level = level
 
     @property
     def locator_as_str(self):
@@ -37,12 +48,10 @@ class Issue(object):
             return None
 
     def __str__(self):
-        r = self.message
+        r = '%d: %s' % (self.level, self.message)
         locator = self.locator_as_str
         if locator is not None:
             r += ', at %s' % locator
         if self.snippet is not None:
             r += '\n%s' % self.snippet
-        if self.exception is not None:
-            r += '\n  %s: %s' % (classname(self.exception), self.exception)
         return r

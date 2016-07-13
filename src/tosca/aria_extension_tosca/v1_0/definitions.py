@@ -2,7 +2,7 @@
 from .assignments import PropertyAssignment
 from .misc import ConstraintClause
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field
+from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
 from tosca import Range
 
 @has_fields
@@ -56,12 +56,12 @@ class PropertyDefinition(Presentation):
         :rtype: str
         """
 
-    @object_dict_field(ConstraintClause)
+    @object_sequenced_list_field(ConstraintClause)
     def constraints(self):
         """
         The optional list of sequenced constraint clauses for the property.
         
-        :rtype: dict of str, :class:`ConstraintClause`
+        :rtype: list of (str, :class:`ConstraintClause`)
         """
 
     @primitive_field(str)
@@ -185,6 +185,26 @@ class InterfaceDefinitionForTemplate(Presentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
+@short_form_field('type')
+@has_fields
+class RequirementDefinitionRelationship(Presentation):
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        The optional reserved keyname used to provide the name of the Relationship Type for the requirement definition's relationship keyname.
+        
+        :rtype: str
+        """
+    
+    @object_list_field(InterfaceDefinitionForType)
+    def interfaces(self):
+        """
+        The optional reserved keyname used to reference declared (named) interface definitions of the corresponding Relationship Type in order to declare additional Property definitions for these interfaces or operations of these interfaces.
+        
+        :rtype: list of :class:`InterfaceDefinitionForType`
+        """
+
+@short_form_field('capability')    
 @has_fields
 @dsl_specification('3.6.2', 'tosca-simple-profile-1.0')
 class RequirementDefinition(Presentation):
@@ -194,6 +214,7 @@ class RequirementDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_REQUIREMENT_DEF>`__
     """
     
+    @field_validator(type_validator('capability', 'capability_types'))
     @primitive_field(str, required=True)
     def capability(self):
         """
@@ -210,12 +231,12 @@ class RequirementDefinition(Presentation):
         :rtype: str
         """
 
-    @primitive_field(str)
+    @object_field(RequirementDefinitionRelationship)
     def relationship(self):
         """
         The optional reserved keyname used to provide the name of a valid Relationship Type to construct when fulfilling the requirement.
         
-        :rtype: str
+        :rtype: :class:`RequirementDefinitionRelationship`
         """
 
     @object_field(Range)
@@ -228,6 +249,10 @@ class RequirementDefinition(Presentation):
         :rtype: :class:`tosca.Range`
         """
 
+    def _get_type(self, consumption_context):
+        return consumption_context.presentation.capability_types.get(self.capability)
+
+@short_form_field('type')
 @has_fields
 @dsl_specification('3.6.1', 'tosca-simple-profile-1.0')
 class CapabilityDefinition(Presentation):
@@ -237,6 +262,7 @@ class CapabilityDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_CAPABILITY_DEFN>`__
     """
     
+    @field_validator(type_validator('capability', 'capability_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -262,6 +288,7 @@ class CapabilityDefinition(Presentation):
         
         :rtype: dict of str, :class:`PropertyDefinition`
         """
+        # The spec says 'list', but the examples are all of dicts
 
     @object_dict_field(AttributeDefinition)
     def attributes(self):
@@ -290,6 +317,13 @@ class CapabilityDefinition(Presentation):
         """
         # TODO: range of integer
 
+    def _get_type(self, consumption_context):
+        return consumption_context.presentation.capability_types.get(self.type)
+
+    def _validate(self, consumption_context):
+        super(CapabilityDefinition, self)._validate(consumption_context)
+        #TODO
+
 @has_fields
 @dsl_specification('3.5.6', 'tosca-simple-profile-1.0')
 class ArtifactDefinition(Presentation):
@@ -299,6 +333,7 @@ class ArtifactDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_ARTIFACT_DEF>`__
     """
     
+    @field_validator(type_validator('artifact', 'artifact_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -341,6 +376,9 @@ class ArtifactDefinition(Presentation):
         :rtype: str
         """
 
+    def _get_type(self, consumption_context):
+        return consumption_context.presentation.artifact_types.get(self.type)
+
 @has_fields
 @dsl_specification('3.7.5', 'tosca-simple-profile-1.0')
 class GroupDefinition(Presentation):
@@ -350,6 +388,7 @@ class GroupDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_GROUP_DEF>`__
     """
 
+    @field_validator(type_validator('group', 'group_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -392,6 +431,9 @@ class GroupDefinition(Presentation):
         :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
+    def _get_type(self, consumption_context):
+        return consumption_context.presentation.group_types.get(self.type)
+
 @has_fields
 @dsl_specification('3.7.6', 'tosca-simple-profile-1.0')
 class PolicyDefinition(Presentation):
@@ -401,6 +443,7 @@ class PolicyDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_POLICY_DEF>`__
     """
 
+    @field_validator(type_validator('policy', 'policy_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -434,3 +477,6 @@ class PolicyDefinition(Presentation):
         
         :rtype: list of str
         """
+
+    def _get_type(self, consumption_context):
+        return consumption_context.presentation.policy_types.get(self.type)

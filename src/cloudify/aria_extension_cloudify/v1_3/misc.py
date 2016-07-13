@@ -32,7 +32,7 @@ class Output(Presentation):
 @short_form_field('implementation')
 @has_fields
 class Operation(Presentation):
-    @primitive_field(str, required=True)
+    @primitive_field(str) # the spec says this is required, but actually sometimes it's not
     def implementation(self):
         """
         The script or plugin task name to execute.

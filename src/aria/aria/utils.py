@@ -278,7 +278,7 @@ def print_exception(e, full=True, cause=False, tb=None):
     """
     def format(e):
         return '%s%s: %s' % (colored.red('Caused by ') if cause else '', colored.red(e.__class__.__name__, bold=True), colored.red(str(e)))
-        
+
     puts(format(e))
     if full:
         if cause:
@@ -321,3 +321,6 @@ def make_agnostic(value):
         for i in range(len(value)):
             value[i] = make_agnostic(value[i])
     return value
+
+def is_primitive(value):
+    return isinstance(value, basestring) or isinstance(value, int) or isinstance(value, float) or isinstance(value, bool)

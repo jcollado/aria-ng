@@ -1,8 +1,9 @@
 
 from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition
 from .misc import ConstraintClause
+from .validators import list_node_type_or_group_type_validator
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_sequenced_list_field, field_validator, derived_from_validator
+from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_sequenced_list_field, field_validator, list_type_validator, derived_from_validator
 from tosca import Version
 
 @has_fields
@@ -306,6 +307,7 @@ class RelationshipType(Presentation):
         :rtype: dict of str, :class:`InterfaceDefinitionForType`
         """
 
+    @field_validator(list_type_validator('capability type', 'capability_types'))
     @primitive_list_field(str)
     def valid_target_types(self):
         """
@@ -456,6 +458,7 @@ class GroupType(Presentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
+    @field_validator(list_type_validator('node type', 'node_types'))
     @primitive_list_field(str)
     def members(self):
         """
@@ -524,6 +527,7 @@ class PolicyType(Presentation):
         :rtype: :class:`PropertyDefinition`
         """
 
+    @field_validator(list_node_type_or_group_type_validator)
     @primitive_list_field(str)
     def targets(self):
         """

@@ -1,19 +1,14 @@
 
 from aria import dsl_specification
-from aria.presentation import Presentation, AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field
+from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
 from .filters import NodeFilter
-
-@dsl_specification('3.5.9', 'tosca-simple-profile-1.0')
-class PropertyAssignment(AsIsPresentation):
-    """
-    This section defines the grammar for assigning values to named properties within TOSCA Node and Relationship templates that are defined in their corresponding named types.
-    
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_VALUE_ASSIGNMENT>`__
-    """
+from .definitions import InterfaceDefinitionForType, CapabilityDefinition
+from .validators import node_type_or_template_validator, relationship_type_or_template_validator
 
 @short_form_field('type')
 @has_fields
 class RequirementAssignmentRelationship(Presentation):
+    @field_validator(relationship_type_or_template_validator)
     @primitive_field(str)
     def type(self):
         """
@@ -22,7 +17,7 @@ class RequirementAssignmentRelationship(Presentation):
         :rtype: str
         """
 
-    #@object_dict_field(InterfaceDefinition)
+    @object_dict_field(InterfaceDefinitionForType)
     def properties(self):
         """
         The optional reserved keyname used to reference declared (named) interface definitions of the corresponding Relationship Type in order to provide Property assignments for these interfaces or operations of these interfaces.
@@ -42,7 +37,7 @@ class RequirementAssignment(Presentation):
     
     # The example in 3.7.2.2.2 shows unknown fields in addition to these, but is this a mistake?
 
-    @primitive_field(str)
+    @object_field(CapabilityDefinition)
     def capability(self):
         """
         The optional reserved keyname used to provide the name of either a:
@@ -50,9 +45,10 @@ class RequirementAssignment(Presentation):
         * Capability definition within a target node template that can fulfill the requirement.
         * Capability Type that the provider will use to select a type-compatible target node template to fulfill the requirement at runtime. 
         
-        :rtype: str
+        :rtype: :class:`CapabilityDefinition`
         """
 
+    @field_validator(node_type_or_template_validator)
     @primitive_field(str)
     def node(self):
         """

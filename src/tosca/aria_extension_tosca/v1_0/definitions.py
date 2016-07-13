@@ -1,8 +1,9 @@
 
-from .assignments import PropertyAssignment
+from .property_assignment import PropertyAssignment
 from .misc import ConstraintClause
+from .validators import list_node_template_or_group_validator
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
+from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator, list_type_validator
 from tosca import Range
 
 @has_fields
@@ -188,6 +189,7 @@ class InterfaceDefinitionForTemplate(Presentation):
 @short_form_field('type')
 @has_fields
 class RequirementDefinitionRelationship(Presentation):
+    @field_validator(type_validator('relationship type', 'relationship_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -214,7 +216,7 @@ class RequirementDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_REQUIREMENT_DEF>`__
     """
     
-    @field_validator(type_validator('capability', 'capability_types'))
+    @field_validator(type_validator('capability type', 'capability_types'))
     @primitive_field(str, required=True)
     def capability(self):
         """
@@ -223,6 +225,7 @@ class RequirementDefinition(Presentation):
         :rtype: str
         """
 
+    @field_validator(type_validator('node type', 'node_types'))
     @primitive_field(str)
     def node(self):
         """
@@ -252,6 +255,9 @@ class RequirementDefinition(Presentation):
     def _get_type(self, consumption_context):
         return consumption_context.presentation.capability_types.get(self.capability)
 
+    def _get_node_type(self, consumption_context):
+        return consumption_context.presentation.capability_types.get(self.node)
+
 @short_form_field('type')
 @has_fields
 @dsl_specification('3.6.1', 'tosca-simple-profile-1.0')
@@ -262,7 +268,7 @@ class CapabilityDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_CAPABILITY_DEFN>`__
     """
     
-    @field_validator(type_validator('capability', 'capability_types'))
+    @field_validator(type_validator('capability type', 'capability_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -298,6 +304,7 @@ class CapabilityDefinition(Presentation):
         :rtype: dict of str, :class:`AttributeDefinition`
         """
 
+    @field_validator(list_type_validator('node type', 'node_types'))
     @primitive_list_field(str)
     def valid_source_types(self):
         """
@@ -333,7 +340,7 @@ class ArtifactDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_ARTIFACT_DEF>`__
     """
     
-    @field_validator(type_validator('artifact', 'artifact_types'))
+    @field_validator(type_validator('artifact type', 'artifact_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -388,7 +395,7 @@ class GroupDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_GROUP_DEF>`__
     """
 
-    @field_validator(type_validator('group', 'group_types'))
+    @field_validator(type_validator('group type', 'group_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -415,6 +422,7 @@ class GroupDefinition(Presentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
+    @field_validator(list_type_validator('node template', 'node_templates'))
     @primitive_list_field(str)
     def members(self):
         """
@@ -443,7 +451,7 @@ class PolicyDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_POLICY_DEF>`__
     """
 
-    @field_validator(type_validator('policy', 'policy_types'))
+    @field_validator(type_validator('policy type', 'policy_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -470,6 +478,7 @@ class PolicyDefinition(Presentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
+    @field_validator(list_node_template_or_group_validator)
     @primitive_list_field(str)
     def targets(self):
         """

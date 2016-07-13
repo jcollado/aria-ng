@@ -1,5 +1,6 @@
 
 from .presenter import *
+from .property_assignment import *
 from .assignments import *
 from .definitions import *
 from .filters import *

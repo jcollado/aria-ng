@@ -12,6 +12,20 @@ def type_validator(type_type, types_dict_name):
         
     return fn
 
+def list_type_validator(type_type, types_dict_name):
+    def fn(field, presentation, consumption_context):
+        field._validate(presentation, consumption_context)
+        
+        # Make sure type exists
+        values = getattr(presentation, field.name)
+        if values is not None:
+            types_dict = getattr(consumption_context.presentation, types_dict_name)
+            for value in values:
+                if value not in types_dict:
+                    presentation._append_value_error_for_unknown_type(consumption_context, type_type, field.name)
+        
+    return fn
+
 def derived_from_validator(types_dict_name):
     def fn(field, presentation, consumption_context):
         field._validate(presentation, consumption_context)

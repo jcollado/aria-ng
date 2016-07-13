@@ -95,7 +95,7 @@ class Presentation(object):
         return values
 
     def _append_value_error_for_unknown_type(self, consumption_context, type_type, field_name):
-        consumption_context.validation.issues.append(Issue('unknown %s type "%s" for %s' % (type_type, getattr(self, field_name), self._fullname), locator=self._get_child_locator(field_name), level=4))
+        consumption_context.validation.issues.append(Issue('unknown %s "%s" for %s' % (type_type, getattr(self, field_name), self._fullname), locator=self._get_child_locator(field_name), level=4))
 
     def _append_issue_for_parent_is_self(self, consumption_context, field_name):
         consumption_context.validation.issues.append(Issue('parent type is self for %s' % self._fullname, locator=self._get_child_locator(field_name), level=4))

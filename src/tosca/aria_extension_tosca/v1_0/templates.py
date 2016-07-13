@@ -1,7 +1,8 @@
 
 from .misc import MetaData, Repository, Import
 from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinitionForTemplate, ArtifactDefinition
-from .assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment
+from .assignments import AttributeAssignment, RequirementAssignment, CapabilityAssignment
+from .property_assignment import PropertyAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
 from aria import dsl_specification
@@ -16,7 +17,7 @@ class NodeTemplate(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_NODE_TEMPLATE>`__
     """
 
-    @field_validator(type_validator('node', 'node_types'))
+    @field_validator(type_validator('node type', 'node_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -126,7 +127,7 @@ class RelationshipTemplate(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_RELATIONSHIP_TEMPLATE>`__
     """
 
-    @field_validator(type_validator('relationship', 'relationship_types'))
+    @field_validator(type_validator('relationship type', 'relationship_types'))
     @primitive_field(str, required=True)
     def type(self):
         """

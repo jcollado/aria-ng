@@ -1,25 +1,7 @@
 
-capability_types:
-  
-  CanServeData:
-    description: |
-      The capability to serve data.
-    properties:
-      class:
-        description: \'relational\' or \'object\'
-        type: str
-  
-  CanHost:
-    description: |
-      The capability to host applications.
-    #derived_from: tosca.capabilities.Container 
-
-relationship_types:
-
-  InstalledIn:
-    description: |
-      Relationship between an application and its host.
-    #derived_from: tosca.relationships.HostedOn
+#
+# Nodes
+#
 
 node_types:
 
@@ -103,3 +85,64 @@ node_types:
       host:
         type: CanHost
         occurrences: 10 # for testing only
+
+#
+# Capabilities
+#
+
+capability_types:
+  
+  CanServeData:
+    description: |
+      The capability to serve data.
+    properties:
+      class:
+        description: \'relational\' (SQL) or \'object\' (No-SQL)
+        type: str
+    valid_source_types: # node types
+      - Host
+  
+  CanHost:
+    description: |
+      The capability to host applications.
+    valid_source_types:
+      - Host
+    #derived_from: tosca.capabilities.Container 
+
+#
+# Relationships
+#
+
+relationship_types:
+
+  InstalledIn:
+    description: |
+      Relationship between an application and its host.
+    valid_target_types: # capability types
+      - CanHost
+    #derived_from: tosca.relationships.HostedOn
+
+#
+# Groups
+#
+
+group_types:
+
+  SecuredHosts:
+    description: |
+      Group of hosts that are allowed to communicate with each other.
+    members: # node types
+      - Host
+
+#
+# Policies
+#
+
+policy_types:
+
+  Securable:
+    description: |
+      Policy to secure hosts or groups of hosts.
+    targets: # node types or group types
+      - Host
+      - SecuredHosts

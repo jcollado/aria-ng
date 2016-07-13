@@ -8,12 +8,9 @@ imports:
 
 topology_template:
 
-  relationship_templates:
-  
-    node_cellar_installed_in:
-      description: |
-        Node Cellar installation relationship.
-      type: InstalledIn
+#
+# Nodes
+#
 
   node_templates:
   
@@ -28,18 +25,18 @@ topology_template:
         package_url: https://github.com/cloudify-cosmo/nodecellar/archive/master.tar.gz
       requirements:
         - host:
+            capability: CanHost # can put a whole capability definition here
             relationship: node_cellar_installed_in # we can use either a relationship template or a relationship type
-            node: application_host # we can use either a node template or a node type
+            node: Host # we can use either a node template or a node type
         - data:
-            capability: ServesData
-            node: Host
+            capability: CanServeData
     
     mongodb:
       description: |
         MongoDB database application.
       type: MongoDbApplication
       requirements:
-        - host: database_host
+        - host: database_host # short form: node template or node type
 
     # Host nodes
 
@@ -56,3 +53,37 @@ topology_template:
       type: Host
       properties:
         ip_address: 192.168.1.101
+
+#
+# Relationships
+#
+
+  relationship_templates:
+  
+    node_cellar_installed_in:
+      description: |
+        Node Cellar installation relationship.
+      type: InstalledIn
+
+#
+# Groups
+#
+
+  groups:
+   
+    secured:
+      type: SecuredHosts
+      members: # node templates
+        - application_host
+        - database_host
+
+#
+# Policies
+#
+
+  policies:
+  
+    securable:
+      type: Securable
+      targets: # node templates or groups
+        - secured

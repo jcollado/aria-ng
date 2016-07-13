@@ -51,4 +51,5 @@ __all__ = (
     'field_setter',
     'field_validator',
     'type_validator',
+    'list_type_validator',
     'derived_from_validator')

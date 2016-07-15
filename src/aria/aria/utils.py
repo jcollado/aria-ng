@@ -133,6 +133,8 @@ class ReadOnlyList(list):
             raise TypeError('read-only list')
         return super(ReadOnlyList, self).__delitem__(key)
 
+EMPTY_READ_ONLY_LIST = ReadOnlyList()
+
 class ReadOnlyDict(OrderedDict):
     """
     A read-only ordered dict.
@@ -154,6 +156,8 @@ class ReadOnlyDict(OrderedDict):
         if self.locked:
             raise TypeError('read-only dict')
         return super(ReadOnlyDict, self).__delitem__(key)
+
+EMPTY_READ_ONLY_DICT = ReadOnlyDict()
 
 class StrictList(list):
     """
@@ -218,7 +222,7 @@ def classname(o):
     """
     return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
 
-def merge(a, b, path=[], strict=True):
+def merge(a, b, path=[], strict=False):
     """
     Deep merge dicts.
     """

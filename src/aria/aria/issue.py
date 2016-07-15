@@ -2,16 +2,43 @@
 from .utils import classname
 
 class Issue(object):
+    PLATFORM = 0
     """
-    Issue levels:
+    Platform error (e.g. I/O, hardware, a bug in ARIA)
+    """
     
-    0: Internal error (usually due to a bug in ARIA)
-    1: Format (e.g. YAML, XML, JSON)
-    2: Single field
-    3: Relationships between fields within the type (grammar)
-    4: Relationships between types (e.g. inheritance, static requirements and capabilities)
-    5: External (e.g. live requirements and capabilities)
+    SYNTAX = 1
     """
+    Syntax and format (e.g. YAML, XML, JSON)
+    """
+    
+    FIELD = 2
+    """
+    Single field
+    """
+    
+    BETWEEN_FIELDS = 3
+    """
+    Relationships between fields within the type (internal grammar)
+    """
+    
+    BETWEEN_TYPES = 4
+    """
+    Relationships between types (e.g. inheritance, external grammar)
+    """
+    
+    BETWEEN_INSTANCES = 5
+    """
+    Topology (e.g. static requirements and capabilities)
+    """
+    
+    EXTERNAL = 6
+    """
+    External (e.g. live requirements and capabilities)
+    """
+    
+    ALL = 100
+
     def __init__(self, message=None, exception=None, location=None, line=None, column=None, locator=None, snippet=None, level=0):
         if message is not None:
             self.message = str(message)

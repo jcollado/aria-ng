@@ -1,6 +1,6 @@
 
 from .reader import Reader
-from .exceptions import ReaderError
+from .exceptions import SyntaxError
 from .locator import Locator
 import ruamel.yaml as yaml # @UnresolvedImport
 
@@ -51,6 +51,6 @@ class YamlReader(Reader):
                 line = e.problem_mark.line
                 column = e.problem_mark.column
                 snippet = e.problem_mark.get_snippet()
-                raise ReaderError('YAML %s: %s %s' % (e.__class__.__name__, problem, context), location=self.loader.location, line=line, column=column, snippet=snippet, cause=e)
+                raise SyntaxError('YAML %s: %s %s' % (e.__class__.__name__, problem, context), location=self.loader.location, line=line, column=column, snippet=snippet, cause=e)
             else:
-                raise ReaderError('YAML: %s' % e, cause=e)
+                raise SyntaxError('YAML: %s' % e, cause=e)

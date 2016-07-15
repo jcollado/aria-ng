@@ -18,11 +18,15 @@ class ToscaSimplePresenter1_0(Presenter):
         dsl = raw.get('tosca_definitions_version')
         return dsl == 'tosca_simple_yaml_1_0'
 
-    def _validate(self, consumption_context):
-        self.service_template._validate(consumption_context)
+    def _validate(self, context):
+        self.service_template._validate(context)
     
     def _get_import_locations(self):
         return [i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else []
+
+    @property
+    def repositories(self):
+        return self.service_template.repositories
 
     @property
     def inputs(self):
@@ -49,8 +53,12 @@ class ToscaSimplePresenter1_0(Presenter):
         return self.service_template.capability_types
 
     @property
+    def interface_types(self):
+        return self.service_template.interface_types
+
+    @property
     def artifact_types(self):
-        return self.service_template.aritfact_types
+        return self.service_template.artifact_types
 
     @property
     def policy_types(self):

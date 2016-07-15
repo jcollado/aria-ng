@@ -27,6 +27,10 @@ class CloudifyPresenter1_3(Presenter):
         return CloudifyDeploymentPlan(self)
 
     @property
+    def repositories(self):
+        return None
+
+    @property
     def inputs(self):
         return self.service_template.inputs
             
@@ -52,6 +56,10 @@ class CloudifyPresenter1_3(Presenter):
 
     @property
     def capability_types(self):
+        return None
+
+    @property
+    def interface_types(self):
         return None
 
     @property

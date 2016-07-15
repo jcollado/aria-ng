@@ -2,7 +2,7 @@
 from .. import VERSION
 from ..loading import LiteralLocation, LiteralLoader
 from .reader import Reader
-from .exceptions import ReaderError
+from .exceptions import SyntaxError
 from jinja2 import Template
 import os
 
@@ -35,4 +35,4 @@ class JinjaReader(Reader):
                 next_reader = self.source.get_reader(LiteralLocation(literal), LiteralLoader(literal))
             return next_reader.read()
         except Exception as e:
-            raise ReaderError('Jinja: %s' % e, cause=e)
+            raise SyntaxError('Jinja: %s' % e, cause=e)

@@ -1,9 +1,11 @@
 
-from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition
+from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition, OperationDefinitionForType
 from .misc import ConstraintClause
 from .validators import list_node_type_or_group_type_validator
+from .interface_utils import get_inherited_interface_definitions
+from .interface_utils import get_inherited_operations
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_sequenced_list_field, field_validator, list_type_validator, derived_from_validator
+from aria.presentation import Presentation, has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, list_type_validator, derived_from_validator, get_inherited_property_definitions
 from tosca import Version
 
 @has_fields
@@ -66,11 +68,15 @@ class ArtifactType(Presentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
     
-    def _get_parent(self, consumption_context):
-        return consumption_context.presentation.artifact_types.get(self.derived_from)
+    def _get_parent(self, context):
+        return context.presentation.artifact_types.get(self.derived_from)
 
-    def _get_properties(self, consumption_context):
-        return self._inherit_and_get_dict_field(consumption_context, 'properties')
+    def _get_properties(self, context):
+        return get_inherited_property_definitions(context, self, 'properties')
+
+    def _validate(self, context):
+        super(ArtifactType, self)._validate(context)
+        self._get_properties(context)
 
 @has_fields
 @dsl_specification('3.6.5', 'tosca-simple-profile-1.0')
@@ -124,11 +130,15 @@ class DataType(Presentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
-    def _get_parent(self, consumption_context):
-        return consumption_context.presentation.data_types.get(self.derived_from)
+    def _get_parent(self, context):
+        return context.presentation.data_types.get(self.derived_from)
 
-    def _get_properties(self, consumption_context):
-        return self._inherit_and_get_dict_field(consumption_context, 'properties')
+    def _get_properties(self, context):
+        return get_inherited_property_definitions(context, self, 'properties')
+
+    def _validate(self, context):
+        super(DataType, self)._validate(context)
+        self._get_properties(context)
 
 @has_fields
 @dsl_specification('3.6.6', 'tosca-simple-profile-1.0')
@@ -191,12 +201,17 @@ class CapabilityType(Presentation):
         :rtype: list of str
         """
         
-    def _get_parent(self, consumption_context):
-        return consumption_context.presentation.capability_types.get(self.derived_from)
+    def _get_parent(self, context):
+        return context.presentation.capability_types.get(self.derived_from)
 
-    def _get_properties(self, consumption_context):
-        return self._inherit_and_get_dict_field(consumption_context, 'properties')
+    def _get_properties(self, context):
+        return get_inherited_property_definitions(context, self, 'properties')
 
+    def _validate(self, context):
+        super(CapabilityType, self)._validate(context)
+        self._get_properties(context)
+
+@allow_unknown_fields
 @has_fields
 @dsl_specification('3.6.4', 'tosca-simple-profile-1.0')
 class InterfaceType(Presentation):
@@ -241,11 +256,24 @@ class InterfaceType(Presentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
-    def _get_parent(self, consumption_context):
-        return consumption_context.presentation.interface_types.get(self.derived_from)
+    @object_dict_unknown_fields(OperationDefinitionForType)
+    def operations(self):
+        pass
 
-    def _get_inputs(self, consumption_context):
-        return self._inherit_and_get_dict_field(consumption_context, 'inputs')
+    def _get_parent(self, context):
+        return context.presentation.interface_types.get(self.derived_from)
+
+    def _get_inputs(self, context):
+        return get_inherited_property_definitions(context, self, 'inputs')
+
+    def _get_operations(self, context):
+        return get_inherited_operations(context, self)
+
+    def _validate(self, context):
+        super(InterfaceType, self)._validate(context)
+        self._get_inputs(context)
+        for operation in self.operations.itervalues():
+            operation._validate(context)
 
 @has_fields
 @dsl_specification('3.6.9', 'tosca-simple-profile-1.0')
@@ -316,11 +344,23 @@ class RelationshipType(Presentation):
         :rtype: list of str
         """
 
-    def _get_parent(self, consumption_context):
-        return consumption_context.presentation.relationship_types.get(self.derived_from)
+    def _get_parent(self, context):
+        return context.presentation.relationship_types.get(self.derived_from)
 
-    def _get_properties(self, consumption_context):
-        return self._inherit_and_get_dict_field(consumption_context, 'properties')
+    def _get_properties(self, context):
+        return get_inherited_property_definitions(context, self, 'properties')
+
+    def _get_attributes(self, context):
+        return get_inherited_property_definitions(context, self, 'attributes')
+
+    def _get_interfaces(self, context):
+        return get_inherited_interface_definitions(context, self, 'relationship type')
+
+    def _validate(self, context):
+        super(RelationshipType, self)._validate(context)
+        self._get_properties(context)
+        self._get_attributes(context)
+        self._get_interfaces(context)
 
 @has_fields
 @dsl_specification('3.6.8', 'tosca-simple-profile-1.0')
@@ -382,12 +422,12 @@ class NodeType(Presentation):
         :rtype: list of (str, :class:`RequirementDefinition`)
         """
 
-    @object_dict_field(CapabilityDefinition)
+    @object_list_field(CapabilityDefinition)
     def capabilities(self):
         """
         An optional list of capability definitions for the Node Type.
         
-        :rtype: dict of str, :class:`CapabilityDefinition`
+        :rtype: list of :class:`CapabilityDefinition`
         """
 
     @object_dict_field(InterfaceDefinitionForType)
@@ -406,11 +446,23 @@ class NodeType(Presentation):
         :rtype: dict of str, :class:`ArtifactDefinition`
         """
 
-    def _get_parent(self, consumption_context):
-        return consumption_context.presentation.node_types.get(self.derived_from)
+    def _get_parent(self, context):
+        return context.presentation.node_types.get(self.derived_from)
 
-    def _get_properties(self, consumption_context):
-        return self._inherit_and_get_dict_field(consumption_context, 'properties')
+    def _get_properties(self, context):
+        return get_inherited_property_definitions(context, self, 'properties')
+
+    def _get_attributes(self, context):
+        return get_inherited_property_definitions(context, self, 'attributes')
+
+    def _get_interfaces(self, context):
+        return get_inherited_interface_definitions(context, self, 'node type')
+
+    def _validate(self, context):
+        super(NodeType, self)._validate(context)
+        self._get_properties(context)
+        self._get_attributes(context)
+        self._get_interfaces(context)
 
 @has_fields
 @dsl_specification('3.6.10', 'tosca-simple-profile-1.0')
@@ -477,11 +529,19 @@ class GroupType(Presentation):
         :rtype: dict of str, :class:`InterfaceDefinitionForType`
         """
 
-    def _get_parent(self, consumption_context):
-        return consumption_context.presentation.group_types.get(self.derived_from)
+    def _get_parent(self, context):
+        return context.presentation.group_types.get(self.derived_from)
 
-    def _get_properties(self, consumption_context):
-        return self._inherit_and_get_dict_field(consumption_context, 'properties')
+    def _get_properties(self, context):
+        return get_inherited_property_definitions(context, self, 'properties')
+
+    def _get_interfaces(self, context):
+        return get_inherited_interface_definitions(context, self, 'group type')
+
+    def _validate(self, context):
+        super(GroupType, self)._validate(context)
+        self._get_properties(context)
+        self._get_interfaces(context)
 
 @has_fields
 @dsl_specification('3.6.11', 'tosca-simple-profile-1.0')
@@ -538,8 +598,12 @@ class PolicyType(Presentation):
         :rtype: list of str
         """
 
-    def _get_parent(self, consumption_context):
-        return consumption_context.presentation.policy_types.get(self.derived_from)
+    def _get_parent(self, context):
+        return context.presentation.policy_types.get(self.derived_from)
 
-    def _get_properties(self, consumption_context):
-        return self._inherit_and_get_dict_field(consumption_context, 'properties')
+    def _get_properties(self, context):
+        return get_inherited_property_definitions(context, self, 'properties')
+
+    def _validate(self, context):
+        super(PolicyType, self)._validate(context)
+        self._get_properties(context)

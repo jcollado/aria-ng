@@ -11,13 +11,7 @@ node_types:
     properties:
       port:
         description: The user port.
-        type: int
-    interfaces:
-      lifecycle:
-        inputs:
-          username:
-            description: The admin username.
-            type: str
+        type: integer
     requirements:
       - host:
           capability: CanHost
@@ -31,32 +25,35 @@ node_types:
     derived_from: Application
     properties:
       port:
-        type: int
+        type: integer
         default: 8080
       root_url:
         description: The root URL.
-        type: str
+        type: string
         default: /
       locale:
         description: The locale (optional).
-        type: str
+        type: string
         required: false
 
   NodeJsWebApplication:
     description: |
       A Node.js-based web application.
     derived_from: WebApplication
-    properties:
-      package_url:
-        description: URL to the Node.js application package. 
-        type: str
+    artifacts:
+      node_js:
+        description: |
+          The Node.js application package.
+        type: ZipApplicationPackage
+        file: https://nodejs.org/dist/v4.4.7/node-v4.4.7-linux-x64.tar.xz
+        deploy_path: /opt/node-js
 
   DatabaseApplication:
     description: |
       A generic database application.
     derived_from: Application
     capabilities:
-      data: CanServeData
+      - CanServeData
 
   MongoDbApplication:
     description: |
@@ -64,14 +61,13 @@ node_types:
     derived_from: DatabaseApplication
     properties:
       port:
-        type: int
+        type: integer
         default: 27017
     capabilities:
-      data:
-        type: CanServeData
+      - type: CanServeData
         properties:
           class:
-            type: str
+            type: string
             default: object
 
   Host:
@@ -80,10 +76,9 @@ node_types:
     properties:
       ip_address:
         description: The IP address.
-        type: str
+        type: string # when overriding a property, you can't change the type
     capabilities:
-      host:
-        type: CanHost
+      - type: CanHost
         occurrences: 10 # for testing only
 
 #
@@ -98,7 +93,7 @@ capability_types:
     properties:
       class:
         description: \'relational\' (SQL) or \'object\' (No-SQL)
-        type: str
+        type: string
     valid_source_types: # node types
       - Host
   
@@ -115,11 +110,44 @@ capability_types:
 
 relationship_types:
 
+  Base:
+    interfaces:
+      lifecycle:
+        type: Lifecycle
+        inputs:
+          bad1:
+            type: string
+            required: false
+        create:
+          inputs:
+            bad2:
+              type: string
+              required: false
+
   InstalledIn:
+    derived_from: Base
     description: |
       Relationship between an application and its host.
     valid_target_types: # capability types
       - CanHost
+    properties:
+      artifact_name:
+        description: The name of the artifact in the node to install.
+        type: string
+    interfaces:
+      lifecycle:
+        type: Lifecycle # type is optional inheritence, we can just define everything here
+        inputs:
+          password:
+            description: The root password for all operations.
+            type: string
+        create:
+          inputs:
+            timeout:
+              description: The timeout in seconds for the create operation.
+              type: integer
+            bad2:
+              type: string
     #derived_from: tosca.relationships.HostedOn
 
 #
@@ -131,8 +159,15 @@ group_types:
   SecuredHosts:
     description: |
       Group of hosts that are allowed to communicate with each other.
+    properties:
+      name:
+        description: The name of the group (for firewall configuration).
+        type: string
     members: # node types
       - Host
+    interfaces:
+      lifecycle:
+        type: Lifecycle # type is optional, we can just define everything here
 
 #
 # Policies
@@ -146,3 +181,50 @@ policy_types:
     targets: # node types or group types
       - Host
       - SecuredHosts
+
+#
+# Artifacts
+#
+
+artifact_types:
+
+  ApplicationPackage:
+    description: |
+      A generic application package.
+
+  ZipApplicationPackage:
+    description: |
+      An application package in a zip.
+    derived_from: ApplicationPackage
+    file_ext:
+      - zip
+      - tar.gz
+      - tar.xz
+
+#
+# Interfaces
+#
+
+interface_types:
+
+  Logging:
+    inputs:
+      debug_logger:
+        type: string
+        default: unknown
+      bad1:
+        type: string
+    create:
+      inputs:
+        bad2:
+          type: string
+
+  Lifecycle:
+    description: |
+      Lifecycle management interface.
+    derived_from: Logging
+    inputs:
+      debug_logger:
+        type: string
+        default: lifecycle
+    #derived_from: tosca.interfaces.node.lifecycle.Standard

@@ -5,6 +5,8 @@ from .presentation import *
 from .source import *
 from .fields import *
 from .validators import *
+from .validation_utils import *
+from .property_utils import *
 
 PRESENTER_CLASSES = []
 
@@ -32,6 +34,7 @@ __all__ = (
     'PresenterError',
     'PresenterNotFoundError',
     'Presenter',
+    'PresentationBase',
     'Presentation',
     'AsIsPresentation',
     'PresenterSource',
@@ -47,9 +50,20 @@ __all__ = (
     'object_list_field',
     'object_dict_field',
     'object_sequenced_list_field',
+    'object_dict_unknown_fields',
     'field_getter',
     'field_setter',
     'field_validator',
+    'value_validator',
     'type_validator',
     'list_type_validator',
-    'derived_from_validator')
+    'derived_from_validator',
+    'validate_no_short_form',
+    'validate_no_unknown_fields',
+    'validate_known_fields',
+    'report_issue_for_unknown_type',
+    'report_issue_for_parent_is_self',
+    'report_issue_for_circular_type_hierarchy',
+    'coerce_property_value',
+    'get_inherited_property_definitions',
+    'get_defined_property_values')

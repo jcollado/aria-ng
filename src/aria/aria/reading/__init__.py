@@ -10,6 +10,7 @@ from .jinja import *
 __all__ = (
     'ReaderError',
     'ReaderNotFoundError',
+    'SyntaxError',
     'Reader',
     'ReaderSource',
     'RawReader',

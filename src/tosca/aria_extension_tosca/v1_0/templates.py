@@ -5,8 +5,10 @@ from .assignments import AttributeAssignment, RequirementAssignment, CapabilityA
 from .property_assignment import PropertyAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
+from .data import get_class_for_data_type
+from .interface_utils import get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
+from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator, get_defined_property_values
 
 @has_fields
 @dsl_specification('3.7.3', 'tosca-simple-profile-1.0')
@@ -108,15 +110,19 @@ class NodeTemplate(Presentation):
         :rtype: str
         """
     
-    def _get_type(self, consumption_context):
-        return consumption_context.presentation.node_types.get(self.type)
+    def _get_type(self, context):
+        return context.presentation.node_types.get(self.type)
 
-    def _get_properties(self, consumption_context):
-        return self._get_assigned_and_defined_dict(consumption_context, 'property', 'properties', '_get_properties')
-    
-    def _validate(self, consumption_context):
-        super(NodeTemplate, self)._validate(consumption_context)
-        self._get_properties(consumption_context)
+    def _get_properties(self, context):
+        return get_defined_property_values(context, self, 'property', 'properties', '_get_properties')
+
+    def _get_interfaces(self, context):
+        return get_template_interfaces(context, self, 'node template', get_class_for_data_type)
+
+    def _validate(self, context):
+        super(NodeTemplate, self)._validate(context)
+        self._get_properties(context)
+        self._get_interfaces(context)
 
 @has_fields
 @dsl_specification('3.7.4', 'tosca-simple-profile-1.0')
@@ -178,15 +184,19 @@ class RelationshipTemplate(Presentation):
         :rtype: str
         """
 
-    def _get_type(self, consumption_context):
-        return consumption_context.presentation.relationship_types.get(self.type)
+    def _get_type(self, context):
+        return context.presentation.relationship_types.get(self.type)
 
-    def _get_properties(self, consumption_context):
-        return self._get_assigned_and_defined_dict(consumption_context, 'property', 'properties', '_get_properties')
+    def _get_properties(self, context):
+        return get_defined_property_values(context, self, 'property', 'properties', '_get_properties')
+
+    def _get_interfaces(self, context):
+        return get_template_interfaces(context, self, 'relationship template', get_class_for_data_type)
     
-    def _validate(self, consumption_context):
-        super(RelationshipTemplate, self)._validate(consumption_context)
-        self._get_properties(consumption_context)
+    def _validate(self, context):
+        super(RelationshipTemplate, self)._validate(context)
+        self._get_properties(context)
+        self._get_interfaces(context)
 
 @has_fields
 @dsl_specification('3.8', 'tosca-simple-profile-1.0')
@@ -313,13 +323,13 @@ class ServiceTemplate(Presentation):
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc397688790>`__
         """
         
-    @object_list_field(Repository)
+    @object_dict_field(Repository)
     @dsl_specification('3.9.3.8', 'tosca-simple-profile-1.0')
     def repositories(self):
         """
         Declares the list of external repositories which contain artifacts that are referenced in the service template along with their addresses and necessary credential information used to connect to them in order to retrieve the artifacts.
         
-        :rtype: list of :class:`Repository`
+        :rtype: dict of str, :class:`Repository`
         """
 
     @object_list_field(Import)

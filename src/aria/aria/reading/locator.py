@@ -3,22 +3,22 @@ from clint.textui import puts, colored, indent
 
 # We are inheriting the primitive types in order to add the ability to set an attribute (_locator) on them.
 
-class LocatorString(str):
+class LocatableString(str):
     pass
 
-class LocatorInt(int):
+class LocatableInt(int):
     pass
 
-class LocatorFloat(float):
+class LocatableFloat(float):
     pass
 
 def wrap(value):
     if isinstance(value, basestring):
-        return True, LocatorString(value)
+        return True, LocatableString(value)
     elif isinstance(value, int):
-        return True, LocatorInt(value)
+        return True, LocatableInt(value)
     elif isinstance(value, float):
-        return True, LocatorFloat(value)
+        return True, LocatableFloat(value)
     return False, value
 
 class Locator(object):

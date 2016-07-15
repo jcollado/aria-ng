@@ -52,18 +52,18 @@ class DefaultParser(Parser):
             presentation._link()
         return presentation
     
-    def parse_and_validate(self, consumption_context):
+    def parse_and_validate(self, context):
         """
         :rtype: :class:`aria.presenter.Presenter`, list of str
         """
         try:
-            consumption_context.presentation = self.parse()
-            Validator(consumption_context).consume()
+            context.presentation = self.parse()
+            Validator(context).consume()
         except Exception as e:
             if hasattr(e, 'issue') and isinstance(e.issue, Issue):
-                consumption_context.validation.issues.append(e.issue)
+                context.validation.report(issue=e.issue)
             else:
-                consumption_context.validation.issues.append(Issue(exception=e))
+                context.validation.report(exception=e)
             if not isinstance(e, AriaError):
                 print_exception(e)
 

@@ -26,6 +26,10 @@ class Presenter(Presentation):
         return None
 
     @property
+    def repositories(self):
+        return None
+
+    @property
     def inputs(self):
         return None
             
@@ -51,6 +55,10 @@ class Presenter(Presentation):
 
     @property
     def capability_types(self):
+        return None
+
+    @property
+    def interface_types(self):
         return None
 
     @property

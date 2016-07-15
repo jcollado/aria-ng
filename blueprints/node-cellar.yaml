@@ -6,6 +6,13 @@ description: |
 imports:
   - node-cellar-types.yaml
 
+repositories:
+
+  node_cellar_repository:
+    description: |
+      The repository for the Node Cellar application and its dependencies.
+    url: https://github.com/cloudify-cosmo/nodecellar/archive
+
 topology_template:
 
 #
@@ -22,7 +29,6 @@ topology_template:
       type: NodeJsWebApplication
       properties:
         port: 8081
-        package_url: https://github.com/cloudify-cosmo/nodecellar/archive/master.tar.gz
       requirements:
         - host:
             capability: CanHost # can put a whole capability definition here
@@ -30,13 +36,21 @@ topology_template:
             node: Host # we can use either a node template or a node type
         - data:
             capability: CanServeData
+      artifacts:
+        node_cellar:
+          description: |
+            The Node Cellar application package.
+          type: ZipApplicationPackage
+          file: master.tar.gz
+          repository: node_cellar_repository
+          deploy_path: /opt/node-cellar
     
     mongodb:
       description: |
         MongoDB database application.
       type: MongoDbApplication
       requirements:
-        - host: database_host # short form: node template or node type
+        - host: data_host # short form: node template or node type
 
     # Host nodes
 
@@ -47,7 +61,7 @@ topology_template:
       properties:
         ip_address: 192.168.1.100
 
-    database_host:
+    data_host:
       description: |
         Host for databases.
       type: Host
@@ -64,6 +78,21 @@ topology_template:
       description: |
         Node Cellar installation relationship.
       type: InstalledIn
+      properties:
+        artifact_name: node_cellar
+      interfaces:
+        lifecycle:
+          #type: Lifecycle # if specified, must be the same as in type
+          inputs:
+            password: admin123
+          create:
+            inputs:
+              timeout: 60
+            implementation:
+              primary: install_node_cellar.sh
+              dependencies:
+                - os_utils.sh
+                - packaging_utils.sh
 
 #
 # Groups
@@ -73,9 +102,11 @@ topology_template:
    
     secured:
       type: SecuredHosts
+      properties:
+        name: node_cellar
       members: # node templates
         - application_host
-        - database_host
+        - data_host
 
 #
 # Policies

@@ -1,9 +1,11 @@
 
 from .property_assignment import PropertyAssignment
 from .misc import ConstraintClause
-from .validators import list_node_template_or_group_validator
+from .validators import data_type_validator, list_node_template_or_group_validator
+from .data import get_class_for_data_type
+from .interface_utils import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator, list_type_validator
+from aria.presentation import Presentation, has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, value_validator, type_validator, list_type_validator, get_defined_property_values
 from tosca import Range
 
 @has_fields
@@ -15,6 +17,7 @@ class PropertyDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_DEFN>`__
     """
     
+    @field_validator(data_type_validator)
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -41,6 +44,7 @@ class PropertyDefinition(Presentation):
         :rtype: bool
         """
 
+    @field_validator(value_validator('type', get_class_for_data_type))
     @primitive_field()
     def default(self):
         """
@@ -82,6 +86,7 @@ class AttributeDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_ATTRIBUTE_DEFN>`__
     """
 
+    @field_validator(data_type_validator)
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -101,6 +106,7 @@ class AttributeDefinition(Presentation):
         """
         return self._get_primitive('description')
 
+    @field_validator(value_validator('type', get_class_for_data_type))
     @primitive_field(str)
     def default(self):
         """
@@ -136,6 +142,7 @@ class ParameterDefinition(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PARAMETER_DEF>`__
     """
 
+    @field_validator(data_type_validator)
     @primitive_field(str)
     def type(self):
         """
@@ -152,14 +159,52 @@ class ParameterDefinition(Presentation):
         The type-compatible value to assign to the named parameter. Parameter values may be provided as the result from the evaluation of an expression or a function.
         """
 
+@short_form_field('primary')
 @has_fields
-@dsl_specification('3.5.14-1', 'tosca-simple-profile-1.0')
-class InterfaceDefinitionForType(Presentation):
+class OperationDefinitionImplementation(Presentation):
+    @primitive_field(str)
+    def primary(self):
+        """
+        The optional implementation artifact name (i.e., the primary script file name within a TOSCA CSAR file).  
+        
+        :rtype: str
+        """
+
+    @primitive_list_field(str)
+    def dependencies(self):
+        """
+        The optional ordered list of one or more dependent or secondary implementation artifact name which are referenced by the primary implementation artifact (e.g., a library the script installs or a secondary script).    
+        
+        :rtype: list of str
+        """
+
+@short_form_field('implementation')
+@has_fields
+@dsl_specification('3.5.13-1', 'tosca-simple-profile-1.0')
+class OperationDefinitionForType(Presentation):
     """
-    An interface definition defines a named interface that can be associated with a Node or Relationship Type.
+    An operation definition defines a named function or procedure that can be bound to an implementation artifact (e.g., a script).
     
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_INTERFACE_DEF>`__
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_OPERATION_DEF>`__
     """
+
+    @primitive_field(str)
+    def description(self):
+        """
+        The optional description string for the associated named operation.
+        
+        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
+        """
+
+    @object_field(OperationDefinitionImplementation)
+    def implementation(self):
+        """
+        The optional implementation artifact name (e.g., a script file name within a TOSCA CSAR file).  
+        
+        :rtype: :class:`OperationDefinitionImplementation`
+        """
 
     @object_dict_field(PropertyDefinition)
     def inputs(self):
@@ -169,6 +214,88 @@ class InterfaceDefinitionForType(Presentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
+@short_form_field('implementation')
+@has_fields
+@dsl_specification('3.5.13-2', 'tosca-simple-profile-1.0')
+class OperationDefinitionForTemplate(Presentation):
+    """
+    An operation definition defines a named function or procedure that can be bound to an implementation artifact (e.g., a script).
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_OPERATION_DEF>`__
+    """
+
+    @primitive_field(str)
+    def description(self):
+        """
+        The optional description string for the associated named operation.
+        
+        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
+        """
+
+    @object_field(OperationDefinitionImplementation)
+    def implementation(self):
+        """
+        The optional implementation artifact name (e.g., a script file name within a TOSCA CSAR file).  
+        
+        :rtype: :class:`OperationDefinitionImplementation`
+        """
+
+    @object_dict_field(PropertyAssignment)
+    def inputs(self):
+        """
+        The optional list of input property assignments (i.e., parameters assignments) for operation definitions that are within TOSCA Node or Relationship Template definitions. This includes when operation definitions are included as part of a Requirement assignment in a Node Template.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+    
+@allow_unknown_fields
+@has_fields
+@dsl_specification('3.5.14-1', 'tosca-simple-profile-1.0')
+class InterfaceDefinitionForType(Presentation):
+    """
+    An interface definition defines a named interface that can be associated with a Node or Relationship Type.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_INTERFACE_DEF>`__
+    """
+    
+    @field_validator(type_validator('interface type', 'interface_types'))
+    @primitive_field(str)
+    def type(self):
+        """
+        Not mentioned in the spec.
+        
+        :rtype: str
+        """
+
+    @object_dict_field(PropertyDefinition)
+    def inputs(self):
+        """
+        The optional list of input property definitions available to all defined operations for interface definitions that are within TOSCA Node or Relationship Type definitions. This includes when interface definitions are included as part of a Requirement definition in a Node Type.
+        
+        :rtype: dict of str, :class:`PropertyDefinition`
+        """
+
+    @object_dict_unknown_fields(OperationDefinitionForType)
+    def operations(self):
+        pass
+
+    def _get_type(self, context):
+        return context.presentation.interface_types.get(self.type)
+
+    def _get_inputs(self, context):
+        return get_and_override_input_definitions_from_type(context, self)
+
+    def _get_operations(self, context):
+        return get_and_override_operation_definitions_from_type(context, self)
+    
+    def _validate(self, context):
+        super(InterfaceDefinitionForType, self)._validate(context)
+        for operation in self.operations.itervalues():
+            operation._validate(context)
+
+@allow_unknown_fields
 @has_fields
 @dsl_specification('3.5.14-2', 'tosca-simple-profile-1.0')
 class InterfaceDefinitionForTemplate(Presentation):
@@ -178,6 +305,15 @@ class InterfaceDefinitionForTemplate(Presentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_INTERFACE_DEF>`__
     """
 
+    @field_validator(type_validator('interface type', 'interface_types'))
+    @primitive_field(str)
+    def type(self):
+        """
+        Not mentioned in the spec.
+        
+        :rtype: str
+        """
+
     @object_dict_field(PropertyAssignment)
     def inputs(self):
         """
@@ -185,6 +321,22 @@ class InterfaceDefinitionForTemplate(Presentation):
         
         :rtype: dict of str, :class:`PropertyAssignment`
         """
+
+    @object_dict_unknown_fields(OperationDefinitionForTemplate)
+    def operations(self):
+        pass
+
+    def _get_type(self, context):
+        # The correct interface type comes from the container (the template) which may in turn get it from its type.
+        # (If we have changed the type here, which we shouldn't, then an issue will have been reported from the container's validation)
+        interface = self._container._get_interfaces(context).get(self._name)
+        the_type = interface.type if interface is not None else self.type
+        return context.presentation.interface_types.get(the_type)
+
+    def _validate(self, context):
+        super(InterfaceDefinitionForTemplate, self)._validate(context)
+        for operation in self.operations.itervalues():
+            operation._validate(context)
 
 @short_form_field('type')
 @has_fields
@@ -252,11 +404,11 @@ class RequirementDefinition(Presentation):
         :rtype: :class:`tosca.Range`
         """
 
-    def _get_type(self, consumption_context):
-        return consumption_context.presentation.capability_types.get(self.capability)
+    def _get_type(self, context):
+        return context.presentation.capability_types.get(self.capability)
 
-    def _get_node_type(self, consumption_context):
-        return consumption_context.presentation.capability_types.get(self.node)
+    def _get_node_type(self, context):
+        return context.presentation.capability_types.get(self.node)
 
 @short_form_field('type')
 @has_fields
@@ -324,12 +476,8 @@ class CapabilityDefinition(Presentation):
         """
         # TODO: range of integer
 
-    def _get_type(self, consumption_context):
-        return consumption_context.presentation.capability_types.get(self.type)
-
-    def _validate(self, consumption_context):
-        super(CapabilityDefinition, self)._validate(consumption_context)
-        #TODO
+    def _get_type(self, context):
+        return context.presentation.capability_types.get(self.type)
 
 @has_fields
 @dsl_specification('3.5.6', 'tosca-simple-profile-1.0')
@@ -357,6 +505,7 @@ class ArtifactDefinition(Presentation):
         :rtype: str
         """
     
+    @field_validator(type_validator('repository', 'repositories'))
     @primitive_field(str)
     def repository(self):
         """
@@ -383,8 +532,8 @@ class ArtifactDefinition(Presentation):
         :rtype: str
         """
 
-    def _get_type(self, consumption_context):
-        return consumption_context.presentation.artifact_types.get(self.type)
+    def _get_type(self, context):
+        return context.presentation.artifact_types.get(self.type)
 
 @has_fields
 @dsl_specification('3.7.5', 'tosca-simple-profile-1.0')
@@ -431,7 +580,7 @@ class GroupDefinition(Presentation):
         :rtype: list of str
         """
 
-    @object_dict_field(InterfaceDefinitionForType)
+    @object_dict_field(InterfaceDefinitionForTemplate)
     def interfaces(self):
         """
         An optional list of named interface definitions for the group definition.
@@ -439,8 +588,19 @@ class GroupDefinition(Presentation):
         :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
-    def _get_type(self, consumption_context):
-        return consumption_context.presentation.group_types.get(self.type)
+    def _get_type(self, context):
+        return context.presentation.group_types.get(self.type)
+
+    def _get_properties(self, context):
+        return get_defined_property_values(context, self, 'property', 'properties', '_get_properties', get_class_for_data_type)
+
+    def _get_interfaces(self, context):
+        return get_template_interfaces(context, self, 'group definition', get_class_for_data_type)
+    
+    def _validate(self, context):
+        super(GroupDefinition, self)._validate(context)
+        self._get_properties(context)
+        self._get_interfaces(context)
 
 @has_fields
 @dsl_specification('3.7.6', 'tosca-simple-profile-1.0')
@@ -487,5 +647,12 @@ class PolicyDefinition(Presentation):
         :rtype: list of str
         """
 
-    def _get_type(self, consumption_context):
-        return consumption_context.presentation.policy_types.get(self.type)
+    def _get_type(self, context):
+        return context.presentation.policy_types.get(self.type)
+
+    def _get_properties(self, context):
+        return get_defined_property_values(context, self, 'property', 'properties', '_get_properties', get_class_for_data_type)
+    
+    def _validate(self, context):
+        super(PolicyDefinition, self)._validate(context)
+        self._get_properties(context)

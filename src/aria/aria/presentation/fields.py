@@ -1,7 +1,7 @@
 
 from ..issue import Issue
-from ..exceptions import InvalidValueError
-from ..utils import ReadOnlyList, ReadOnlyDict
+from ..exceptions import InvalidValueError, AriaError
+from ..utils import ReadOnlyList, ReadOnlyDict, print_exception
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict
@@ -17,10 +17,15 @@ class Field(object):
         self.allowed = allowed
         self.required = required
     
-    def get(self, raw):
-        return self._get(raw)
+    def get(self, presentation):
+        return self._get(presentation)
     
-    def _get(self, raw):
+    def _get(self, presentation):
+        raw = getattr(presentation, '_raw')
+
+        if self.field_type == 'object_dict_unknown_fields':
+            return ReadOnlyDict([(k, self.cls(name=k, raw=v, container=presentation)) for k, v in raw.iteritems() if k not in presentation.FIELDS])
+
         is_short_form_field = (self.container.SHORT_FORM_FIELD == self.name) if hasattr(self.container, 'SHORT_FORM_FIELD') else False
         is_dict = isinstance(raw, dict)
 
@@ -50,7 +55,6 @@ class Field(object):
 
         elif self.field_type == 'primitive_list':
             if not isinstance(value, list):
-                location = self._get_location(raw)
                 raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             if self.cls:
                 for i in range(len(value)):
@@ -63,19 +67,19 @@ class Field(object):
 
         elif self.field_type == 'object':
             try:
-                return self.cls(raw=value)
+                return self.cls(raw=value, container=presentation)
             except TypeError as e:
-                raise InvalidValueError('could not initialize %s to field_type %s: %s' % (self.fullname, self.fullclass), cause=e, locator=self.get_locator(raw))
+                raise InvalidValueError('could not initialize %s to field_type %s: %s' % (self.fullname, self.fullclass, repr(value)), cause=e, locator=self.get_locator(raw))
 
         elif self.field_type == 'object_list':
             if not isinstance(value, list):
                 raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
-            return ReadOnlyList([self.cls(raw=v) for v in value])
+            return ReadOnlyList([self.cls(raw=v, container=presentation) for v in value])
 
         elif self.field_type == 'object_dict':
             if not isinstance(value, dict):
                 raise InvalidValueError('%s must be a dict: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
-            return ReadOnlyDict([(k, self.cls(name=k, raw=v)) for k, v in value.iteritems()])
+            return ReadOnlyDict([(k, self.cls(name=k, raw=v, container=presentation)) for k, v in value.iteritems()])
 
         elif self.field_type == 'sequenced_object_list':
             if not isinstance(value, list):
@@ -87,7 +91,7 @@ class Field(object):
                 if len(v) != 1:
                     raise InvalidValueError('%s list elements must be dicts with exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
                 k, vv = v.items()[0]
-                sequence.append((k, self.cls(raw=vv)))
+                sequence.append((k, self.cls(raw=vv, container=presentation)))
             return ReadOnlyList(sequence)
 
         else:
@@ -95,51 +99,54 @@ class Field(object):
             location = (', at %s' % locator) if locator is not None else ''
             raise AttributeError('%s has unsupported field_type: %s%s' % (self.fullname, self.field_type, location))
 
-    def set(self, raw, value):
-        return self._set(raw, value)
+    def set(self, presentation, value):
+        return self._set(presentation, value)
 
-    def _set(self, raw, value):
-        old = raw.get(self.name)
+    def _set(self, presentation, value):
+        raw = getattr(presentation, '_raw')
+        old = self.get(presentation)
         raw[self.name] = value
         try:
             # Validates our value
-            self.get(raw)
+            self.get(presentation)
         except Exception as e:
             raw[self.name] = old
             raise e
         return old
 
-    def validate(self, presentation, consumption_context):
-        self._validate(presentation, consumption_context)
+    def validate(self, presentation, context):
+        self._validate(presentation, context)
     
-    def _validate(self, presentation, consumption_context):
+    def _validate(self, presentation, context):
         value = None
         
         try:
             value = getattr(presentation, self.name)
         except Exception as e:
             if hasattr(e, 'issue') and isinstance(e.issue, Issue):
-                consumption_context.validation.issues.append(e.issue)
+                context.validation.report(issue=e.issue)
             else:
-                consumption_context.validation.issues.append(Issue(exception=e))
+                context.validation.report(exception=e)
+                if not isinstance(e, AriaError):
+                    print_exception(e)
         
         if isinstance(value, list):
             if self.field_type == 'object_list':
                 for v in value:
                     if hasattr(v, '_validate'):
-                        v._validate(consumption_context)
+                        v._validate(context)
             elif self.field_type == 'sequenced_object_list':
                 for _, v in value:
                     if hasattr(v, '_validate'):
-                        v._validate(consumption_context)
+                        v._validate(context)
         elif isinstance(value, dict):
-            if self.field_type == 'object_dict':
+            if (self.field_type == 'object_dict') or (self.field_type == 'object_dict_unknown_fields'):
                 for v in value.itervalues():
                     if hasattr(v, '_validate'):
-                        v._validate(consumption_context)
+                        v._validate(context)
         
         if hasattr(value, '_validate'):
-            value._validate(consumption_context)
+            value._validate(context)
 
     @property
     def fullname(self):
@@ -237,10 +244,10 @@ def has_fields(cls):
 
                 @wraps(field.fn)
                 def getter(self):
-                    return field.get(self._raw)
+                    return field.get(self)
                     
                 def setter(self, value):
-                    field.set(self._raw, value)
+                    field.set(self, value)
 
                 return property(fget=getter, fset=setter)
 
@@ -347,12 +354,22 @@ def object_sequenced_list_field(cls, default=None, allowed=None, required=False)
         return Field(field_type='sequenced_object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
+def object_dict_unknown_fields(cls, default=None, allowed=None, required=False):
+    """
+    Function decorator for dict of object fields, for all the fields that are not already decorated.
+    
+    The function must be a method in a class decorated with :func:`has\_fields`.
+    """
+    def decorator(fn):
+        return Field(field_type='object_dict_unknown_fields', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+    return decorator
+
 def field_getter(getter_fn):
     """
     Function decorator for overriding the getter function of a field.
     
-    The signature of the getter function must be: f(field, raw).
-    The default getter can be accessed as field.\_get(raw).
+    The signature of the getter function must be: f(field, presentation).
+    The default getter can be accessed as field.\_get(presentation).
     
     The function must already be decorated with a field decorator.
     """
@@ -368,8 +385,8 @@ def field_setter(setter_fn):
     """
     Function decorator for overriding the setter function of a field.
     
-    The signature of the setter function must be: f(field, raw, value).
-    The default setter can be accessed as field.\_set(raw, value).
+    The signature of the setter function must be: f(field, presentation, value).
+    The default setter can be accessed as field.\_set(presentation, value).
     
     The function must already be decorated with a field decorator.
     """
@@ -385,8 +402,8 @@ def field_validator(validator_fn):
     """
     Function decorator for overriding the validator function of a field.
     
-    The signature of the validator function must be: f(field, presentation, consumption_context).
-    The default validator can be accessed as field.\_validate(presentation, consumption_context).
+    The signature of the validator function must be: f(field, presentation, context).
+    The default validator can be accessed as field.\_validate(presentation, context).
     
     The function must already be decorated with a field decorator.
     """

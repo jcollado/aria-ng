@@ -122,7 +122,7 @@ class Range(object):
     SHORTHAND_NAME = 'range'
     TYPE_QUALIFIED_NAME = 'tosca:range'
 
-    def __init__(self, raw):
+    def __init__(self, raw, container):
         self._raw = raw
 
 @dsl_specification('3.2.6.4', 'tosca-simple-profile-1.0')

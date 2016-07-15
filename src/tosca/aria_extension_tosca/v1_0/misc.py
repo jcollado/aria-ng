@@ -1,11 +1,12 @@
 
+from .presentation import ToscaPresentation
 from tosca.datatypes import Credential
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, object_field
+from aria.presentation import PresentationBase, has_fields, short_form_field, primitive_field, object_field
 
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')
-class MetaData(Presentation):
+class MetaData(ToscaPresentation):
     @primitive_field(str)
     @dsl_specification('3.9.3.3', 'tosca-simple-profile-1.0')
     def template_name(self):
@@ -29,7 +30,7 @@ class MetaData(Presentation):
 
 @has_fields
 @dsl_specification('3.5.5', 'tosca-simple-profile-1.0')
-class Repository(Presentation):
+class Repository(ToscaPresentation):
     """
     A repository definition defines a named external repository which contains deployment and implementation artifacts that are referenced within the TOSCA Service Template.
     
@@ -65,7 +66,7 @@ class Repository(Presentation):
 @short_form_field('file')
 @has_fields
 @dsl_specification('3.5.7', 'tosca-simple-profile-1.0')
-class Import(Presentation):
+class Import(ToscaPresentation):
     """
     An import definition is used within a TOSCA Service Template to locate and uniquely name another TOSCA Service Template file which has type and template definitions to be imported (included) and referenced within another Service Template.
     
@@ -104,46 +105,33 @@ class Import(Presentation):
         :rtype: str
         """
 
-@has_fields
 @dsl_specification('3.5.2', 'tosca-simple-profile-1.0')
-class ConstraintClause(Presentation):
-    """
-    A constraint clause defines an operation along with one or more compatible values that can be used to define a constraint on a property or parameter's allowed values when it is defined in a TOSCA Service Template or one of its entities.
-    
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_CONSTRAINTS_CLAUSE>`__
-    """
-    
-    @primitive_field()
+class ConstraintClause(PresentationBase):
     def equal(self):
         """
         Constrains a property or parameter to a value equal to ('=') the value declared.
         """
     
-    @primitive_field()
     def greater_than(self):
         """
         Constrains a property or parameter to a value greater than ('>') the value declared.
         """
     
-    @primitive_field()
     def greater_or_equal(self):
         """
         Constrains a property or parameter to a value greater than or equal to ('>=') the value declared.
         """
     
-    @primitive_field()
     def less_than(self):
         """
         Constrains a property or parameter to a value less than ('<') the value declared.
         """
     
-    @primitive_field()
     def less_or_equal(self):
         """
         Constrains a property or parameter to a value less than or equal to ('<=') the value declared.
         """
     
-    @primitive_field()
     def in_range(self):
         """
         Constrains a property or parameter to a value in range of (inclusive) the two values declared.
@@ -151,31 +139,26 @@ class ConstraintClause(Presentation):
         Note: subclasses or templates of types that declare a property with the in_range constraint MAY only further restrict the range specified by the parent type.
         """
     
-    @primitive_field()
     def valid_values(self):
         """
         Constrains a property or parameter to a value that is in the list of declared values.
         """
     
-    @primitive_field()
     def length(self):
         """
         Constrains the property or parameter to a value of a given length.
         """
     
-    @primitive_field()
     def min_length(self):
         """
         Constrains the property or parameter to a value to a minimum length.
         """
     
-    @primitive_field()
     def max_length(self):
         """
         Constrains the property or parameter to a value to a maximum length.
         """
 
-    @primitive_field()
     def pattern(self):
         """
         Constrains the property or parameter to a value that is allowed by the provided regular expression.

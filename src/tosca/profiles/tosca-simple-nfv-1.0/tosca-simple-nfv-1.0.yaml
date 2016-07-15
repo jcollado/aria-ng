@@ -1,0 +1,7 @@
+
+imports:
+  - capabilities.yaml
+  - data.yaml
+  - groups.yaml
+  - nodes.yaml
+  - relationships.yaml

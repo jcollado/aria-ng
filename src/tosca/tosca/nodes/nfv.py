@@ -75,7 +75,7 @@ class CP(tosca.nodes.Root):
     TYPE_QUALIFIED_NAME = 'tosca:CP'
     TYPE_URI = 'tosca.nodes.nfv.CP'
 
-    @validated_property(str)
+    @validated_property(str, required=True)
     def type(self):
         """
         This may be, for example, a virtual port, a virtual NIC address, a SR-IOV port, a physical port, a physical NIC address or the endpoint of an IP VPN enabling network connectivity.

@@ -52,20 +52,26 @@ class MultithreadedExecutor(object):
                     executor._returns[index] = r
             except Exception as e:
                 with executor._lock:
-                    executor.exceptions[index] = e
+                    executor._exceptions[index] = e
                     if executor.print_exceptions:
                         print_exception(e)
         
         thread = Thread(target=wrapper, args=(self, self._index, fn, args))
         thread.start()
-        self._threads.append(thread)
+        with self._lock:
+            self._threads.append(thread)
         self._index += 1
 
     def join_all(self):
         """
         Blocks until all tasks finish execution.
         """
-        for thread in self._threads:
+        while True:
+            with self._lock:
+                try:
+                    thread = self._threads.pop()
+                except IndexError:
+                    return
             thread.join()
 
     @property

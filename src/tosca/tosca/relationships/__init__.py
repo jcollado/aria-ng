@@ -28,7 +28,7 @@ class Root(object):
     @validated_property(str, default='initial', required=True)
     def state(self):
         """
-        The state of the relationship instance. See section "Relationship States" for allowed values.
+        The state of the relationship instance.
         """
 
 @has_validated_properties

@@ -11,7 +11,12 @@ def data_type_validator(field, presentation, context):
 
     value = getattr(presentation, field.name)
     if value is not None:
-        if get_class_for_data_type(value) is None:
+        valid = False
+        if context.presentation.data_types is not None:
+            valid = (value in context.presentation.data_types)
+        if not valid:
+            valid = (get_class_for_data_type(value) is not None)
+        if not valid:
             report_issue_for_unknown_type(context, presentation, 'data type', field.name)
 
 def node_type_or_template_validator(field, presentation, context):

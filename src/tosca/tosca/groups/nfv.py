@@ -48,7 +48,7 @@ class VNFFG(object):
     @validated_property(tosca.List(str), required=True)
     def constituent_vnfs(self):
         """
-        Reference to a list of  VNFD used in this VNF Forwarding Graph.
+        Reference to a list of VNFD used in this VNF Forwarding Graph.
         """
 
 __all__ = (

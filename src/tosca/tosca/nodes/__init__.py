@@ -32,7 +32,7 @@ class Root(object):
     @validated_property(str, default='initial', required=True)
     def state(self):
         """
-        The state of the node instance. See section "Node States" for allowed values.
+        The state of the node instance.
         """
 
 @has_validated_properties
@@ -103,7 +103,7 @@ class SoftwareComponent(Root):
 @dsl_specification('5.8.4', 'tosca-simple-profile-1.0')
 class WebServer(SoftwareComponent):
     """
-    This TOSA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing management operations for one or more WebApplication nodes.
+    This TOSCA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing management operations for one or more WebApplication nodes.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBSERVER>`__
     """
@@ -137,7 +137,7 @@ class DBMS(SoftwareComponent):
     """
     The TOSCA DBMS node represents a typical relational, SQL Database Management System software component or service.
     
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBSERVER>`__
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_DBMS>`__
     """
 
     # Note: the names are missing from the spec
@@ -159,7 +159,7 @@ class DBMS(SoftwareComponent):
 
 @has_validated_properties
 @dsl_specification('5.8.7', 'tosca-simple-profile-1.0')
-class Database(Root): # seems a mistake in spec: it should inherit SoftwareComponent, no?
+class Database(Root):
     """
     The TOSCA Database node represents a logical database that can be managed and hosted by a TOSCA DBMS node.
     

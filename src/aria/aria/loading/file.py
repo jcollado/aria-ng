@@ -9,7 +9,7 @@ class FileTextLoader(Loader):
     """
     ARIA file text loader.
     
-    Extracts a document from a file. The default encoding is UTF-8, but other supported
+    Extracts a text document from a file. The default encoding is UTF-8, but other supported
     encoding can be specified instead.
     
     Supports a list of base paths that are tried in order if the file cannot be found.

@@ -31,7 +31,7 @@ class Parser(object):
 class DefaultParser(Parser):
     """
     The default ARIA parser supports agnostic raw data composition for presenters
-    that have `_get_import_locations` and `_merge_import`.
+    that have `\_get\_import\_locations` and `\_merge\_import`.
     
     To improve performance, loaders are called asynchronously on separate threads.
     """
@@ -40,22 +40,9 @@ class DefaultParser(Parser):
         """
         :rtype: :class:`aria.presenter.Presenter`
         """
-        executor = MultithreadedExecutor()
-        presentation = self._parse_all(self.location, None, self.presenter_class, executor)
-        executor.join_all()
-        executor.raise_first()
-        imported_presentations = executor.returns
-        if imported_presentations and hasattr(presentation, '_merge_import'):
-            for imported_presentation in imported_presentations:
-                presentation._merge_import(imported_presentation)
-        if presentation and hasattr(presentation, '_link'):
-            presentation._link()
-        return presentation
+        return self._parse_all(self.location, None, self.presenter_class)
     
     def parse_and_validate(self, context):
-        """
-        :rtype: :class:`aria.presenter.Presenter`, list of str
-        """
         try:
             context.presentation = self.parse()
             Validator(context).consume()
@@ -67,21 +54,34 @@ class DefaultParser(Parser):
             if not isinstance(e, AriaError):
                 print_exception(e)
 
-    def _parse_all(self, location, origin_location, presenter_class, executor):
+    def _parse_all(self, location, origin_location, presenter_class):
         raw = self._parse_one(location, origin_location)
         
         if presenter_class is None:
             presenter_class = self.presenter_source.get_presenter(raw)
         
         presentation = presenter_class(raw=raw)
+
+        if presentation is not None and hasattr(presentation, '_link'):
+            presentation._link()
         
         # Submit imports to executor
         if hasattr(presentation, '_get_import_locations'):
             import_locations = presentation._get_import_locations()
             if import_locations:
+                executor = MultithreadedExecutor()
                 for import_location in import_locations:
                     # The imports inherit the parent presenter class and use the current location as their origin location
-                    executor.submit(self._parse_all, import_location, location, presenter_class, executor)
+                    executor.submit(self._parse_all, import_location, location, presenter_class)
+                executor.join_all()
+                executor.raise_first()
+                imported_presentations = executor.returns
+                
+                # Merge imports
+                if imported_presentations is not None:
+                    for imported_presentation in imported_presentations:
+                        if hasattr(presentation, '_merge_import'):
+                            presentation._merge_import(imported_presentation)
         
         return presentation
     

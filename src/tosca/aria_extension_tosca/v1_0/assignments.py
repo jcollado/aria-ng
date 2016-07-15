@@ -1,13 +1,14 @@
 
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
+from aria.presentation import has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
+from .presentation import ToscaPresentation
 from .filters import NodeFilter
 from .definitions import InterfaceDefinitionForType, CapabilityDefinition
 from .validators import node_type_or_template_validator, relationship_type_or_template_validator
 
 @short_form_field('type')
 @has_fields
-class RequirementAssignmentRelationship(Presentation):
+class RequirementAssignmentRelationship(ToscaPresentation):
     @field_validator(relationship_type_or_template_validator)
     @primitive_field(str)
     def type(self):
@@ -28,7 +29,7 @@ class RequirementAssignmentRelationship(Presentation):
 @short_form_field('node')
 @has_fields
 @dsl_specification('3.7.2', 'tosca-simple-profile-1.0')
-class RequirementAssignment(Presentation):
+class RequirementAssignment(ToscaPresentation):
     """
     A Requirement assignment allows template authors to provide either concrete names of TOSCA templates or provide abstract selection criteria for providers to use to find matching TOSCA templates that are used to fulfill a named requirement's declared TOSCA Node Type.
     
@@ -81,7 +82,7 @@ class RequirementAssignment(Presentation):
 
 @has_fields
 @dsl_specification('3.7.1', 'tosca-simple-profile-1.0')
-class CapabilityAssignment(Presentation):
+class CapabilityAssignment(ToscaPresentation):
     """
     A capability assignment allows node template authors to assign values to properties and attributes for a named capability definition that is part of a Node Template's type definition.
     
@@ -92,7 +93,7 @@ class CapabilityAssignment(Presentation):
 
 @has_fields
 @dsl_specification('3.5.11', 'tosca-simple-profile-1.0')
-class AttributeAssignment(Presentation):
+class AttributeAssignment(ToscaPresentation):
     """
     This section defines the grammar for assigning values to named attributes within TOSCA Node and Relationship templates which are defined in their corresponding named types.
     

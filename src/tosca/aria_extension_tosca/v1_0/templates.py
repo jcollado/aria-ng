@@ -1,4 +1,5 @@
 
+from .presentation import ToscaPresentation
 from .misc import MetaData, Repository, Import
 from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinitionForTemplate, ArtifactDefinition
 from .assignments import AttributeAssignment, RequirementAssignment, CapabilityAssignment
@@ -8,11 +9,11 @@ from .filters import NodeFilter
 from .data import get_class_for_data_type
 from .interface_utils import get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator, get_defined_property_values
+from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator, get_defined_property_values
 
 @has_fields
 @dsl_specification('3.7.3', 'tosca-simple-profile-1.0')
-class NodeTemplate(Presentation):
+class NodeTemplate(ToscaPresentation):
     """
     A Node Template specifies the occurrence of a manageable software component as part of an application's topology model which is defined in a TOSCA Service Template. A Node template is an instance of a specified Node Type and can provide customized properties, constraints or operations which override the defaults provided by its Node Type and its implementations.
     
@@ -126,7 +127,7 @@ class NodeTemplate(Presentation):
 
 @has_fields
 @dsl_specification('3.7.4', 'tosca-simple-profile-1.0')
-class RelationshipTemplate(Presentation):
+class RelationshipTemplate(ToscaPresentation):
     """
     A Relationship Template specifies the occurrence of a manageable relationship between node templates as part of an application's topology model that is defined in a TOSCA Service Template. A Relationship template is an instance of a specified Relationship Type and can provide customized properties, constraints or operations which override the defaults provided by its Relationship Type and its implementations.
     
@@ -200,7 +201,7 @@ class RelationshipTemplate(Presentation):
 
 @has_fields
 @dsl_specification('3.8', 'tosca-simple-profile-1.0')
-class TopologyTemplate(Presentation):
+class TopologyTemplate(ToscaPresentation):
     """
     This section defines the topology template of a cloud application. The main ingredients of the topology template are node templates representing components of the application and relationship templates representing links between the components. These elements are defined in the nested node_templates section and the nested relationship_templates sections, respectively. Furthermore, a topology template allows for defining input parameters, output parameters as well as grouping of node templates.
     
@@ -275,7 +276,7 @@ class TopologyTemplate(Presentation):
 
 @has_fields
 @dsl_specification('3.9', 'tosca-simple-profile-1.0')
-class ServiceTemplate(Presentation):
+class ServiceTemplate(ToscaPresentation):
     """
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_SERVICE_TEMPLATE>`__.
     """

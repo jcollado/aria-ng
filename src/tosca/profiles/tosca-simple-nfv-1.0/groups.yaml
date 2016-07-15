@@ -1,0 +1,40 @@
+
+group_types:
+
+  tosca.groups.nfv.VNFFG:
+    _extensions:
+      specification: tosca-simple-nfv-1.0
+      specification_section: 10.6.1
+      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc447714727'
+    description: |
+      The NFV VNFFG group type represents a logical VNF forwarding graph entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
+    derived_from: tosca.groups.Root
+    properties:
+      vendor:
+        description: |
+          Specify the vendor generating this VNFFG.
+        type: string
+      version:
+        description: |
+          Specify the identifier (e.g. name), version, and description of service this VNFFG is describing.
+        type: string
+      number_of_endpoints:
+        description: |
+          Count of the external endpoints included in this VNFFG, to form an index.
+        type: integer
+      dependent_virtual_link:
+        description: |
+          Reference to a list of VLD used in this Forwarding Graph.
+        type: list
+        entry_schema: string
+      connection_point:
+        description: |
+          Reference to Connection Points forming the VNFFG.
+        type: list
+        entry_schema: string
+      constituent_vnfs:
+        description: |
+          Reference to a list of VNFD used in this VNF Forwarding Graph.
+        type: list
+        entry_schema: string
+    members: [ tosca.nodes.nfv.FP ]

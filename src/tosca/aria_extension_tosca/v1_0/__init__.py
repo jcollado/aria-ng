@@ -1,5 +1,6 @@
 
 from .presenter import *
+from .presentation import ToscaPresentation
 from .property_assignment import *
 from .assignments import *
 from .definitions import *
@@ -13,6 +14,7 @@ from .interface_utils import *
 
 __all__ = (
     'ToscaSimplePresenter1_0',
+    'ToscaPresentation',
     'PropertyAssignment',
     'RequirementAssignment',
     'CapabilityAssignment',

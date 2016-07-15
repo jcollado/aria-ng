@@ -1,0 +1,46 @@
+
+policy_types:
+
+  tosca.policies.Root:
+    _extensions:
+      specification: tosca-simple-profile-1.0
+      specification_section: 5.10.1
+      specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_ROOT'
+    description: |
+      This is the default (root) TOSCA Policy Type definition that all other TOSCA base Policy Types derive from.
+  
+  tosca.policies.Placement:
+    _extensions:
+      specification: tosca-simple-profile-1.0
+      specification_section: 5.10.2
+      specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_PLACEMENT'
+    description: |
+      This is the default (root) TOSCA Policy Type definition that is used to govern placement of TOSCA nodes or groups of nodes.
+    derived_from: tosca.policies.Root
+  
+  tosca.policies.Scaling:
+    _extensions:
+      specification: tosca-simple-profile-1.0
+      specification_section: 5.10.3
+      specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_SCALING'
+    description: |
+      This is the default (root) TOSCA Policy Type definition that is used to govern scaling of TOSCA nodes or groups of nodes.
+    derived_from: tosca.policies.Root
+  
+  tosca.policies.Update:
+    _extensions:
+      specification: tosca-simple-profile-1.0
+      specification_section: 5.10.4
+      specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_UPDATE'
+    description: |
+      This is the default (root) TOSCA Policy Type definition that is used to govern update of TOSCA nodes or groups of nodes.
+    derived_from: tosca.policies.Root
+  
+  tosca.policies.Performance:
+    _extensions:
+      specification: tosca-simple-profile-1.0
+      specification_section: 5.10.5
+      specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_PERFORMANCE'
+    description: |
+      This is the default (root) TOSCA Policy Type definition that is used to declare performance requirements for TOSCA nodes or groups of nodes.
+    derived_from: tosca.policies.Root

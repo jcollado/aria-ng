@@ -290,7 +290,7 @@ class OperatingSystem(Root):
     @validated_property(str)
     def distribution(self):
         """
-        The Operating System (OS) distribution. Examples of valid values for a "type" of "Linux" would include:  debian, fedora, rhel and ubuntu.
+        The Operating System (OS) distribution. Examples of valid values for a "type" of "Linux" would include: debian, fedora, rhel and ubuntu.
         """
 
     @validated_property(str)

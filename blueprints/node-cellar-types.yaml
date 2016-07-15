@@ -1,4 +1,8 @@
 
+imports:
+  - src/tosca/profiles/tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
+  - src/tosca/profiles/tosca-simple-nfv-1.0/tosca-simple-nfv-1.0.yaml
+
 #
 # Nodes
 #
@@ -53,7 +57,7 @@ node_types:
       A generic database application.
     derived_from: Application
     capabilities:
-      - CanServeData
+      data: CanServeData
 
   MongoDbApplication:
     description: |
@@ -64,7 +68,8 @@ node_types:
         type: integer
         default: 27017
     capabilities:
-      - type: CanServeData
+      data:
+        type: CanServeData
         properties:
           class:
             type: string
@@ -78,7 +83,8 @@ node_types:
         description: The IP address.
         type: string # when overriding a property, you can't change the type
     capabilities:
-      - type: CanHost
+      host:
+        type: CanHost
         occurrences: 10 # for testing only
 
 #
@@ -100,9 +106,9 @@ capability_types:
   CanHost:
     description: |
       The capability to host applications.
+    derived_from: tosca.capabilities.Container 
     valid_source_types:
       - Host
-    #derived_from: tosca.capabilities.Container 
 
 #
 # Relationships
@@ -111,6 +117,7 @@ capability_types:
 relationship_types:
 
   Base:
+    derived_from: tosca.relationships.HostedOn
     interfaces:
       lifecycle:
         type: Lifecycle
@@ -125,6 +132,7 @@ relationship_types:
               required: false
 
   InstalledIn:
+    #derived_from: tosca.relationships.HostedOn
     derived_from: Base
     description: |
       Relationship between an application and its host.
@@ -148,7 +156,6 @@ relationship_types:
               type: integer
             bad2:
               type: string
-    #derived_from: tosca.relationships.HostedOn
 
 #
 # Groups
@@ -217,6 +224,7 @@ artifact_types:
 interface_types:
 
   Logging:
+    derived_from: tosca.interfaces.node.lifecycle.Standard
     inputs:
       debug_logger:
         type: string
@@ -231,9 +239,9 @@ interface_types:
   Lifecycle:
     description: |
       Lifecycle management interface.
+    #derived_from: tosca.interfaces.node.lifecycle.Standard
     derived_from: Logging
     inputs:
       debug_logger:
         type: string
         default: lifecycle
-    #derived_from: tosca.interfaces.node.lifecycle.Standard

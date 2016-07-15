@@ -4,7 +4,7 @@ description: |
   Node Cellar TOSCA blueprint.
 
 imports:
-  - node-cellar-types.yaml
+  - node-cellar-types.yaml # there is also a long form for imports
 
 repositories:
 
@@ -29,10 +29,11 @@ topology_template:
       type: NodeJsWebApplication
       properties:
         port: 8081
+        root_url: /node-cellar
       requirements:
         - host:
-            capability: CanHost # can put a whole capability definition here
-            relationship: node_cellar_installed_in # we can use either a relationship template or a relationship type
+            capability: CanHost # we can put a type, or a whole capability definition here
+            relationship: node_cellar_installed_in # we can use either a relationship template or a relationship type here
             node: Host # we can use either a node template or a node type
         - data:
             capability: CanServeData
@@ -107,6 +108,10 @@ topology_template:
       members: # node templates
         - application_host
         - data_host
+      interfaces:
+        lifecycle:
+          create:
+            implementation: create_secure_hosts_group.sh
 
 #
 # Policies

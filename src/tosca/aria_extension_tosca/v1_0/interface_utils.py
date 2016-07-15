@@ -16,7 +16,7 @@ def get_inherited_operations(context, presentation):
     # Add/merge our operations
     our_operations = presentation.operations
     if our_operations is not None:
-        merge_operation_definitions(context, operations, our_operations, presentation._name, presentation)
+        merge_operation_definitions(context, operations, our_operations, presentation._name, presentation, 'type')
 
     return operations
 
@@ -37,7 +37,7 @@ def get_and_override_input_definitions_from_type(context, presentation):
     # Add/merge our inputs
     our_inputs = presentation.inputs
     if our_inputs is not None:
-        merge_input_definitions(context, inputs, our_inputs, presentation._name, None, presentation)
+        merge_input_definitions(context, inputs, our_inputs, presentation._name, None, presentation, 'definition')
     
     return inputs
 
@@ -54,7 +54,7 @@ def get_and_override_operation_definitions_from_type(context, presentation):
     # Add/merge our operations
     our_operations = presentation.operations
     if our_operations is not None:
-        merge_operation_definitions(context, operations, our_operations, presentation._name, presentation)
+        merge_operation_definitions(context, operations, our_operations, presentation._name, presentation, 'definition')
     
     return operations
 
@@ -107,7 +107,7 @@ def get_template_interfaces(context, presentation, type_name, get_type_fn=None):
                     context.validation.report('interface definition "%s" changes interface type from "%s" to "%s" for %s' % (interface_name, interface_type1, interface_type2, presentation._fullname), locator=getattr(interface_type2, '_locator', our_interface._locator), level=Issue.BETWEEN_TYPES)
 
                 # Assign interface inputs
-                assign_raw_inputs(context, interface._raw, our_interface.inputs, type_interface._get_inputs(context), interface_name, None, presentation, get_type_fn)
+                assign_raw_inputs(context, interface._raw, our_interface.inputs, type_interface._get_inputs(context), our_interface, interface_name, None, presentation, get_type_fn)
                     
                 # Assign operation implementations and inputs
                 our_operations = our_interface.operations
@@ -132,7 +132,7 @@ def get_template_interfaces(context, presentation, type_name, get_type_fn=None):
 
                         # Assign operation inputs
                         type_inputs = type_operation.inputs if type_operation is not None else None
-                        assign_raw_inputs(context, interface._raw[operation_name], our_inputs, type_inputs, interface_name, operation_name, presentation, get_type_fn)
+                        assign_raw_inputs(context, interface._raw[operation_name], our_inputs, type_inputs, our_operation, interface_name, operation_name, presentation, get_type_fn)
 
                 # Check that there are no required inputs for operations we haven't assigned
                 validate_unassigned_operation_inputs(context, interface.operations, type_operations, our_interface, presentation)
@@ -182,34 +182,34 @@ def convert_interface_definition_from_type_to_template(context, presentation, co
     from .definitions import InterfaceDefinitionForTemplate
     return InterfaceDefinitionForTemplate(name=presentation._name, raw=raw, container=container)
 
-def merge_raw_input_definition(context, raw_input, our_input, interface_name, operation_name, presentation):
+def merge_raw_input_definition(context, raw_input, our_input, interface_name, operation_name, presentation, type_name):
     # Check if we changed the type
     input_type1 = raw_input.get('type')
     input_type2 = our_input.type
     if input_type1 != input_type2:
         if operation_name is not None:
-            context.validation.report('interface definition "%s" changes operation input "%s.%s" type from "%s" to "%s" for %s' % (interface_name, operation_name, our_input._name, input_type1, input_type2, presentation._fullname), locator=input_type2._locator, level=Issue.BETWEEN_TYPES)
+            context.validation.report('interface %s "%s" changes operation input "%s.%s" type from "%s" to "%s" for %s' % (type_name, interface_name, operation_name, our_input._name, input_type1, input_type2, presentation._fullname), locator=input_type2._locator, level=Issue.BETWEEN_TYPES)
         else:
-            context.validation.report('interface definition "%s" changes input "%s" type from "%s" to "%s" for %s' % (interface_name, our_input._name, input_type1, input_type2, presentation._fullname), locator=input_type2._locator, level=Issue.BETWEEN_TYPES)
+            context.validation.report('interface %s "%s" changes input "%s" type from "%s" to "%s" for %s' % (type_name, interface_name, our_input._name, input_type1, input_type2, presentation._fullname), locator=input_type2._locator, level=Issue.BETWEEN_TYPES)
 
     # Merge    
     merge(raw_input, our_input._raw)
 
-def merge_input_definitions(context, inputs, our_inputs, interface_name, operation_name, presentation):
+def merge_input_definitions(context, inputs, our_inputs, interface_name, operation_name, presentation, type_name):
     for input_name, our_input in our_inputs.iteritems():
         if input_name in inputs:
-            merge_raw_input_definition(context, inputs[input_name]._raw, our_input, interface_name, operation_name, presentation)
+            merge_raw_input_definition(context, inputs[input_name]._raw, our_input, interface_name, operation_name, presentation, type_name)
         else:
             inputs[input_name] = our_input._clone(presentation)
 
-def merge_raw_input_definitions(context, raw_inputs, our_inputs, interface_name, operation_name, presentation):
+def merge_raw_input_definitions(context, raw_inputs, our_inputs, interface_name, operation_name, presentation, type_name):
     for input_name, our_input in our_inputs.iteritems():
         if input_name in raw_inputs:
-            merge_raw_input_definition(context, raw_inputs[input_name], our_input, interface_name, operation_name, presentation)
+            merge_raw_input_definition(context, raw_inputs[input_name], our_input, interface_name, operation_name, presentation, type_name)
         else:
             raw_inputs[input_name] = deepcopy(our_input._raw)
 
-def merge_raw_operation_definition(context, raw_operation, our_operation, interface_name, presentation):
+def merge_raw_operation_definition(context, raw_operation, our_operation, interface_name, presentation, type_name):
     # Add/merge inputs
     our_operation_inputs = our_operation.inputs
     if our_operation_inputs is not None:
@@ -217,7 +217,7 @@ def merge_raw_operation_definition(context, raw_operation, our_operation, interf
         if ('inputs' not in raw_operation) or (raw_operation.get('inputs') is None):
             raw_operation['inputs'] = {}
             
-        merge_raw_input_definitions(context, raw_operation['inputs'], our_operation_inputs, interface_name, our_operation._name, presentation)
+        merge_raw_input_definitions(context, raw_operation['inputs'], our_operation_inputs, interface_name, our_operation._name, presentation, type_name)
     
     # Override the description
     if our_operation._raw.get('description') is not None:
@@ -230,22 +230,27 @@ def merge_raw_operation_definition(context, raw_operation, our_operation, interf
         else:
             raw_operation['implementation'] = deepcopy(our_operation._raw['implementation'])
 
-def merge_operation_definitions(context, operations, our_operations, interface_name, presentation):
+def merge_operation_definitions(context, operations, our_operations, interface_name, presentation, type_name):
     for operation_name, our_operation in our_operations.iteritems():
         if operation_name in operations:
-            merge_raw_operation_definition(context, operations[operation_name]._raw, our_operation, interface_name, presentation)
+            merge_raw_operation_definition(context, operations[operation_name]._raw, our_operation, interface_name, presentation, type_name)
         else:
             operations[operation_name] = our_operation._clone(presentation)
 
-def merge_raw_operation_definitions(context, raw_operations, our_operations, interface_name, presentation):
+def merge_raw_operation_definitions(context, raw_operations, our_operations, interface_name, presentation, type_name):
     for operation_name, our_operation in our_operations.iteritems():
         if operation_name in raw_operations:
-            merge_raw_operation_definition(context, raw_operations[operation_name], our_operation, interface_name, presentation)
+            merge_raw_operation_definition(context, raw_operations[operation_name], our_operation, interface_name, presentation, type_name)
         else:
             raw_operations[operation_name] = deepcopy(our_operation._raw)
 
-def merge_interface_definition(context, interface, our_source, presentation): # from either an InterfaceType or an InterfaceDefinition
-    # TODO check if we changed interface type
+def merge_interface_definition(context, interface, our_source, presentation, type_name): # from either an InterfaceType or an InterfaceDefinition
+    if hasattr(our_source, 'type'):
+        # Check if we changed the interface type
+        input_type1 = interface.type
+        input_type2 = our_source.type
+        if (input_type1 is not None) and (input_type2 is not None) and (input_type1 != input_type2):
+            context.validation.report('interface definition "%s" changes type from "%s" to "%s" for %s' % (interface._name, input_type1, input_type2, presentation._fullname), locator=input_type2._locator, level=Issue.BETWEEN_TYPES)
     
     # Add/merge inputs
     our_interface_inputs = our_source._get_inputs(context) if hasattr(our_source, '_get_inputs') else our_source.inputs 
@@ -254,18 +259,17 @@ def merge_interface_definition(context, interface, our_source, presentation): # 
         if ('inputs' not in interface._raw) or (interface._raw.get('inputs') is None):
             interface._raw['inputs'] = {}
     
-        # TODO: errors for type vs definition
-        merge_raw_input_definitions(context, interface._raw['inputs'], our_interface_inputs, our_source._name, None, presentation)
+        merge_raw_input_definitions(context, interface._raw['inputs'], our_interface_inputs, our_source._name, None, presentation, type_name)
         
     # Add/merge operations
     our_operations = our_source._get_operations(context) if hasattr(our_source, '_get_operations') else our_source.operations
     if our_operations is not None:
-        merge_raw_operation_definitions(context, interface._raw, our_operations, our_source._name, presentation)
+        merge_raw_operation_definitions(context, interface._raw, our_operations, our_source._name, presentation, type_name)
 
 def merge_interface_definitions(context, interfaces, our_interfaces, presentation, for_presentation=None):
     for name, our_interface in our_interfaces.iteritems():
         if name in interfaces:
-            merge_interface_definition(context, interfaces[name], our_interface, presentation)
+            merge_interface_definition(context, interfaces[name], our_interface, presentation, 'definition')
         else:
             if for_presentation is not None:
                 interfaces[name] = our_interface._clone(for_presentation)
@@ -276,9 +280,9 @@ def merge_interface_definitions_from_their_types(context, interfaces, presentati
     for interface in interfaces.itervalues():
         the_type = interface._get_type(context) # InterfaceType
         if the_type is not None:
-            merge_interface_definition(context, interface, the_type, presentation)
+            merge_interface_definition(context, interface, the_type, presentation, 'type')
 
-def assign_raw_inputs(context, values, assignments, definitions, interface_name, operation_name, presentation, get_type_fn):
+def assign_raw_inputs(context, values, assignments, definitions, target, interface_name, operation_name, presentation, get_type_fn):
     if assignments is not None:
         # Make sure we have the dict
         if ('inputs' not in values) or (values['inputs'] is None):
@@ -303,11 +307,10 @@ def assign_raw_inputs(context, values, assignments, definitions, interface_name,
     if definitions is not None:
         for input_name, definition in definitions.iteritems():
             if definition.required and (values['inputs'] is not None) and (values['inputs'].get(input_name) is None):
-                # TODO: better locator
                 if operation_name is not None:
-                    context.validation.report('interface definition "%s" does not assign a value to a required operation input "%s.%s" for %s' % (interface_name, operation_name, input_name, presentation._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+                    context.validation.report('interface definition "%s" does not assign a value to a required operation input "%s.%s" for %s' % (interface_name, operation_name, input_name, presentation._fullname), locator=target._locator, level=Issue.BETWEEN_TYPES)
                 else:
-                    context.validation.report('interface definition "%s" does not assign a value to a required input "%s" for %s' % (interface_name, input_name, presentation._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+                    context.validation.report('interface definition "%s" does not assign a value to a required input "%s" for %s' % (interface_name, input_name, presentation._fullname), locator=target._locator, level=Issue.BETWEEN_TYPES)
 
 def validate_unassigned_operation_inputs(context, operations, definitions, interface, presentation):
     for operation_name, definition in definitions.iteritems():

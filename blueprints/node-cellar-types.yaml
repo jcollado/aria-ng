@@ -136,7 +136,7 @@ relationship_types:
         type: string
     interfaces:
       lifecycle:
-        type: Lifecycle # type is optional inheritence, we can just define everything here
+        type: Lifecycle # type is optional, for inheritence, but we can just define everything here
         inputs:
           password:
             description: The root password for all operations.
@@ -168,6 +168,15 @@ group_types:
     interfaces:
       lifecycle:
         type: Lifecycle # type is optional, we can just define everything here
+        inputs:
+          bad1:
+            type: string
+            required: false
+        create:
+          inputs:
+            bad2:
+              type: string
+              required: false
 
 #
 # Policies

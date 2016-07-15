@@ -292,8 +292,9 @@ class InterfaceDefinitionForType(Presentation):
     
     def _validate(self, context):
         super(InterfaceDefinitionForType, self)._validate(context)
-        for operation in self.operations.itervalues():
-            operation._validate(context)
+        if self.operations:
+            for operation in self.operations.itervalues():
+                operation._validate(context)
 
 @allow_unknown_fields
 @has_fields
@@ -335,8 +336,9 @@ class InterfaceDefinitionForTemplate(Presentation):
 
     def _validate(self, context):
         super(InterfaceDefinitionForTemplate, self)._validate(context)
-        for operation in self.operations.itervalues():
-            operation._validate(context)
+        if self.operations:
+            for operation in self.operations.itervalues():
+                operation._validate(context)
 
 @short_form_field('type')
 @has_fields

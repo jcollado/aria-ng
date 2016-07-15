@@ -24,7 +24,9 @@ class Field(object):
         raw = getattr(presentation, '_raw')
 
         if self.field_type == 'object_dict_unknown_fields':
-            return ReadOnlyDict([(k, self.cls(name=k, raw=v, container=presentation)) for k, v in raw.iteritems() if k not in presentation.FIELDS])
+            if isinstance(raw, dict):
+                return ReadOnlyDict([(k, self.cls(name=k, raw=v, container=presentation)) for k, v in raw.iteritems() if k not in presentation.FIELDS])
+            return None
 
         is_short_form_field = (self.container.SHORT_FORM_FIELD == self.name) if hasattr(self.container, 'SHORT_FORM_FIELD') else False
         is_dict = isinstance(raw, dict)
@@ -83,13 +85,13 @@ class Field(object):
 
         elif self.field_type == 'sequenced_object_list':
             if not isinstance(value, list):
-                raise InvalidValueError('%s must be a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                raise InvalidValueError('%s must be a sequenced list (a list of dicts, each with exactly one key): %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             sequence = []
             for v in value:
                 if not isinstance(v, dict):
-                    raise InvalidValueError('%s list elements must be dicts: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
-                if len(v) != 1:
                     raise InvalidValueError('%s list elements must be dicts with exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                if len(v) != 1:
+                    raise InvalidValueError('%s list elements must have exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
                 k, vv = v.items()[0]
                 sequence.append((k, self.cls(raw=vv, container=presentation)))
             return ReadOnlyList(sequence)

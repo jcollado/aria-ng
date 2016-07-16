@@ -6,7 +6,7 @@ from .validators import data_type_validator, list_node_template_or_group_validat
 from .data import get_class_for_data_type
 from .interface_utils import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, value_validator, type_validator, list_type_validator, get_defined_property_values
+from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, value_validator, type_validator, list_type_validator, get_defined_property_values
 from tosca import Range
 
 @has_fields
@@ -62,7 +62,7 @@ class PropertyDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @object_sequenced_list_field(ConstraintClause)
+    @object_list_field(ConstraintClause)
     def constraints(self):
         """
         The optional list of sequenced constraint clauses for the property.

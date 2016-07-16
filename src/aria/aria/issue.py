@@ -73,12 +73,24 @@ class Issue(object):
                 return '"%s"' % self.location
         else:
             return None
+    
+    @property
+    def heading_as_str(self):
+        return '%d: %s' % (self.level, self.message)
 
-    def __str__(self):
-        r = '%d: %s' % (self.level, self.message)
+    @property
+    def details_as_str(self):
+        r = ''
         locator = self.locator_as_str
         if locator is not None:
-            r += ', at %s' % locator
+            r += '@%s' % locator
         if self.snippet is not None:
             r += '\n%s' % self.snippet
+        return r
+
+    def __str__(self):
+        r = self.heading_as_str
+        details = self.details_as_str
+        if details:
+            r += ', ' + details
         return r

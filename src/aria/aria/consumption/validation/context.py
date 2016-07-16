@@ -28,10 +28,14 @@ class ValidationContext(object):
     def dump_issues(self):
         issues = self.issues
         if issues:
-            puts(colored.red('Validation issues:'))
+            puts(colored.red('Validation issues:', bold=True))
             with indent(2):
                 for issue in issues:
-                    puts('%s' % issue)
+                    puts(colored.red(issue.heading_as_str))
+                    details = issue.details_as_str
+                    if details:
+                        with indent(3):
+                            puts(details)
                     if issue.exception is not None:
                         with indent(2):
                             print_exception(issue.exception)

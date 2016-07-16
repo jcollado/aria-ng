@@ -57,6 +57,7 @@ __all__ = (
     'value_validator',
     'type_validator',
     'list_type_validator',
+    'list_length_validator',
     'derived_from_validator',
     'validate_no_short_form',
     'validate_no_unknown_fields',

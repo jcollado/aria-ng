@@ -9,9 +9,34 @@ The ARIA API documentation always links to the relevant section of the specifica
 likewise we provide an annotated version of the specification that links back to the API
 documentation.
 
+There are seven possible levels of validation errors:
 
-`aria.parser`
--------------
+0. Platform errors. E.g. network, hardware, of even an internal bug in ARIA (let us know, please!).
+1. Syntax and format errors. E.g. non-compliant YAML, XML, JSON.
+2. Field validation. E.g. assigning a string where an integer is expected, using a list instead of a dict.
+3. Relationships between fields within a type. This is "grammar" as it applies to rules for setting the values of fields in relation to each other.
+4. Relationships between types. E.g. referring to an unknown type, causing a type inheritance loop. 
+5. Topology. These errors happen if requirements and capabilities cannot be matched in order to assemble a valid topology.
+6. External dependencies. These errors happen if requirement/capability matching fails due to external resources missing, e.g. the lack of a valid virtual machine, API credentials, etc. 
+
+
+Quick Start
+-----------
+
+You need Python. Use a [virtualenv](https://virtualenv.pypa.io/en/stable/):
+
+	pip install virtualenv
+	virtualenv env
+	. env/bin/activate
+	make aria-requirements
+
+Now run a quick TOSCA blueprint validation:
+
+	./aria blueprints/node-cellar.yaml 
+
+
+`aria.parsing`
+---------------
 
 The ARIA parser's generates a representation of TOSCA profiles in Python, such that they
 can be validated, consumed, or manipulated.
@@ -26,12 +51,12 @@ used to convert from one DSL (parse it) to another (write it).
 
 The parser works in three phases, represented by packages and classes in the API:
 
-* `aria.loader`: Loaders are used to read the TOSCA data, usually as text.
+* `aria.loading`: Loaders are used to read the TOSCA data, usually as text.
   For example UriTextLoader will load text from URIs (including files).
-* `aria.reader`: Readers convert data from the loaders into agnostic raw
+* `aria.reading`: Readers convert data from the loaders into agnostic raw
   data. For example, YamlReader converts YAML text into Python dicts, lists, and
   primitives.
-* `aria.presenter`: Presenters wrap the agnostic raw data in a nice
+* `aria.presentation`: Presenters wrap the agnostic raw data in a nice
   Python facade (a "presentation") that makes it much easier to work with the data,
   including utilities for validation, querying, etc. Note that presenters are
   _wrappers_: the agnostic raw data is always maintained intact, and can always be
@@ -88,7 +113,7 @@ CLI Tool
 Though ARIA is fully exposed as an API, it also comes with a CLI tool to allow you to
 work from the shell:
 
-   aria blueprints/simple-blueprint.yaml
+   aria blueprints/node-cellar.yaml
 
 The tool loads YAML files and run consumers on them. It can be useful for quickly
 validating a blueprint.

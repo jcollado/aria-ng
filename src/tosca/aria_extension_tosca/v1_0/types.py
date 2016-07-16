@@ -6,7 +6,7 @@ from .validators import list_node_type_or_group_type_validator
 from .interface_utils import get_inherited_interface_definitions
 from .interface_utils import get_inherited_operations
 from aria import dsl_specification
-from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, list_type_validator, derived_from_validator, get_inherited_property_definitions
+from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_list_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, list_type_validator, derived_from_validator, get_inherited_property_definitions
 from tosca import Version
 
 @has_fields
@@ -115,7 +115,7 @@ class DataType(ToscaPresentation):
         :rtype: str
         """
 
-    @object_sequenced_list_field(ConstraintClause)
+    @object_list_field(ConstraintClause)
     def constraints(self):
         """
         The optional list of sequenced constraint clauses for the Data Type.

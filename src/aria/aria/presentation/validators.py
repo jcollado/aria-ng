@@ -59,6 +59,22 @@ def list_type_validator(type_name, types_dict_name):
         
     return fn
 
+def list_length_validator(length):
+    """
+    Can be used with @field\_validator.
+    """
+
+    def fn(field, presentation, context):
+        field._validate(presentation, context)
+        
+        # Make sure list has exactly the length
+        values = getattr(presentation, field.name)
+        if isinstance(values, list):
+            if len(values) != length:
+                context.validation.report('"%s" must have exactly %d elements for %s' % (field.name, length, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
+        
+    return fn
+
 def derived_from_validator(types_dict_name):
     """
     Can be used with @field\_validator.

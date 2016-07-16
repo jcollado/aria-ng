@@ -53,7 +53,7 @@ data_types:
           CPU socket identifier.
         type: integer
         constraints:
-          - greater_or_eq: 0
+          - greater_or_equal: 0
         required: false
       vcpus:
         description: >

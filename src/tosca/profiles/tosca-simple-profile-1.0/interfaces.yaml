@@ -6,28 +6,28 @@ interface_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.7.3
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Ref384391055'
-    description: |
+    description: >
       This is the default (root) TOSCA Interface Type definition that all other TOSCA Interface Types derive from.
   
   tosca.interfaces.node.lifecycle.Standard:
     _extensions:
       specification: tosca-simple-profile-1.0
       specification_section: 5.7.4
-    description: |
+    description: >
       This lifecycle interface defines the essential, normative operations that TOSCA nodes may support.
     derived_from: tosca.interfaces.Root
     create:
-      description: |
+      description: >
         Standard lifecycle create operation.
     configure:
-      description: |
+      description: >
         Standard lifecycle configure operation.
     start:
-      description: |
+      description: >
         Standard lifecycle start operation.
     stop:
-      description: |
+      description: >
         Standard lifecycle stop operation.
     delete:
-      description: |
+      description: >
         Standard lifecycle delete operation.

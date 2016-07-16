@@ -6,19 +6,21 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.1
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_ROOT'
-    description: |
+    description: >
       The TOSCA Root Node Type is the default type that all other TOSCA base Node Types derive from. This allows for all TOSCA nodes to have a consistent set of features for modeling and management (e.g., consistent definitions for requirements, capabilities and lifecycle interfaces).
     attributes:
       tosca_id:
-        description: |
+        description: >
           A unique identifier of the realized instance of a Node Template that derives from any TOSCA normative type.
         type: string
       tosca_name:
-        description: |
-          This attribute reflects the name of the Node Template as defined in the TOSCA service template. This name is not unique to the realized instance model of corresponding deployed application as each template in the model can result in one or more instances (e.g., scaled) when orchestrated to a provider environment.
+        description: >
+          This attribute reflects the name of the Node Template as defined in the TOSCA service template. This name is not unique
+          to the realized instance model of corresponding deployed application as each template in the model can result in one or
+          more instances (e.g., scaled) when orchestrated to a provider environment.
         type: string
       state:
-        description: |
+        description: >
           The state of the node instance.
         type: string
         default: initial
@@ -40,26 +42,28 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.2
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_COMPUTE'
-    description: |
-      The TOSCA Compute node represents one or more real or virtual processors of software applications or services along with other essential local resources. Collectively, the resources the compute node represents can logically be viewed as a (real or virtual) "server".
+    description: >
+      The TOSCA Compute node represents one or more real or virtual processors of software applications or services along with
+      other essential local resources. Collectively, the resources the compute node represents can logically be viewed as a (real
+      or virtual) "server".
     derived_from: tosca.nodes.Root
     attributes:
       private_address:
-        description: |
+        description: >
           The primary private IP address assigned by the cloud provider that applications may use to access the Compute node.
         type: string
       public_address:
-        description: |
+        description: >
           The primary public IP address assigned by the cloud provider that applications may use to access the Compute node.
         type: string
       networks:
-        description: |
+        description: >
           The list of logical networks assigned to the compute host instance and information about them.
         type: map
         entry_schema:
           type: tosca.datatypes.network.NetworkInfo
       ports:
-        description: |
+        description: >
           The list of logical ports assigned to the compute host instance and information about them.
         type: map
         entry_schema:
@@ -86,7 +90,7 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.11
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_APP'
-    description: |
+    description: >
       The TOSCA Container Application node represents an application that requires Container-level virtualization technology.
     derived_from: tosca.nodes.Root
     requirements:
@@ -100,19 +104,20 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.12
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379548332'
-    description: |
-      The TOSCA Load Balancer node represents logical function that be used in conjunction with a Floating Address to distribute an application's traffic (load) across a number of instances of the application (e.g., for a clustered or scaled application).
+    description: >
+      The TOSCA Load Balancer node represents logical function that be used in conjunction with a Floating Address to distribute an
+      application's traffic (load) across a number of instances of the application (e.g., for a clustered or scaled application).
     derived_from: tosca.nodes.Root
     properties:
       algorithm:
-        description: |
+        description: >
           No description in spec.
         type: string
         required: false
         status: experimental
     capabilities:
       client:
-        description: |
+        description: >
           The Floating (IP) client's on the public network can connect to.
         type: tosca.capabilities.Endpoint.Public
         occurrences: [ 0, UNBOUNDED ]
@@ -131,17 +136,18 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.3
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_SOFTWARE_COMPONENT'
-    description: |
-      The TOSCA SoftwareComponent node represents a generic software component that can be managed and run by a TOSCA Compute Node Type.
+    description: >
+      The TOSCA SoftwareComponent node represents a generic software component that can be managed and run by a TOSCA Compute Node
+      Type.
     derived_from: tosca.nodes.Root
     properties:
       component_version:
-        description: |
+        description: >
           The optional software component's version.
         type: version
         required: false
       admin_credential:
-        description: |
+        description: >
           The optional credential that can be used to authenticate to the software component.
         type: tosca.datatypes.Credential
         required: false
@@ -156,8 +162,9 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.4
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBSERVER'
-    description: |
-      This TOSCA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing management operations for one or more WebApplication nodes.
+    description: >
+      This TOSCA WebServer Node Type represents an abstract software component or service that is capable of hosting and providing
+      management operations for one or more WebApplication nodes.
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       data_endpoint:
@@ -173,12 +180,13 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.5
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBAPPLICATION'
-    description: |
-      The TOSCA WebApplication node represents a software application that can be managed and run by a TOSCA WebServer node. Specific types of web applications such as Java, etc. could be derived from this type.
+    description: >
+      The TOSCA WebApplication node represents a software application that can be managed and run by a TOSCA WebServer node.
+      Specific types of web applications such as Java, etc. could be derived from this type.
     derived_from: tosca.nodes.SoftwareComponent # the spec says tosca.nodes.Root, but this seems to be a mistake
     properties:
       context_root:
-        description: |
+        description: >
           The web application's context root which designates the application's URL path within the web server it is hosted on.
         type: string
         required: false
@@ -196,17 +204,17 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.6
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_DBMS'
-    description: |
+    description: >
       The TOSCA DBMS node represents a typical relational, SQL Database Management System software component or service.
     derived_from: tosca.nodes.SoftwareComponent
     properties:
       root_password:
-        description: |
+        description: >
           The optional root password for the DBMS server.
         type: string
         required: false
       port:
-        description: |
+        description: >
           The DBMS server's port.
         type: integer
         required: false
@@ -220,26 +228,26 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.7
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_DATABASE'
-    description: |
+    description: >
       The TOSCA Database node represents a logical database that can be managed and hosted by a TOSCA DBMS node.
     derived_from: tosca.nodes.Root # note, it's *not* a SoftwareComponent
     properties:
       name:
-        description: |
+        description: >
           The logical database Name.
         type: string
       port:
-        description: |
+        description: >
           The port the database service will use to listen for incoming data and requests.
         type: integer
         required: false
       user:
-        description: |
+        description: >
           The special user account used for database administration.
         type: string
         required: false
       password:
-        description: |
+        description: >
           The password associated with the user account provided in the 'user' property.
         type: string
         required: false
@@ -257,8 +265,9 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.10
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_RUNTIME'
-    description: |
-      The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application services on a single Compute host.
+    description: >
+      The TOSCA Container Runtime node represents operating system-level virtualization technology used to run multiple application
+      services on a single Compute host.
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       host:
@@ -274,23 +283,24 @@ node_types:
     _extensions:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.8
-    description: |
-      The TOSCA ObjectStorage node represents storage that provides the ability to store data as objects (or BLOBs of data) without consideration for the underlying filesystem or devices.
+    description: >
+      The TOSCA ObjectStorage node represents storage that provides the ability to store data as objects (or BLOBs of data) without
+      consideration for the underlying filesystem or devices.
     derived_from: tosca.nodes.Root
     properties:
       name:
-        description: |
+        description: >
           The logical name of the object store (or container).
         type: string
       size:
-        description: |
+        description: >
           The requested initial storage size (default unit is in Gigabytes).
         type: scalar-unit.size
         constraints:
           - greater_or_equal: 0 GB
         required: false
       maxsize:
-        description: |
+        description: >
           The requested maximum storage size (default unit is in Gigabytes).
         type: scalar-unit.size
         constraints:
@@ -305,22 +315,22 @@ node_types:
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.9
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_BLOCK_STORAGE'
-    description: |
+    description: >
     derived_from: tosca.nodes.Root
     properties:
       size:
-        description: |
+        description: >
           The requested storage size (default unit is MB).
         type: scalar-unit.size
         constraints:
           - greater_or_equal: 1 MB
       volume_id:
-        description: |
+        description: >
           ID of an existing volume (that is in the accessible scope of the requesting application).
         type: string
         required: false
       snapshot_id:
-        description: |
+        description: >
           Some identifier that represents an existing snapshot that should be used when creating the block storage (volume).
         type: string
         required: false
@@ -336,12 +346,12 @@ node_types:
     _extensions:
       specification: tosca-simple-profile-1.0
       specification_section: 7.5.1
-    description: |
+    description: >
       The TOSCA Network node represents a simple, logical network service.
     derived_from: tosca.nodes.Root
     properties:
       ip_version:
-        description: |
+        description: >
           The IP version of the requested network.
         type: integer
         constraints:
@@ -349,52 +359,57 @@ node_types:
         default: 4
         required: false
       cidr:
-        description: |
+        description: >
           The cidr block of the requested network.
         type: string
         required: false
       start_ip:
-        description: |
+        description: >
           The IP address to be used as the 1st one in a pool of addresses derived from the cidr block full IP range.
         type: string
         required: false
       end_ip:
-        description: |
+        description: >
           The IP address to be used as the last one in a pool of addresses derived from the cidr block full IP range.
         type: string
         required: false
       gateway_ip:
-        description: |
+        description: >
           The gateway IP address.
         type: string
         required: false
       network_name:
-        description: |
-          An Identifier that represents an existing Network instance in the underlying cloud infrastructure - OR - be used as the name of the new created network.
+        description: >
+          An Identifier that represents an existing Network instance in the underlying cloud infrastructure - OR - be used as the
+          name of the new created network.
         type: string
         required: false
       network_id:
-        description: |
-          An Identifier that represents an existing Network instance in the underlying cloud infrastructure. This property is mutually exclusive with all other properties except network_name.
+        description: >
+          An Identifier that represents an existing Network instance in the underlying cloud infrastructure. This property is
+          mutually exclusive with all other properties except network_name.
         type: string
         required: false
       segmentation_id:
-        description: |
-          A segmentation identifier in the underlying cloud infrastructure (e.g., VLAN id, GRE tunnel id). If the segmentation_id is specified, the network_type or physical_network properties should be provided as well.
+        description: >
+          A segmentation identifier in the underlying cloud infrastructure (e.g., VLAN id, GRE tunnel id). If the segmentation_id
+          is specified, the network_type or physical_network properties should be provided as well.
         type: string
         required: false
       network_type:
-        description: |
-          Optionally, specifies the nature of the physical network in the underlying cloud infrastructure. Examples are flat, vlan, gre or vxlan. For flat and vlan types, physical_network should be provided too.
+        description: >
+          Optionally, specifies the nature of the physical network in the underlying cloud infrastructure. Examples are flat, vlan,
+          gre or vxlan. For flat and vlan types, physical_network should be provided too.
         type: string
         required: false
       physical_network:
-        description: |
-          Optionally, identifies the physical network on top of which the network is implemented, e.g. physnet1. This property is required if network_type is flat or vlan.
+        description: >
+          Optionally, identifies the physical network on top of which the network is implemented, e.g. physnet1. This property is
+          required if network_type is flat or vlan.
         type: string
         required: false
       dhcp_enabled:
-        description: |
+        description: >
           Indicates the TOSCA container to create a virtual network instance with or without a DHCP service.
         type: boolean
         default: true
@@ -407,44 +422,50 @@ node_types:
     _extensions:
       specification: tosca-simple-profile-1.0
       specification_section: 7.5.2
-    description: |
+    description: >
       The TOSCA Port node represents a logical entity that associates between Compute and Network normative types.
       
       The Port node type effectively represents a single virtual NIC on the Compute node instance.
     derived_from: tosca.nodes.Root
     properties:
       ip_address:
-        description: |
-          Allow the user to set a fixed IP address. Note that this address is a request to the provider which they will attempt to fulfill but may not be able to dependent on the network the port is associated with.
+        description: >
+          Allow the user to set a fixed IP address. Note that this address is a request to the provider which they will attempt to
+          fulfill but may not be able to dependent on the network the port is associated with.
         type: string
         required: false
       order:
-        description: |
-          The order of the NIC on the compute instance (e.g. eth2). Note: when binding more than one port to a single compute (aka multi vNICs) and ordering is desired, it is *mandatory* that all ports will be set with an order value and. The order values must represent a positive, arithmetic progression that starts with 0 (e.g. 0, 1, 2, ..., n).
+        description: >
+          The order of the NIC on the compute instance (e.g. eth2). Note: when binding more than one port to a single compute (aka
+          multi vNICs) and ordering is desired, it is *mandatory* that all ports will be set with an order value and. The order
+          values must represent a positive, arithmetic progression that starts with 0 (e.g. 0, 1, 2, ..., n).
         type: integer
         constraints:
           - greater_or_equal: 0
         default: 0
         required: false
       is_default:
-        description: |
-          Set is_default=true to apply a default gateway route on the running compute instance to the associated network gateway. Only one port that is associated to single compute node can set as default=true.
+        description: >
+          Set is_default=true to apply a default gateway route on the running compute instance to the associated network gateway.
+          Only one port that is associated to single compute node can set as default=true.
         type: boolean
         default: false
         required: false
       ip_range_start:
-        description: |
-          Defines the starting IP of a range to be allocated for the compute instances that are associated by this Port. Without setting this property the IP allocation is done from the entire CIDR block of the network.
+        description: >
+          Defines the starting IP of a range to be allocated for the compute instances that are associated by this Port. Without
+          setting this property the IP allocation is done from the entire CIDR block of the network.
         type: string
         required: false
       ip_range_end:
-        description: |
-          Defines the ending IP of a range to be allocated for the compute instances that are associated by this Port. Without setting this property the IP allocation is done from the entire CIDR block of the network.
+        description: >
+          Defines the ending IP of a range to be allocated for the compute instances that are associated by this Port. Without
+          setting this property the IP allocation is done from the entire CIDR block of the network.
         type: string
         required: false
     attributes:
       ip_address:
-        description: |
+        description: >
           The IP address would be assigned to the associated compute instance.
         type: string
     requirements:

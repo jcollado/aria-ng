@@ -113,7 +113,7 @@ CLI Tool
 Though ARIA is fully exposed as an API, it also comes with a CLI tool to allow you to
 work from the shell:
 
-   aria blueprints/node-cellar.yaml
+	aria blueprints/node-cellar.yaml
 
 The tool loads YAML files and run consumers on them. It can be useful for quickly
 validating a blueprint.

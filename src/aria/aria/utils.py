@@ -1,8 +1,9 @@
 
+from clint.textui import puts, colored, indent
 from threading import Thread, Lock
 from collections import OrderedDict
-from clint.textui import puts, colored, indent
-import sys, linecache
+from Queue import Queue
+import sys, linecache, itertools
 
 class OpenClose(object):
     """
@@ -22,58 +23,63 @@ class OpenClose(object):
             self.wrapped.close()
         return False
 
-class MultithreadedExecutor(object):
+class ThreadPoolExecutor(object):
     """
     Executes functions on their own threads.
     
     Makes sure to gather all thrown exceptions in one place.
-    """
-
-    # This is a trivial multithreaded solution, but it should be good enough for
-    # most simple use cases. It can be improved by using a Queue with a thread pool.
     
-    def __init__(self):
+    It's a simple implementation, but works well enough.
+    """
+    
+    CYANIDE = object()
+
+    class Worker(Thread):
+        def __init__(self, executor):
+            super(ThreadPoolExecutor.Worker, self).__init__()
+            self.executor = executor
+            self.daemon = True
+            self.start()
+        
+        def run(self):
+            while True:
+                if not self.executor._execute_next_task():
+                    break
+    
+    def __init__(self, size=10):
         self.print_exceptions = False
-        self._lock = Lock()
-        self._threads = []
-        self._index = 0
+
+        self._tasks = Queue()
+        self._workers = [ThreadPoolExecutor.Worker(self) for _ in range(size)]
         self._returns = {}
         self._exceptions = {}
+        self._id_creator = itertools.count()
+        self._lock = Lock() # for console output
     
-    def submit(self, fn, *args):
+    def submit(self, fn, *args, **kwargs):
         """
         Non-blocking: submits a task function to the execution. The task will be
         called ASAP on another thread.
         """
-        def wrapper(executor, index, fn, args):
-            try:
-                r = fn(*args)
-                with executor._lock:
-                    executor._returns[index] = r
-            except Exception as e:
-                with executor._lock:
-                    executor._exceptions[index] = e
-                    if executor.print_exceptions:
-                        print_exception(e)
-        
-        thread = Thread(target=wrapper, args=(self, self._index, fn, args))
-        thread.start()
-        with self._lock:
-            self._threads.append(thread)
-        self._index += 1
+        self._tasks.put((self._id_creator.next(), fn, args, kwargs))
 
     def join_all(self):
         """
         Blocks until all tasks finish execution.
         """
-        while True:
-            with self._lock:
-                try:
-                    thread = self._threads.pop()
-                except IndexError:
-                    return
-            thread.join()
+        self._tasks.join()
+        
+    def shutdown(self):
+        while self.is_running:
+            self._tasks.put(ThreadPoolExecutor.CYANIDE)
 
+    @property
+    def is_running(self):
+        for worker in self._workers:
+            if worker.is_alive():
+                return True
+        return False
+    
     @property
     def returns(self):
         """
@@ -98,6 +104,32 @@ class MultithreadedExecutor(object):
         exceptions = self.exceptions
         if exceptions:
             raise exceptions[0]
+
+    def _execute_next_task(self):
+        task = self._tasks.get()
+        if task == ThreadPoolExecutor.CYANIDE:
+            # Time to die :(
+            return False
+        self._execute_task(*task)
+        return True
+
+    def _execute_task(self, id, fn, args, kwargs):
+        try:
+            r = fn(*args, **kwargs)
+            self._returns[id] = r
+        except Exception as e:
+            self._exceptions[id] = e
+            if self.print_exceptions:
+                with self._lock:
+                    print_exception(e)
+        self._tasks.task_done()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.shutdown()
+        return False
 
 class LockedList(list):
     """

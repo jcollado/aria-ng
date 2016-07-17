@@ -40,7 +40,7 @@ __all__ = (
     'VERSION',
     'install_aria_extensions',
     'OpenClose',
-    'MultithreadedExecutor',
+    'ThreadPoolExecutor',
     'LockedList',
     'ReadOnlyList',
     'EMPTY_READ_ONLY_LIST',

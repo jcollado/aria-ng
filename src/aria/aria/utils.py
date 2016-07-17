@@ -23,20 +23,133 @@ class OpenClose(object):
             self.wrapped.close()
         return False
 
-class ThreadPoolExecutor(object):
+class FixedThreadPoolExecutor(object):
     """
-    Executes functions on their own threads.
+    Executes tasks in a fixed thread pool.
     
-    Makes sure to gather all thrown exceptions in one place.
+    Makes sure to gather all returned results and thrown exceptions in one place, in order of task
+    submission.
     
-    It's a simple implementation, but works well enough.
+    Example::
+    
+        def sum(arg1, arg2):
+            return arg1 + arg2
+            
+        executor = FixedThreadPoolExecutor(10)
+        try:
+            for value in range(100):
+                executor.submit(sum, value, value)
+            executor.drain()
+        except:
+            executor.close()
+        executor.raise_first()
+        print executor.returns
+    
+    You can also use it with the Python "with" keyword, in which case you don't need to call "close"
+    explicitly::
+    
+        with FixedThreadPoolExecutor(10) as executor:
+            for value in range(100):
+                executor.submit(sum, value, value)
+            executor.drain()
+            executor.raise_first()
+            print executor.returns
     """
     
-    CYANIDE = object()
+    def __init__(self, size=10, timeout=None, print_exceptions=False):
+        """
+        :param size: Number of threads in the pool (fixed).
+        :param timeout: Timeout in seconds for all blocking operations. (Defaults to none, meaning no timeout) 
+        :param print_exceptions: Set to true in order to print exceptions from tasks. (Defaults to false)
+        """
+        self.size = size
+        self.timeout = timeout
+        self.print_exceptions = print_exceptions
 
-    class Worker(Thread):
-        def __init__(self, executor):
-            super(ThreadPoolExecutor.Worker, self).__init__()
+        self._tasks = Queue()
+        self._returns = {}
+        self._exceptions = {}
+        self._id_creator = itertools.count()
+        self._lock = Lock() # for console output
+
+        self._workers = [FixedThreadPoolExecutor._Worker(self, index) for index in range(size)]
+    
+    def submit(self, fn, *args, **kwargs):
+        """
+        Submit a task for execution.
+        
+        The task will be called ASAP on the next available worker thread in the pool.
+        """
+        self._tasks.put((self._id_creator.next(), fn, args, kwargs), timeout=self.timeout)
+
+    def close(self):
+        """
+        Blocks until all current tasks finish execution and all worker threads are dead.
+        
+        You cannot submit tasks anymore after calling this.
+        
+        This is called automatically upon exit if you are using the "with" keyword.
+        """
+        self.drain()
+        while self.is_alive:
+            self._tasks.put(FixedThreadPoolExecutor._CYANIDE, timeout=self.timeout)
+        self._workers =  None
+
+    def drain(self):
+        """
+        Blocks until all current tasks finish execution, but leaves the worker threads alive.
+        """
+        self._tasks.join() # oddly, the API does not support a timeout parameter
+
+    @property
+    def is_alive(self):
+        """
+        True if any of the worker threads are alive.
+        """
+        for worker in self._workers:
+            if worker.is_alive():
+                return True
+        return False
+    
+    @property
+    def returns(self):
+        """
+        The returned values from all tasks, in order of submission.
+        """
+        return [self._returns[k] for k in sorted(self._returns)]
+
+    @property
+    def exceptions(self):
+        """
+        The raised exceptions from all tasks, in order of submission.
+        """
+        return [self._exceptions[k] for k in sorted(self._exceptions)]
+
+    def raise_first(self):
+        """
+        If exceptions were thrown by any task, then the first one will be raised.
+        
+        This is rather arbitrary: proper handling would involve iterating all the
+        exceptions. However, if you want to use the "raise" mechanism, you are
+        limited to raising only one of them.
+        """
+        exceptions = self.exceptions
+        if exceptions:
+            raise exceptions[0]
+
+    _CYANIDE = object()
+    """
+    Special task marker used to kill worker threads.
+    """
+
+    class _Worker(Thread):
+        """
+        Worker thread.
+        
+        Keeps executing tasks until fed with cyanide.
+        """
+        def __init__(self, executor, index):
+            super(FixedThreadPoolExecutor._Worker, self).__init__(name='FixedThreadPoolExecutor%d' % index)
             self.executor = executor
             self.daemon = True
             self.start()
@@ -46,68 +159,9 @@ class ThreadPoolExecutor(object):
                 if not self.executor._execute_next_task():
                     break
     
-    def __init__(self, size=10):
-        self.print_exceptions = False
-
-        self._tasks = Queue()
-        self._workers = [ThreadPoolExecutor.Worker(self) for _ in range(size)]
-        self._returns = {}
-        self._exceptions = {}
-        self._id_creator = itertools.count()
-        self._lock = Lock() # for console output
-    
-    def submit(self, fn, *args, **kwargs):
-        """
-        Non-blocking: submits a task function to the execution. The task will be
-        called ASAP on another thread.
-        """
-        self._tasks.put((self._id_creator.next(), fn, args, kwargs))
-
-    def join_all(self):
-        """
-        Blocks until all tasks finish execution.
-        """
-        self._tasks.join()
-        
-    def shutdown(self):
-        while self.is_running:
-            self._tasks.put(ThreadPoolExecutor.CYANIDE)
-
-    @property
-    def is_running(self):
-        for worker in self._workers:
-            if worker.is_alive():
-                return True
-        return False
-    
-    @property
-    def returns(self):
-        """
-        The returned values from all task functions, in order of submission.
-        """
-        return [self._returns[k] for k in sorted(self._returns)]
-
-    @property
-    def exceptions(self):
-        """
-        The raised exceptions from all task functions, in order of submission.
-        """
-        return [self._exceptions[k] for k in sorted(self._exceptions)]
-
-    def raise_first(self):
-        """
-        If exceptions were thrown by any task, then the first one will be raised.
-        
-        This is rather arbitrary: proper handling would involve iterating all
-        the exceptions. 
-        """
-        exceptions = self.exceptions
-        if exceptions:
-            raise exceptions[0]
-
     def _execute_next_task(self):
-        task = self._tasks.get()
-        if task == ThreadPoolExecutor.CYANIDE:
+        task = self._tasks.get(timeout=self.timeout)
+        if task == FixedThreadPoolExecutor._CYANIDE:
             # Time to die :(
             return False
         self._execute_task(*task)
@@ -128,7 +182,7 @@ class ThreadPoolExecutor(object):
         return self
 
     def __exit__(self, type, value, traceback):
-        self.shutdown()
+        self.close()
         return False
 
 class LockedList(list):

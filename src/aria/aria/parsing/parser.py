@@ -1,5 +1,5 @@
 
-from .. import ThreadPoolExecutor, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
+from .. import FixedThreadPoolExecutor, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
 from ..consumption import Validator
 from ..loading import DefaultLoaderSource
 from ..reading import DefaultReaderSource
@@ -40,9 +40,10 @@ class DefaultParser(Parser):
         """
         :rtype: :class:`aria.presenter.Presenter`
         """
-        with ThreadPoolExecutor() as executor:
+        executor = FixedThreadPoolExecutor()
+        try:
             presentation = self._parse_all(self.location, None, self.presenter_class, executor)
-            executor.join_all()
+            executor.drain()
             
             # Handle exceptions
             if context is not None:
@@ -52,6 +53,8 @@ class DefaultParser(Parser):
                 executor.raise_first()
                 
             imported_presentations = executor.returns
+        except:
+            executor.close()
 
         # Merge imports
         if imported_presentations is not None:

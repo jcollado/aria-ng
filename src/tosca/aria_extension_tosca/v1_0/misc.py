@@ -1,8 +1,17 @@
 
 from .presentation import ToscaPresentation
-from tosca.datatypes import Credential
+from .utils.data import validate_constraint
 from aria import dsl_specification
-from aria.presentation import has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator, list_length_validator
+from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator, list_length_validator
+
+class Range(AsIsPresentation):
+    pass
+
+class Version(AsIsPresentation):
+    pass
+
+class Credential(AsIsPresentation):
+    pass
 
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')
@@ -187,3 +196,4 @@ class ConstraintClause(ToscaPresentation):
 
     def _validate(self, context):
         super(ConstraintClause, self)._validate(context)
+        validate_constraint(context, self)

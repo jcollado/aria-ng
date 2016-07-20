@@ -1,8 +1,10 @@
 
 from .assignments import PropertyAssignment
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field 
-from tosca import Version
+from aria.presentation import Presentation, AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field 
+
+class Version(AsIsPresentation):
+    pass
 
 @has_fields
 @dsl_specification('outputs', 'cloudify-1.3')

@@ -19,6 +19,7 @@ class Reader(object):
             data = loader.load()
             if data is None:
                 raise ReaderError('loader did not provide data: %s' % self.loader)
+            self.location = loader.location # loader may change the location during loading
             return data
     
     def read(self):

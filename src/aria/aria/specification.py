@@ -48,15 +48,10 @@ def iter_spec(spec):
     keys = sections.keys()
     def key(value):
         try:
-            k = 0.0
-            level = 1.0
             parts = value.split('-', 1)
-            for part in parts[0].split('.'):
-                k += float(part) / level
-                level *= 1000.0
-            if len(parts) > 1:
-                k += float(parts[1]) / level
-            return k
+            first = (int(v) for v in parts[0].split('.'))
+            second = parts[1] if len(parts) > 1 else None
+            return (first, second)
         except ValueError:
             return value
     keys.sort(key=key)

@@ -3,6 +3,8 @@ capability_types:
 
   tosca.capabilities.Compute.Container.Architecture:
     _extensions:
+      shorthand_name: Compute.Container.Architecture
+      type_qualified_name: tosca:Compute.Container.Architecture
       specification: tosca-simple-nfv-1.0
       specification_section: 8.2.1
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#DEFN_TYPE_CAPABILITIES_CONTAINER'
@@ -45,6 +47,8 @@ capability_types:
 
   tosca.capabilities.nfv.VirtualBindable:
     _extensions:
+      shorthand_name: VirtualBindable
+      type_qualified_name: tosca:VirtualBindable
       specification: tosca-simple-nfv-1.0
       specification_section: 8.2.2
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc419290220'
@@ -55,6 +59,8 @@ capability_types:
 
   tosca.capabilities.nfv.Metric:
     _extensions:
+      shorthand_name: Metric
+      type_qualified_name: tosca:Metric
       specification: tosca-simple-nfv-1.0
       specification_section: 8.2.3
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc418607874'
@@ -65,6 +71,8 @@ capability_types:
 
   tosca.capabilities.nfv.Forwarder:
     _extensions:
+      shorthand_name: Forwarder
+      type_qualified_name: tosca:Forwarder
       specification: tosca-simple-nfv-1.0
       specification_section: 10.3.1
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc447714718'
@@ -75,6 +83,8 @@ capability_types:
 
   tosca.capabilities.nfv.VirtualLinkable:
     _extensions:
+      shorthand_name: VirtualLinkable
+      type_qualified_name: tosca:VirtualLinkable
       specification: tosca-simple-nfv-1.0
       specification_section: 11.3.1
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc447714735'

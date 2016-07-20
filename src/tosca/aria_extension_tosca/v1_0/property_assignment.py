@@ -1,4 +1,8 @@
 
+#
+# Needs to be in its own file to avoid Python import loops
+#
+
 from aria import dsl_specification
 from aria.presentation import AsIsPresentation
 

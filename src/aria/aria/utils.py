@@ -3,7 +3,7 @@ from clint.textui import puts, colored, indent
 from threading import Thread, Lock
 from collections import OrderedDict
 from Queue import Queue
-import sys, linecache, itertools
+import sys, linecache, itertools, multiprocessing
 
 class OpenClose(object):
     """
@@ -23,6 +23,7 @@ class OpenClose(object):
             self.wrapped.close()
         return False
 
+# https://gist.github.com/tliron/81dd915166b0bfc64be08b4f8e22c835
 class FixedThreadPoolExecutor(object):
     """
     Executes tasks in a fixed thread pool.
@@ -56,7 +57,7 @@ class FixedThreadPoolExecutor(object):
             print executor.returns
     """
     
-    def __init__(self, size=10, timeout=None, print_exceptions=False):
+    def __init__(self, size=multiprocessing.cpu_count() * 2 + 1, timeout=None, print_exceptions=False):
         """
         :param size: Number of threads in the pool (fixed).
         :param timeout: Timeout in seconds for all blocking operations. (Defaults to none, meaning no timeout) 
@@ -333,19 +334,19 @@ def merge(a, b, path=[], strict=False):
             a[key] = value_b
     return a
 
-def import_class(name, paths=[]):
+def import_fullname(name, paths=[]):
     """
-    Imports a class based on its full name, optionally searching for it in the paths.
+    Imports a variable or class based on a full name, optionally searching for it in the paths.
     """
     if name is None:
         return None
     
     def do_import(name):
         if name and ('.' in name):
-            module_name, class_name = name.rsplit('.', 1)
-            return getattr(__import__(module_name, fromlist=[class_name], level=0), class_name)
+            module_name, name = name.rsplit('.', 1)
+            return getattr(__import__(module_name, fromlist=[name], level=0), name)
         else:
-            raise ImportError('class not found: %s' % name)
+            raise ImportError('import not found: %s' % name)
     
     try:
         return do_import(name)
@@ -354,9 +355,9 @@ def import_class(name, paths=[]):
             try:
                 return do_import('%s.%s' % (p, name))
             except Exception as e:
-                raise ImportError('cannot import class %s, because %s' % (name, e))
+                raise ImportError('cannot import %s, because %s' % (name, e))
 
-    raise ImportError('class not found: %s' % name)
+    raise ImportError('import not found: %s' % name)
 
 def import_modules(name):
     """

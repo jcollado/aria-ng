@@ -50,7 +50,7 @@ __all__ = (
     'StrictDict',
     'classname',
     'merge',
-    'import_class',
+    'import_fullname',
     'import_modules',
     'print_exception',
     'print_traceback',

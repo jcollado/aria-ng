@@ -1,13 +1,48 @@
 
 from .presentation import ToscaPresentation
 from .property_assignment import PropertyAssignment
-from .misc import ConstraintClause
-from .validators import data_type_validator, list_node_template_or_group_validator
-from .data import get_class_for_data_type
-from .interface_utils import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
+from .misc import ConstraintClause, Range
+from .utils.validators import data_type_validator, data_value_validator, list_node_template_or_group_validator
+from .utils.data import get_data_type, validate_entry_schema
+from .utils.properties import get_assigned_and_defined_property_values
+from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, value_validator, type_validator, list_type_validator, get_defined_property_values
-from tosca import Range
+from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, type_validator, list_type_validator
+
+@short_form_field('type')
+@has_fields
+class EntrySchema(ToscaPresentation):
+    """
+    The specification does not properly explain this type, however it is implied by examples.
+    """
+    
+    @field_validator(data_type_validator('entry schema data type'))
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        :rtype: str
+        """
+
+    @primitive_field(str)
+    def description(self):
+        """
+        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+        
+        :rtype: str
+        """
+
+    @object_list_field(ConstraintClause)
+    def constraints(self):
+        """
+        :rtype: list of (str, :class:`ConstraintClause`)
+        """
+
+    def _get_type(self, context):
+        return get_data_type(context, self)
+    
+    def _validate(self, context):
+        super(EntrySchema, self)._validate(context)
+        validate_entry_schema(context, self)
 
 @has_fields
 @dsl_specification('3.5.8', 'tosca-simple-profile-1.0')
@@ -18,7 +53,7 @@ class PropertyDefinition(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_DEFN>`__
     """
     
-    @field_validator(data_type_validator)
+    @field_validator(data_type_validator())
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -45,7 +80,7 @@ class PropertyDefinition(ToscaPresentation):
         :rtype: bool
         """
 
-    @field_validator(value_validator('type', get_class_for_data_type))
+    @field_validator(data_value_validator)
     @primitive_field()
     def default(self):
         """
@@ -54,7 +89,8 @@ class PropertyDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str, default='supported')
+    @primitive_field(str, default='supported', allowed=['supported', 'unsupported', 'experimental', 'deprecated'])
+    @dsl_specification(section='3.5.8.3', spec='tosca-simple-profile-1.0')
     def status(self):
         """
         The optional status of the property relative to the specification or implementation.
@@ -70,13 +106,16 @@ class PropertyDefinition(ToscaPresentation):
         :rtype: list of (str, :class:`ConstraintClause`)
         """
 
-    @primitive_field(str)
+    @object_field(EntrySchema)
     def entry_schema(self):
         """
         The optional key that is used to declare the name of the Datatype definition for entries of set types such as the TOSCA list or map.
         
         :rtype: str
         """
+    
+    def _get_type(self, context):
+        return get_data_type(context, self)
 
 @has_fields
 @dsl_specification('3.5.10', 'tosca-simple-profile-1.0')
@@ -87,7 +126,7 @@ class AttributeDefinition(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_ATTRIBUTE_DEFN>`__
     """
 
-    @field_validator(data_type_validator)
+    @field_validator(data_type_validator())
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -107,7 +146,7 @@ class AttributeDefinition(ToscaPresentation):
         """
         return self._get_primitive('description')
 
-    @field_validator(value_validator('type', get_class_for_data_type))
+    @field_validator(data_value_validator)
     @primitive_field(str)
     def default(self):
         """
@@ -118,7 +157,7 @@ class AttributeDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str, default='supported')
+    @primitive_field(str, default='supported', allowed=['supported', 'unsupported', 'experimental', 'deprecated'])
     def status(self):
         """
         The optional status of the attribute relative to the specification or implementation.
@@ -126,13 +165,16 @@ class AttributeDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str)
+    @object_field(EntrySchema)
     def entry_schema(self):
         """
         The optional key that is used to declare the name of the Datatype definition for entries of set types such as the TOSCA list or map.
         
         :rtype: str
         """
+
+    def _get_type(self, context):
+        return get_data_type(context, self)
 
 @has_fields
 @dsl_specification('3.5.12', 'tosca-simple-profile-1.0')
@@ -143,7 +185,7 @@ class ParameterDefinition(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PARAMETER_DEF>`__
     """
 
-    @field_validator(data_type_validator)
+    @field_validator(data_type_validator())
     @primitive_field(str)
     def type(self):
         """
@@ -595,10 +637,10 @@ class GroupDefinition(ToscaPresentation):
         return context.presentation.group_types.get(self.type)
 
     def _get_properties(self, context):
-        return get_defined_property_values(context, self, 'property', 'properties', '_get_properties', get_class_for_data_type)
+        return get_assigned_and_defined_property_values(context, self)
 
     def _get_interfaces(self, context):
-        return get_template_interfaces(context, self, 'group definition', get_class_for_data_type)
+        return get_template_interfaces(context, self, 'group definition')
     
     def _validate(self, context):
         super(GroupDefinition, self)._validate(context)
@@ -654,7 +696,7 @@ class PolicyDefinition(ToscaPresentation):
         return context.presentation.policy_types.get(self.type)
 
     def _get_properties(self, context):
-        return get_defined_property_values(context, self, 'property', 'properties', '_get_properties', get_class_for_data_type)
+        return get_assigned_and_defined_property_values(context, self)
     
     def _validate(self, context):
         super(PolicyDefinition, self)._validate(context)

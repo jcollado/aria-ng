@@ -37,7 +37,7 @@ class ValidationContext(object):
                         with indent(3):
                             puts(details)
                     if issue.exception is not None:
-                        with indent(2):
+                        with indent(3):
                             print_exception(issue.exception)
             return True
         return False

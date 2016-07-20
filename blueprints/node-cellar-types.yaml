@@ -1,7 +1,7 @@
 
 imports:
-  - src/tosca/profiles/tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
-  - src/tosca/profiles/tosca-simple-nfv-1.0/tosca-simple-nfv-1.0.yaml
+  - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
+  - tosca-simple-nfv-1.0/tosca-simple-nfv-1.0.yaml
 
 #
 # Nodes
@@ -15,7 +15,7 @@ node_types:
     properties:
       port:
         description: The user port.
-        type: integer
+        type: tosca.datatypes.network.PortDef
     requirements:
       - host:
           capability: CanHost
@@ -29,7 +29,7 @@ node_types:
     derived_from: Application
     properties:
       port:
-        type: integer
+        type: tosca.datatypes.network.PortDef
         default: 8080
       root_url:
         description: The root URL.
@@ -44,6 +44,18 @@ node_types:
     description: |
       A Node.js-based web application.
     derived_from: WebApplication
+    properties:
+      test1:
+        type: map
+        entry_schema: integer
+      test2:
+        type: version
+      test3:
+        type: scalar-unit.size
+      test4:
+        type: scalar-unit.time
+      test5:
+        type: scalar-unit.frequency
     artifacts:
       node_js:
         description: |
@@ -65,7 +77,7 @@ node_types:
     derived_from: DatabaseApplication
     properties:
       port:
-        type: integer
+        type: tosca.datatypes.network.PortDef
         default: 27017
     capabilities:
       data:
@@ -146,9 +158,9 @@ relationship_types:
       lifecycle:
         type: Lifecycle # type is optional, for inheritence, but we can just define everything here
         inputs:
-          password:
-            description: The root password for all operations.
-            type: string
+          credential:
+            description: The credential for all operations.
+            type: tosca.datatypes.Credential
         create:
           inputs:
             timeout:

@@ -40,7 +40,9 @@ class DefaultParser(Parser):
         """
         :rtype: :class:`aria.presenter.Presenter`
         """
-        executor = FixedThreadPoolExecutor()
+        imported_presentations = None
+        
+        executor = FixedThreadPoolExecutor(timeout=10)
         try:
             presentation = self._parse_all(self.location, None, self.presenter_class, executor)
             executor.drain()
@@ -72,7 +74,7 @@ class DefaultParser(Parser):
             self._handle_exception(context, e)
 
     def _parse_all(self, location, origin_location, presenter_class, executor):
-        raw = self._parse_one(location, origin_location)
+        raw, location = self._parse_one(location, origin_location)
         
         if presenter_class is None:
             presenter_class = self.presenter_source.get_presenter(raw)
@@ -94,10 +96,10 @@ class DefaultParser(Parser):
     
     def _parse_one(self, location, origin_location):
         if self.reader:
-            return self.reader.read()
+            return self.reader.read(), self.reader.location
         loader = self.loader_source.get_loader(location, origin_location)
         reader = self.reader_source.get_reader(location, loader)
-        return reader.read()
+        return reader.read(), reader.location
 
     def _handle_exception(self, context, e):
         if hasattr(e, 'issue') and isinstance(e.issue, Issue):

@@ -15,7 +15,7 @@ __all__ = (
     'LiteralLocation',
     'LiteralLoader',
     'DefaultLoaderSource',
-    'PATHS',
+    'FILE_LOADER_PATHS',
     'FileTextLoader',
     'SESSION',
     'SESSION_CACHE_PATH',

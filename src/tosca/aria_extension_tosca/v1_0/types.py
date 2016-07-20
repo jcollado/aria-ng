@@ -1,13 +1,13 @@
 
 from .presentation import ToscaPresentation
 from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition, OperationDefinitionForType
-from .misc import ConstraintClause
-from .validators import list_node_type_or_group_type_validator
-from .interface_utils import get_inherited_interface_definitions
-from .interface_utils import get_inherited_operations
+from .misc import ConstraintClause, Version
+from .utils.validators import data_type_derived_from_validator, list_node_type_or_group_type_validator
+from .utils.properties import get_inherited_property_definitions
+from .utils.interfaces import get_inherited_interface_definitions, get_inherited_operations
+from .utils.data import coerce_data_type_value
 from aria import dsl_specification
-from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_list_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, list_type_validator, derived_from_validator, get_inherited_property_definitions
-from tosca import Version
+from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_list_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, list_type_validator, derived_from_validator
 
 @has_fields
 @dsl_specification('3.6.3', 'tosca-simple-profile-1.0')
@@ -88,7 +88,7 @@ class DataType(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_DATA_TYPE>`__
     """
 
-    @field_validator(derived_from_validator('data_types'))
+    @field_validator(data_type_derived_from_validator)
     @primitive_field(str)
     def derived_from(self):
         """
@@ -140,6 +140,9 @@ class DataType(ToscaPresentation):
     def _validate(self, context):
         super(DataType, self)._validate(context)
         self._get_properties(context)
+    
+    def _coerce_value(self, constraints, value):
+        return coerce_data_type_value(self, constraints, value)
 
 @has_fields
 @dsl_specification('3.6.6', 'tosca-simple-profile-1.0')
@@ -194,6 +197,7 @@ class CapabilityType(ToscaPresentation):
         :rtype: dict of str, :class:`AttributeDefinition`
         """
 
+    @field_validator(list_type_validator('note type', 'node_types'))
     @primitive_list_field(str)
     def valid_source_types(self):
         """

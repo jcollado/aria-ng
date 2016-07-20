@@ -4,7 +4,7 @@ from aria.presentation import has_fields, short_form_field, primitive_field, obj
 from .presentation import ToscaPresentation
 from .filters import NodeFilter
 from .definitions import InterfaceDefinitionForType, CapabilityDefinition
-from .validators import node_type_or_template_validator, relationship_type_or_template_validator
+from .utils.validators import node_type_or_template_validator, relationship_type_or_template_validator
 
 @short_form_field('type')
 @has_fields

@@ -3,6 +3,8 @@ node_types:
 
   tosca.nodes.Root:
     _extensions:
+      shorthand_name: Root
+      type_qualified_name: tosca:Root
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.1
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_ROOT'
@@ -39,6 +41,8 @@ node_types:
   
   tosca.nodes.Compute:
     _extensions:
+      shorthand_name: Compute
+      type_qualified_name: tosca:Compute
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.2
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_COMPUTE'
@@ -85,22 +89,10 @@ node_types:
       scalable:
          type: tosca.capabilities.Scalable
 
-  tosca.nodes.Container.Application:
-    _extensions:
-      specification: tosca-simple-profile-1.0
-      specification_section: 5.8.11
-      specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_APP'
-    description: >
-      The TOSCA Container Application node represents an application that requires Container-level virtualization technology.
-    derived_from: tosca.nodes.Root
-    requirements:
-      - host:
-          capability: tosca.capabilities.Container
-          #node: tosca.nodes.Container # seems to be a mistake in the spec
-          relationship: tosca.relationships.HostedOn
-
   tosca.nodes.LoadBalancer:
     _extensions:
+      shorthand_name: LoadBalancer
+      type_qualified_name: tosca:LoadBalancer
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.12
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379548332'
@@ -133,6 +125,8 @@ node_types:
   
   tosca.nodes.SoftwareComponent:
     _extensions:
+      shorthand_name: SoftwareComponent
+      type_qualified_name: tosca:SoftwareComponent
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.3
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_SOFTWARE_COMPONENT'
@@ -159,6 +153,8 @@ node_types:
 
   tosca.nodes.WebServer:
     _extensions:
+      shorthand_name: WebServer
+      type_qualified_name: tosca:WebServer
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.4
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBSERVER'
@@ -177,6 +173,8 @@ node_types:
 
   tosca.nodes.WebApplication:
     _extensions:
+      shorthand_name: WebApplication
+      type_qualified_name: tosca:WebApplication
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.5
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_WEBAPPLICATION'
@@ -201,6 +199,8 @@ node_types:
   
   tosca.nodes.DBMS:
     _extensions:
+      shorthand_name: DBMS # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:DBMS
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.6
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_DBMS'
@@ -225,6 +225,8 @@ node_types:
 
   tosca.nodes.Database:
     _extensions:
+      shorthand_name: Database
+      type_qualified_name: tosca:Database
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.7
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_DATABASE'
@@ -259,9 +261,16 @@ node_types:
     capabilities:
       database_endpoint:
         type: tosca.capabilities.Endpoint.Database
+  
+  #
+  # Container
+  #
+
 
   tosca.nodes.Container.Runtime:
     _extensions:
+      shorthand_name: Container.Runtime
+      type_qualified_name: tosca:Container.Runtime
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.10
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_RUNTIME'
@@ -275,12 +284,30 @@ node_types:
       scalable:
         type: tosca.capabilities.Scalable
 
+  tosca.nodes.Container.Application:
+    _extensions:
+      shorthand_name: Container.Application
+      type_qualified_name: tosca:Container.Application
+      specification: tosca-simple-profile-1.0
+      specification_section: 5.8.11
+      specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_CONTAINER_APP'
+    description: >
+      The TOSCA Container Application node represents an application that requires Container-level virtualization technology.
+    derived_from: tosca.nodes.Root
+    requirements:
+      - host:
+          capability: tosca.capabilities.Container
+          #node: tosca.nodes.Container # seems to be a mistake in the spec
+          relationship: tosca.relationships.HostedOn
+
   #
   # Storage
   #
 
   tosca.nodes.ObjectStorage:
     _extensions:
+      shorthand_name: ObjectStorage
+      type_qualified_name: tosca:ObjectStorage
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.8
     description: >
@@ -312,6 +339,8 @@ node_types:
   
   tosca.nodes.BlockStorage:
     _extensions:
+      shorthand_name: BlockStorage
+      type_qualified_name: tosca:BlockStorage
       specification: tosca-simple-profile-1.0
       specification_section: 5.8.9
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_NODES_BLOCK_STORAGE'
@@ -344,6 +373,8 @@ node_types:
 
   tosca.nodes.network.Network:
     _extensions:
+      shorthand_name: Network
+      type_qualified_name: tosca:Network
       specification: tosca-simple-profile-1.0
       specification_section: 7.5.1
     description: >
@@ -420,6 +451,8 @@ node_types:
   
   tosca.nodes.network.Port:
     _extensions:
+      shorthand_name: Port
+      type_qualified_name: tosca:Port
       specification: tosca-simple-profile-1.0
       specification_section: 7.5.2
     description: >

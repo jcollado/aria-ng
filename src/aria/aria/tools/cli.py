@@ -1,5 +1,5 @@
 
-from .. import install_aria_extensions, print_exception, import_class
+from .. import install_aria_extensions, print_exception, import_fullname
 from ..consumption import ConsumptionContext
 from .utils import CommonArgumentParser, create_parser_ns
 
@@ -19,7 +19,7 @@ def main():
         
         install_aria_extensions()
 
-        consumer_class = import_class(consumer_class_name, ['aria.consumption'])
+        consumer_class = import_fullname(consumer_class_name, ['aria.consumption'])
         parser = create_parser_ns(args)
 
         context = ConsumptionContext()

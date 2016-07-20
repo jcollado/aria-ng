@@ -6,7 +6,7 @@ def validate_no_short_form(presentation, context):
     Makes sure that we can use short form definitions only if we allowed it.
     """
     if (not hasattr(presentation, 'SHORT_FORM_FIELD')) and (not isinstance(presentation._raw, dict)):
-        context.validation.report('short form not allowed for %s' % presentation._fullname, locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
+        context.validation.report('short form not allowed for field "%s"' % presentation._fullname, locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
 
 def validate_no_unknown_fields(presentation, context):
     """
@@ -15,7 +15,7 @@ def validate_no_unknown_fields(presentation, context):
     if (not getattr(presentation, 'ALLOW_UNKNOWN_FIELDS', False)) and (not context.validation.allow_unknown_fields) and isinstance(presentation._raw, dict) and hasattr(presentation, 'FIELDS'):
         for k in presentation._raw:
             if k not in presentation.FIELDS:
-                context.validation.report('unknown field "%s" in %s' % (k, presentation._fullname), locator=presentation._get_child_locator(k), level=Issue.BETWEEN_FIELDS)
+                context.validation.report('field "%s" is not supported in "%s"' % (k, presentation._fullname), locator=presentation._get_child_locator(k), level=Issue.BETWEEN_FIELDS)
 
 def validate_known_fields(presentation, context):
     """
@@ -26,13 +26,13 @@ def validate_known_fields(presentation, context):
             field.validate(presentation, context)
 
 def report_issue_for_unknown_type(context, presentation, type_name, field_name):
-    context.validation.report('unknown %s "%s" for %s' % (type_name, getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
+    context.validation.report('field "%s" refers to an unknown %s for "%s"' % (getattr(presentation, type_name, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_parent_is_self(context, presentation, field_name):
-    context.validation.report('parent type is presentation for %s' % presentation._fullname, locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
+    context.validation.report('parent type of "%s" is self' % presentation._fullname, locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_unknown_parent_type(context, presentation, field_name):
     context.validation.report('unknown parent type "%s" for %s' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_circular_type_hierarchy(context, presentation, field_name):
-    context.validation.report('parent type "%s" causes circular type hierarchy for %s' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
+    context.validation.report('"%s" of "%s" creates a circular type hierarchy' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)

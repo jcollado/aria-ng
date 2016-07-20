@@ -2,28 +2,6 @@
 from .. import Issue
 from .validation_utils import report_issue_for_unknown_type, report_issue_for_parent_is_self, report_issue_for_unknown_parent_type, report_issue_for_circular_type_hierarchy
 
-def value_validator(type_field_name, get_type_fn):
-    """
-    Can be used with @field\_validator.
-    """
-    
-    def fn(field, presentation, context):
-        field._validate(presentation, context)
-        
-        # Make sure value can be coerced to the type
-        value = getattr(presentation, field.name)
-        if value is not None:
-            the_type = getattr(presentation, type_field_name)
-            if the_type is not None:
-                cls = get_type_fn(the_type)
-                if cls is not None:
-                    try:
-                        cls(value)
-                    except ValueError:
-                        context.validation.report('"%s" must be coercible to %s.%s in %s: %s' % (field.name, cls.__module__, cls.__name__, presentation._fullname, repr(value)), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_FIELDS)
-        
-    return fn
-
 def type_validator(type_name, types_dict_name):
     """
     Can be used with @field\_validator.
@@ -71,7 +49,7 @@ def list_length_validator(length):
         values = getattr(presentation, field.name)
         if isinstance(values, list):
             if len(values) != length:
-                context.validation.report('"%s" must have exactly %d elements for %s' % (field.name, length, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
+                context.validation.report('field "%s" does not have exactly %d elements in "%s"' % (field.name, length, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
         
     return fn
 

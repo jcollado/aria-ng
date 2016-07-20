@@ -3,6 +3,8 @@ relationship_types:
 
   tosca.relationships.nfv.VirtualBindsTo:
     _extensions:
+      shorthand_name: VirtualBindsTo
+      type_qualified_name: tosca:VirtualBindsTo
       specification: tosca-simple-nfv-1.0
       specification_section: 8.4.1
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc419290234'
@@ -13,6 +15,8 @@ relationship_types:
 
   tosca.relationships.nfv.Monitor:
     _extensions:
+      shorthand_name: Monitor
+      type_qualified_name: tosca:Monitor
       specification: tosca-simple-nfv-1.0
       specification_section: 8.4.2
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc418607880'
@@ -23,6 +27,8 @@ relationship_types:
 
   tosca.relationships.nfv.ForwardsTo:
     _extensions:
+      shorthand_name: ForwardsTo
+      type_qualified_name: tosca:ForwardsTo
       specification: tosca-simple-nfv-1.0
       specification_section: 10.4.1
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc447714720'
@@ -33,6 +39,8 @@ relationship_types:
 
   tosca.relationships.nfv.VirtualLinksTo:
     _extensions:
+      shorthand_name: VirtualLinksTo
+      type_qualified_name: tosca:VirtualLinksTo
       specification: tosca-simple-nfv-1.0
       specification_section: 11.4.1
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc447714737'

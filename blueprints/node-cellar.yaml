@@ -28,8 +28,15 @@ topology_template:
         Node Cellar Node.js web application.
       type: NodeJsWebApplication
       properties:
-        port: 8081
+        port: x8081
         root_url: /node-cellar
+        test1:
+          test1: hi
+          test2: ho
+        test2: 1.-5
+        test3: 5 TiB
+        test4: 1.2 d
+        test5: 1.2 GHz
       requirements:
         - host:
             capability: CanHost # we can put a type, or a whole capability definition here
@@ -85,7 +92,10 @@ topology_template:
         lifecycle:
           #type: Lifecycle # if specified, must be the same as in type
           inputs:
-            password: admin123
+            credential:
+              token_type: password
+              user: root
+              toke: admin123
           create:
             inputs:
               timeout: 60

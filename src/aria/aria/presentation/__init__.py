@@ -6,7 +6,6 @@ from .source import *
 from .fields import *
 from .validators import *
 from .validation_utils import *
-from .property_utils import *
 
 PRESENTER_CLASSES = []
 
@@ -54,7 +53,6 @@ __all__ = (
     'field_getter',
     'field_setter',
     'field_validator',
-    'value_validator',
     'type_validator',
     'list_type_validator',
     'list_length_validator',
@@ -64,7 +62,4 @@ __all__ = (
     'validate_known_fields',
     'report_issue_for_unknown_type',
     'report_issue_for_parent_is_self',
-    'report_issue_for_circular_type_hierarchy',
-    'coerce_property_value',
-    'get_inherited_property_definitions',
-    'get_defined_property_values')
+    'report_issue_for_circular_type_hierarchy')

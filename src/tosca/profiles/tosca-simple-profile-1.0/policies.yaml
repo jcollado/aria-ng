@@ -3,6 +3,8 @@ policy_types:
 
   tosca.policies.Root:
     _extensions:
+      shorthand_name: Root # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:Root
       specification: tosca-simple-profile-1.0
       specification_section: 5.10.1
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_ROOT'
@@ -11,6 +13,8 @@ policy_types:
   
   tosca.policies.Placement:
     _extensions:
+      shorthand_name: Placement # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:Placement
       specification: tosca-simple-profile-1.0
       specification_section: 5.10.2
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_PLACEMENT'
@@ -20,6 +24,8 @@ policy_types:
   
   tosca.policies.Scaling:
     _extensions:
+      shorthand_name: Scaling # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:Scaling
       specification: tosca-simple-profile-1.0
       specification_section: 5.10.3
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_SCALING'
@@ -29,6 +35,8 @@ policy_types:
   
   tosca.policies.Update:
     _extensions:
+      shorthand_name: Update # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:Update
       specification: tosca-simple-profile-1.0
       specification_section: 5.10.4
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_UPDATE'
@@ -38,6 +46,8 @@ policy_types:
   
   tosca.policies.Performance:
     _extensions:
+      shorthand_name: Performance # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:Performance
       specification: tosca-simple-profile-1.0
       specification_section: 5.10.5
       specification_url: 'http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_TYPE_POLICIES_PERFORMANCE'

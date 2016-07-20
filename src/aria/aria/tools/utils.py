@@ -1,5 +1,5 @@
 
-from .. import VERSION, import_class
+from .. import VERSION, import_fullname
 from argparse import ArgumentParser
 
 class BaseArgumentParser(ArgumentParser):
@@ -21,11 +21,11 @@ def create_parser_ns(ns, **kwargs):
     return create_parser(**args)
 
 def create_parser(uri, parser, loader_source, reader_source, presenter_source, presenter, **kwargs):
-    parser_class = import_class(parser, ['aria.parsing'])
-    loader_source_class = import_class(loader_source, ['aria.loading'])
-    reader_source_class = import_class(reader_source, ['aria.reading'])
-    presenter_source_class = import_class(presenter_source, ['aria.presentation'])
-    presenter_class = import_class(presenter, ['aria.presentation'])
+    parser_class = import_fullname(parser, ['aria.parsing'])
+    loader_source_class = import_fullname(loader_source, ['aria.loading'])
+    reader_source_class = import_fullname(reader_source, ['aria.reading'])
+    presenter_source_class = import_fullname(presenter_source, ['aria.presentation'])
+    presenter_class = import_fullname(presenter, ['aria.presentation'])
 
     return parser_class(location=uri,
         loader_source=loader_source_class(),

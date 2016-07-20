@@ -3,6 +3,8 @@ node_types:
 
   tosca.nodes.nfv.VNF:
     _extensions:
+      shorthand_name: VNF # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:VNF
       specification: tosca-simple-nfv-1.0
       specification_section: 8.5.1
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc379455076'
@@ -31,6 +33,8 @@ node_types:
 
   tosca.nodes.nfv.VDU:
     _extensions:
+      shorthand_name: VDU
+      type_qualified_name: tosca:VDU
       specification: tosca-simple-nfv-1.0
       specification_section: 8.5.2
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc419290242'
@@ -47,6 +51,8 @@ node_types:
 
   tosca.nodes.nfv.CP:
     _extensions:
+      shorthand_name: CP
+      type_qualified_name: tosca:CP
       specification: tosca-simple-nfv-1.0
       specification_section: 8.5.3
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc419290245'
@@ -81,8 +87,34 @@ node_types:
           capability: tosca.capabilities.nfv.VirtualBindable
           relationship: tosca.relationships.nfv.VirtualBindsTo
 
+  tosca.nodes.nfv.FP:
+    _extensions:
+      shorthand_name: FP # the spec must be mistaken here, says "VL"
+      type_qualified_name: tosca:FP
+      specification: tosca-simple-nfv-1.0
+      specification_section: 10.5.1
+      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc447714722'
+    description: >
+      The NFV FP node type represents a logical network forwarding path entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
+    derived_from: tosca.nodes.Root
+    properties:
+      policy:
+        description: >
+          A policy or rule to apply to the NFP
+        type: string
+        required: false
+    requirements:
+      - forwarder:
+          capability: tosca.capabilities.nfv.Forwarder
+
+  #
+  # Virtual link
+  #
+
   tosca.nodes.nfv.VL:
     _extensions:
+      shorthand_name: VL
+      type_qualified_name: tosca:VL
       specification: tosca-simple-nfv-1.0
       specification_section: 9.1
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc419290251'
@@ -101,6 +133,8 @@ node_types:
 
   tosca.nodes.nfv.VL.ELine:
     _extensions:
+      shorthand_name: VL.ELine # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:VL.ELine
       specification: tosca-simple-nfv-1.0
       specification_section: 9.2
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc419290256'
@@ -114,6 +148,8 @@ node_types:
 
   tosca.nodes.nfv.VL.ELAN:
     _extensions:
+      shorthand_name: VL.ELAN # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:VL.ELAN
       specification: tosca-simple-nfv-1.0
       specification_section: 9.3
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc419290257'
@@ -123,27 +159,11 @@ node_types:
 
   tosca.nodes.nfv.VL.ETree:
     _extensions:
+      shorthand_name: VL.ETree # ommitted in the spec (seems to be a mistake)
+      type_qualified_name: tosca:VL.ETree
       specification: tosca-simple-nfv-1.0
       specification_section: 9.4
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc419290258'
     description: >
       The NFV VL.ETree node represents an E-Tree virtual link entity.
     derived_from: tosca.nodes.nfv.VL
-
-  tosca.nodes.nfv.FP:
-    _extensions:
-      specification: tosca-simple-nfv-1.0
-      specification_section: 10.5.1
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc447714722'
-    description: >
-      The NFV FP node type represents a logical network forwarding path entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
-    derived_from: tosca.nodes.Root
-    properties:
-      policy:
-        description: >
-          A policy or rule to apply to the NFP
-        type: string
-        required: false
-    requirements:
-      - forwarder:
-          capability: tosca.capabilities.nfv.Forwarder

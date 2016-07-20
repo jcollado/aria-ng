@@ -18,14 +18,18 @@ class PresentationBase(object):
 
     @property
     def _fullname(self):
-        if self._name:
-            return '"%s"' % self._name
+        if self._name is not None:
+            return self._name
+        elif self._container is not None:
+            return self._container._fullname
         return classname(self)
 
     @property
     def _locator(self):
         if hasattr(self._raw, '_locator'):
             return self._raw._locator
+        elif self._container is not None:
+            return self._container._locator
         return None
 
     def _get_child_locator(self, name):

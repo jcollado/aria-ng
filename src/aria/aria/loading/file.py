@@ -3,7 +3,7 @@ from .loader import Loader
 from .exceptions import LoaderError, DocumentNotFoundError
 import codecs, os.path
 
-PATHS = []
+FILE_LOADER_PATHS = []
 
 class FileTextLoader(Loader):
     """
@@ -18,7 +18,7 @@ class FileTextLoader(Loader):
     def __init__(self, source, path, paths=[], encoding='utf-8'):
         self.source = source
         self.location = path
-        self.paths = PATHS + paths
+        self.paths = FILE_LOADER_PATHS + paths
         self.encoding = encoding
         self.file = None
     

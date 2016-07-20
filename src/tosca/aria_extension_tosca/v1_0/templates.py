@@ -6,10 +6,10 @@ from .assignments import AttributeAssignment, RequirementAssignment, CapabilityA
 from .property_assignment import PropertyAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
-from .data import get_class_for_data_type
-from .interface_utils import get_template_interfaces
+from .utils.properties import get_assigned_and_defined_property_values
+from .utils.interfaces import get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator, get_defined_property_values
+from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
 
 @has_fields
 @dsl_specification('3.7.3', 'tosca-simple-profile-1.0')
@@ -115,10 +115,10 @@ class NodeTemplate(ToscaPresentation):
         return context.presentation.node_types.get(self.type)
 
     def _get_properties(self, context):
-        return get_defined_property_values(context, self, 'property', 'properties', '_get_properties')
+        return get_assigned_and_defined_property_values(context, self)
 
     def _get_interfaces(self, context):
-        return get_template_interfaces(context, self, 'node template', get_class_for_data_type)
+        return get_template_interfaces(context, self, 'node template')
 
     def _validate(self, context):
         super(NodeTemplate, self)._validate(context)
@@ -189,10 +189,10 @@ class RelationshipTemplate(ToscaPresentation):
         return context.presentation.relationship_types.get(self.type)
 
     def _get_properties(self, context):
-        return get_defined_property_values(context, self, 'property', 'properties', '_get_properties')
+        return get_assigned_and_defined_property_values(context, self)
 
     def _get_interfaces(self, context):
-        return get_template_interfaces(context, self, 'relationship template', get_class_for_data_type)
+        return get_template_interfaces(context, self, 'relationship template')
     
     def _validate(self, context):
         super(RelationshipTemplate, self)._validate(context)

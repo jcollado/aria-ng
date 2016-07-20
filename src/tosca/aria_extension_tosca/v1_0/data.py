@@ -79,9 +79,9 @@ class Scalar(object):
         if match is None:
             raise ValueError('scalar be formatted as <scalar> <unit>')
         
-        self.scalar = self.__class__.TYPE(match.group('scalar'))
+        self.scalar = float(match.group('scalar'))
         self.unit = match.group('unit')
-        self.value = self.scalar * self.__class__.UNITS[self.unit]
+        self.value = self.__class__.TYPE(self.scalar * self.__class__.UNITS[self.unit])
     
     def __str__(self):
         return '%s %s' % (self.value, self.__class__.UNIT)
@@ -98,7 +98,8 @@ class ScalarSize(Scalar):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_SCALAR_UNIT_SIZE>`__
     """
 
-    RE = r'^(?P<scalar>[0-9]*)\s*(?P<unit>B|kB|KiB|MB|MiB|GB|GiB|TB|TiB)$'
+    # See: http://www.regular-expressions.info/floatingpoint.html
+    RE = r'^(?P<scalar>[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*(?P<unit>B|kB|KiB|MB|MiB|GB|GiB|TB|TiB)$'
     
     UNITS = {
         'B': 1,

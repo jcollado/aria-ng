@@ -5,7 +5,7 @@ from .misc import ConstraintClause, Version
 from .utils.validators import data_type_derived_from_validator, list_node_type_or_group_type_validator
 from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions, get_inherited_operations
-from .utils.data import coerce_data_type_value
+from .utils.data import get_data_type, coerce_data_type_value
 from aria import dsl_specification
 from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_list_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, list_type_validator, derived_from_validator
 
@@ -132,7 +132,7 @@ class DataType(ToscaPresentation):
         """
 
     def _get_parent(self, context):
-        return context.presentation.data_types.get(self.derived_from)
+        return get_data_type(context, self, 'derived_from')
 
     def _get_properties(self, context):
         return get_inherited_property_definitions(context, self, 'properties')

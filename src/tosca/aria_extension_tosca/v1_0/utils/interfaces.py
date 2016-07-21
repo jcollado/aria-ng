@@ -9,12 +9,18 @@ from copy import deepcopy
 #
 
 def get_inherited_operations(context, presentation):
+    """
+    Returns our operation definitions added on top of those of our parent, if we have one (recursively).
+    
+    Allows overriding all aspects of parent operations except input data types.  
+    """
+    
     # Get operations from parent
     parent = presentation._get_parent(context)
     operations = get_inherited_operations(context, parent) if parent is not None else OrderedDict()
     
     # Add/merge our operations
-    our_operations = presentation.operations
+    our_operations = presentation.operations # OperationDefinitionForType
     if our_operations is not None:
         merge_operation_definitions(context, operations, our_operations, presentation._name, presentation, 'type')
 
@@ -25,6 +31,12 @@ def get_inherited_operations(context, presentation):
 #
 
 def get_and_override_input_definitions_from_type(context, presentation):
+    """
+    Returns our input definitions added on top of those of the interface type, if specified.
+    
+    Allows overriding all aspects of interface type inputs except data types.  
+    """
+    
     inputs = OrderedDict()
 
     # Get inputs from type
@@ -35,13 +47,19 @@ def get_and_override_input_definitions_from_type(context, presentation):
             inputs[input_name] = type_input._clone(presentation)
 
     # Add/merge our inputs
-    our_inputs = presentation.inputs
+    our_inputs = presentation.inputs # PropertyDefinition
     if our_inputs is not None:
         merge_input_definitions(context, inputs, our_inputs, presentation._name, None, presentation, 'definition')
     
     return inputs
 
 def get_and_override_operation_definitions_from_type(context, presentation):
+    """
+    Returns our operation definitions added on top of those of the interface type, if specified.
+    
+    Allows overriding all aspects of interface type inputs except data types.  
+    """
+    
     operations = OrderedDict()
 
     # Get operations from type
@@ -52,7 +70,7 @@ def get_and_override_operation_definitions_from_type(context, presentation):
             operations[operations_name] = type_operation._clone(presentation)
     
     # Add/merge our operations
-    our_operations = presentation.operations
+    our_operations = presentation.operations # OperationDefinitionForType
     if our_operations is not None:
         merge_operation_definitions(context, operations, our_operations, presentation._name, presentation, 'definition')
     
@@ -63,6 +81,12 @@ def get_and_override_operation_definitions_from_type(context, presentation):
 #
 
 def get_inherited_interface_definitions(context, presentation, type_name, for_presentation=None):
+    """
+    Returns our interface definitions added on top of those of our parent, if we have one (recursively).
+    
+    Allows overriding all aspects of parent interfaces except interface and operation input data types.  
+    """
+    
     # Get interfaces from parent
     parent = presentation._get_parent(context)
     interfaces = get_inherited_interface_definitions(context, parent, type_name, presentation) if parent is not None else OrderedDict()
@@ -78,18 +102,30 @@ def get_inherited_interface_definitions(context, presentation, type_name, for_pr
     return interfaces
 
 #
-# NodeTemplate, RelationshipTemplate, GroupDefinition
+# NodeTemplate, RelationshipTemplate, GroupDefinition, RequirementAssignmentRelationship
 #
 
 def get_template_interfaces(context, presentation, type_name):
+    """
+    Returns the assigned interface values while making sure they are defined in the type. This includes
+    the interfaces themselves, their operations, and inputs for interfaces and operations.
+    
+    Interface and operation inputs' default values, if available, will be used if we did not assign them.
+    
+    Makes sure that required inputs indeed end up with a value.
+    
+    This code is especially complex due to the levels of nesting involved.
+    """
+    
     interfaces = OrderedDict()
     
-    the_type = presentation._get_type(context) # e.g. NodeType
+    the_type = presentation._get_type(context) # NodeType, RelationshipType, GroupType, *or* RelationshipTemplate (RequirementAssignmentRelationship can refer to these)
     type_interfaces = the_type._get_interfaces(context) if the_type is not None else None
 
-    # Fill in interfaces from the type (will initialize with default values)
+    # Copy over interfaces from the type (will initialize inputs with default values)
     if type_interfaces is not None:
         for interface_name, interface in type_interfaces.iteritems():
+            # InterfaceDefinitionForTemplate will not be converted, just cloned (we get these from RelationshipTemplate)
             interfaces[interface_name] = convert_interface_definition_from_type_to_template(context, interface, presentation)
     
     # Fill in our interfaces
@@ -100,12 +136,6 @@ def get_template_interfaces(context, presentation, type_name):
                 interface = interfaces[interface_name] # InterfaceDefinitionForTemplate
                 type_interface = type_interfaces[interface_name] # InterfaceDefinitionForType
                 
-                # Check if we changed the interface type
-                interface_type1 = type_interface.type
-                interface_type2 = our_interface.type
-                if (interface_type1 is not None) and (interface_type2 is not None) and (interface_type1 != interface_type2):
-                    context.validation.report('interface definition "%s" changes interface type from "%s" to "%s" for "%s"' % (interface_name, interface_type1, interface_type2, presentation._fullname), locator=getattr(interface_type2, '_locator', our_interface._locator), level=Issue.BETWEEN_TYPES)
-
                 # Assign interface inputs
                 assign_raw_inputs(context, interface._raw, our_interface.inputs, type_interface._get_inputs(context), our_interface, interface_name, None, presentation)
                     
@@ -152,9 +182,12 @@ def convert_input_definitions_to_values(values, definitions):
             values[name] = default
 
 def convert_interface_definition_from_type_to_template(context, presentation, container):
-    raw = {}
+    from ..definitions import InterfaceDefinitionForTemplate
+
+    if isinstance(presentation, InterfaceDefinitionForTemplate):
+        return presentation._clone(container)
     
-    raw['type'] = presentation.type
+    raw = {}
     
     # Copy default values for inputs
     inputs = presentation._get_inputs(context)
@@ -179,7 +212,6 @@ def convert_interface_definition_from_type_to_template(context, presentation, co
                 raw['operations'][operation_name]['inputs'] = {}
                 convert_input_definitions_to_values(raw['operations'][operation_name]['inputs'], inputs)
     
-    from ..definitions import InterfaceDefinitionForTemplate
     return InterfaceDefinitionForTemplate(name=presentation._name, raw=raw, container=container)
 
 def merge_raw_input_definition(context, raw_input, our_input, interface_name, operation_name, presentation, type_name):

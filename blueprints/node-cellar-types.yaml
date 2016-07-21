@@ -35,6 +35,7 @@ node_types:
         description: The root URL.
         type: string
         default: /
+
       locale:
         description: The locale (optional).
         type: string
@@ -50,6 +51,8 @@ node_types:
         entry_schema: integer
       test2:
         type: version
+        constraints:
+          - in_range: [ 2.1, 3.1 ]
       test3:
         type: scalar-unit.size
       test4:

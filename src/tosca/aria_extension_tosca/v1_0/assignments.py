@@ -1,10 +1,13 @@
 
-from aria import dsl_specification
-from aria.presentation import has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
 from .presentation import ToscaPresentation
 from .filters import NodeFilter
-from .definitions import InterfaceDefinitionForType, CapabilityDefinition
+from .definitions import InterfaceDefinitionForTemplate, CapabilityDefinition
+from .property_assignment import PropertyAssignment
 from .utils.validators import node_type_or_template_validator, relationship_type_or_template_validator
+from .utils.properties import get_assigned_and_defined_property_values
+from .utils.interfaces import get_template_interfaces
+from aria import dsl_specification
+from aria.presentation import has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
 
 @short_form_field('type')
 @has_fields
@@ -18,13 +21,38 @@ class RequirementAssignmentRelationship(ToscaPresentation):
         :rtype: str
         """
 
-    @object_dict_field(InterfaceDefinitionForType)
+    @object_dict_field(PropertyAssignment)
     def properties(self):
+        """
+        The spec doesn't mention this but shows it in examples.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @object_dict_field(InterfaceDefinitionForTemplate)
+    def interfaces(self):
         """
         The optional reserved keyname used to reference declared (named) interface definitions of the corresponding Relationship Type in order to provide Property assignments for these interfaces or operations of these interfaces.
         
-        :rtype: dict of str, :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
         """
+
+    def _get_type(self, context):
+        the_type = context.presentation.relationship_types.get(self.type)
+        if the_type is None:
+            the_type = context.presentation.relationship_templates.get(self.type)
+        return the_type
+
+    def _get_properties(self, context):
+        return get_assigned_and_defined_property_values(context, self)
+
+    def _get_interfaces(self, context):
+        return get_template_interfaces(context, self, 'requirement assignment')
+
+    def _validate(self, context):
+        super(RequirementAssignmentRelationship, self)._validate(context)
+        self._get_properties(context)
+        self._get_interfaces(context)
 
 @short_form_field('node')
 @has_fields

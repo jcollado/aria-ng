@@ -2,8 +2,8 @@
 from .presentation import ToscaPresentation
 from .property_assignment import PropertyAssignment
 from .misc import ConstraintClause, Range
-from .utils.validators import data_type_validator, data_value_validator, list_node_template_or_group_validator
-from .utils.data import get_data_type, validate_entry_schema
+from .utils.validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
+from .utils.data import get_data_type
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification
@@ -38,11 +38,7 @@ class EntrySchema(ToscaPresentation):
         """
 
     def _get_type(self, context):
-        return get_data_type(context, self)
-    
-    def _validate(self, context):
-        super(EntrySchema, self)._validate(context)
-        validate_entry_schema(context, self)
+        return get_data_type(context, self, 'type')
 
 @has_fields
 @dsl_specification('3.5.8', 'tosca-simple-profile-1.0')
@@ -106,6 +102,7 @@ class PropertyDefinition(ToscaPresentation):
         :rtype: list of (str, :class:`ConstraintClause`)
         """
 
+    @field_validator(entry_schema_validator)
     @object_field(EntrySchema)
     def entry_schema(self):
         """
@@ -115,7 +112,7 @@ class PropertyDefinition(ToscaPresentation):
         """
     
     def _get_type(self, context):
-        return get_data_type(context, self)
+        return get_data_type(context, self, 'type')
 
 @has_fields
 @dsl_specification('3.5.10', 'tosca-simple-profile-1.0')
@@ -165,6 +162,7 @@ class AttributeDefinition(ToscaPresentation):
         :rtype: str
         """
 
+    @field_validator(entry_schema_validator)
     @object_field(EntrySchema)
     def entry_schema(self):
         """
@@ -174,7 +172,7 @@ class AttributeDefinition(ToscaPresentation):
         """
 
     def _get_type(self, context):
-        return get_data_type(context, self)
+        return get_data_type(context, self, 'type')
 
 @has_fields
 @dsl_specification('3.5.12', 'tosca-simple-profile-1.0')
@@ -349,15 +347,6 @@ class InterfaceDefinitionForTemplate(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_INTERFACE_DEF>`__
     """
 
-    @field_validator(type_validator('interface type', 'interface_types'))
-    @primitive_field(str)
-    def type(self):
-        """
-        Not mentioned in the spec.
-        
-        :rtype: str
-        """
-
     @object_dict_field(PropertyAssignment)
     def inputs(self):
         """
@@ -369,13 +358,6 @@ class InterfaceDefinitionForTemplate(ToscaPresentation):
     @object_dict_unknown_fields(OperationDefinitionForTemplate)
     def operations(self):
         pass
-
-    def _get_type(self, context):
-        # The correct interface type comes from the container (the template) which may in turn get it from its type.
-        # (If we have changed the type here, which we shouldn't, then an issue will have been reported from the container's validation)
-        interface = self._container._get_interfaces(context).get(self._name)
-        the_type = interface.type if interface is not None else self.type
-        return context.presentation.interface_types.get(the_type)
 
     def _validate(self, context):
         super(InterfaceDefinitionForTemplate, self)._validate(context)

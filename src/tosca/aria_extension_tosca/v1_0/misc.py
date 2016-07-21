@@ -168,32 +168,36 @@ class ConstraintClause(ToscaPresentation):
         Constrains a property or parameter to a value that is in the list of declared values.
         """
     
-    @primitive_field()
+    @primitive_field(int)
     def length(self):
         """
         Constrains the property or parameter to a value of a given length.
         """
     
-    @primitive_field()
+    @primitive_field(int)
     def min_length(self):
         """
         Constrains the property or parameter to a value to a minimum length.
         """
     
-    @primitive_field()
+    @primitive_field(int)
     def max_length(self):
         """
         Constrains the property or parameter to a value to a maximum length.
         """
 
-    @primitive_field()
+    @primitive_field(str)
     def pattern(self):
         """
         Constrains the property or parameter to a value that is allowed by the provided regular expression.
 
         Note: Future drafts of this specification will detail the use of regular expressions and reference an appropriate standardized grammar.
         """
-
+    
+    def _is_typed(self):
+        key = self._raw.keys()[0]
+        return key in ('equal', 'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'less_or_equal', 'in_range', 'valid_values')
+                
     def _validate(self, context):
         super(ConstraintClause, self)._validate(context)
         validate_constraint(context, self)

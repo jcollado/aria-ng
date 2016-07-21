@@ -33,7 +33,7 @@ topology_template:
         test1:
           test1: hi
           test2: ho
-        test2: 1.-5
+        test2: 3.1
         test3: 5 TiB
         test4: 1.2 d
         test5: 1.2 GHz

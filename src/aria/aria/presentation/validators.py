@@ -4,6 +4,8 @@ from .validation_utils import report_issue_for_unknown_type, report_issue_for_pa
 
 def type_validator(type_name, types_dict_name):
     """
+    Makes sure that the field refers to an existing type defined in the root presenter.
+    
     Can be used with @field\_validator.
     """
     
@@ -21,6 +23,10 @@ def type_validator(type_name, types_dict_name):
 
 def list_type_validator(type_name, types_dict_name):
     """
+    Makes sure that the field's elements refer to existing types defined in the root presenter.
+    
+    Assumes that the field is a list.
+    
     Can be used with @field\_validator.
     """
 
@@ -39,6 +45,10 @@ def list_type_validator(type_name, types_dict_name):
 
 def list_length_validator(length):
     """
+    Makes sure the field has exactly a specific number of elements.
+    
+    Assumes that the field is a list.
+    
     Can be used with @field\_validator.
     """
 
@@ -55,6 +65,8 @@ def list_length_validator(length):
 
 def derived_from_validator(types_dict_name):
     """
+    Makes sure that the field refers to a valid parent type defined in the root presenter.
+    
     Can be used with @field\_validator.
     """
 

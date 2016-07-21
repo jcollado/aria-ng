@@ -4,19 +4,23 @@ from aria import Issue, merge
 from collections import OrderedDict
 from copy import deepcopy
 
-def coerce_property_value(context, assignment, definition):
-    the_type = definition._get_type(context) if definition is not None else None
-    entry_schema = definition.entry_schema if definition is not None else None
-    constraints = definition.constraints if definition is not None else None
-    return coerce_value(context, assignment, the_type, entry_schema, constraints, assignment.value)
+#
+# All the types: NodeType, RelationshipType, etc.
+#
 
-def get_inherited_property_definitions(context, presentation, field_name, for_presentation=None): # works on both properties and inputs
+def get_inherited_property_definitions(context, presentation, field_name, for_presentation=None): # works on properties, inputs, and attributes
+    """
+    Returns our property definitions added on top of those of our parent, if we have one (recursively).
+    
+    Allows overriding all aspects of parent properties except data type.  
+    """
+    
     # Get definitions from parent
-    parent = presentation._get_parent(context)
+    parent = presentation._get_parent(context) if hasattr(presentation, '_get_parent') else None # if we inherit from a primitive, it does not have a parent
     definitions = get_inherited_property_definitions(context, parent, field_name, for_presentation=presentation) if parent is not None else OrderedDict()
     
     # Add/merge our definitions
-    our_definitions = getattr(presentation, field_name)
+    our_definitions = getattr(presentation, field_name, None) # if we inherit from a primitive, it does not have our field
     if our_definitions is not None:
         for name, our_definition in our_definitions.iteritems():
             if name in definitions:
@@ -37,11 +41,23 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
         
     return definitions
 
+#
+# NodeTemplate, RelationshipTemplate, GroupDefinition, PolicyDefinition, RequirementAssignmentRelationship
+#
+
 def get_assigned_and_defined_property_values(context, presentation):
+    """
+    Returns the assigned property values while making sure they are defined in our type.
+    
+    The property definition's default value, if available, will be used if we did not assign it.
+    
+    Makes sure that required properties indeed end up with a value.
+    """
+    
     values = OrderedDict()
     
     the_type = presentation._get_type(context)
-    assignments = getattr(presentation, 'properties', None)
+    assignments = presentation.properties
     definitions = the_type._get_properties(context) if the_type is not None else None
 
     # Fill in our assignments, but make sure they are defined
@@ -63,3 +79,13 @@ def get_assigned_and_defined_property_values(context, presentation):
                 context.validation.report('required property "%s" does not have a value in "%s"' % (name, presentation._fullname), locator=presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
     
     return values
+
+#
+# Utils
+#
+
+def coerce_property_value(context, assignment, definition): # works on both properties and inputs
+    the_type = definition._get_type(context) if definition is not None else None
+    entry_schema = definition.entry_schema if definition is not None else None
+    constraints = definition.constraints if definition is not None else None
+    return coerce_value(context, assignment, the_type, entry_schema, constraints, assignment.value)

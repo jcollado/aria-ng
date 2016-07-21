@@ -1,12 +1,19 @@
 
-from .utils.data import coerce_to_class
+from .utils.data import coerce_to_class, report_issue_for_bad_format
 from aria import  dsl_specification
 from collections import OrderedDict
 from functools import total_ordering
 import re
 
 @total_ordering
+@dsl_specification('3.2.2', 'tosca-simple-profile-1.0')
 class Version(object):
+    """
+    TOSCA supports the concept of "reuse" of type definitions, as well as template definitions which could be version and change over time. It is important to provide a reliable, normative means to represent a version string which enables the comparison and management of types and templates over time. Therefore, the TOSCA TC intends to provide a normative version type (string) for this purpose in future Working Drafts of this specification.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_VERSION>`__
+    """
+
     # <major_version>.<minor_version>[.<fix_version>[.<qualifier>[-<build_version]]]
     RE = r'^(?P<major>\d+)\.(?P<minor>\d+)(\.(?P<fix>\d+)((\.(?P<qualifier>\d+))(\-(?P<build>\d+))?)?)?$'
     
@@ -17,7 +24,8 @@ class Version(object):
         """
         return (version.major, version.minor, version.fix, version.qualifier, version.build)
     
-    def __init__(self, entry_schema, constraints, value):
+    def __init__(self, entry_schema, constraints, value, constraint_key):
+        value = str(value)
         match = re.match(Version.RE, value)
         if match is None:
             raise ValueError('version must be formatted as <major_version>.<minor_version>[.<fix_version>[.<qualifier>[-<build_version]]]')
@@ -38,6 +46,9 @@ class Version(object):
     def __str__(self):
         return self.value
     
+    def __repr__(self):
+        return self.__str__()
+
     def __eq__(self, version):
         return (self.major, self.minor, self.fix, self.qualifier, self.build) == (version.major, version.minor, version.fix, version.qualifier, version.build)
 
@@ -58,6 +69,37 @@ class Version(object):
                             return True
         return False
 
+@dsl_specification('3.2.3', 'tosca-simple-profile-1.0')
+class Range(object):
+    """
+    The range type can be used to define numeric ranges with a lower and upper boundary. For example, this allows for specifying a range of ports to be opened in a firewall.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_RANGE>`__
+    """
+
+    def __init__(self, entry_schema, constraints, value, constraint_key):
+        if not isinstance(value, list):
+            # TODO must be list
+            raise ValueError('range is not a list: %s' % repr(value))
+        if len(value) != 2:
+            raise ValueError('range does not have exactly 2 elements: %s' % repr(value))
+        
+        try:
+            float(value[0])
+        except ValueError:
+            raise ValueError('lower bound of range is not a valid number: %s' % repr(value[0]))
+
+        if value[1] != 'UNBOUNDED':
+            try:
+                float(value[1])
+            except ValueError:
+                raise ValueError('upper bound of range is not a valid number or "UNBOUNDED": %s' % repr(value[0]))
+
+        if value[0] >= value[1]:
+            raise ValueError('upper bound of range is not greater than the lower bound: %s >= %s' % (repr(value[0]), repr(value[1])))
+        
+        self.value = value
+
 @total_ordering
 @dsl_specification('3.2.6', 'tosca-simple-profile-1.0')
 class Scalar(object):
@@ -74,7 +116,8 @@ class Scalar(object):
         """
         return scalar.value
     
-    def __init__(self, entry_schema, constraints, value):
+    def __init__(self, entry_schema, constraints, value, constraint_key):
+        value = str(value)
         match = re.match(self.__class__.RE, value)
         if match is None:
             raise ValueError('scalar be formatted as <scalar> <unit>')
@@ -85,6 +128,9 @@ class Scalar(object):
     
     def __str__(self):
         return '%s %s' % (self.value, self.__class__.UNIT)
+
+    def __repr__(self):
+        return self.__str__()
     
     def __eq__(self, scalar):
         return self.value == scalar.value
@@ -154,38 +200,25 @@ class ScalarFrequency(Scalar):
     TYPE = float
     UNIT = 'Hz'
 
-@dsl_specification('3.2.2', 'tosca-simple-profile-1.0')
-def coerce_version(context, presentation, the_type, entry_schema, constraints, value):
-    """
-    TOSCA supports the concept of "reuse" of type definitions, as well as template definitions which could be version and change over time. It is important to provide a reliable, normative means to represent a version string which enables the comparison and management of types and templates over time. Therefore, the TOSCA TC intends to provide a normative version type (string) for this purpose in future Working Drafts of this specification.
-    
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_VERSION>`__
-    """
-    return coerce_to_class(context, presentation, Version, entry_schema, constraints, value)
+#
+# The following are hooked in the YAML as 'coerce_value' extensions
+#
 
-@dsl_specification('3.2.3', 'tosca-simple-profile-1.0')
-def coerce_range(context, presentation, the_type, entry_schema, constraints, value):
-    """
-    The range type can be used to define numeric ranges with a lower and upper boundary. For example, this allows for specifying a range of ports to be opened in a firewall.
-    
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_RANGE>`__
-    """
-    
-    if not isinstance(value, list):
-        # TODO must be list
-        pass
-    if len(value) != 2:
-        # TODO must have 2 elements
-        pass
-    
-    # first must be integer
-    # second can be integer or UNBOUNDED
-    # if second is integer, must be > first
-    
-    return value
+def coerce_version(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+    return coerce_to_class(context, presentation, Version, entry_schema, constraints, value, constraint_key)
+
+def coerce_range(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+    if constraint_key == 'in_range':
+        # When we're in a "in_range" constraint, the values are *not* themselves ranges, but numbers
+        try:
+            return float(value)
+        except ValueError as e:
+            report_issue_for_bad_format(context, presentation, the_type, value, constraint_key, e)
+    else:
+        return coerce_to_class(context, presentation, Range, entry_schema, constraints, value, constraint_key)
 
 @dsl_specification('3.2.4', 'tosca-simple-profile-1.0')
-def coerce_list(context, presentation, the_type, entry_schema, constraints, value):
+def coerce_list(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
     """
     The list type allows for specifying multiple values for a parameter of property. For example, if an application allows for being configured to listen on multiple ports, a list of ports could be configured using the list data type.
     
@@ -199,7 +232,7 @@ def coerce_list(context, presentation, the_type, entry_schema, constraints, valu
     return value
     
 @dsl_specification('3.2.5', 'tosca-simple-profile-1.0')
-def coerce_map_value(context, presentation, the_type, entry_schema, constraints, value):
+def coerce_map_value(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
     """
     The map type allows for specifying multiple values for a parameter of property as a map. In contrast to the list type, where each entry can only be addressed by its index in the list, entries in a map are named elements that can be addressed by their keys.
     
@@ -217,11 +250,11 @@ def coerce_map_value(context, presentation, the_type, entry_schema, constraints,
     
     return r
 
-def coerce_scalar_unit_size(context, presentation, the_type, entry_schema, constraints, value):
-    return coerce_to_class(context, presentation, ScalarSize, entry_schema, constraints, value)
+def coerce_scalar_unit_size(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+    return coerce_to_class(context, presentation, ScalarSize, entry_schema, constraints, value, constraint_key)
 
-def coerce_scalar_unit_time(context, presentation, the_type, entry_schema, constraints, value):
-    return coerce_to_class(context, presentation, ScalarTime, entry_schema, constraints, value)
+def coerce_scalar_unit_time(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+    return coerce_to_class(context, presentation, ScalarTime, entry_schema, constraints, value, constraint_key)
     
-def coerce_scalar_unit_frequency(context, presentation, the_type, entry_schema, constraints, value):
-    return coerce_to_class(context, presentation, ScalarFrequency, entry_schema, constraints, value)
+def coerce_scalar_unit_frequency(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+    return coerce_to_class(context, presentation, ScalarFrequency, entry_schema, constraints, value, constraint_key)

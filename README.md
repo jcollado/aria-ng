@@ -87,24 +87,28 @@ it goes over the entire presentation, attempts to read all the fields, and accum
 all the error messages into a single report. Error messages include the exact location
 (file, line, column) where the error occurred.
 
-### Implementer
+### Deployer
 
-This converts the presentation into an "implementation", which is the Python class
-structure implied by TOSCA. Thus, node types become classes, the instances being
+Here the validated blueprint is converted into a deployment plan. Requirements are matched
+with capabilities, node templates become node instances, and a relationship graph is formed
+between them. This is the primary output from ARIA. The deployment plan, like most
+everything else in ARIA, is agnostic raw data, and can be output to JSON, YAML, or any other
+useful structure.
+
+### Generator (extension)
+
+This converts the blueprint into an Python code, which is a bunch of Python classes
+representing the TOSCA structure. Thus, node types become classes, the instances being
 nodes, interfaces can be turned into methods, and these are connected to each other
 via special relationship classes. You can use these classes directly in your product,
 allowing a quick and easy way to move from a TOSCA blueprint to a topology.
 
 The TOSCA specification defines a large set of common node and relationship types,
-for virtual machines, networks, databases, IP addresses, etc. ARIA comes with
-ready-made implementations for all of these in the `tosca` pacakge. For example,
-if a TOSCA artifact type derives from `tosca.artifacts.Deployment.Image.VM`, this
-would be implemented as normal Python inheritance from a class that is already
-defined in ARIA.
+for virtual machines, networks, databases, IP addresses, etc.
 
-Note that the implementer is entirely optional: it is very much possible to consume
+Note that the generator is entirely optional: it is very much possible to consume
 the validated TOSCA presentation as is appropriate for your product without converting
-it into an implementation.
+it into Python code.
 
 
 CLI Tool

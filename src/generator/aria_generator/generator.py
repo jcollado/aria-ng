@@ -1,19 +1,19 @@
 
-from ...execution import ExecutionContext
-from ..consumer import Consumer
-from ..exceptions import BadImplementationError
+from .exceptions import BadImplementationError
 from .code_generator import CodeGenerator
 from .prop import CodeProperty
 from .assignment import CodeAssignment
 from .method import CodeMethod
 from .node_template import CodeNodeTemplate
 from .relationship import CodeRelationship
+from aria.execution import ExecutionContext
+from aria.consumption import Consumer
 from inspect import getargspec
 import sys
 
-class Implementer(Consumer):
+class Generator(Consumer):
     """
-    ARIA implementer.
+    ARIA generator.
     
     Creates Python classes for the presentation.
     """

@@ -1,6 +1,6 @@
 
-from ... import make_agnostic
 from .writer import Writer
+from aria import make_agnostic
 from collections import OrderedDict
 
 class CodeClass(object):

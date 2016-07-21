@@ -1,5 +1,5 @@
 
-from ... import VERSION, make_agnostic
+from aria import VERSION, make_agnostic
 from cStringIO import StringIO
 import datetime, re
 

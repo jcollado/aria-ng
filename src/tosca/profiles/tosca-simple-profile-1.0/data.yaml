@@ -4,6 +4,10 @@ data_types:
   #
   # Primitive
   #
+  
+  timestamp:
+    _extensions:
+      coerce_value: aria_extension_tosca.v1_0.data.coerce_timestamp
 
   version:
     _extensions:
@@ -205,7 +209,7 @@ data_types:
     derived_from: integer # ARIA allows deriving from primitives; it's unclear if the TOSCA spec does
     constraints:
       - in_range: [ 1, 65535 ]
-  
+
   tosca.datatypes.network.PortSpec:
     _extensions:
       shorthand_name: PortSpec

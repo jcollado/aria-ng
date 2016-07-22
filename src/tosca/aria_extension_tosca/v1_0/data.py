@@ -3,8 +3,101 @@ from .utils.data import coerce_to_class, report_issue_for_bad_format
 from aria import  dsl_specification
 from collections import OrderedDict
 from functools import total_ordering
+from datetime import datetime, tzinfo, timedelta
 import re
 
+class Timezone(tzinfo):
+    """
+    Timezone as fixed offset in hours and minutes east of UTC.
+    """
+
+    def __init__(self, hours=0, minutes=0):
+        self._offset = timedelta(hours=hours, minutes=minutes)
+
+    def utcoffset(self, dt):
+        return self._offset
+
+    def tzname(self, dt):
+        return str(self._offset)
+
+    def dst(self, dt):
+        return Timezone._ZERO
+
+    _ZERO = timedelta(0)
+
+UTC = Timezone()
+
+@total_ordering
+class Timestamp(object):
+    '''
+    See the `Timestamp Language-Independent Type for YAML Version 1.1 (Working Draft 2005-01-18) <http://yaml.org/type/timestamp.html>`__
+    '''
+    
+    RE_SHORT = r'^(?P<year>[0-9][0-9][0-9][0-9])-(?P<month>[0-9][0-9])-(?P<day>[0-9][0-9])$'
+    RE_LONG = r'^(?P<year>[0-9][0-9][0-9][0-9])-(?P<month>[0-9][0-9]?)-(?P<day>[0-9][0-9]?)([Tt]|[ \t]+)(?P<hour>[0-9][0-9]?):(?P<minute>[0-9][0-9]):(?P<second>[0-9][0-9])(?P<fraction>\.[0-9]*)?(([ \t]*)Z|(?P<tzh>[-+][0-9][0-9])?(:(?P<tzm>[0-9][0-9])?)?)?$'
+    CANONICAL = '%Y-%m-%dT%H:%M:%S'
+    
+    def __init__(self, entry_schema, constraints, value, constraint_key):
+        value = str(value)
+        match = re.match(Timestamp.RE_SHORT, value)
+        if match is not None:
+            year = int(match.group('year'))
+            month = int(match.group('month'))
+            day = int(match.group('day'))
+            self.value = datetime(year, month, day, tzinfo=UTC)
+        else:
+            match = re.match(Timestamp.RE_LONG, value)
+            if match is not None:
+                year = int(match.group('year'))
+                month = int(match.group('month'))
+                day = int(match.group('day'))
+                hour = match.group('hour')
+                if hour is not None:
+                    hour = int(hour)
+                minute = match.group('minute')
+                if minute is not None:
+                    minute = int(minute)
+                second = match.group('second')
+                if second is not None:
+                    second = int(second)
+                fraction = match.group('fraction')
+                if fraction is not None:
+                    fraction = int(float(fraction) * 1000000.0) # convert to microseconds
+                tzh = match.group('tzh')
+                if tzh is not None:
+                    tzh = int(tzh)
+                else:
+                    tzh = 0
+                tzm = match.group('tzm')
+                if tzm is not None:
+                    tzm = int(tzm)
+                else:
+                    tzm = 0
+                self.value = datetime(year, month, day, hour, minute, second, fraction, Timezone(tzh, tzm))
+            else:
+                raise ValueError('timestamp must be formatted as YAML ISO8601 variant or YYYY-MM-DD')
+    
+    @property
+    def as_datetime_utc(self):
+        return self.value.astimezone(UTC)
+    
+    def __str__(self):
+        dt = self.as_datetime_utc
+        return '%s%sZ' % (dt.strftime(Timestamp.CANONICAL), Timestamp._fraction_as_str(dt))
+    
+    def __repr__(self):
+        return repr(self.__str__())
+
+    def __eq__(self, timestamp):
+        return self.value == timestamp.value
+
+    def __lt__(self, timestamp):
+        return self.value < timestamp.value
+    
+    @staticmethod
+    def _fraction_as_str(dt):
+        return '{0:g}'.format(dt.microsecond / 1000000.0).lstrip('0')
+    
 @total_ordering
 @dsl_specification('3.2.2', 'tosca-simple-profile-1.0')
 class Version(object):
@@ -14,7 +107,6 @@ class Version(object):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_VERSION>`__
     """
 
-    # <major_version>.<minor_version>[.<fix_version>[.<qualifier>[-<build_version]]]
     RE = r'^(?P<major>\d+)\.(?P<minor>\d+)(\.(?P<fix>\d+)((\.(?P<qualifier>\d+))(\-(?P<build>\d+))?)?)?$'
     
     @staticmethod
@@ -37,17 +129,20 @@ class Version(object):
         self.minor = match.group('minor')
         self.minor = int(self.minor)
         self.fix = match.group('fix')
-        self.fix = int(self.fix) if self.fix is not None else None
+        if self.fix is not None:
+            self.fix = int(self.fix)
         self.qualifier = match.group('qualifier')
-        self.qualifier = int(self.qualifier) if self.qualifier is not None else None
+        if self.qualifier is not None:
+            self.qualifier = int(self.qualifier)
         self.build = match.group('build')
-        self.build = int(self.build) if self.build is not None else None
+        if self.build is not None:
+            self.build = int(self.build)
 
     def __str__(self):
         return self.value
     
     def __repr__(self):
-        return self.__str__()
+        return repr(self.__str__())
 
     def __eq__(self, version):
         return (self.major, self.minor, self.fix, self.qualifier, self.build) == (version.major, version.minor, version.fix, version.qualifier, version.build)
@@ -130,7 +225,7 @@ class Scalar(object):
         return '%s %s' % (self.value, self.__class__.UNIT)
 
     def __repr__(self):
-        return self.__str__()
+        return repr(self.__str__())
     
     def __eq__(self, scalar):
         return self.value == scalar.value
@@ -203,6 +298,9 @@ class ScalarFrequency(Scalar):
 #
 # The following are hooked in the YAML as 'coerce_value' extensions
 #
+
+def coerce_timestamp(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+    return coerce_to_class(context, presentation, Timestamp, entry_schema, constraints, value, constraint_key)
 
 def coerce_version(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
     return coerce_to_class(context, presentation, Version, entry_schema, constraints, value, constraint_key)

@@ -2,7 +2,7 @@
 from .presentation import ToscaPresentation
 from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition, OperationDefinitionForType
 from .misc import ConstraintClause, Version
-from .utils.validators import data_type_derived_from_validator, list_node_type_or_group_type_validator
+from .utils.validators import data_type_derived_from_validator, data_type_properties_validator, list_node_type_or_group_type_validator
 from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions, get_inherited_operations
 from .utils.data import get_data_type, coerce_data_type_value
@@ -123,6 +123,7 @@ class DataType(ToscaPresentation):
         :rtype: list of (str, :class:`ConstraintClause`)
         """
 
+    @field_validator(data_type_properties_validator)
     @object_dict_field(PropertyDefinition)
     def properties(self):
         """
@@ -132,7 +133,7 @@ class DataType(ToscaPresentation):
         """
 
     def _get_parent(self, context):
-        return get_data_type(context, self, 'derived_from')
+        return get_data_type(context, self, 'derived_from', allow_none=True)
 
     def _get_properties(self, context):
         return get_inherited_property_definitions(context, self, 'properties')
@@ -141,8 +142,17 @@ class DataType(ToscaPresentation):
         super(DataType, self)._validate(context)
         self._get_properties(context)
     
-    def _coerce_value(self, constraints, value):
-        return coerce_data_type_value(self, constraints, value)
+    def _coerce_value(self, context, presentation, entry_schema, constraints, value, constraint_key):
+        return coerce_data_type_value(context, presentation, self, entry_schema, constraints, value, constraint_key)
+    
+    def _get_primitive_ancestor(self, context):
+        parent = self._get_parent(context)
+        if parent is not None:
+            if not isinstance(parent, DataType):
+                return parent
+            else:
+                return parent._get_primitive_ancestor(context)
+        return None
 
 @has_fields
 @dsl_specification('3.6.6', 'tosca-simple-profile-1.0')

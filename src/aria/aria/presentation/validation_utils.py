@@ -32,7 +32,7 @@ def report_issue_for_parent_is_self(context, presentation, field_name):
     context.validation.report('parent type of "%s" is self' % presentation._fullname, locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_unknown_parent_type(context, presentation, field_name):
-    context.validation.report('unknown parent type "%s" for %s' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
+    context.validation.report('unknown parent type "%s" for "%s"' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_circular_type_hierarchy(context, presentation, field_name):
     context.validation.report('"%s" of "%s" creates a circular type hierarchy' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)

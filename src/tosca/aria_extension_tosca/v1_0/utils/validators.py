@@ -1,5 +1,5 @@
 
-from .data import PRIMITIVE_DATA_TYPES, get_data_type_name
+from .data import get_primitive_data_type, get_data_type_name
 from aria import Issue
 from aria.presentation import report_issue_for_unknown_type, derived_from_validator
 
@@ -91,7 +91,7 @@ def data_type_validator(type_name='data type'):
             if value in context.presentation.data_types:
                 return True
             # Can be a primitive data type
-            if value not in PRIMITIVE_DATA_TYPES:
+            if get_primitive_data_type(value) is None:
                 report_issue_for_unknown_type(context, presentation, type_name, field.name)
     
         return False
@@ -110,6 +110,20 @@ def data_type_derived_from_validator(field, presentation, context):
     if data_type_validator()(field, presentation, context):
         # Validate derivation only if a complex data type (primitive types have no derivation hierarchy)
         _data_type_derived_from_validator(field, presentation, context)
+
+def data_type_properties_validator(field, presentation, context):
+    """
+    Makes sure that we do not have properties if we have a primitive ancestor.
+    
+    Can be used with @field\_validator.
+    """
+
+    field._validate(presentation, context)
+    
+    values = getattr(presentation, field.name)
+    if values is not None:
+        if presentation._get_primitive_ancestor(context) is not None:
+            context.validation.report('data type "%s" defines properties even though it has a primitive ancestor' % presentation._fullname, locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
 
 def entry_schema_validator(field, presentation, context):
     """
@@ -138,10 +152,10 @@ def entry_schema_validator(field, presentation, context):
     
     if use_entry_schema:
         if value is None:
-            context.validation.report('"entry_schema" does not have a value as required by data type "%s" for %s' % (get_data_type_name(the_type), presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+            context.validation.report('"entry_schema" does not have a value as required by data type "%s" for "%s"' % (get_data_type_name(the_type), presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
     else:
         if value is not None:
-            context.validation.report('"entry_schema" has a value but it is not used by data type "%s" for %s' % (get_data_type_name(the_type), presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+            context.validation.report('"entry_schema" has a value but it is not used by data type "%s" for "%s"' % (get_data_type_name(the_type), presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
 def data_value_validator(field, presentation, context):
     """

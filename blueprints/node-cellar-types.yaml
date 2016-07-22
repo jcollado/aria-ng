@@ -59,6 +59,8 @@ node_types:
         type: scalar-unit.time
       test5:
         type: scalar-unit.frequency
+      test6:
+        type: timestamp
     artifacts:
       node_js:
         description: |

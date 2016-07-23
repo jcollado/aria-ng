@@ -1,8 +1,9 @@
 
 from .presentation import ToscaPresentation
-from .utils.data import validate_constraint
+from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
+from .utils.data import apply_constraint_to_value
 from aria import dsl_specification
-from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator, list_length_validator
+from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator
 
 class Range(AsIsPresentation):
     pass
@@ -123,37 +124,42 @@ class ConstraintClause(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_CONSTRAINTS_CLAUSE>`__
     """
     
+    @field_validator(constraint_clause_field_validator)
     @primitive_field()
     def equal(self):
         """
         Constrains a property or parameter to a value equal to ('=') the value declared.
         """
     
+    @field_validator(constraint_clause_field_validator)
     @primitive_field()
     def greater_than(self):
         """
         Constrains a property or parameter to a value greater than ('>') the value declared.
         """
     
+    @field_validator(constraint_clause_field_validator)
     @primitive_field()
     def greater_or_equal(self):
         """
         Constrains a property or parameter to a value greater than or equal to ('>=') the value declared.
         """
     
+    @field_validator(constraint_clause_field_validator)
     @primitive_field()
     def less_than(self):
         """
         Constrains a property or parameter to a value less than ('<') the value declared.
         """
     
+    @field_validator(constraint_clause_field_validator)
     @primitive_field()
     def less_or_equal(self):
         """
         Constrains a property or parameter to a value less than or equal to ('<=') the value declared.
         """
     
-    @field_validator(list_length_validator(2))
+    @field_validator(constraint_clause_in_range_validator)
     @primitive_list_field()
     def in_range(self):
         """
@@ -162,6 +168,7 @@ class ConstraintClause(ToscaPresentation):
         Note: subclasses or templates of types that declare a property with the in_range constraint MAY only further restrict the range specified by the parent type.
         """
     
+    @field_validator(constraint_clause_valid_values_validator)
     @primitive_list_field()
     def valid_values(self):
         """
@@ -186,6 +193,7 @@ class ConstraintClause(ToscaPresentation):
         Constrains the property or parameter to a value to a maximum length.
         """
 
+    @field_validator(constraint_clause_pattern_validator)
     @primitive_field(str)
     def pattern(self):
         """
@@ -194,10 +202,16 @@ class ConstraintClause(ToscaPresentation):
         Note: Future drafts of this specification will detail the use of regular expressions and reference an appropriate standardized grammar.
         """
     
+    def _get_type(self, context):
+        if hasattr(self._container, '_get_type'):
+            return self._container._get_type(context)
+        else:
+            # We are inside DataType, so the DataType itself is our type 
+            return self._container
+    
     def _is_typed(self):
         key = self._raw.keys()[0]
         return key in ('equal', 'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'less_or_equal', 'in_range', 'valid_values')
                 
-    def _validate(self, context):
-        super(ConstraintClause, self)._validate(context)
-        validate_constraint(context, self)
+    def _apply_to_value(self, context, presentation, value):
+        return apply_constraint_to_value(context, presentation, self, value)

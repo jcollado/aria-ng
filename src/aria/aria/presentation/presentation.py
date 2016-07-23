@@ -1,6 +1,6 @@
 
 from .. import classname
-from .validation_utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
+from .utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
 from copy import deepcopy
 
 class PresentationBase(object):

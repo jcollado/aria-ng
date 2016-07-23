@@ -30,17 +30,23 @@ UTC = Timezone()
 @total_ordering
 class Timestamp(object):
     '''
+    TOSCA timestamps follow the YAML specification, which in turn is a variant of ISO8601.
+    
+    Long forms and short forms (without time of day and assuming UTC timezone) are supported for parsing.
+    The canonical form (for rendering) matches the long form at the UTC timezone. 
+    
     See the `Timestamp Language-Independent Type for YAML Version 1.1 (Working Draft 2005-01-18) <http://yaml.org/type/timestamp.html>`__
     '''
     
     RE_SHORT = r'^(?P<year>[0-9][0-9][0-9][0-9])-(?P<month>[0-9][0-9])-(?P<day>[0-9][0-9])$'
-    RE_LONG = r'^(?P<year>[0-9][0-9][0-9][0-9])-(?P<month>[0-9][0-9]?)-(?P<day>[0-9][0-9]?)([Tt]|[ \t]+)(?P<hour>[0-9][0-9]?):(?P<minute>[0-9][0-9]):(?P<second>[0-9][0-9])(?P<fraction>\.[0-9]*)?(([ \t]*)Z|(?P<tzh>[-+][0-9][0-9])?(:(?P<tzm>[0-9][0-9])?)?)?$'
+    RE_LONG = r'^(?P<year>[0-9][0-9][0-9][0-9])-(?P<month>[0-9][0-9]?)-(?P<day>[0-9][0-9]?)([Tt]|[ \t]+)(?P<hour>[0-9][0-9]?):(?P<minute>[0-9][0-9]):(?P<second>[0-9][0-9])(?P<fraction>\.[0-9]*)?(([ \t]*)Z|(?P<tzhour>[-+][0-9][0-9])?(:(?P<tzminute>[0-9][0-9])?)?)?$'
     CANONICAL = '%Y-%m-%dT%H:%M:%S'
     
-    def __init__(self, entry_schema, constraints, value, constraint_key):
+    def __init__(self, entry_schema, constraints, value, aspect):
         value = str(value)
         match = re.match(Timestamp.RE_SHORT, value)
         if match is not None:
+            # Parse short form
             year = int(match.group('year'))
             month = int(match.group('month'))
             day = int(match.group('day'))
@@ -48,6 +54,7 @@ class Timestamp(object):
         else:
             match = re.match(Timestamp.RE_LONG, value)
             if match is not None:
+                # Parse long form
                 year = int(match.group('year'))
                 month = int(match.group('month'))
                 day = int(match.group('day'))
@@ -63,19 +70,19 @@ class Timestamp(object):
                 fraction = match.group('fraction')
                 if fraction is not None:
                     fraction = int(float(fraction) * 1000000.0) # convert to microseconds
-                tzh = match.group('tzh')
-                if tzh is not None:
-                    tzh = int(tzh)
+                tzhour = match.group('tzhour')
+                if tzhour is not None:
+                    tzhour = int(tzhour)
                 else:
-                    tzh = 0
-                tzm = match.group('tzm')
-                if tzm is not None:
-                    tzm = int(tzm)
+                    tzhour = 0
+                tzminute = match.group('tzminute')
+                if tzminute is not None:
+                    tzminute = int(tzminute)
                 else:
-                    tzm = 0
-                self.value = datetime(year, month, day, hour, minute, second, fraction, Timezone(tzh, tzm))
+                    tzminute = 0
+                self.value = datetime(year, month, day, hour, minute, second, fraction, Timezone(tzhour, tzminute))
             else:
-                raise ValueError('timestamp must be formatted as YAML ISO8601 variant or YYYY-MM-DD')
+                raise ValueError('timestamp must be formatted as YAML ISO8601 variant or "YYYY-MM-DD"')
     
     @property
     def as_datetime_utc(self):
@@ -116,7 +123,7 @@ class Version(object):
         """
         return (version.major, version.minor, version.fix, version.qualifier, version.build)
     
-    def __init__(self, entry_schema, constraints, value, constraint_key):
+    def __init__(self, entry_schema, constraints, value, aspect):
         value = str(value)
         match = re.match(Version.RE, value)
         if match is None:
@@ -172,7 +179,7 @@ class Range(object):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_RANGE>`__
     """
 
-    def __init__(self, entry_schema, constraints, value, constraint_key):
+    def __init__(self, entry_schema, constraints, value, aspect):
         if not isinstance(value, list):
             # TODO must be list
             raise ValueError('range is not a list: %s' % repr(value))
@@ -211,7 +218,7 @@ class Scalar(object):
         """
         return scalar.value
     
-    def __init__(self, entry_schema, constraints, value, constraint_key):
+    def __init__(self, entry_schema, constraints, value, aspect):
         value = str(value)
         match = re.match(self.__class__.RE, value)
         if match is None:
@@ -236,6 +243,8 @@ class Scalar(object):
 @dsl_specification('3.2.6.4', 'tosca-simple-profile-1.0')
 class ScalarSize(Scalar):
     """
+    Integer scalar for counting bytes.
+    
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_SCALAR_UNIT_SIZE>`__
     """
 
@@ -243,14 +252,14 @@ class ScalarSize(Scalar):
     RE = r'^(?P<scalar>[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*(?P<unit>B|kB|KiB|MB|MiB|GB|GiB|TB|TiB)$'
     
     UNITS = {
-        'B': 1,
-        'kB': 1000,
-        'KiB': 1024,
-        'MB': 1000000,
-        'MiB': 1048576,
-        'GB': 1000000000,
-        'GiB': 1073741824,
-        'TB': 1000000000000,
+        'B':               1,
+        'kB':           1000,
+        'KiB':          1024,
+        'MB':        1000000,
+        'MiB':       1048576,
+        'GB':     1000000000,
+        'GiB':    1073741824,
+        'TB':  1000000000000,
         'TiB': 1099511627776}
 
     TYPE = int
@@ -259,6 +268,8 @@ class ScalarSize(Scalar):
 @dsl_specification('3.2.6.5', 'tosca-simple-profile-1.0')
 class ScalarTime(Scalar):
     """
+    Floating point scalar for counting seconds.
+    
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_SCALAR_UNIT_TIME>`__
     """
     
@@ -266,13 +277,13 @@ class ScalarTime(Scalar):
     RE = r'^(?P<scalar>[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*(?P<unit>ns|us|ms|s|m|h|d)$'
 
     UNITS = {
-        'ns': 0.000000001,
-        'us': 0.000001,
-        'ms': 0.001,
-        's': 1.0,
-        'm': 60.0,
-        'h': 3600.0,
-        'd': 86400.0}
+        'ns':     0.000000001,
+        'us':     0.000001,
+        'ms':     0.001,
+        's':      1.0,
+        'm':     60.0,
+        'h':   3600.0,
+        'd':  86400.0}
 
     TYPE = float
     UNIT = 'seconds'
@@ -280,6 +291,8 @@ class ScalarTime(Scalar):
 @dsl_specification('3.2.6.6', 'tosca-simple-profile-1.0')
 class ScalarFrequency(Scalar):
     """
+    Floating point scalar for counting cycles per second (Hz).
+
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_SCALAR_UNIT_FREQUENCY>`__
     """
     
@@ -287,9 +300,9 @@ class ScalarFrequency(Scalar):
     RE = r'^(?P<scalar>[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*(?P<unit>Hz|kHz|MHz|GHz)$'
 
     UNITS = {
-        'Hz': 1.0,
-        'kHz': 1000.0,
-        'MHz': 1000000.0,
+        'Hz':           1.0,
+        'kHz':       1000.0,
+        'MHz':    1000000.0,
         'GHz': 1000000000.0}
 
     TYPE = float
@@ -299,24 +312,24 @@ class ScalarFrequency(Scalar):
 # The following are hooked in the YAML as 'coerce_value' extensions
 #
 
-def coerce_timestamp(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
-    return coerce_to_class(context, presentation, Timestamp, entry_schema, constraints, value, constraint_key)
+def coerce_timestamp(context, presentation, the_type, entry_schema, constraints, value, aspect):
+    return coerce_to_class(context, presentation, Timestamp, entry_schema, constraints, value, aspect)
 
-def coerce_version(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
-    return coerce_to_class(context, presentation, Version, entry_schema, constraints, value, constraint_key)
+def coerce_version(context, presentation, the_type, entry_schema, constraints, value, aspect):
+    return coerce_to_class(context, presentation, Version, entry_schema, constraints, value, aspect)
 
-def coerce_range(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
-    if constraint_key == 'in_range':
+def coerce_range(context, presentation, the_type, entry_schema, constraints, value, aspect):
+    if aspect == 'in_range':
         # When we're in a "in_range" constraint, the values are *not* themselves ranges, but numbers
         try:
             return float(value)
         except ValueError as e:
-            report_issue_for_bad_format(context, presentation, the_type, value, constraint_key, e)
+            report_issue_for_bad_format(context, presentation, the_type, value, aspect, e)
     else:
-        return coerce_to_class(context, presentation, Range, entry_schema, constraints, value, constraint_key)
+        return coerce_to_class(context, presentation, Range, entry_schema, constraints, value, aspect)
 
 @dsl_specification('3.2.4', 'tosca-simple-profile-1.0')
-def coerce_list(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+def coerce_list(context, presentation, the_type, entry_schema, constraints, value, aspect):
     """
     The list type allows for specifying multiple values for a parameter of property. For example, if an application allows for being configured to listen on multiple ports, a list of ports could be configured using the list data type.
     
@@ -325,12 +338,12 @@ def coerce_list(context, presentation, the_type, entry_schema, constraints, valu
     
     if not isinstance(value, list):
         # TODO must be list
-        pass
+        return None
 
     return value
     
 @dsl_specification('3.2.5', 'tosca-simple-profile-1.0')
-def coerce_map_value(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+def coerce_map_value(context, presentation, the_type, entry_schema, constraints, value, aspect):
     """
     The map type allows for specifying multiple values for a parameter of property as a map. In contrast to the list type, where each entry can only be addressed by its index in the list, entries in a map are named elements that can be addressed by their keys.
     
@@ -339,7 +352,7 @@ def coerce_map_value(context, presentation, the_type, entry_schema, constraints,
     
     if not isinstance(value, dict):
         # TODO must be dict
-        pass
+        return None
     
     r = OrderedDict()
     
@@ -348,11 +361,11 @@ def coerce_map_value(context, presentation, the_type, entry_schema, constraints,
     
     return r
 
-def coerce_scalar_unit_size(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
-    return coerce_to_class(context, presentation, ScalarSize, entry_schema, constraints, value, constraint_key)
+def coerce_scalar_unit_size(context, presentation, the_type, entry_schema, constraints, value, aspect):
+    return coerce_to_class(context, presentation, ScalarSize, entry_schema, constraints, value, aspect)
 
-def coerce_scalar_unit_time(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
-    return coerce_to_class(context, presentation, ScalarTime, entry_schema, constraints, value, constraint_key)
+def coerce_scalar_unit_time(context, presentation, the_type, entry_schema, constraints, value, aspect):
+    return coerce_to_class(context, presentation, ScalarTime, entry_schema, constraints, value, aspect)
     
-def coerce_scalar_unit_frequency(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
-    return coerce_to_class(context, presentation, ScalarFrequency, entry_schema, constraints, value, constraint_key)
+def coerce_scalar_unit_frequency(context, presentation, the_type, entry_schema, constraints, value, aspect):
+    return coerce_to_class(context, presentation, ScalarFrequency, entry_schema, constraints, value, aspect)

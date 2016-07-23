@@ -8,7 +8,7 @@ from copy import deepcopy
 # All the types: NodeType, RelationshipType, etc.
 #
 
-def get_inherited_property_definitions(context, presentation, field_name, for_presentation=None): # works on properties, inputs, and attributes
+def get_inherited_property_definitions(context, presentation, field_name, for_presentation=None): # works on properties, parameters, inputs, and attributes
     """
     Returns our property definitions added on top of those of our parent, if we have one (recursively).
     

@@ -28,10 +28,10 @@ class ValidationContext(object):
     def dump_issues(self):
         issues = self.issues
         if issues:
-            puts(colored.red('Validation issues:', bold=True))
+            puts(colored.blue('Validation issues:', bold=True))
             with indent(2):
                 for issue in issues:
-                    puts(colored.red(issue.heading_as_str))
+                    puts(colored.blue(issue.heading_as_str))
                     details = issue.details_as_str
                     if details:
                         with indent(3):

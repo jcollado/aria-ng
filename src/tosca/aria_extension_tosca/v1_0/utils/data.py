@@ -1,12 +1,13 @@
 
 from aria import Issue, dsl_specification, import_fullname
 from collections import OrderedDict
+import re
 
 #
 # DataType
 #
 
-def coerce_data_type_value(context, presentation, the_type, entry_schema, constraints, value, constraint_key):
+def coerce_data_type_value(context, presentation, data_type, entry_schema, constraints, value, aspect):
     """
     Handles the \_coerce\_data() hook for complex data types.
     
@@ -21,16 +22,12 @@ def coerce_data_type_value(context, presentation, the_type, entry_schema, constr
        a value.
     """
 
-    primitive = the_type._get_primitive_ancestor(context)
-    if primitive is not None:
+    primitive_type = data_type._get_primitive_ancestor(context)
+    if primitive_type is not None:
         # Must be coercible to primitive ancestor
-        try:
-            value = primitive(value)
-        except ValueError as e:
-            report_issue_for_bad_format(context, presentation, the_type, value, constraint_key, e)
-            value = None
+        value = coerce_to_primitive(context, presentation, primitive_type, constraints, value, aspect)
     else:
-        definitions = the_type._get_properties(context)
+        definitions = data_type._get_properties(context)
         if isinstance(value, dict):
             r = OrderedDict()
 
@@ -43,7 +40,7 @@ def coerce_data_type_value(context, presentation, the_type, entry_schema, constr
                     definition_constraints = definition.constraints
                     r[name] = coerce_value(context, presentation, definition_type, definition_entry_schema, definition_constraints, v)
                 else:
-                    context.validation.report('assignment to undefined property "%s" in type "%s" for "%s"' % (name, the_type._fullname, presentation._fullname), locator=v._locator, level=Issue.BETWEEN_TYPES)
+                    context.validation.report('assignment to undefined property "%s" in type "%s" for "%s"' % (name, data_type._fullname, presentation._fullname), locator=v._locator, level=Issue.BETWEEN_TYPES)
 
             # Fill in defaults from the definitions, and check if required definitions have not been assigned
             for name, definition in definitions.iteritems():
@@ -51,14 +48,12 @@ def coerce_data_type_value(context, presentation, the_type, entry_schema, constr
                     r[name] = definition.default
     
                 if getattr(definition, 'required', False) and (r.get(name) is None):
-                    context.validation.report('required property "%s" in type "%s" is not assigned a value for "%s"' % (name, the_type._fullname, presentation._fullname), locator=presentation._get_child_locator('definitions'), level=Issue.BETWEEN_TYPES)
+                    context.validation.report('required property "%s" in type "%s" is not assigned a value for "%s"' % (name, data_type._fullname, presentation._fullname), locator=presentation._get_child_locator('definitions'), level=Issue.BETWEEN_TYPES)
             
             value = r
         else:
-            context.validation.report('value of type "%s" is not a dict for "%s"' % (the_type._fullname, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
+            context.validation.report('value of type "%s" is not a dict for "%s"' % (data_type._fullname, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
             value = None
-        
-    # Check constraints?
     
     return value
 
@@ -94,41 +89,99 @@ def get_data_type(context, presentation, field_name, allow_none=False):
 # ConstraintClause
 #
 
-def validate_constraint(context, presentation):
+def apply_constraint_to_value(context, presentation, constraint_clause, value):
     """
-    Makes sure the constraint clause is a dict with exactly one key and that, if appropriate for the constraint, the values match the data type.
+    Returns false if the value does not conform to the constraint.
     """
     
-    # Must have exactly one key
-    if len(presentation._raw) != 1:
-        context.validation.report('constraint "%s" is not a dict with exactly one key %s' % (presentation._name, presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
-        return
+    constraint_key = constraint_clause._raw.keys()[0]
     
-    if presentation._is_typed():
-        the_type = presentation._container._get_type(context) if hasattr(presentation._container, '_get_type') else presentation._container
-        constraint_key = presentation._raw.keys()[0]
-        value = presentation._raw.values()[0]
-        
-        if constraint_key == 'valid_values':
-            # All "valid_values" must be coercible
-            for v in value:
-                coerce_value(context, presentation, the_type, None, None, v, constraint_key)
-        elif constraint_key == 'in_range':
-            v1, v2 = value
-            
-            # First "in_range" value must be coercible
-            v1 = coerce_value(context, presentation, the_type, None, None, v1, constraint_key)
-            
-            if v2 != 'UNBOUNDED':
-                # Second "in_range" value must be coercible
-                v2 = coerce_value(context, presentation, the_type, None, None, v2, constraint_key)
-                
-                # Second "in_range" value must be greater than first
-                if (v1 is not None) and (v2 is not None) and (v1 >= v2):
-                    context.validation.report('upper bound of "in_range" constraint is not greater than the lower bound for "%s": %s >= %s' % (presentation._container._fullname, repr(v1), repr(v2)), locator=presentation._locator, level=Issue.FIELD)
-        else:
-            # Single value must be coercible
-            coerce_value(context, presentation, the_type, None, None, value, constraint_key)
+    def report(message, constraint):
+        context.validation.report('value %s %s per constraint in "%s": %s' % (message, repr(constraint), presentation._name or presentation._container._name, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
+
+    if constraint_key == 'equal':
+        constraint = constraint_clause.equal
+        if value != constraint:
+            report('is not equal to', constraint)
+            return False
+
+    elif constraint_key == 'greater_than':
+        constraint = constraint_clause.greater_than
+        if value <= constraint:
+            report('is not greater than', constraint)
+            return False
+
+    elif constraint_key == 'greater_or_equal':
+        constraint = constraint_clause.greater_or_equal
+        if value < constraint:
+            report('is not greater than or equal to', constraint)
+            return False
+
+    elif constraint_key == 'less_than':
+        constraint = constraint_clause.less_than
+        if value >= constraint:
+            report('is not less than', constraint)
+            return False
+
+    elif constraint_key == 'less_or_equal':
+        constraint = constraint_clause.less_or_equal
+        if value > constraint:
+            report('is not less than or equal to', constraint)
+            return False
+
+    elif constraint_key == 'in_range':
+        lower, upper = constraint_clause.in_range
+        if value < lower:
+            report('is not greater than or equal to lower bound', lower)
+            return False
+        if (upper != 'UNBOUNDED') and (value > upper):
+            report('is not lesser than or equal to upper bound', upper)
+            return False
+
+    elif constraint_key == 'valid_values':
+        constraint = constraint_clause.valid_values
+        if value not in constraint:
+            report('is not one of', constraint)
+            return False
+
+    elif constraint_key == 'length':
+        constraint = constraint_clause.length
+        try:
+            if len(value) != constraint:
+                report('is not of length', constraint)
+                return False
+        except TypeError:
+            pass # should be validated elsewhere
+
+    elif constraint_key == 'min_length':
+        constraint = constraint_clause.min_length
+        try:
+            if len(value) < constraint:
+                report('has a length lesser than', constraint)
+                return False
+        except TypeError:
+            pass # should be validated elsewhere
+
+    elif constraint_key == 'max_length':
+        constraint = constraint_clause.max_length
+        try:
+            if len(value) > constraint:
+                report('has a length greater than', constraint)
+                return False
+        except TypeError:
+            pass # should be validated elsewhere
+
+    elif constraint_key == 'pattern':
+        constraint = constraint_clause.pattern
+        try:
+            # Note: the TOSCA 1.0 spec does not specify the regular expression grammar, so we will just use Python's
+            if re.match(constraint, str(value)) is None:
+                report('does not match regular expression', constraint)
+                return False
+        except re.error:
+            pass # should be validated elsewhere
+    
+    return True
 
 #
 # Utils
@@ -150,21 +203,34 @@ PRIMITIVE_DATA_TYPES = {
     'null': None.__class__}
 
 @dsl_specification('3.2.1', 'tosca-simple-profile-1.0')
-def get_primitive_data_type(the_type):
+def get_primitive_data_type(type_name):
     """
     Many of the types we use in this profile are built-in types from the YAML 1.2 specification (i.e., those identified by the "tag:yaml.org,2002" version tag) [YAML-1.2].
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc373867862>`__
     """
     
-    return PRIMITIVE_DATA_TYPES.get(the_type)
+    return PRIMITIVE_DATA_TYPES.get(type_name)
 
 def get_data_type_name(the_type):
+    """
+    Returns the name of the type, whether it's a DataType, a primitive type, or another class.
+    """
+    
     if hasattr(the_type, '_name'):
         return the_type._name
     return '%s.%s' % (the_type.__module__, the_type.__name__) 
 
-def coerce_value(context, presentation, the_type, entry_schema, constraints, value, constraint_key=None):
+def coerce_value(context, presentation, the_type, entry_schema, constraints, value, aspect=None):
+    """
+    Returns the value after it's coerced to its type, reporting validation errors if it cannot be coerced.
+    
+    Supports both complex data types and primitives.
+    
+    Data types can use the "coerce\_value" extension to hook their own specialized function. If the extension
+    is present, we will delegate to that hook.
+    """
+    
     if the_type is None:
         return None
 
@@ -178,28 +244,59 @@ def coerce_value(context, presentation, the_type, entry_schema, constraints, val
         coerce_value_fn_name = the_type._get_extension('coerce_value')
         if coerce_value_fn_name is not None:
             coerce_value_fn = import_fullname(coerce_value_fn_name)
-            return coerce_value_fn(context, presentation, the_type, entry_schema, constraints, value, constraint_key)
-    
+            return coerce_value_fn(context, presentation, the_type, entry_schema, constraints, value, aspect)
+
     if hasattr(the_type, '_coerce_value'):
-        # Complex type (likely a DataType instance)
-        value = the_type._coerce_value(context, presentation, entry_schema, constraints, value, constraint_key)
-    else:
-        # Primitive type
-        try:
-            value = the_type(value)
-        except ValueError as e:
-            report_issue_for_bad_format(context, presentation, the_type, value, constraint_key, e)
-            value = None
+        # Delegate to type (likely a DataType instance)
+        return the_type._coerce_value(context, presentation, entry_schema, constraints, value, aspect)
+
+    if the_type is not None:
+        # Coerce to primitive type
+        return coerce_to_primitive(context, presentation, the_type, constraints, value, aspect)
+    
+    return None
+
+def coerce_to_primitive(context, presentation, primitive_type, constraints, value, aspect=None):
+    try:
+        # Coerce
+        value = primitive_type(value)
+        
+        # Check constraints
+        if (value is not None) and (constraints is not None):
+            valid = True
+            for constraint in constraints:
+                if not constraint._apply_to_value(context, presentation, value):
+                    valid = False
+            if not valid:
+                value = None
+    except ValueError as e:
+        report_issue_for_bad_format(context, presentation, primitive_type, value, aspect, e)
+        value = None
+    except TypeError as e:
+        report_issue_for_bad_format(context, presentation, primitive_type, value, aspect, e)
+        value = None
     
     return value
 
-def coerce_to_class(context, presentation, the_type, entry_schema, constraints, value, constraint_key=None):
+def coerce_to_class(context, presentation, the_type, entry_schema, constraints, value, aspect=None):
     try:
-        value = the_type(entry_schema, constraints, value, constraint_key)
+        value = the_type(entry_schema, constraints, value, aspect)
     except ValueError as e:
-        report_issue_for_bad_format(context, presentation, the_type, value, constraint_key, e)
+        report_issue_for_bad_format(context, presentation, the_type, value, aspect, e)
         value = None
+    
+    # TODO: constraints?
+        
     return value
 
-def report_issue_for_bad_format(context, presentation, the_type, value, constraint_key, e):
-    context.validation.report('%sfield "%s" is not a valid "%s": %s' % ('"%s" constraint of ' % constraint_key if constraint_key is not None else '', presentation._name or presentation._container._name, get_data_type_name(the_type), repr(value)), locator=presentation._locator, level=Issue.BETWEEN_FIELDS, exception=e)
+def report_issue_for_bad_format(context, presentation, the_type, value, aspect, e):
+    aspect = None
+    if aspect == 'default':
+        aspect = '"default" value'
+    elif aspect is not None:
+        aspect = '"%s" constraint'  
+    
+    if aspect is not None:
+        context.validation.report('%s for field "%s" is not a valid "%s": %s' % (aspect, presentation._name or presentation._container._name, get_data_type_name(the_type), repr(value)), locator=presentation._locator, level=Issue.BETWEEN_FIELDS, exception=e)
+    else:
+        context.validation.report('field "%s" is not a valid "%s": %s' % (presentation._name or presentation._container._name, get_data_type_name(the_type), repr(value)), locator=presentation._locator, level=Issue.BETWEEN_FIELDS, exception=e)

@@ -3,7 +3,7 @@ from .presentation import ToscaPresentation
 from .filters import NodeFilter
 from .definitions import InterfaceDefinitionForTemplate, CapabilityDefinition
 from .property_assignment import PropertyAssignment
-from .utils.validators import node_type_or_template_validator, relationship_type_or_template_validator
+from .field_validators import node_type_or_template_validator, relationship_type_or_template_validator
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_template_interfaces
 from aria import dsl_specification

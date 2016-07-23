@@ -2,7 +2,7 @@
 from .presentation import ToscaPresentation
 from .property_assignment import PropertyAssignment
 from .misc import ConstraintClause, Range
-from .utils.validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
+from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
 from .utils.data import get_data_type
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces

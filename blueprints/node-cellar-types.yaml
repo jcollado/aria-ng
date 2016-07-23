@@ -10,7 +10,7 @@ imports:
 node_types:
 
   Application:
-    description: |
+    description: >
       A generic application.
     properties:
       port:
@@ -24,17 +24,22 @@ node_types:
       #- host: tosca.capabilities.Container
 
   WebApplication:
-    description: |
+    description: >
       A generic web application.
     derived_from: Application
     properties:
       port:
         type: tosca.datatypes.network.PortDef
         default: 8080
+        constraints:
+          - valid_values: [ 8080, 8081 ]
+          - pattern: '^808[01]$'
       root_url:
         description: The root URL.
         type: string
         default: /
+        constraints:
+          - max_length: 20
 
       locale:
         description: The locale (optional).
@@ -42,7 +47,7 @@ node_types:
         required: false
 
   NodeJsWebApplication:
-    description: |
+    description: >
       A Node.js-based web application.
     derived_from: WebApplication
     properties:
@@ -63,21 +68,21 @@ node_types:
         type: timestamp
     artifacts:
       node_js:
-        description: |
+        description: >
           The Node.js application package.
         type: ZipApplicationPackage
         file: https://nodejs.org/dist/v4.4.7/node-v4.4.7-linux-x64.tar.xz
         deploy_path: /opt/node-js
 
   DatabaseApplication:
-    description: |
+    description: >
       A generic database application.
     derived_from: Application
     capabilities:
       data: CanServeData
 
   MongoDbApplication:
-    description: |
+    description: >
       MongoDB database application.
     derived_from: DatabaseApplication
     properties:
@@ -93,7 +98,7 @@ node_types:
             default: object
 
   Host:
-    description: |
+    description: >
       A host.
     properties:
       ip_address:
@@ -111,7 +116,7 @@ node_types:
 capability_types:
   
   CanServeData:
-    description: |
+    description: >
       The capability to serve data.
     properties:
       class:
@@ -121,7 +126,7 @@ capability_types:
       - Host
   
   CanHost:
-    description: |
+    description: >
       The capability to host applications.
     derived_from: tosca.capabilities.Container 
     valid_source_types:
@@ -151,7 +156,7 @@ relationship_types:
   InstalledIn:
     #derived_from: tosca.relationships.HostedOn
     derived_from: Base
-    description: |
+    description: >
       Relationship between an application and its host.
     valid_target_types: # capability types
       - CanHost
@@ -181,7 +186,7 @@ relationship_types:
 group_types:
 
   SecuredHosts:
-    description: |
+    description: >
       Group of hosts that are allowed to communicate with each other.
     properties:
       name:
@@ -209,7 +214,7 @@ group_types:
 policy_types:
 
   Securable:
-    description: |
+    description: >
       Policy to secure hosts or groups of hosts.
     targets: # node types or group types
       - Host
@@ -222,11 +227,11 @@ policy_types:
 artifact_types:
 
   ApplicationPackage:
-    description: |
+    description: >
       A generic application package.
 
   ZipApplicationPackage:
-    description: |
+    description: >
       An application package in a zip.
     derived_from: ApplicationPackage
     file_ext:
@@ -254,7 +259,7 @@ interface_types:
           type: string
 
   Lifecycle:
-    description: |
+    description: >
       Lifecycle management interface.
     #derived_from: tosca.interfaces.node.lifecycle.Standard
     derived_from: Logging

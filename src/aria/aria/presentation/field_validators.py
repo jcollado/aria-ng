@@ -1,6 +1,6 @@
 
 from .. import Issue
-from .validation_utils import report_issue_for_unknown_type, report_issue_for_parent_is_self, report_issue_for_unknown_parent_type, report_issue_for_circular_type_hierarchy
+from .utils import report_issue_for_unknown_type, report_issue_for_parent_is_self, report_issue_for_unknown_parent_type, report_issue_for_circular_type_hierarchy
 
 def type_validator(type_name, types_dict_name):
     """
@@ -59,7 +59,7 @@ def list_length_validator(length):
         values = getattr(presentation, field.name)
         if isinstance(values, list):
             if len(values) != length:
-                context.validation.report('field "%s" does not have exactly %d elements in "%s"' % (field.name, length, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
+                context.validation.report('field "%s" does not have exactly %d elements for "%s"' % (field.name, length, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
         
     return fn
 

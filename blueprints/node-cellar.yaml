@@ -1,7 +1,12 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
-description: |
+description: >
   Node Cellar TOSCA blueprint.
+
+metadata:
+  template_name: node-cellar
+  template_author: ARIA
+  template_version: 1.0.0
 
 imports:
   - node-cellar-types.yaml # there is also a long form for imports
@@ -9,22 +14,22 @@ imports:
 repositories:
 
   node_cellar_repository:
-    description: |
+    description: >
       The repository for the Node Cellar application and its dependencies.
     url: https://github.com/cloudify-cosmo/nodecellar/archive
 
 topology_template:
 
-#
-# Nodes
-#
+  #
+  # Nodes
+  #
 
   node_templates:
   
     # Application nodes
 
     node_cellar:
-      description: |
+      description: >
         Node Cellar Node.js web application.
       type: NodeJsWebApplication
       properties:
@@ -47,7 +52,7 @@ topology_template:
             capability: CanServeData
       artifacts:
         node_cellar:
-          description: |
+          description: >
             The Node Cellar application package.
           type: ZipApplicationPackage
           file: master.tar.gz
@@ -55,7 +60,7 @@ topology_template:
           deploy_path: /opt/node-cellar
     
     mongodb:
-      description: |
+      description: >
         MongoDB database application.
       type: MongoDbApplication
       requirements:
@@ -64,27 +69,27 @@ topology_template:
     # Host nodes
 
     application_host:
-      description: |
+      description: >
         Host for applications.
       type: Host
       properties:
         ip_address: 192.168.1.100
 
     data_host:
-      description: |
+      description: >
         Host for databases.
       type: Host
       properties:
         ip_address: 192.168.1.101
 
-#
-# Relationships
-#
+  #
+  # Relationships
+  #
 
   relationship_templates:
   
     node_cellar_installed_in:
-      description: |
+      description: >
         Node Cellar installation relationship.
       type: InstalledIn
       properties:
@@ -106,9 +111,9 @@ topology_template:
                 - os_utils.sh
                 - packaging_utils.sh
 
-#
-# Groups
-#
+  #
+  # Groups
+  #
 
   groups:
    
@@ -124,9 +129,9 @@ topology_template:
           create:
             implementation: create_secure_hosts_group.sh
 
-#
-# Policies
-#
+  #
+  # Policies
+  #
 
   policies:
   

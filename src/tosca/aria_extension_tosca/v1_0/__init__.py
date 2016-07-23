@@ -10,7 +10,11 @@ from .types import *
 from .misc import *
 from .data import *
 
+MODULES = (
+    'utils',)
+
 __all__ = (
+    'MODULES',
     'ToscaSimplePresenter1_0',
     'ToscaPresentation',
     'PropertyAssignment',
@@ -46,4 +50,10 @@ __all__ = (
     'PolicyType',
     'MetaData',
     'Repository',
-    'Import')
+    'Import',
+    'Timestamp',
+    'Version',
+    'Range',
+    'ScalarSize',
+    'ScalarTime',
+    'ScalarFrequency')

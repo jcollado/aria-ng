@@ -95,42 +95,48 @@ def apply_constraint_to_value(context, presentation, constraint_clause, value):
     """
     
     constraint_key = constraint_clause._raw.keys()[0]
+    the_type = constraint_clause._get_type(context)
+    entry_schema = getattr(presentation, 'entry_schema', None) # PropertyAssignment does not have this
+    
+    def coerce(constraint):
+        return coerce_value(context, presentation, the_type, entry_schema, None, constraint, constraint_key)
     
     def report(message, constraint):
         context.validation.report('value %s %s per constraint in "%s": %s' % (message, repr(constraint), presentation._name or presentation._container._name, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
 
     if constraint_key == 'equal':
-        constraint = constraint_clause.equal
+        constraint = coerce(constraint_clause.equal)
         if value != constraint:
             report('is not equal to', constraint)
             return False
 
     elif constraint_key == 'greater_than':
-        constraint = constraint_clause.greater_than
+        constraint = coerce(constraint_clause.greater_than)
         if value <= constraint:
             report('is not greater than', constraint)
             return False
 
     elif constraint_key == 'greater_or_equal':
-        constraint = constraint_clause.greater_or_equal
+        constraint = coerce(constraint_clause.greater_or_equal)
         if value < constraint:
             report('is not greater than or equal to', constraint)
             return False
 
     elif constraint_key == 'less_than':
-        constraint = constraint_clause.less_than
+        constraint = coerce(constraint_clause.less_than)
         if value >= constraint:
             report('is not less than', constraint)
             return False
 
     elif constraint_key == 'less_or_equal':
-        constraint = constraint_clause.less_or_equal
+        constraint = coerce(constraint_clause.less_or_equal)
         if value > constraint:
             report('is not less than or equal to', constraint)
             return False
 
     elif constraint_key == 'in_range':
         lower, upper = constraint_clause.in_range
+        lower, upper = coerce(lower), coerce(upper)
         if value < lower:
             report('is not greater than or equal to lower bound', lower)
             return False
@@ -139,7 +145,7 @@ def apply_constraint_to_value(context, presentation, constraint_clause, value):
             return False
 
     elif constraint_key == 'valid_values':
-        constraint = constraint_clause.valid_values
+        constraint = (coerce(v) for v in constraint_clause.valid_values)
         if value not in constraint:
             report('is not one of', constraint)
             return False
@@ -256,19 +262,23 @@ def coerce_value(context, presentation, the_type, entry_schema, constraints, val
     
     return None
 
+def apply_constraints_to_value(context, presentation, constraints, value):
+    if (value is not None) and (constraints is not None):
+        valid = True
+        for constraint in constraints:
+            if not constraint._apply_to_value(context, presentation, value):
+                valid = False
+        if not valid:
+            value = None
+    return value
+
 def coerce_to_primitive(context, presentation, primitive_type, constraints, value, aspect=None):
     try:
         # Coerce
         value = primitive_type(value)
         
         # Check constraints
-        if (value is not None) and (constraints is not None):
-            valid = True
-            for constraint in constraints:
-                if not constraint._apply_to_value(context, presentation, value):
-                    valid = False
-            if not valid:
-                value = None
+        apply_constraints_to_value(context, presentation, constraints, value)
     except ValueError as e:
         report_issue_for_bad_format(context, presentation, primitive_type, value, aspect, e)
         value = None
@@ -285,7 +295,8 @@ def coerce_to_class(context, presentation, the_type, entry_schema, constraints, 
         report_issue_for_bad_format(context, presentation, the_type, value, aspect, e)
         value = None
     
-    # TODO: constraints?
+    # Check constraints
+    apply_constraints_to_value(context, presentation, constraints, value)
         
     return value
 

@@ -40,6 +40,9 @@ class EntrySchema(ToscaPresentation):
     def _get_type(self, context):
         return get_data_type(context, self, 'type')
 
+    def _get_constraints(self, context):
+        return get_property_constraints(context, self)
+
 @has_fields
 @dsl_specification('3.5.8', 'tosca-simple-profile-1.0')
 class PropertyDefinition(ToscaPresentation):

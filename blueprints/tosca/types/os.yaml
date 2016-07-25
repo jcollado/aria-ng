@@ -1,0 +1,59 @@
+
+imports:
+  - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
+
+dsl_definitions:
+
+  os:
+    user_and_group_name_constraints: &OS_USER_AND_GROUP_NAME_CONSTRAINTS
+      - pattern: '^[a-z0-9_-]{3,16}$'
+    password_constraints: &OS_PASSWORD_CONSTRAINTS
+      - pattern: '^[a-z0-9_-]{6,18}$'
+
+artifact_types:
+
+  os.Package:
+    description: >
+      Generic application package.
+    derived_from: tosca.artifacts.Root
+
+  os.Archive:
+    description: >
+      Application package in an archive.
+    derived_from: os.Package
+    file_ext:
+      - zip
+      - tar
+      - tar.gz
+      - tar.xz
+
+  os.Deb:
+    description: >
+      Debian application package.
+    derived_from: os.Package
+    file_ext:
+      - deb
+
+  os.RPM:
+    description: >
+      RPM application package.
+    derived_from: os.Package
+    file_ext:
+      - rpm
+
+data_types:
+
+  os.UserInfo:
+    description: >
+      Information about an operating system user.
+    derived_from: tosca.datatypes.Root
+    properties:
+      password:
+        type: string
+        constraints: *OS_PASSWORD_CONSTRAINTS
+      groups:
+        type: list
+        entry_schema:
+          type: string
+          constraints: *OS_USER_AND_GROUP_NAME_CONSTRAINTS
+        required: false

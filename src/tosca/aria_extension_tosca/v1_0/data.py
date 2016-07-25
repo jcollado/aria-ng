@@ -1,5 +1,5 @@
 
-from .utils.data import coerce_to_class, report_issue_for_bad_format
+from .utils.data import coerce_to_class, report_issue_for_bad_format, coerce_value
 from aria import  dsl_specification
 from collections import OrderedDict
 from functools import total_ordering
@@ -181,10 +181,9 @@ class Range(object):
 
     def __init__(self, entry_schema, constraints, value, aspect):
         if not isinstance(value, list):
-            # TODO must be list
-            raise ValueError('range is not a list: %s' % repr(value))
+            raise ValueError('range value is not a list: %s' % repr(value))
         if len(value) != 2:
-            raise ValueError('range does not have exactly 2 elements: %s' % repr(value))
+            raise ValueError('range value does not have exactly 2 elements: %s' % repr(value))
         
         try:
             float(value[0])
@@ -201,6 +200,69 @@ class Range(object):
             raise ValueError('upper bound of range is not greater than the lower bound: %s >= %s' % (repr(value[0]), repr(value[1])))
         
         self.value = value
+
+@dsl_specification('3.2.4', 'tosca-simple-profile-1.0')
+class List(object):
+    """
+    The list type allows for specifying multiple values for a parameter of property. For example, if an application allows for being configured to listen on multiple ports, a list of ports could be configured using the list data type.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_LIST>`__
+    """
+    
+    @staticmethod
+    def _create(context, presentation, entry_schema, constraints, value, aspect):
+        if not isinstance(value, list):
+            raise ValueError('"list" data type value is not a list: %s' % repr(value))
+
+        entry_schema_type = entry_schema._get_type(context)
+        entry_schema_constraints = entry_schema.constraints
+
+        r = []
+        for v in value:
+            v = coerce_value(context, presentation, entry_schema_type, None, entry_schema_constraints, v, aspect)
+            if v is not None:
+                r.append(v)
+
+        return List(r)
+    
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return repr(self.value)
+
+@dsl_specification('3.2.5', 'tosca-simple-profile-1.0')
+class Map(object):
+    """
+    The map type allows for specifying multiple values for a parameter of property as a map. In contrast to the list type, where each entry can only be addressed by its index in the list, entries in a map are named elements that can be addressed by their keys.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_MAP>`__
+    """
+    
+    @staticmethod
+    def _create(context, presentation, entry_schema, constraints, value, aspect):
+        if not isinstance(value, dict):
+            raise ValueError('"map" data type value is not a dict: %s' % repr(value))
+
+        if entry_schema is None:
+            raise ValueError('"map" data type does not define "entry_schema"')
+
+        entry_schema_type = entry_schema._get_type(context)
+        entry_schema_constraints = entry_schema.constraints
+
+        r = OrderedDict()
+        for k, v in value.iteritems():
+            v = coerce_value(context, presentation, entry_schema_type, None, entry_schema_constraints, v, aspect)
+            if v is not None:
+                r[k] = v
+
+        return Map(r)
+    
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return repr(self.value)
 
 @total_ordering
 @dsl_specification('3.2.6', 'tosca-simple-profile-1.0')
@@ -325,41 +387,16 @@ def coerce_range(context, presentation, the_type, entry_schema, constraints, val
             return float(value)
         except ValueError as e:
             report_issue_for_bad_format(context, presentation, the_type, value, aspect, e)
+        except TypeError as e:
+            report_issue_for_bad_format(context, presentation, the_type, value, aspect, e)
     else:
         return coerce_to_class(context, presentation, Range, entry_schema, constraints, value, aspect)
 
-@dsl_specification('3.2.4', 'tosca-simple-profile-1.0')
 def coerce_list(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    """
-    The list type allows for specifying multiple values for a parameter of property. For example, if an application allows for being configured to listen on multiple ports, a list of ports could be configured using the list data type.
+    return coerce_to_class(context, presentation, List, entry_schema, constraints, value, aspect)
     
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_LIST>`__
-    """
-    
-    if not isinstance(value, list):
-        # TODO must be list
-        return None
-
-    return value
-    
-@dsl_specification('3.2.5', 'tosca-simple-profile-1.0')
 def coerce_map_value(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    """
-    The map type allows for specifying multiple values for a parameter of property as a map. In contrast to the list type, where each entry can only be addressed by its index in the list, entries in a map are named elements that can be addressed by their keys.
-    
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#TYPE_TOSCA_MAP>`__
-    """
-    
-    if not isinstance(value, dict):
-        # TODO must be dict
-        return None
-    
-    r = OrderedDict()
-    
-    for k, v in value.iteritems():
-        r[k] = v
-    
-    return r
+    return coerce_to_class(context, presentation, Map, entry_schema, constraints, value, aspect)
 
 def coerce_scalar_unit_size(context, presentation, the_type, entry_schema, constraints, value, aspect):
     return coerce_to_class(context, presentation, ScalarSize, entry_schema, constraints, value, aspect)

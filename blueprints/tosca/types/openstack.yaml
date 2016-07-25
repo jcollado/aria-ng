@@ -1,6 +1,7 @@
 
 imports:
   - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
+  - os.yaml
 
 dsl_definitions:
 
@@ -12,7 +13,7 @@ node_types:
 
   openstack.Instance:
     description: >
-      An OpenStack instance.
+      OpenStack instance.
 
       You may assign an image_id or attach an openstack.Image artifact (the artifact
       will take precedence).
@@ -33,12 +34,15 @@ node_types:
         type: string
         default: m1.medium
         required: false
+      users:
+        type: map
+        entry_schema: os.UserInfo
     interfaces:
       lifecyle:
         inputs:
-          credential:
-            description: The credential for all operations.
-            type: tosca.datatypes.Credential
+          openstack_credential:
+            description: The OpenStack API credential for all operations.
+            type: openstack.Credential
         type: tosca.interfaces.node.lifecycle.Standard
         create:
           implementation:
@@ -51,7 +55,7 @@ group_types:
 
   openstack.Secured:
     description: >
-      An OpenStack secured group.
+      OpenStack secured group.
     derived_from: tosca.groups.Root
     members:
       - openstack.Instance
@@ -71,6 +75,8 @@ group_types:
 policy_types:
 
   openstack.Scaling:
+    description: >
+      OpenStack scaling policy.
     derived_from: tosca.policies.Scaling
     properties:
       bandwidth_threshold:
@@ -84,13 +90,20 @@ policy_types:
 
 data_types:
 
+  openstack.Credential:
+    derived_from: tosca.datatypes.Credential
+
   openstack.UUID:
+    description: >
+      OpenStack UUID (in GUID format).
     derived_from: string
     constraints: *OPENSTACK_UUID_CONSTRAINTS
 
 artifact_types:
 
   openstack.Image:
+    description: >
+      OpenStack image artifact.
     derived_from: tosca.artifacts.Deployment.Image.VM
     file_ext:
       - img

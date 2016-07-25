@@ -109,17 +109,6 @@ class RequirementAssignment(ToscaPresentation):
         """
 
 @has_fields
-@dsl_specification('3.7.1', 'tosca-simple-profile-1.0')
-class CapabilityAssignment(ToscaPresentation):
-    """
-    A capability assignment allows node template authors to assign values to properties and attributes for a named capability definition that is part of a Node Template's type definition.
-    
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_CAPABILITY_ASSIGNMENT>`__
-    """
-    
-    #TODO
-
-@has_fields
 @dsl_specification('3.5.11', 'tosca-simple-profile-1.0')
 class AttributeAssignment(ToscaPresentation):
     """
@@ -129,3 +118,40 @@ class AttributeAssignment(ToscaPresentation):
     """
     
     #TODO
+
+@has_fields
+@dsl_specification('3.7.1', 'tosca-simple-profile-1.0')
+class CapabilityAssignment(ToscaPresentation):
+    """
+    A capability assignment allows node template authors to assign values to properties and attributes for a named capability definition that is part of a Node Template's type definition.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_CAPABILITY_ASSIGNMENT>`__
+    """
+    
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        An optional list of property definitions for the Capability definition.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @object_dict_field(AttributeAssignment)
+    def attributes(self):
+        """
+        An optional list of attribute definitions for the Capability definition.
+        
+        :rtype: dict of str, :class:`AttributeAssignment`
+        """
+
+    def _get_type(self, context):
+        node_type = self._container._get_type(context)
+        capability_definition = node_type.capabilities.get(self._name) if node_type is not None else None
+        return capability_definition._get_type(context) if capability_definition is not None else None
+
+    def _get_properties(self, context):
+        return get_assigned_and_defined_property_values(context, self)
+
+    def _validate(self, context):
+        super(CapabilityAssignment, self)._validate(context)
+        self._get_properties(context)

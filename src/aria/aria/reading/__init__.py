@@ -11,6 +11,7 @@ __all__ = (
     'ReaderError',
     'ReaderNotFoundError',
     'SyntaxError',
+    'AlreadyReadError',
     'Reader',
     'ReaderSource',
     'RawReader',

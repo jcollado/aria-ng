@@ -1,4 +1,5 @@
 
+from .. import LockedList
 from ..loading import LiteralLocation
 from .exceptions import ReaderNotFoundError
 from .yaml import YamlReader
@@ -28,6 +29,7 @@ class DefaultReaderSource(ReaderSource):
     def __init__(self, literal_reader_class=YamlReader):
         super(DefaultReaderSource, self).__init__()
         self.literal_reader_class = literal_reader_class
+        self.already_read_locations = LockedList()
 
     def get_reader(self, location, loader):
         if isinstance(location, LiteralLocation):

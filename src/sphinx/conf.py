@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ARIA API'
+project = u'ARIA'
 copyright = u'2016, GigaSpaces'
 author = u'GigaSpaces'
 
@@ -261,7 +261,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'ARIA.tex', u'ARIA API',
+    (master_doc, 'ARIA.tex', u'ARIA',
      u'GigaSpaces', 'manual'),
 ]
 
@@ -297,7 +297,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'aria', u'ARIA API',
+    (master_doc, 'aria', u'ARIA',
      [author], 1)
 ]
 
@@ -312,7 +312,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'ARIA', u'ARIA API',
+    (master_doc, 'ARIA', u'ARIA',
      author, 'ARIA', 'Toolkit for parsing TOSCA.',
      'Miscellaneous'),
 ]
@@ -340,3 +340,11 @@ autoclass_content = 'both'
 
 # Default to everything important
 autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance']
+
+def on_skip_members(app, what, name, obj, skip, options):
+    if name == 'FIELDS':
+        skip = True
+    return skip
+    
+def setup(app):
+    app.connect('autodoc-skip-member', on_skip_members)

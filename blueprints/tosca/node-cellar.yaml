@@ -9,12 +9,10 @@ metadata:
   template_version: 1.0.0
 
 imports:
-  - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
-#  - tosca-simple-nfv-1.0/tosca-simple-nfv-1.0.yaml
   - types/openstack.yaml
   - types/nodejs.yaml
   - types/mongodb.yaml
-  - types/packages.yaml
+  - tosca-simple-nfv-1.0/tosca-simple-nfv-1.0.yaml # not using this for now
 
 repositories:
 
@@ -37,18 +35,31 @@ topology_template:
         node_cellar:
           description: >
             The Node Cellar application package.
-          type: packages.Archive
+          type: os.Archive
           file: master.tar.gz
           repository: node_cellar
           deploy_path: /opt/nodejs/applications/node-cellar
       requirements:
         - database: node_cellar_database
+      capabilities:
+        app_endpoint:
+          properties:
+            url_path: /nodecellar
     
     node_cellar_database:
+      description: >
+        Node Cellar MongoDB database.
       type: mongodb.Database
       properties:
         name: node_cellar
-    
+      artifacts:
+        dump:
+          description: >
+            The Node Cellar initial database.
+          type: mongodb.DatabaseDump
+          file: node-cellar.json
+          repository: node_cellar
+
     # Server software
     
     nodejs:
@@ -65,6 +76,14 @@ topology_template:
       description: >
         Host for applications.
       type: openstack.Instance
+      properties:
+        users:
+          root:
+            password: admin123
+          nodejs:
+            password: nodejs123
+            groups:
+              - www-data
 
     data_host:
       description: >
@@ -72,6 +91,11 @@ topology_template:
       type: openstack.Instance
       properties:
         flavor_name: m1.large
+        users:
+          root:
+            password: admin123 
+          mongodb:
+            password: mongo123
 
   groups:
   

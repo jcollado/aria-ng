@@ -54,7 +54,7 @@ def coerce_data_type_value(context, presentation, data_type, entry_schema, const
                 if name in definitions:
                     definition = definitions[name]
                     definition_type = definition._get_type(context)
-                    definition_entry_schema = definition._get_entry_schema(context)
+                    definition_entry_schema = definition.entry_schema
                     definition_constraints = definition._get_constraints(context)
                     r[name] = coerce_value(context, presentation, definition_type, definition_entry_schema, definition_constraints, v)
                 else:
@@ -102,10 +102,6 @@ def get_data_type(context, presentation, field_name, allow_none=False):
     
     # Try primitive data type
     return get_primitive_data_type(the_type)
-
-#
-# PropertyDefinition, AttributeDefinition
-#
 
 def get_property_constraints(context, presentation):
     """
@@ -330,7 +326,12 @@ def coerce_to_primitive(context, presentation, primitive_type, constraints, valu
 
 def coerce_to_class(context, presentation, the_type, entry_schema, constraints, value, aspect=None):
     try:
-        value = the_type(entry_schema, constraints, value, aspect)
+        if hasattr(the_type, '_create'):
+            # Instantiate using creator function
+            value = the_type._create(context, presentation, entry_schema, constraints, value, aspect)
+        else:
+            # Normal instantiation
+            value = the_type(entry_schema, constraints, value, aspect)
     except ValueError as e:
         report_issue_for_bad_format(context, presentation, the_type, value, aspect, e)
         value = None

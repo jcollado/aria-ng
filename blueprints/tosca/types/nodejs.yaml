@@ -1,19 +1,50 @@
 
 imports:
   - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
-  - packages.yaml
+  - os.yaml
 
 node_types:
 
   nodejs.Server:
+    description: >
+      Node.js server application.
     derived_from: tosca.nodes.WebServer
     artifacts:
       nodejs:
         description: >
-          The Node.js application package.
-        type: packages.Archive
+          Node.js application package.
+        type: os.Archive
         file: https://nodejs.org/dist/v4.4.7/node-v4.4.7-linux-x64.tar.xz
         deploy_path: /opt/nodejs
+    capabilities:
+      data_endpoint: # @override 
+        type: tosca.capabilities.Endpoint
+        properties:
+          port:
+            type: tosca.datatypes.network.PortDef
+            default: 8080
+          url_path:
+            type: string
+            default: /
+      admin_endpoint: # @override
+        type: tosca.capabilities.Endpoint.Admin
+        properties:
+          port:
+            type: tosca.datatypes.network.PortDef
+            default: 8080
+          url_path:
+            type: string
+            default: /admin
+      host: # @override
+        type: tosca.capabilities.Container
+        valid_source_types: [ nodejs.Application ]
 
   nodejs.Application:
     derived_from: tosca.nodes.WebApplication
+    capabilities:
+      app_endpoint: # @override
+        type: tosca.capabilities.Endpoint
+        properties:
+          port:
+            type: tosca.datatypes.network.PortDef
+            default: 8080

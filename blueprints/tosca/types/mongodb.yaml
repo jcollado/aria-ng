@@ -1,20 +1,50 @@
 
 imports:
   - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
+  - os.yaml
 
 node_types:
 
   mongodb.Server:
+    description: >
+      MongoDB server application.
     derived_from: tosca.nodes.DBMS
     properties:
-      # @override
-      root_password:
+      root_password: # @override
         type: string
         default: admin
-      # @override
-      port:
+      port: # @override
         type: integer
         default: 27017
+    artifacts:
+      mongodb:
+        description: >
+          MongoDB application package.
+        type: os.Archive
+        file: https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1604-3.2.8.tgz
+        deploy_path: /opt/mongodb
 
   mongodb.Database:
+    description: >
+      MongoDB database.
+      
+      Supports importing database data if a mongodb.DatabaseDump is attached.
     derived_from: tosca.nodes.Database
+    interfaces:
+      lifecyle:
+        type: tosca.interfaces.node.lifecycle.Standard
+        create:
+          implementation:
+            primary: mongodb/create_and_import_database.sh
+            dependencies:
+              - mongodb/utils/api.sh
+              - utils/os.sh
+
+artifact_types:
+
+  mongodb.DatabaseDump:
+    description: >
+      Dump of a MongoDB database.
+    derived_from: tosca.artifacts.Root
+    file_ext:
+      - json

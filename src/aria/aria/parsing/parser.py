@@ -1,8 +1,8 @@
 
-from .. import FixedThreadPoolExecutor, Issue, AriaError, UnimplementedFunctionalityError, LockedList, print_exception, classname
+from .. import FixedThreadPoolExecutor, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
 from ..consumption import Validator
 from ..loading import DefaultLoaderSource
-from ..reading import DefaultReaderSource
+from ..reading import DefaultReaderSource, AlreadyReadError
 from ..presentation import DefaultPresenterSource
 
 class Parser(object):
@@ -45,9 +45,8 @@ class DefaultParser(Parser):
         imported_presentations = None
         
         executor = FixedThreadPoolExecutor(timeout=10)
-        importing_locations = LockedList()
         try:
-            presentation = self._parse_all(self.location, None, self.presenter_class, executor, importing_locations)
+            presentation = self._parse_all(self.location, None, self.presenter_class, executor)
             executor.drain()
             
             # Handle exceptions
@@ -82,7 +81,7 @@ class DefaultParser(Parser):
         except Exception as e:
             self._handle_exception(context, e)
 
-    def _parse_all(self, location, origin_location, presenter_class, executor, importing_locations):
+    def _parse_all(self, location, origin_location, presenter_class, executor):
         raw, location = self._parse_one(location, origin_location)
         
         if presenter_class is None:
@@ -98,15 +97,8 @@ class DefaultParser(Parser):
             import_locations = presentation._get_import_locations()
             if import_locations:
                 for import_location in import_locations:
-                    do_import = False
-                    with importing_locations:
-                        if import_location not in importing_locations:
-                            importing_locations.append(import_location)
-                            do_import = True
-                    
-                    if do_import:
-                        # The imports inherit the parent presenter class and use the current location as their origin location
-                        executor.submit(self._parse_all, import_location, location, presenter_class, executor, importing_locations)
+                    # The imports inherit the parent presenter class and use the current location as their origin location
+                    executor.submit(self._parse_all, import_location, location, presenter_class, executor)
 
         return presentation
     
@@ -118,6 +110,8 @@ class DefaultParser(Parser):
         return reader.read(), reader.location
 
     def _handle_exception(self, context, e):
+        if isinstance(e, AlreadyReadError):
+            return
         if hasattr(e, 'issue') and isinstance(e.issue, Issue):
             context.validation.report(issue=e.issue)
         else:

@@ -82,7 +82,7 @@ def data_value_validator(field, presentation, context):
     if value is not None:
         the_type = presentation._get_type(context)
         entry_schema = presentation.entry_schema
-        constraints = getattr(presentation, 'constraints', None) # AttributeDefinition does not have this
+        constraints = presentation._get_constraints(context) if hasattr(presentation, '_get_constraints') else None # AttributeDefinition does not have this
         coerce_value(context, presentation, the_type, entry_schema, constraints, value, field.name)
 
 #

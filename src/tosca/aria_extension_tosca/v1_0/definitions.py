@@ -3,7 +3,7 @@ from .presentation import ToscaPresentation
 from .property_assignment import PropertyAssignment
 from .misc import ConstraintClause, Range
 from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
-from .utils.data import get_data_type
+from .utils.data import get_data_type, get_property_constraints
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification
@@ -113,6 +113,9 @@ class PropertyDefinition(ToscaPresentation):
     
     def _get_type(self, context):
         return get_data_type(context, self, 'type')
+
+    def _get_constraints(self, context):
+        return get_property_constraints(context, self)
 
 @has_fields
 @dsl_specification('3.5.10', 'tosca-simple-profile-1.0')

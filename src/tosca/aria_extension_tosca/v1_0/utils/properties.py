@@ -87,5 +87,5 @@ def get_assigned_and_defined_property_values(context, presentation):
 def coerce_property_value(context, value, definition): # works on both properties and inputs
     the_type = definition._get_type(context) if definition is not None else None
     entry_schema = definition.entry_schema if definition is not None else None
-    constraints = definition.constraints if definition is not None else None
+    constraints = definition._get_constraints(context) if definition is not None else None
     return coerce_value(context, value, the_type, entry_schema, constraints, value.value)

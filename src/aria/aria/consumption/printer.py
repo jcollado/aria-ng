@@ -121,7 +121,7 @@ class Printer(Consumer):
                                     puts('Implementation: %s' % self.context.style.literal(operation.implementation))
                                 else:
                                     puts('Implementation: %s' % self.context.style.type(operation.implementation))
-                            if operation.executor:
+                            if hasattr(operation, 'executor') and operation.executor:
                                 puts('Executor: %s' % self.context.style.node(operation.executor))
                             if operation.inputs:
                                 puts('Inputs:') # TODO

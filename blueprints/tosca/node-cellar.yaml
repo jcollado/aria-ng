@@ -1,0 +1,93 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+description: >
+  Node Cellar TOSCA blueprint.
+
+metadata:
+  template_name: node-cellar
+  template_author: ARIA
+  template_version: 1.0.0
+
+imports:
+  - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
+#  - tosca-simple-nfv-1.0/tosca-simple-nfv-1.0.yaml
+  - types/openstack.yaml
+  - types/nodejs.yaml
+  - types/mongodb.yaml
+  - types/packages.yaml
+
+repositories:
+
+  node_cellar:
+    description: >
+      The repository for the Node Cellar application and its dependencies.
+    url: https://github.com/cloudify-cosmo/nodecellar/archive
+
+topology_template:
+
+  node_templates:
+  
+    # Application
+
+    node_cellar:
+      description: >
+        Node Cellar Node.js web application.
+      type: nodejs.Application
+      artifacts:
+        node_cellar:
+          description: >
+            The Node Cellar application package.
+          type: packages.Archive
+          file: master.tar.gz
+          repository: node_cellar
+          deploy_path: /opt/nodejs/applications/node-cellar
+      requirements:
+        - database: node_cellar_database
+    
+    node_cellar_database:
+      type: mongodb.Database
+      properties:
+        name: node_cellar
+    
+    # Server software
+    
+    nodejs:
+      type: nodejs.Server
+
+    mongodb:
+      description: >
+        MongoDB database.
+      type: mongodb.Server
+    
+    # Hosts
+
+    application_host:
+      description: >
+        Host for applications.
+      type: openstack.Instance
+
+    data_host:
+      description: >
+        Host for databases.
+      type: openstack.Instance
+      properties:
+        flavor_name: m1.large
+
+  groups:
+  
+    node_cellar:
+      type: openstack.Secured
+      members:
+        - application_host
+        - data_host
+
+  policies:
+  
+    scaling:
+      type: openstack.Scaling
+      properties:
+        bandwidth_threshold: 2 GB
+        secured_group: node_cellar
+      targets: # node templates or groups
+        - application_host
+        - data_host

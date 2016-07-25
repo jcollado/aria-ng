@@ -1,0 +1,19 @@
+
+imports:
+  - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
+  - packages.yaml
+
+node_types:
+
+  nodejs.Server:
+    derived_from: tosca.nodes.WebServer
+    artifacts:
+      nodejs:
+        description: >
+          The Node.js application package.
+        type: packages.Archive
+        file: https://nodejs.org/dist/v4.4.7/node-v4.4.7-linux-x64.tar.xz
+        deploy_path: /opt/nodejs
+
+  nodejs.Application:
+    derived_from: tosca.nodes.WebApplication

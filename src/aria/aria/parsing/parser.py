@@ -1,5 +1,5 @@
 
-from .. import FixedThreadPoolExecutor, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
+from .. import FixedThreadPoolExecutor, Issue, AriaError, UnimplementedFunctionalityError, LockedList, print_exception, classname
 from ..consumption import Validator
 from ..loading import DefaultLoaderSource
 from ..reading import DefaultReaderSource
@@ -40,11 +40,14 @@ class DefaultParser(Parser):
         """
         :rtype: :class:`aria.presenter.Presenter`
         """
+        
+        presentation = None
         imported_presentations = None
         
         executor = FixedThreadPoolExecutor(timeout=10)
+        importing_locations = LockedList()
         try:
-            presentation = self._parse_all(self.location, None, self.presenter_class, executor)
+            presentation = self._parse_all(self.location, None, self.presenter_class, executor, importing_locations)
             executor.drain()
             
             # Handle exceptions
@@ -55,6 +58,11 @@ class DefaultParser(Parser):
                 executor.raise_first()
                 
             imported_presentations = executor.returns
+        except Exception as e:
+            if context is not None:
+                self._handle_exception(context, e)
+            else:
+                raise e
         except:
             executor.close()
 
@@ -69,11 +77,12 @@ class DefaultParser(Parser):
     def parse_and_validate(self, context):
         try:
             context.presentation = self.parse(context)
-            Validator(context).consume()
+            if context.presentation is not None:
+                Validator(context).consume()
         except Exception as e:
             self._handle_exception(context, e)
 
-    def _parse_all(self, location, origin_location, presenter_class, executor):
+    def _parse_all(self, location, origin_location, presenter_class, executor, importing_locations):
         raw, location = self._parse_one(location, origin_location)
         
         if presenter_class is None:
@@ -89,13 +98,20 @@ class DefaultParser(Parser):
             import_locations = presentation._get_import_locations()
             if import_locations:
                 for import_location in import_locations:
-                    # The imports inherit the parent presenter class and use the current location as their origin location
-                    executor.submit(self._parse_all, import_location, location, presenter_class, executor)
-                
+                    do_import = False
+                    with importing_locations:
+                        if import_location not in importing_locations:
+                            importing_locations.append(import_location)
+                            do_import = True
+                    
+                    if do_import:
+                        # The imports inherit the parent presenter class and use the current location as their origin location
+                        executor.submit(self._parse_all, import_location, location, presenter_class, executor, importing_locations)
+
         return presentation
     
     def _parse_one(self, location, origin_location):
-        if self.reader:
+        if self.reader is not None:
             return self.reader.read(), self.reader.location
         loader = self.loader_source.get_loader(location, origin_location)
         reader = self.reader_source.get_reader(location, loader)

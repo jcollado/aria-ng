@@ -26,7 +26,7 @@ def validate_known_fields(presentation, context):
             field.validate(presentation, context)
 
 def report_issue_for_unknown_type(context, presentation, type_name, field_name):
-    context.validation.report('field "%s" refers to an unknown %s for "%s"' % (getattr(presentation, type_name, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
+    context.validation.report('"%s" refers to an unknown %s for "%s"' % (getattr(presentation, field_name), type_name, presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_parent_is_self(context, presentation, field_name):
     context.validation.report('parent type of "%s" is self' % presentation._fullname, locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)

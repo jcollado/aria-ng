@@ -1,0 +1,97 @@
+
+imports:
+  - tosca-simple-profile-1.0/tosca-simple-profile-1.0.yaml
+
+dsl_definitions:
+
+  openstack:
+    uuid_constraints: &OPENSTACK_UUID_CONSTRAINTS
+      - pattern: '^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$'
+
+node_types:
+
+  openstack.Instance:
+    description: >
+      An OpenStack instance.
+
+      You may assign an image_id or attach an openstack.Image artifact (the artifact
+      will take precedence).
+    
+      You may assign either flavor_id or flavor_name (flavor_id will take precedence).
+      If neither are assigned, flavor_name has a default value.
+    derived_from: tosca.nodes.Compute
+    properties:
+      image_id:
+        description: >
+          See: https://s3itwiki.uzh.ch/display/clouddoc/Supported+Images
+        type: openstack.UUID
+        default: 5d62e82c-924e-4fa9-b1e4-c133867596f7
+      flavor_id:
+        type: openstack.UUID
+        required: false
+      flavor_name:
+        type: string
+        default: m1.medium
+        required: false
+    interfaces:
+      lifecyle:
+        inputs:
+          credential:
+            description: The credential for all operations.
+            type: tosca.datatypes.Credential
+        type: tosca.interfaces.node.lifecycle.Standard
+        create:
+          implementation:
+            primary: openstack/create_instance.sh
+            dependencies:
+              - openstack/utils/api.sh
+              - utils/os.sh
+
+group_types:
+
+  openstack.Secured:
+    description: >
+      An OpenStack secured group.
+    derived_from: tosca.groups.Root
+    members:
+      - openstack.Instance
+    interfaces:
+      lifecyle:
+        inputs:
+          credential:
+            description: The credential for all operations.
+            type: tosca.datatypes.Credential
+        create:
+          implementation:
+            primary: openstack/create_secured_group.sh
+            dependencies:
+              - openstack/utils/api.sh
+              - utils/os.sh
+
+policy_types:
+
+  openstack.Scaling:
+    derived_from: tosca.policies.Scaling
+    properties:
+      bandwidth_threshold:
+        type: scalar-unit.size
+        default: 1 GB
+      secured_group:
+        description: >
+          Optional name of secured group in which we will add new instances.
+        type: string
+        required: false
+
+data_types:
+
+  openstack.UUID:
+    derived_from: string
+    constraints: *OPENSTACK_UUID_CONSTRAINTS
+
+artifact_types:
+
+  openstack.Image:
+    derived_from: tosca.artifacts.Deployment.Image.VM
+    file_ext:
+      - img
+      - iso

@@ -10,3 +10,5 @@ out/
 
 *.geany
 *.csv
+
+.DS_Store

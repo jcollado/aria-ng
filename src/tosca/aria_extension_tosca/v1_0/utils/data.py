@@ -7,6 +7,24 @@ import re
 # DataType
 #
 
+def get_inherited_constraints(context, presentation):
+    """
+    If we don't have constraints, will return our parent's constraints (if we have one), recursively.
+    
+    Implication: if we define even one constraint, the parent's constraints will not be inherited.
+    """
+    
+    constraints = presentation.constraints
+
+    if constraints is None:
+        # If we don't have any, use our parent's
+        parent = presentation._get_parent(context)
+        parent_constraints = get_inherited_constraints(context, parent) if parent is not None else None
+        if parent_constraints is not None:
+            constraints = parent_constraints
+    
+    return constraints
+
 def coerce_data_type_value(context, presentation, data_type, entry_schema, constraints, value, aspect):
     """
     Handles the \_coerce\_data() hook for complex data types.
@@ -36,8 +54,8 @@ def coerce_data_type_value(context, presentation, data_type, entry_schema, const
                 if name in definitions:
                     definition = definitions[name]
                     definition_type = definition._get_type(context)
-                    definition_entry_schema = definition.entry_schema
-                    definition_constraints = definition.constraints
+                    definition_entry_schema = definition._get_entry_schema(context)
+                    definition_constraints = definition._get_constraints(context)
                     r[name] = coerce_value(context, presentation, definition_type, definition_entry_schema, definition_constraints, v)
                 else:
                     context.validation.report('assignment to undefined property "%s" in type "%s" for "%s"' % (name, data_type._fullname, presentation._fullname), locator=v._locator, level=Issue.BETWEEN_TYPES)
@@ -84,6 +102,28 @@ def get_data_type(context, presentation, field_name, allow_none=False):
     
     # Try primitive data type
     return get_primitive_data_type(the_type)
+
+#
+# PropertyDefinition, AttributeDefinition
+#
+
+def get_property_constraints(context, presentation):
+    """
+    If we don't have constraints, will return our type's constraints (if we have one), recursively.
+    
+    Implication: if we define even one constraint, the type's constraints will not be inherited.
+    """
+
+    constraints = presentation.constraints
+
+    if constraints is None:
+        # If we don't have any, use our type's
+        the_type = presentation._get_type(context)
+        type_constraints = the_type._get_constraints(context) if hasattr(the_type, '_get_constraints') else None
+        if type_constraints is not None:
+            constraints = type_constraints
+    
+    return constraints
 
 #
 # ConstraintClause

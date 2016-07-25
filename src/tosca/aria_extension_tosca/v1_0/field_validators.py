@@ -103,6 +103,18 @@ def data_type_derived_from_validator(field, presentation, context):
         # Validate derivation only if a complex data type (primitive types have no derivation hierarchy)
         _data_type_derived_from_validator(field, presentation, context)
 
+def data_type_constraints_validator(field, presentation, context):
+    """
+    Makes sure that we do not have constraints if we are a complex type (with no primitive ancestor).
+    """
+
+    field._validate(presentation, context)
+    
+    value = getattr(presentation, field.name)
+    if value is not None:
+        if presentation._get_primitive_ancestor(context) is None:
+            context.validation.report('data type "%s" defines constraints but does not have a primitive ancestor' % presentation._fullname, locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
+
 def data_type_properties_validator(field, presentation, context):
     """
     Makes sure that we do not have properties if we have a primitive ancestor.

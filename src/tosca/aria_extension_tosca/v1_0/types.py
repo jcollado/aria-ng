@@ -2,7 +2,7 @@
 from .presentation import ToscaPresentation
 from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition, OperationDefinitionForType
 from .misc import ConstraintClause, Version
-from .field_validators import data_type_derived_from_validator, data_type_properties_validator, list_node_type_or_group_type_validator
+from .field_validators import data_type_derived_from_validator, data_type_constraints_validator, data_type_properties_validator, list_node_type_or_group_type_validator
 from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions, get_inherited_operations
 from .utils.data import get_data_type, get_inherited_constraints, coerce_data_type_value
@@ -115,6 +115,7 @@ class DataType(ToscaPresentation):
         :rtype: str
         """
 
+    @field_validator(data_type_constraints_validator)
     @object_list_field(ConstraintClause)
     def constraints(self):
         """

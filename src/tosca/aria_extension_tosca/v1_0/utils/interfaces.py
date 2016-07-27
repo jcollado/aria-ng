@@ -1,7 +1,7 @@
 
-from .properties import coerce_property_value
-from collections import OrderedDict
+from .properties import coerce_property_value, convert_property_definitions_to_values
 from aria import Issue, merge
+from collections import OrderedDict
 from copy import deepcopy
 
 #
@@ -34,7 +34,7 @@ def get_and_override_input_definitions_from_type(context, presentation):
     """
     Returns our input definitions added on top of those of the interface type, if specified.
     
-    Allows overriding all aspects of interface type inputs except data types.  
+    Allows overriding all aspects of parent interface type inputs except data types.  
     """
     
     inputs = OrderedDict()
@@ -57,7 +57,7 @@ def get_and_override_operation_definitions_from_type(context, presentation):
     """
     Returns our operation definitions added on top of those of the interface type, if specified.
     
-    Allows overriding all aspects of interface type inputs except data types.  
+    Allows overriding all aspects of parent interface type inputs except data types.  
     """
     
     operations = OrderedDict()
@@ -107,8 +107,8 @@ def get_inherited_interface_definitions(context, presentation, type_name, for_pr
 
 def get_template_interfaces(context, presentation, type_name):
     """
-    Returns the assigned interface values while making sure they are defined in the type. This includes
-    the interfaces themselves, their operations, and inputs for interfaces and operations.
+    Returns the assigned template_interface values while making sure they are defined in the type. This includes
+    the template_interfaces themselves, their operations, and inputs for template_interfaces and operations.
     
     Interface and operation inputs' default values, if available, will be used if we did not assign them.
     
@@ -117,31 +117,32 @@ def get_template_interfaces(context, presentation, type_name):
     This code is especially complex due to the levels of nesting involved.
     """
     
-    interfaces = OrderedDict()
+    template_interfaces = OrderedDict()
     
     the_type = presentation._get_type(context) # NodeType, RelationshipType, GroupType, *or* RelationshipTemplate (RequirementAssignmentRelationship can refer to these)
-    type_interfaces = the_type._get_interfaces(context) if the_type is not None else None
+    type_interfaces = the_type._get_interfaces(context) if the_type is not None else None # InterfaceDefinitionForType (or InterfaceDefinitionForTemplate in the case of RelationshipTemplate)
 
     # Copy over interfaces from the type (will initialize inputs with default values)
     if type_interfaces is not None:
-        for interface_name, interface in type_interfaces.iteritems():
-            # InterfaceDefinitionForTemplate will not be converted, just cloned (we get these from RelationshipTemplate)
-            interfaces[interface_name] = convert_interface_definition_from_type_to_template(context, interface, presentation)
+        for interface_name, template_interface in type_interfaces.iteritems():
+            # Note that in the case of a RelationshipTemplate, we will already have the values as InterfaceDefinitionForTemplate.
+            # It will not be converted, just cloned.
+            template_interfaces[interface_name] = convert_interface_definition_from_type_to_template(context, template_interface, presentation)
     
     # Fill in our interfaces
-    our_interfaces = presentation.interfaces
-    if our_interfaces is not None:
-        for interface_name, our_interface in our_interfaces.iteritems():
-            if interface_name in interfaces:
-                interface = interfaces[interface_name] # InterfaceDefinitionForTemplate
-                type_interface = type_interfaces[interface_name] # InterfaceDefinitionForType
+    our_template_interfaces = presentation.interfaces
+    if our_template_interfaces is not None:
+        for interface_name, our_template_interface in our_template_interfaces.iteritems():
+            if interface_name in template_interfaces:
+                template_interface = template_interfaces[interface_name] # InterfaceDefinitionForTemplate
+                type_interface = type_interfaces[interface_name] # InterfaceDefinitionForType (or InterfaceDefinitionForTemplate in the case of RelationshipTemplate) 
                 
                 # Assign interface inputs
-                assign_raw_inputs(context, interface._raw, our_interface.inputs, type_interface._get_inputs(context), our_interface, interface_name, None, presentation)
+                assign_raw_inputs(context, template_interface._raw, our_template_interface.inputs, type_interface._get_inputs(context), our_template_interface, interface_name, None, presentation)
                     
                 # Assign operation implementations and inputs
-                our_operations = our_interface.operations
-                type_operations = type_interface._get_operations(context)
+                our_operations = our_template_interface.operations # OperationDefinitionForTemplate
+                type_operations = type_interface._get_operations(context) # OperationDefinitionForType
                 if our_operations is not None:
                     for operation_name, our_operation in our_operations.iteritems():
                         type_operation = type_operations.get(operation_name) # OperationDefinitionForType
@@ -154,32 +155,26 @@ def get_template_interfaces(context, presentation, type_name):
 
                         if (our_inputs is not None) or (our_implementation is not None):
                             # Make sure we have the dict
-                            if (operation_name not in interface._raw) or (interface._raw[operation_name] is None):
-                                interface._raw[operation_name] = {}
+                            if (operation_name not in template_interface._raw) or (template_interface._raw[operation_name] is None):
+                                template_interface._raw[operation_name] = {}
                             
                         if our_implementation is not None:
-                            interface._raw[operation_name]['implementation'] = deepcopy(our_implementation._raw)
+                            template_interface._raw[operation_name]['implementation'] = deepcopy(our_implementation._raw)
 
                         # Assign operation inputs
                         type_inputs = type_operation.inputs if type_operation is not None else None
-                        assign_raw_inputs(context, interface._raw[operation_name], our_inputs, type_inputs, our_operation, interface_name, operation_name, presentation)
+                        assign_raw_inputs(context, template_interface._raw[operation_name], our_inputs, type_inputs, our_operation, interface_name, operation_name, presentation)
 
                 # Check that there are no required inputs for operations we haven't assigned
-                validate_unassigned_operation_inputs(context, interface.operations, type_operations, our_interface, presentation)
+                validate_unassigned_operation_inputs(context, template_interface.operations, type_operations, our_template_interface, presentation)
             else:
-                context.validation.report('interface definition "%s" not declared in %s "%s" for "%s"' % (interface_name, type_name, presentation.type, presentation._fullname), locator=our_interface._locator, level=Issue.BETWEEN_TYPES)
+                context.validation.report('interface definition "%s" not declared in %s "%s" for "%s"' % (interface_name, type_name, presentation.type, presentation._fullname), locator=our_template_interface._locator, level=Issue.BETWEEN_TYPES)
 
-    return interfaces
+    return template_interfaces
 
 #
 # Utils
 #
-
-def convert_input_definitions_to_values(values, definitions):
-    for name, definition in definitions.iteritems():
-        default = definition.default
-        if default is not None:
-            values[name] = default
 
 def convert_interface_definition_from_type_to_template(context, presentation, container):
     from ..definitions import InterfaceDefinitionForTemplate
@@ -187,20 +182,20 @@ def convert_interface_definition_from_type_to_template(context, presentation, co
     if isinstance(presentation, InterfaceDefinitionForTemplate):
         return presentation._clone(container)
     
-    raw = {}
+    raw = OrderedDict()
     
     # Copy default values for inputs
     inputs = presentation._get_inputs(context)
     if inputs is not None:
-        raw['inputs'] = {}
-        convert_input_definitions_to_values(raw['inputs'], inputs)
+        raw['inputs'] = OrderedDict()
+        convert_property_definitions_to_values(raw['inputs'], inputs)
     
     # Copy operations
     operations = presentation._get_operations(context)
     if operations is not None:
-        raw['operations'] = {}
+        raw['operations'] = OrderedDict()
         for operation_name, operation in operations.iteritems():
-            raw['operations'][operation_name] = {}
+            raw['operations'][operation_name] = OrderedDict()
             description = operation.description
             if description is not None:
                 raw['operations'][operation_name]['description'] = deepcopy(description)
@@ -209,8 +204,8 @@ def convert_interface_definition_from_type_to_template(context, presentation, co
                 raw['operations'][operation_name]['implementation'] = deepcopy(implementation._raw)
             inputs = operation.inputs
             if inputs is not None:
-                raw['operations'][operation_name]['inputs'] = {}
-                convert_input_definitions_to_values(raw['operations'][operation_name]['inputs'], inputs)
+                raw['operations'][operation_name]['inputs'] = OrderedDict()
+                convert_property_definitions_to_values(raw['operations'][operation_name]['inputs'], inputs)
     
     return InterfaceDefinitionForTemplate(name=presentation._name, raw=raw, container=container)
 
@@ -329,10 +324,11 @@ def assign_raw_inputs(context, values, assignments, definitions, target, interfa
                     context.validation.report('interface definition "%s" assigns a value to an unknown input "%s" for "%s"' % (interface_name, input_name, presentation._fullname), locator=assignment._locator, level=Issue.BETWEEN_TYPES)
 
             definition = definitions.get(input_name) if definitions is not None else None
+
+            # Note: default value has already been assigned 
             
             # Coerce value
-            value = coerce_property_value(context, assignment, definition)
-            values['inputs'][input_name] = value
+            values['inputs'][input_name] = coerce_property_value(context, assignment, definition)
 
     # Check that required inputs are assigned
     if definitions is not None:

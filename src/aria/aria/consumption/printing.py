@@ -2,7 +2,7 @@
 from .consumer import Consumer
 from clint.textui import puts, colored
 
-class Printer(Consumer):
+class Print(Consumer):
     def consume(self):
         puts(self.context.style.section('Type:'))
         with self.context.style.indent:

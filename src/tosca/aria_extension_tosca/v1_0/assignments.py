@@ -1,9 +1,9 @@
 
 from .presentation import ToscaPresentation
 from .filters import NodeFilter
-from .definitions import InterfaceDefinitionForTemplate, CapabilityDefinition
+from .definitions import InterfaceDefinitionForTemplate
 from .property_assignment import PropertyAssignment
-from .field_validators import node_type_or_template_validator, relationship_type_or_template_validator
+from .field_validators import node_template_or_type_validator, relationship_template_or_type_validator, capability_definition_or_type_validator
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_template_interfaces
 from aria import dsl_specification
@@ -12,7 +12,7 @@ from aria.presentation import has_fields, short_form_field, primitive_field, obj
 @short_form_field('type')
 @has_fields
 class RequirementAssignmentRelationship(ToscaPresentation):
-    @field_validator(relationship_type_or_template_validator)
+    @field_validator(relationship_template_or_type_validator)
     @primitive_field(str)
     def type(self):
         """
@@ -66,7 +66,8 @@ class RequirementAssignment(ToscaPresentation):
     
     # The example in 3.7.2.2.2 shows unknown fields in addition to these, but is this a mistake?
 
-    @object_field(CapabilityDefinition)
+    @field_validator(capability_definition_or_type_validator)
+    @primitive_field(str)
     def capability(self):
         """
         The optional reserved keyname used to provide the name of either a:
@@ -74,10 +75,10 @@ class RequirementAssignment(ToscaPresentation):
         * Capability definition within a target node template that can fulfill the requirement.
         * Capability Type that the provider will use to select a type-compatible target node template to fulfill the requirement at runtime. 
         
-        :rtype: :class:`CapabilityDefinition`
+        :rtype: str
         """
 
-    @field_validator(node_type_or_template_validator)
+    @field_validator(node_template_or_type_validator)
     @primitive_field(str)
     def node(self):
         """
@@ -107,6 +108,33 @@ class RequirementAssignment(ToscaPresentation):
         
         :rtype: dict of str, :class:`NodeFilter`
         """
+    
+    def _get_node(self, context):
+        node = self.node
+        if node in context.presentation.node_templates:
+            return context.presentation.node_templates[node], 'node_template'
+        elif node in context.presentation.node_types:
+            return context.presentation.node_types[node], 'node_type'
+        return None, None
+
+    def _get_capability(self, context):
+        capability = self.capability
+        
+        if capability is not None:
+            node, node_variant = self._get_node(context)
+            capability_definitions_or_assignments = node._get_capabilities(context) if node is not None else None
+            
+            if (capability_definitions_or_assignments is not None) and (capability in capability_definitions_or_assignments):
+                if node_variant == 'node_template':
+                    return capability_definitions_or_assignments[capability], 'capability_assignment'
+                else:
+                    return capability_definitions_or_assignments[capability], 'capability_definition'
+        
+            capability_types = context.presentation.capability_types
+            if (context.presentation.capability_types is not None) and (capability in capability_types):
+                return capability_types[capability], 'capability_type'
+        
+        return None, None
 
 @has_fields
 @dsl_specification('3.5.11', 'tosca-simple-profile-1.0')
@@ -146,7 +174,8 @@ class CapabilityAssignment(ToscaPresentation):
 
     def _get_type(self, context):
         node_type = self._container._get_type(context)
-        capability_definition = node_type.capabilities.get(self._name) if node_type is not None else None
+        capability_definitions = node_type._get_capabilities(context) if node_type is not None else None
+        capability_definition = capability_definitions.get(self._name) if capability_definitions is not None else None
         return capability_definition._get_type(context) if capability_definition is not None else None
 
     def _get_properties(self, context):

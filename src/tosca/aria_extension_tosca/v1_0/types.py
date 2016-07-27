@@ -5,6 +5,7 @@ from .misc import ConstraintClause, Version
 from .field_validators import data_type_derived_from_validator, data_type_constraints_validator, data_type_properties_validator, list_node_type_or_group_type_validator
 from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions, get_inherited_operations
+from .utils.reqs_and_caps import get_inherited_requirements, get_inherited_capabilities
 from .utils.data import get_data_type, get_inherited_constraints, coerce_data_type_value
 from aria import dsl_specification
 from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_list_field, object_sequenced_list_field, object_dict_unknown_fields, field_validator, list_type_validator, derived_from_validator
@@ -473,6 +474,12 @@ class NodeType(ToscaPresentation):
 
     def _get_attributes(self, context):
         return get_inherited_property_definitions(context, self, 'attributes')
+
+    def _get_requirements(self, context):
+        return get_inherited_requirements(context, self)
+
+    def _get_capabilities(self, context):
+        return get_inherited_capabilities(context, self)
 
     def _get_interfaces(self, context):
         return get_inherited_interface_definitions(context, self, 'node type')

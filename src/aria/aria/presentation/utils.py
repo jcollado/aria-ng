@@ -5,6 +5,7 @@ def validate_no_short_form(presentation, context):
     """
     Makes sure that we can use short form definitions only if we allowed it.
     """
+    
     if (not hasattr(presentation, 'SHORT_FORM_FIELD')) and (not isinstance(presentation._raw, dict)):
         context.validation.report('short form not allowed for field "%s"' % presentation._fullname, locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
 
@@ -12,6 +13,7 @@ def validate_no_unknown_fields(presentation, context):
     """
     Make sure that we can use unknown fields only if we allowed it.
     """
+    
     if (not getattr(presentation, 'ALLOW_UNKNOWN_FIELDS', False)) and (not context.validation.allow_unknown_fields) and isinstance(presentation._raw, dict) and hasattr(presentation, 'FIELDS'):
         for k in presentation._raw:
             if k not in presentation.FIELDS:
@@ -21,6 +23,7 @@ def validate_known_fields(presentation, context):
     """
     Validates all known fields.
     """
+    
     if hasattr(presentation, '_iter_fields'):
         for _, field in presentation._iter_fields():
             field.validate(presentation, context)

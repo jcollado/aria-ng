@@ -5,7 +5,7 @@ from collections import OrderedDict
 from copy import deepcopy
 
 #
-# All the types: NodeType, RelationshipType, etc.
+# ArtifactType, DataType, CapabilityType, RelationshipType, NodeType, GroupType, PolicyType, CapabilityDefinition
 #
 
 def get_inherited_property_definitions(context, presentation, field_name, for_presentation=None): # works on properties, parameters, inputs, and attributes
@@ -56,7 +56,7 @@ def get_assigned_and_defined_property_values(context, presentation):
     
     values = OrderedDict()
     
-    the_type = presentation._get_type(context)
+    the_type = presentation._get_type(context) # In the case of RequirementAssignmentRelationship, this could be a RelationshipTemplate
     assignments = presentation.properties
     definitions = the_type._get_properties(context) if the_type is not None else None
 
@@ -65,15 +65,16 @@ def get_assigned_and_defined_property_values(context, presentation):
         for name, value in assignments.iteritems():
             if (definitions is not None) and (name in definitions):
                 definition = definitions[name]
-                values[name] = coerce_property_value(context, value, definition)
+                if value.value is not None:
+                    values[name] = coerce_property_value(context, value, definition)
             else:
                 context.validation.report('assignment to undefined property "%s" for "%s"' % (name, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
     
     # Fill in defaults from the definitions, and check if required properties have not been assigned
     if definitions is not None:
         for name, definition in definitions.iteritems():
-            if (values.get(name) is None) and hasattr(definition, 'default'):
-                values[name] = definition.default
+            if (values.get(name) is None) and hasattr(definition, 'default') and (definition.default is not None):
+                values[name] = coerce_default_property_value(context, presentation, definition) 
 
             if getattr(definition, 'required', False) and (values.get(name) is None):
                 context.validation.report('required property "%s" is not assigned a value for "%s"' % (name, presentation._fullname), locator=presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
@@ -89,3 +90,15 @@ def coerce_property_value(context, value, definition): # works on both propertie
     entry_schema = definition.entry_schema if definition is not None else None
     constraints = definition._get_constraints(context) if definition is not None else None
     return coerce_value(context, value, the_type, entry_schema, constraints, value.value)
+
+def coerce_default_property_value(context, presentation, definition): # works on both properties and inputs
+    the_type = definition._get_type(context) if definition is not None else None
+    entry_schema = definition.entry_schema if definition is not None else None
+    constraints = definition._get_constraints(context) if definition is not None else None
+    return coerce_value(context, presentation, the_type, entry_schema, constraints, definition.default)
+
+def convert_property_definitions_to_values(values, definitions):
+    for name, definition in definitions.iteritems():
+        default = definition.default
+        if default is not None:
+            values[name] = default

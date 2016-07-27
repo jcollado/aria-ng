@@ -6,12 +6,12 @@ imports:
 node_types:
 
   nodejs.Server:
-    description: >
+    description: >-
       Node.js server application.
     derived_from: tosca.nodes.WebServer
     artifacts:
       nodejs:
-        description: >
+        description: >-
           Node.js application package.
         type: os.Archive
         file: https://nodejs.org/dist/v4.4.7/node-v4.4.7-linux-x64.tar.xz

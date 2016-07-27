@@ -7,36 +7,36 @@ data_types:
       type_qualified_name: tosca:Container.Architecture.CPUAllocation
       specification: tosca-simple-nfv-1.0
       specification_section: 8.3.1
-    description: >
+    description: >-
       Granular CPU allocation requirements for NFV workloads.
     derived_from: tosca.datatypes.Root
     properties:
       cpu_affinity:
-        description: >
+        description: >-
           Describes whether vCPU need to be pinned to dedicated CPU core or shared dynamically.
         type: string
         constraints:
           - valid_values: [ shared, dedicated ]
         required: false
       thread_allocation:
-        description: >
+        description: >-
           Describe thread allocation requirement.
         type: string
         constraints:
           - valid_values: [ avoid, isolate, separate, prefer ]
         required: false
       socket_count:
-        description: >
+        description: >-
           Number of CPU sockets.
         type: integer
         required: false
       core_count:
-        description: >
+        description: >-
           Number of cores per socket.
         type: integer
         required: false
       thread_count:
-        description: >
+        description: >-
           Number of threads per core.
         type: integer
         required: false
@@ -48,19 +48,19 @@ data_types:
       specification: tosca-simple-nfv-1.0
       specification_section: 8.3.2
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/tosca-nfv-v1.0.html#_Toc447714697'
-    description: >
+    description: >-
       Granular Non-Uniform Memory Access (NUMA) topology requirements for NFV workloads.
     derived_from: tosca.datatypes.Root
     properties:
       id:
-        description: >
+        description: >-
           CPU socket identifier.
         type: integer
         constraints:
           - greater_or_equal: 0
         required: false
       vcpus:
-        description: >
+        description: >-
           List of specific host cpu numbers within a NUMA socket complex.
   
           TODO: need a new base type, with non-overlapping, positive value validation (exclusivity),
@@ -69,7 +69,7 @@ data_types:
           type: integer
         required: false
       mem_size:
-        description: >
+        description: >-
           Size of memory allocated from this NUMA memory bank.
         type: scalar-unit.size
         constraints:

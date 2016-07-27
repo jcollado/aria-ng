@@ -93,7 +93,7 @@ class Field(object):
                 if len(v) != 1:
                     raise InvalidValueError('field "%s" list elements do not all have exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
                 k, vv = v.items()[0]
-                sequence.append((k, self.cls(raw=vv, container=presentation)))
+                sequence.append((k, self.cls(name=k, raw=vv, container=presentation)))
             return ReadOnlyList(sequence)
 
         else:

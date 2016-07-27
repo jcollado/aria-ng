@@ -13,12 +13,12 @@ dsl_definitions:
 artifact_types:
 
   os.Package:
-    description: >
+    description: >-
       Generic application package.
     derived_from: tosca.artifacts.Root
 
   os.Archive:
-    description: >
+    description: >-
       Application package in an archive.
     derived_from: os.Package
     file_ext:
@@ -28,14 +28,14 @@ artifact_types:
       - tar.xz
 
   os.Deb:
-    description: >
+    description: >-
       Debian application package.
     derived_from: os.Package
     file_ext:
       - deb
 
   os.RPM:
-    description: >
+    description: >-
       RPM application package.
     derived_from: os.Package
     file_ext:
@@ -44,7 +44,7 @@ artifact_types:
 data_types:
 
   os.UserInfo:
-    description: >
+    description: >-
       Information about an operating system user.
     derived_from: tosca.datatypes.Root
     properties:

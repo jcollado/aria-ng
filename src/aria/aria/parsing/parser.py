@@ -1,6 +1,6 @@
 
 from .. import FixedThreadPoolExecutor, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
-from ..consumption import Validator
+from ..consumption import Validate
 from ..loading import DefaultLoaderSource
 from ..reading import DefaultReaderSource, AlreadyReadError
 from ..presentation import DefaultPresenterSource
@@ -46,7 +46,7 @@ class DefaultParser(Parser):
         
         executor = FixedThreadPoolExecutor(timeout=10)
         try:
-            presentation = self._parse_all(self.location, None, self.presenter_class, executor)
+            presentation = self._parse_all(context, self.location, None, self.presenter_class, executor)
             executor.drain()
             
             # Handle exceptions
@@ -77,12 +77,12 @@ class DefaultParser(Parser):
         try:
             context.presentation = self.parse(context)
             if context.presentation is not None:
-                Validator(context).consume()
+                Validate(context).consume()
         except Exception as e:
             self._handle_exception(context, e)
 
-    def _parse_all(self, location, origin_location, presenter_class, executor):
-        raw, location = self._parse_one(location, origin_location)
+    def _parse_all(self, context, location, origin_location, presenter_class, executor):
+        raw, location = self._parse_one(context, location, origin_location)
         
         if presenter_class is None:
             presenter_class = self.presenter_source.get_presenter(raw)
@@ -98,15 +98,15 @@ class DefaultParser(Parser):
             if import_locations:
                 for import_location in import_locations:
                     # The imports inherit the parent presenter class and use the current location as their origin location
-                    executor.submit(self._parse_all, import_location, location, presenter_class, executor)
+                    executor.submit(self._parse_all, context, import_location, location, presenter_class, executor)
 
         return presentation
     
-    def _parse_one(self, location, origin_location):
+    def _parse_one(self, context, location, origin_location):
         if self.reader is not None:
             return self.reader.read(), self.reader.location
         loader = self.loader_source.get_loader(location, origin_location)
-        reader = self.reader_source.get_reader(location, loader)
+        reader = self.reader_source.get_reader(context.reading, location, loader)
         return reader.read(), reader.location
 
     def _handle_exception(self, context, e):

@@ -1,9 +1,10 @@
 
+from ..reading import init_yaml
 from .consumer import Consumer
 from .exceptions import ConsumerError
 import ruamel.yaml as yaml # @UnresolvedImport
 
-class YamlWriter(Consumer):
+class Yaml(Consumer):
     """
     ARIA YAML writer.
     
@@ -12,7 +13,8 @@ class YamlWriter(Consumer):
     
     def consume(self):
         try:
-            text = yaml.dump(self.context.presentation.raw, Dumper=yaml.RoundTripDumper)
+            init_yaml()
+            text = yaml.dump(self.context.presentation._raw, Dumper=yaml.RoundTripDumper)
             self.context.out.write(text)
         except Exception as e:
             raise ConsumerError('YamlWriter: %s' % e, cause=e)

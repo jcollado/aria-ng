@@ -1,7 +1,7 @@
 
-from ..consumer import Consumer
+from .consumer import Consumer
 
-class Validator(Consumer):
+class Validate(Consumer):
     """
     ARIA validator.
     

@@ -1,6 +1,6 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
-description: >
+description: >-
   Node Cellar TOSCA blueprint.
 
 metadata:
@@ -17,7 +17,7 @@ imports:
 repositories:
 
   node_cellar:
-    description: >
+    description: >-
       The repository for the Node Cellar application and its dependencies.
     url: https://github.com/cloudify-cosmo/nodecellar/archive
 
@@ -28,33 +28,46 @@ topology_template:
     # Application
 
     node_cellar:
-      description: >
+      description: >-
         Node Cellar Node.js web application.
       type: nodejs.Application
       artifacts:
         node_cellar:
-          description: >
+          description: >-
             The Node Cellar application package.
           type: os.Archive
           file: master.tar.gz
           repository: node_cellar
           deploy_path: /opt/nodejs/applications/node-cellar
       requirements:
-        - database: node_cellar_database
+        #- database: node_cellar_database
+        - database:
+            node: node_cellar_database
+            capability: database_endpoint
+            relationship:
+              type: tosca.relationships.ConnectsTo
+              properties:
+                credential:
+                  user: admin
+                  token: admin123
+        #- database:
+        #    node: node_cellar_database
+        #    capability: tosca.capabilities.Endpoint.Database
+            
       capabilities:
         app_endpoint:
           properties:
             url_path: /nodecellar
     
     node_cellar_database:
-      description: >
+      description: >-
         Node Cellar MongoDB database.
       type: mongodb.Database
       properties:
         name: node_cellar
       artifacts:
-        dump:
-          description: >
+        initial:
+          description: >-
             The Node Cellar initial database.
           type: mongodb.DatabaseDump
           file: node-cellar.json
@@ -66,14 +79,14 @@ topology_template:
       type: nodejs.Server
 
     mongodb:
-      description: >
+      description: >-
         MongoDB database.
       type: mongodb.Server
     
     # Hosts
 
     application_host:
-      description: >
+      description: >-
         Host for applications.
       type: openstack.Instance
       properties:
@@ -86,7 +99,7 @@ topology_template:
               - www-data
 
     data_host:
-      description: >
+      description: >-
         Host for databases.
       type: openstack.Instance
       properties:

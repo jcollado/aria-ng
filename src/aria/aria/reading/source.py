@@ -1,5 +1,4 @@
 
-from .. import LockedList
 from ..loading import LiteralLocation
 from .exceptions import ReaderNotFoundError
 from .yaml import YamlReader
@@ -12,7 +11,7 @@ class ReaderSource(object):
     Reader sources provide appropriate :class:`Reader` instances for locations.
     """
 
-    def get_reader(self, location, loader):
+    def get_reader(self, context, location, loader):
         raise ReaderNotFoundError('location: %s' % location)
 
 EXTENSIONS = {
@@ -29,13 +28,12 @@ class DefaultReaderSource(ReaderSource):
     def __init__(self, literal_reader_class=YamlReader):
         super(DefaultReaderSource, self).__init__()
         self.literal_reader_class = literal_reader_class
-        self.already_read_locations = LockedList()
 
-    def get_reader(self, location, loader):
+    def get_reader(self, context, location, loader):
         if isinstance(location, LiteralLocation):
-            return self.literal_reader_class(self, location, loader)
+            return self.literal_reader_class(context, self, location, loader)
         elif isinstance(location, basestring):
             for extension, reader_class in EXTENSIONS.iteritems():
                 if location.endswith(extension):
-                    return reader_class(self, location, loader)
-        return super(DefaultReaderSource, self).get_reader(location, loader)
+                    return reader_class(context, self, location, loader)
+        return super(DefaultReaderSource, self).get_reader(context, location, loader)

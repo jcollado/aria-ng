@@ -4,7 +4,7 @@ from .property_assignment import PropertyAssignment
 from .misc import ConstraintClause, Range
 from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
 from .utils.data import get_data_type, get_property_constraints
-from .utils.properties import get_assigned_and_defined_property_values
+from .utils.properties import get_inherited_property_definitions, get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification
 from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, type_validator, list_type_validator
@@ -391,6 +391,9 @@ class RequirementDefinitionRelationship(ToscaPresentation):
         :rtype: list of :class:`InterfaceDefinitionForType`
         """
 
+    def _get_type(self, context):
+        return context.presentation.relationship_types.get(self.type)
+
 @short_form_field('capability')    
 @has_fields
 @dsl_specification('3.6.2', 'tosca-simple-profile-1.0')
@@ -479,7 +482,6 @@ class CapabilityDefinition(ToscaPresentation):
         
         :rtype: dict of str, :class:`PropertyDefinition`
         """
-        # The spec says 'list', but the examples are all of dicts
 
     @object_dict_field(AttributeDefinition)
     def attributes(self):
@@ -511,6 +513,17 @@ class CapabilityDefinition(ToscaPresentation):
 
     def _get_type(self, context):
         return context.presentation.capability_types.get(self.type)
+
+    def _get_properties(self, context):
+        return get_inherited_property_definitions(context, self, 'properties')
+
+    def _get_attributes(self, context):
+        return get_inherited_property_definitions(context, self, 'attributes')
+
+    def _validate(self, context):
+        super(CapabilityDefinition, self)._validate(context)
+        self._get_properties(context)
+        self._get_attributes(context)
 
 @has_fields
 @dsl_specification('3.5.6', 'tosca-simple-profile-1.0')

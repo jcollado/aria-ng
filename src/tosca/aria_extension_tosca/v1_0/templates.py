@@ -8,6 +8,7 @@ from .types import ArtifactType, DataType, CapabilityType, InterfaceType, Relati
 from .filters import NodeFilter
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_template_interfaces
+from .utils.reqs_and_caps import get_template_requirements, get_template_capabilities
 from aria import dsl_specification
 from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
 
@@ -116,6 +117,12 @@ class NodeTemplate(ToscaPresentation):
 
     def _get_properties(self, context):
         return get_assigned_and_defined_property_values(context, self)
+
+    def _get_requirements(self, context):
+        return get_template_requirements(context, self)
+
+    def _get_capabilities(self, context):
+        return get_template_capabilities(context, self)
 
     def _get_interfaces(self, context):
         return get_template_interfaces(context, self, 'node template')

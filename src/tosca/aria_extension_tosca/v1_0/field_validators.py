@@ -214,7 +214,7 @@ def constraint_clause_pattern_validator(field, presentation, context):
 # RequirementAssignment
 #
 
-def node_type_or_template_validator(field, presentation, context):
+def node_template_or_type_validator(field, presentation, context):
     """
     Makes sure that the field refers to either a node template or a node type.
     
@@ -230,11 +230,39 @@ def node_type_or_template_validator(field, presentation, context):
         if (value not in node_templates) and (value not in node_types):
             report_issue_for_unknown_type(context, presentation, 'node template or node type', field.name)
 
+def capability_definition_or_type_validator(field, presentation, context):
+    """
+    Makes sure refers to either a capability definition name (in the node template or node type referred to by the "node" field)
+    or a general capability type.
+    
+    If the value refers to a capability type, make sure the "node" field was not assigned.  
+    
+    Used as @field\_validator for the "capability" field in :class:`RequirementAssignment`.
+    """
+    
+    field._validate(presentation, context)
+    
+    value = getattr(presentation, field.name)
+    if value is not None:
+        node, _ = presentation._get_node(context)
+        capability_definitions_or_assignments = node._get_capabilities(context) if node is not None else None
+        
+        if (capability_definitions_or_assignments is not None) and (value in capability_definitions_or_assignments):
+            return
+
+        capability_types = context.presentation.capability_types
+        if (context.presentation.capability_types is not None) and (value in capability_types):
+            if node is not None:
+                context.validation.report('"%s" refers to a capability type even though "node" has a value for "%s"' % (presentation._name, presentation._container._fullname), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_FIELDS)
+            return
+        
+        context.validation.report('"%s" refers to an unknown capability definition name or capability type for "%s"' % (presentation._name, presentation._container._fullname), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
+
 #
 # RequirementAssignmentRelationship
 #
 
-def relationship_type_or_template_validator(field, presentation, context):
+def relationship_template_or_type_validator(field, presentation, context):
     """
     Makes sure that the field refers to either a relationship template or a relationship type.
     

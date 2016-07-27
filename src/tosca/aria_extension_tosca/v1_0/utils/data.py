@@ -225,6 +225,21 @@ def apply_constraint_to_value(context, presentation, constraint_clause, value):
     
     return True
 
+def apply_constraints_to_value(context, presentation, constraints, value):
+    """
+    Applies all constraints to the value. If the value conforms, returns the value.
+    If it does not conform, returns None.
+    """
+
+    if (value is not None) and (constraints is not None):
+        valid = True
+        for constraint in constraints:
+            if not constraint._apply_to_value(context, presentation, value):
+                valid = False
+        if not valid:
+            value = None
+    return value
+
 #
 # Utils
 #
@@ -298,17 +313,11 @@ def coerce_value(context, presentation, the_type, entry_schema, constraints, val
     
     return None
 
-def apply_constraints_to_value(context, presentation, constraints, value):
-    if (value is not None) and (constraints is not None):
-        valid = True
-        for constraint in constraints:
-            if not constraint._apply_to_value(context, presentation, value):
-                valid = False
-        if not valid:
-            value = None
-    return value
-
 def coerce_to_primitive(context, presentation, primitive_type, constraints, value, aspect=None):
+    """
+    Returns the value after it's coerced to a primitive type, translating exceptions to validation errors if it cannot be coerced.
+    """
+    
     try:
         # Coerce
         value = primitive_type(value)
@@ -324,20 +333,30 @@ def coerce_to_primitive(context, presentation, primitive_type, constraints, valu
     
     return value
 
-def coerce_to_class(context, presentation, the_type, entry_schema, constraints, value, aspect=None):
+def coerce_to_class(context, presentation, cls, entry_schema, constraints, value, aspect=None):
+    """
+    Returns the value after it's coerced to a custom class, reporting validation errors if it cannot be coerced.
+    Constraints will be applied after coersion.
+    
+    Will either call a "\_create" static function in the class, or instantiate it using a constructor if "\_create"
+    is not available.
+    
+    This will usually be called by a "coerce\_value" extension hook in a :class:`DataType`.
+    """
+    
     try:
-        if hasattr(the_type, '_create'):
+        if hasattr(cls, '_create'):
             # Instantiate using creator function
-            value = the_type._create(context, presentation, entry_schema, constraints, value, aspect)
+            value = cls._create(context, presentation, entry_schema, constraints, value, aspect)
         else:
             # Normal instantiation
-            value = the_type(entry_schema, constraints, value, aspect)
+            value = cls(entry_schema, constraints, value, aspect)
     except ValueError as e:
-        report_issue_for_bad_format(context, presentation, the_type, value, aspect, e)
+        report_issue_for_bad_format(context, presentation, cls, value, aspect, e)
         value = None
     
     # Check constraints
-    apply_constraints_to_value(context, presentation, constraints, value)
+    value = apply_constraints_to_value(context, presentation, constraints, value)
         
     return value
 

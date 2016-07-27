@@ -342,8 +342,9 @@ autoclass_content = 'both'
 autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance']
 
 def on_skip_members(app, what, name, obj, skip, options):
-    if name == 'FIELDS':
-        skip = True
+    if not skip:
+        if name == 'FIELDS':
+            skip = True
     return skip
     
 def setup(app):

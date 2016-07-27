@@ -2,10 +2,11 @@
 from .exceptions import *
 from .context import *
 from .consumer import *
-from .printer import *
+from .validate import *
+from .deploy import *
+from .printing import *
 from .yaml import *
 from .style import *
-from .validation import *
 
 MODULES = (
     'validation')
@@ -16,7 +17,8 @@ __all__ = (
     'ValidationContext',
     'ConsumptionContext',
     'Consumer',
-    'Printer',
-    'YamlWriter',
-    'Style',
-    'Validator')
+    'Validate',
+    'Deploy',
+    'Print',
+    'Yaml',
+    'Style')

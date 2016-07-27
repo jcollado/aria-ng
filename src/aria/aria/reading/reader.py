@@ -9,18 +9,20 @@ class Reader(object):
     Readers provide agnostic raw data by consuming :class:`aria.loader.Loader` instances.
     """
     
-    def __init__(self, source, location, loader):
+    def __init__(self, context, source, location, loader):
+        self.context = context
         self.source = source
         self.location = location
         self.loader = loader
 
     def load(self):
         with OpenClose(self.loader) as loader:
-            with self.source.already_read_locations:
-                if loader.location in self.source.already_read_locations:
-                    raise AlreadyReadError('already read: %s' % loader.location)
-                else:
-                    self.source.already_read_locations.append(loader.location)
+            if self.context is not None:
+                with self.context.locations:
+                    if loader.location in self.context.locations:
+                        raise AlreadyReadError('already read: %s' % loader.location)
+                    else:
+                        self.context.locations.append(loader.location)
             
             data = loader.load()
             if data is None:

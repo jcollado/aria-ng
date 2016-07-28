@@ -1,5 +1,6 @@
 
-from aria import Issue, InvalidValueError, dsl_specification, import_fullname
+from aria import Issue, InvalidValueError, dsl_specification
+from aria.utils import import_fullname
 from collections import OrderedDict
 import re
 

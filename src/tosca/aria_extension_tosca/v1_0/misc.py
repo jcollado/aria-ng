@@ -2,7 +2,8 @@
 from .presentation import ToscaPresentation
 from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
 from .utils.data import get_as_data_type, apply_constraint_to_value
-from aria import cachedmethod, dsl_specification
+from aria import dsl_specification
+from aria.utils import cachedmethod
 from aria.presentation import has_fields, short_form_field, primitive_field, primitive_list_field, field_validator
 
 @has_fields

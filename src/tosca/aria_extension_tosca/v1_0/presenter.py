@@ -1,7 +1,7 @@
 
 from .templates import ServiceTemplate
-from aria import ReadOnlyList
 from aria.presentation import Presenter
+from aria.utils import ReadOnlyList
 
 class ToscaSimplePresenter1_0(Presenter):
     """

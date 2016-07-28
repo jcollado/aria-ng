@@ -1,5 +1,6 @@
 
-from .. import UnimplementedFunctionalityError, OpenClose, classname
+from .. import UnimplementedFunctionalityError
+from ..utils import OpenClose, classname
 from .exceptions import ReaderError, AlreadyReadError
 
 class Reader(object):

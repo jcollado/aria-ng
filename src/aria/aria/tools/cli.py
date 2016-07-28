@@ -1,5 +1,6 @@
 
-from .. import install_aria_extensions, print_exception, import_fullname
+from .. import install_aria_extensions
+from ..utils import print_exception, import_fullname
 from ..consumption import ConsumptionContext
 from .utils import CommonArgumentParser, create_parser_ns
 

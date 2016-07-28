@@ -1,5 +1,6 @@
 
-from .. import FixedThreadPoolExecutor, Issue, AriaError, UnimplementedFunctionalityError, print_exception, classname
+from .. import Issue, AriaError, UnimplementedFunctionalityError
+from ..utils import FixedThreadPoolExecutor, print_exception, classname
 from ..consumption import Validate
 from ..loading import DefaultLoaderSource
 from ..reading import DefaultReaderSource, AlreadyReadError

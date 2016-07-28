@@ -9,7 +9,8 @@ from .utils.interfaces import get_inherited_interface_definitions, get_inherited
 from .utils.requirements import get_inherited_requirement_definitions
 from .utils.capabilities import get_inherited_capability_definitions
 from .utils.data import data_type_class_getter, get_data_type, get_inherited_constraints, coerce_data_type_value
-from aria import ReadOnlyDict, ReadOnlyList, cachedmethod, dsl_specification
+from aria import dsl_specification
+from aria.utils import ReadOnlyDict, ReadOnlyList, cachedmethod
 from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_list_field, object_sequenced_list_field, object_dict_unknown_fields, field_getter, field_validator, list_type_validator, derived_from_validator
 
 @has_fields

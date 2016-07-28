@@ -1,6 +1,6 @@
 
 from .writer import Writer, one_line
-from aria import make_agnostic
+from aria.utils import make_agnostic
 
 class CodeProperty(object):
     def __init__(self, generator, name, description=None, type=None, default=None):

@@ -7,7 +7,8 @@ from .field_validators import data_type_validator, data_value_validator, entry_s
 from .utils.data import data_type_class_getter, get_data_type, get_property_constraints
 from .utils.properties import get_inherited_property_definitions, get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
-from aria import ReadOnlyDict, cachedmethod, dsl_specification
+from aria import dsl_specification
+from aria.utils import ReadOnlyDict, cachedmethod
 from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, field_getter, type_validator, list_type_validator
 
 @short_form_field('type')
@@ -91,7 +92,7 @@ class PropertyDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str, default='supported', allowed=['supported', 'unsupported', 'experimental', 'deprecated'])
+    @primitive_field(str, default='supported', allowed=('supported', 'unsupported', 'experimental', 'deprecated'))
     @dsl_specification(section='3.5.8.3', spec='tosca-simple-profile-1.0')
     def status(self):
         """
@@ -165,7 +166,7 @@ class AttributeDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str, default='supported', allowed=['supported', 'unsupported', 'experimental', 'deprecated'])
+    @primitive_field(str, default='supported', allowed=('supported', 'unsupported', 'experimental', 'deprecated'))
     def status(self):
         """
         The optional status of the attribute relative to the specification or implementation.

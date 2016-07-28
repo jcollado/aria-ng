@@ -1,6 +1,7 @@
 
 from .data import coerce_value
-from aria import Issue, merge, deepclone
+from aria import Issue
+from aria.utils import merge, deepclone
 from collections import OrderedDict
 
 #
@@ -44,7 +45,7 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
 # NodeTemplate, RelationshipTemplate, GroupDefinition, PolicyDefinition
 #
 
-def get_assigned_and_defined_property_values(context, presentation, original_presentation=None):
+def get_assigned_and_defined_property_values(context, presentation):
     """
     Returns the assigned property values while making sure they are defined in our type.
     
@@ -81,9 +82,7 @@ def get_assigned_and_defined_property_values(context, presentation, original_pre
                 values[name] = coerce_default_property_value(context, presentation, definition) 
 
             if getattr(definition, 'required', False) and (values.get(name) is None):
-                if original_presentation is None:
-                    original_presentation = presentation 
-                context.validation.report('required property "%s" is not assigned a value for "%s"' % (name, original_presentation._fullname), locator=original_presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
+                context.validation.report('required property "%s" is not assigned a value for "%s"' % (name, presentation._fullname), locator=presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
     
     return values
 

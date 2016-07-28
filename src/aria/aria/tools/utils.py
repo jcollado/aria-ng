@@ -1,5 +1,6 @@
 
-from .. import VERSION, import_fullname
+from .. import VERSION
+from ..utils import import_fullname
 from argparse import ArgumentParser
 
 class BaseArgumentParser(ArgumentParser):

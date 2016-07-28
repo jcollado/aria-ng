@@ -1,5 +1,5 @@
 
-from .. import AriaError
+from aria import AriaError
 
 class ExecutorError(AriaError):
     """

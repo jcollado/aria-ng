@@ -1,5 +1,6 @@
 
-from .. import install_aria_extensions, print_exception
+from .. import install_aria_extensions
+from ..utils import print_exception
 from ..loading import FILE_LOADER_PATHS, LiteralLocation
 from .utils import CommonArgumentParser, create_parser_ns
 from rest_server import start_server

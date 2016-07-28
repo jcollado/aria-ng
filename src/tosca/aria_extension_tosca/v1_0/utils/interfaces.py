@@ -1,6 +1,7 @@
 
 from .properties import coerce_property_value, convert_property_definitions_to_values
-from aria import Issue, merge, deepclone
+from aria import Issue
+from aria.utils import merge, deepclone
 from collections import OrderedDict
 
 #

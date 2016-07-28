@@ -10,7 +10,8 @@ from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
 from .utils.capabilities import get_template_capabilities
-from aria import ReadOnlyDict, ReadOnlyList, cachedmethod, dsl_specification
+from aria import dsl_specification
+from aria.utils import ReadOnlyDict, ReadOnlyList, cachedmethod
 from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
 
 @has_fields

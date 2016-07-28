@@ -1,5 +1,5 @@
 
-from .. import LockedList
+from ..utils import LockedList
 
 class ReadingContext(object):
     def __init__(self):

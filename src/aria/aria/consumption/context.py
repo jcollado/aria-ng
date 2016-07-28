@@ -1,5 +1,6 @@
 
-from .. import Issue, ReadOnlyList, print_exception
+from .. import Issue
+from ..utils import ReadOnlyList, print_exception
 from ..reading import ReadingContext
 from .style import Style
 from clint.textui import puts, colored, indent

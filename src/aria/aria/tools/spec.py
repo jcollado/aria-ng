@@ -1,5 +1,6 @@
 
-from .. import install_aria_extensions, print_exception, import_modules, DSL_SPECIFICATION_PACKAGES, DSL_SPECIFICATION, iter_spec
+from .. import install_aria_extensions, DSL_SPECIFICATION_PACKAGES, DSL_SPECIFICATION, iter_spec
+from ..utils import print_exception, import_modules
 from .utils import BaseArgumentParser
 from clint.textui import puts, colored, indent
 import csv, sys

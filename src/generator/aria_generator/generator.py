@@ -6,7 +6,7 @@ from .assignment import CodeAssignment
 from .method import CodeMethod
 from .node_template import CodeNodeTemplate
 from .relationship import CodeRelationship
-from aria.execution import ExecutionContext
+from .execution import ExecutionContext
 from aria.consumption import Consumer
 from inspect import getargspec
 import sys

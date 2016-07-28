@@ -1,7 +1,7 @@
 
 from .properties import convert_property_definitions_to_values, get_assigned_and_defined_property_values
 from .interfaces import convert_interface_definition_from_type_to_raw_template, get_template_interfaces
-from aria import merge, deepclone
+from aria.utils import merge, deepclone
 from collections import OrderedDict
 
 #
@@ -119,7 +119,6 @@ def convert_requirement_from_definition_to_assignment(context, presentation, con
     return RequirementAssignment(name=presentation._name, raw=raw, container=container)
 
 def fill_in_requirement_assignment(context, requirement):
-    original_presentation=None
     relationship = requirement.relationship
     if relationship is None:
         return
@@ -129,13 +128,11 @@ def fill_in_requirement_assignment(context, requirement):
         return
 
     if relationship_type_variant == 'relationship_type':
-        property_values = get_assigned_and_defined_property_values(context, relationship, original_presentation)
-        interfaces = get_template_interfaces(context, relationship, 'relationship definition')
+        property_values = get_assigned_and_defined_property_values(context, relationship)
     else:
         property_values = relationship_type._get_property_values(context)
-        #TODO
-        interfaces = get_template_interfaces(context, relationship, 'relationship definition')
-        #interfaces = relationship_type._get_interfaces(context)
+    
+    interfaces = get_template_interfaces(context, relationship, 'relationship definition')
         
     if len(property_values):
         relationship._raw['properties'] = property_values

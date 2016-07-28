@@ -1,5 +1,5 @@
 
-from .. import classname, deepclone
+from ..utils import classname, deepclone
 from .utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
 
 class PresentationBase(object):

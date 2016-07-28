@@ -4,7 +4,10 @@ from aria.presentation import PRESENTER_CLASSES
 from .v1_3 import CloudifyPresenter1_3
 
 def install_aria_extension():
+    # v1.3 presenter
     PRESENTER_CLASSES.append(CloudifyPresenter1_3)
+    
+    # DSL specification
     DSL_SPECIFICATION_PACKAGES.append('aria_extension_cloudify')
 
 MODULES = (

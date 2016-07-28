@@ -1,7 +1,7 @@
 
-from .. import classname
 from .exceptions import ExecutorNotFoundError
 from .cloudify import HostAgentExecutor, CentralDeploymentAgentExecutor
+from aria.utils import classname
 from clint.textui import puts
 
 class Relationship(object):

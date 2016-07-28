@@ -4,7 +4,8 @@ from .filters import NodeFilter
 from .definitions import InterfaceDefinitionForTemplate
 from .property_assignment import PropertyAssignment
 from .field_validators import node_template_or_type_validator, relationship_template_or_type_validator, capability_definition_or_type_validator
-from aria import cachedmethod, dsl_specification
+from aria import dsl_specification
+from aria.utils import cachedmethod
 from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
 
 @short_form_field('type')

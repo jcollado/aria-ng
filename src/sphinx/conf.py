@@ -21,6 +21,7 @@ import sys
 sys.path.append(os.path.abspath('../aria'))
 sys.path.append(os.path.abspath('../tosca'))
 sys.path.append(os.path.abspath('../cloudify'))
+#sys.path.append(os.path.abspath('../generator'))
 
 # -- General configuration ------------------------------------------------
 

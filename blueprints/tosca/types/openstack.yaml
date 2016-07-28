@@ -82,11 +82,6 @@ policy_types:
       bandwidth_threshold:
         type: scalar-unit.size
         default: 1 GB
-      secured_group:
-        description: >-
-          Optional name of secured group in which we will add new instances.
-        type: string
-        required: false
 
 data_types:
 

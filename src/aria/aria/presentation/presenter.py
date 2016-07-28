@@ -1,5 +1,5 @@
 
-from .. import merge
+from ..utils import merge
 from .presentation import Presentation
 
 class Presenter(Presentation):

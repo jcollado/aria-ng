@@ -79,7 +79,7 @@ topology_template:
             node: node_cellar_database
             capability: database_endpoint
             relationship:
-              type: connects_to # relationship type or relationship template
+              type: ConnectsTo # relationship type or relationship template
               properties:
                 credential:
                   user: admin
@@ -177,7 +177,5 @@ topology_template:
       type: openstack.Scaling
       properties:
         bandwidth_threshold: 2 GB
-        secured_group: node_cellar
       targets: # node templates or groups
-        - application_host
-        - data_host
+        - node_cellar

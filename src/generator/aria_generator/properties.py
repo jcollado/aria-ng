@@ -1,5 +1,5 @@
 
-from .exceptions import InvalidValueError
+from aria.exceptions import InvalidValueError
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict

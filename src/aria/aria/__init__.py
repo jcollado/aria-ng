@@ -1,6 +1,4 @@
 
-from .utils import *
-from .properties import *
 from .issue import *
 from .exceptions import *
 from .specification import *
@@ -32,33 +30,13 @@ MODULES = (
     'parsing',
     'presentation',
     'reading',
-    'tools')
+    'tools',
+    'utils')
 
 __all__ = (
     'MODULES',
     'VERSION',
     'install_aria_extensions',
-    'OpenClose',
-    'FixedThreadPoolExecutor',
-    'LockedList',
-    'ReadOnlyList',
-    'EMPTY_READ_ONLY_LIST',
-    'ReadOnlyDict',
-    'EMPTY_READ_ONLY_DICT',
-    'StrictList',
-    'StrictDict',
-    'classname',
-    'cachedmethod',
-    'merge',
-    'deepclone',
-    'import_fullname',
-    'import_modules',
-    'print_exception',
-    'print_traceback',
-    'make_agnostic',
-    'Prop',
-    'has_validated_properties',
-    'validated_property',
     'Issue',
     'AriaError',
     'UnimplementedFunctionalityError',

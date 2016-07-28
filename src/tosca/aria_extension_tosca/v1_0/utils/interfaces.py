@@ -145,11 +145,11 @@ def get_template_interfaces(context, presentation, type_name):
                 interface_definition = interface_definitions[interface_name] # InterfaceDefinitionForType (or InterfaceDefinitionForTemplate in the case of RelationshipTemplate) 
                 
                 # Assign interface inputs
-                if hasattr(interface_definition, '_get_inputs'):
+                if not is_a_template:
                     assign_raw_inputs(context, interface_template._raw, our_interface_template.inputs, interface_definition._get_inputs(context), our_interface_template, interface_name, None, presentation)
                 else:
                     # InterfaceDefinitionForTemplate
-                    merge(our_interface_template._raw['inputs'], deepclone(interface_definition._raw['inputs']))
+                    merge(interface_template._raw['inputs'], deepclone(our_interface_template._raw['inputs']))
 
                 # Assign operation implementations and inputs
                 our_operation_templates = our_interface_template.operations # OperationDefinitionForTemplate
@@ -173,11 +173,11 @@ def get_template_interfaces(context, presentation, type_name):
                             interface_template._raw[operation_name]['implementation'] = deepclone(our_implementation._raw)
 
                         # Assign operation inputs
-                        if not is_a_template: 
+                        if not is_a_template:
                             input_definitions = operation_definition.inputs if operation_definition is not None else None
                             assign_raw_inputs(context, interface_template._raw[operation_name], our_input_assignments, input_definitions, our_operation_template, interface_name, operation_name, presentation)
                         else:
-                            merge(our_operation_template._raw['inputs'], deepclone(operation_definition._raw['inputs']))
+                            merge(interface_template._raw[operation_name]['inputs'], deepclone(our_operation_template._raw['inputs']))
             else:
                 context.validation.report('interface definition "%s" not declared in %s "%s" for "%s"' % (interface_name, type_name, presentation.type, presentation._fullname), locator=our_interface_template._locator, level=Issue.BETWEEN_TYPES)
 

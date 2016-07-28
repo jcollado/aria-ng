@@ -7,9 +7,8 @@ from .field_validators import data_type_validator, data_value_validator, entry_s
 from .utils.data import data_type_class_getter, get_data_type, get_property_constraints
 from .utils.properties import get_inherited_property_definitions, get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
-from aria import ReadOnlyDict, dsl_specification
+from aria import ReadOnlyDict, cachedmethod, dsl_specification
 from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, field_getter, type_validator, list_type_validator
-from functools32 import lru_cache
 
 @short_form_field('type')
 @has_fields
@@ -39,11 +38,11 @@ class EntrySchema(ToscaPresentation):
         :rtype: list of (str, :class:`ConstraintClause`)
         """
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return get_data_type(context, self, 'type')
 
-    @lru_cache()
+    @cachedmethod
     def _get_constraints(self, context):
         return get_property_constraints(context, self)
 
@@ -118,11 +117,11 @@ class PropertyDefinition(ToscaPresentation):
         :rtype: str
         """
     
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return get_data_type(context, self, 'type')
 
-    @lru_cache()
+    @cachedmethod
     def _get_constraints(self, context):
         return get_property_constraints(context, self)
 
@@ -183,7 +182,7 @@ class AttributeDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return get_data_type(context, self, 'type')
 
@@ -335,15 +334,15 @@ class InterfaceDefinitionForType(ToscaPresentation):
     def operations(self):
         pass
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.interface_types.get(self.type) if context.presentation.interface_types is not None else None
 
-    @lru_cache()
+    @cachedmethod
     def _get_inputs(self, context):
         return ReadOnlyDict(get_and_override_input_definitions_from_type(context, self))
 
-    @lru_cache()
+    @cachedmethod
     def _get_operations(self, context):
         return ReadOnlyDict(get_and_override_operation_definitions_from_type(context, self))
     
@@ -375,7 +374,7 @@ class InterfaceDefinitionForTemplate(ToscaPresentation):
     def operations(self):
         pass
     
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         the_type = self._container._get_type(context)
         
@@ -413,7 +412,7 @@ class RequirementDefinitionRelationship(ToscaPresentation):
         :rtype: list of :class:`InterfaceDefinitionForType`
         """
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.relationship_types.get(self.type) if context.presentation.relationship_types is not None else None
 
@@ -464,11 +463,11 @@ class RequirementDefinition(ToscaPresentation):
         :rtype: :class:`Range`
         """
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.capability_types.get(self.capability) if context.presentation.capability_types is not None else None
 
-    @lru_cache()
+    @cachedmethod
     def _get_node_type(self, context):
         return context.presentation.capability_types.get(self.node)
 
@@ -537,15 +536,15 @@ class CapabilityDefinition(ToscaPresentation):
         :rtype: :class:`Range`
         """
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.capability_types.get(self.type) if context.presentation.capability_types is not None else None
 
-    @lru_cache()
+    @cachedmethod
     def _get_properties(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
-    @lru_cache()
+    @cachedmethod
     def _get_attributes(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'attributes'))
 
@@ -663,15 +662,15 @@ class GroupDefinition(ToscaPresentation):
         :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.group_types.get(self.type) if context.presentation.group_types is not None else None
 
-    @lru_cache()
+    @cachedmethod
     def _get_property_values(self, context):
         return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
 
-    @lru_cache()
+    @cachedmethod
     def _get_interfaces(self, context):
         return ReadOnlyDict(get_template_interfaces(context, self, 'group definition'))
     
@@ -725,11 +724,11 @@ class PolicyDefinition(ToscaPresentation):
         :rtype: list of str
         """
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
 
-    @lru_cache()
+    @cachedmethod
     def _get_property_values(self, context):
         return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
     

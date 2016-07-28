@@ -2,9 +2,8 @@
 from .presentation import ToscaPresentation
 from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
 from .utils.data import get_as_data_type, apply_constraint_to_value
-from aria import dsl_specification
+from aria import cachedmethod, dsl_specification
 from aria.presentation import has_fields, short_form_field, primitive_field, primitive_list_field, field_validator
-from functools32 import lru_cache
 
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')
@@ -65,7 +64,7 @@ class Repository(ToscaPresentation):
         :rtype: tosca.datatypes.Credential
         """
     
-    @lru_cache()
+    @cachedmethod
     def _get_credential(self, context):
         return get_as_data_type(context, self, 'credential', 'tosca.datatypes.Credential')
 
@@ -198,7 +197,7 @@ class ConstraintClause(ToscaPresentation):
         Note: Future drafts of this specification will detail the use of regular expressions and reference an appropriate standardized grammar.
         """
     
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         if hasattr(self._container, '_get_type'):
             return self._container._get_type(context)
@@ -206,7 +205,7 @@ class ConstraintClause(ToscaPresentation):
             # We are inside DataType, so the DataType itself is our type 
             return self._container
     
-    @lru_cache()
+    @cachedmethod
     def _is_typed(self):
         key = self._raw.keys()[0]
         return key in ('equal', 'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'less_or_equal', 'in_range', 'valid_values')

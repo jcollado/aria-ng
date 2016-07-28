@@ -48,6 +48,7 @@ __all__ = (
     'StrictList',
     'StrictDict',
     'classname',
+    'cachedmethod',
     'merge',
     'deepclone',
     'import_fullname',

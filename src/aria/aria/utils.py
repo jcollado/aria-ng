@@ -4,6 +4,7 @@ from threading import Thread, Lock
 from collections import OrderedDict
 from copy import deepcopy
 from Queue import Queue
+from functools32 import lru_cache
 import sys, linecache, itertools, multiprocessing
 
 class OpenClose(object):
@@ -320,6 +321,8 @@ def classname(o):
     """
     
     return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
+
+cachedmethod = lru_cache()
 
 def merge(a, b, path=[], strict=False):
     """

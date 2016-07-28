@@ -10,9 +10,8 @@ from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
 from .utils.capabilities import get_template_capabilities
-from aria import ReadOnlyDict, ReadOnlyList, dsl_specification
+from aria import ReadOnlyDict, ReadOnlyList, cachedmethod, dsl_specification
 from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
-from functools32 import lru_cache
 
 @has_fields
 @dsl_specification('3.7.3', 'tosca-simple-profile-1.0')
@@ -114,23 +113,23 @@ class NodeTemplate(ToscaPresentation):
         :rtype: str
         """
     
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.node_types.get(self.type) if context.presentation.node_types is not None else None
 
-    @lru_cache()
+    @cachedmethod
     def _get_property_values(self, context):
         return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
 
-    @lru_cache()
+    @cachedmethod
     def _get_requirements(self, context):
         return ReadOnlyList(get_template_requirements(context, self))
 
-    @lru_cache()
+    @cachedmethod
     def _get_capabilities(self, context):
         return ReadOnlyDict(get_template_capabilities(context, self))
 
-    @lru_cache()
+    @cachedmethod
     def _get_interfaces(self, context):
         return ReadOnlyDict(get_template_interfaces(context, self, 'node template'))
 
@@ -201,15 +200,15 @@ class RelationshipTemplate(ToscaPresentation):
         :rtype: str
         """
 
-    @lru_cache()
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.relationship_types.get(self.type) if context.presentation.relationship_types is not None else None
 
-    @lru_cache()
+    @cachedmethod
     def _get_property_values(self, context):
         return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
 
-    @lru_cache()
+    @cachedmethod
     def _get_interfaces(self, context):
         return ReadOnlyDict(get_template_interfaces(context, self, 'relationship template'))
     

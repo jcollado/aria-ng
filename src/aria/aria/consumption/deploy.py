@@ -16,13 +16,14 @@ class Deploy(Consumer):
         if self.context.presentation.node_templates:
             for node_template_name, node_template in self.context.presentation.node_templates.iteritems():
                 puts('Node template: %s' % self.context.style.node(node_template_name))
+
                 requirements = node_template._get_requirements(self.context)
                 if requirements:
                     with self.context.style.indent:
                         puts('Requirements:')
                         with self.context.style.indent:
                             for requirement_name, requirement in requirements:
-                                puts('Requirement name: %s' % requirement_name)
+                                puts(self.context.style.node(requirement_name))
                                 with self.context.style.indent:
                                     node, node_variant = requirement._get_node(self.context)
                                     if node is not None:
@@ -66,9 +67,9 @@ class Deploy(Consumer):
                                                             the_type = interface._get_type(self.context)
                                                             
                                                             if the_type is not None:
-                                                                puts('%s (type: %s)' % (interface_name, self.context.style.type(the_type._name)))
+                                                                puts('%s (type: %s)' % (self.context.style.node(interface_name), self.context.style.type(the_type._name)))
                                                             else:
-                                                                puts(interface_name)
+                                                                puts(self.context.style.node(interface_name))
                                                             
                                                             inputs = interface.inputs
                                                             if inputs:
@@ -84,12 +85,49 @@ class Deploy(Consumer):
                                                                     puts('Operations:')
                                                                     with self.context.style.indent:
                                                                         for operation_name, operation in operations.iteritems():
-                                                                            puts(operation_name)
-
+                                                                            implementation = operation.implementation
                                                                             inputs = operation.inputs
-                                                                            if inputs:
-                                                                                with self.context.style.indent:
+                                                                            
+                                                                            if implementation is None and not inputs:
+                                                                                continue
+                                                                            
+                                                                            puts(self.context.style.node(operation_name))
+
+                                                                            with self.context.style.indent:
+                                                                                if implementation is not None:
+                                                                                    puts('Implementation: %s' % implementation.primary)
+                                                                                    if implementation.dependencies:
+                                                                                        puts('Dependencies: %s' % implementation.dependencies)
+    
+                                                                                if inputs:
                                                                                     puts('Inputs:')
                                                                                     with self.context.style.indent:
                                                                                         for input_name, input in inputs.iteritems():
                                                                                             puts('%s = %s' % (self.context.style.property(input_name), self.context.style.literal(input.value)))
+
+                capabilities = node_template._get_capabilities(self.context)
+                if capabilities:
+                    with self.context.style.indent:
+                        puts('Capabilities:')
+                        with self.context.style.indent:
+                            for capability_name, capability in capabilities.iteritems():
+                                capability_definition = capability._get_definition(self.context)
+                                the_type = capability._get_type(self.context)
+                                
+                                if the_type is not None:
+                                    puts('%s (type: %s)' % (self.context.style.node(capability_name), self.context.style.type(the_type._name)))
+                                else:
+                                    puts(self.context.style.node(capability_name))
+                                
+                                with self.context.style.indent:
+                                    if capability_definition is not None:
+                                        valid_source_types = capability_definition.valid_source_types
+                                        if valid_source_types:
+                                            puts('Valid source node types: %s' % valid_source_types)
+
+                                    properties = capability.properties
+                                    if properties:
+                                            puts('Properties:')
+                                            with self.context.style.indent:
+                                                for property_name, prop in properties.iteritems():
+                                                    puts('%s = %s' % (self.context.style.property(property_name), self.context.style.literal(prop.value)))

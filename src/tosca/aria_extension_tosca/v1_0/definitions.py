@@ -5,7 +5,7 @@ from .misc import ConstraintClause
 from .data import Range
 from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
 from .utils.data import data_type_class_getter, get_data_type, get_property_constraints
-from .utils.properties import get_inherited_property_definitions, get_assigned_and_defined_property_values
+from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification
 from aria.utils import ReadOnlyDict, cachedmethod
@@ -540,19 +540,12 @@ class CapabilityDefinition(ToscaPresentation):
     @cachedmethod
     def _get_type(self, context):
         return context.presentation.capability_types.get(self.type) if context.presentation.capability_types is not None else None
-
+    
     @cachedmethod
-    def _get_properties(self, context):
-        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
-
-    @cachedmethod
-    def _get_attributes(self, context):
-        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'attributes'))
-
-    def _validate(self, context):
-        super(CapabilityDefinition, self)._validate(context)
-        self._get_properties(context)
-        self._get_attributes(context)
+    def _get_parent(self, context):
+        container_parent = self._container._get_parent(context)
+        container_parent_capabilities = container_parent._get_capabilities(context) if container_parent is not None else None
+        return container_parent_capabilities.get(self._name) if container_parent_capabilities is not None else None
 
 @has_fields
 @dsl_specification('3.5.6', 'tosca-simple-profile-1.0')

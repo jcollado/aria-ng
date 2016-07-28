@@ -1,8 +1,25 @@
 
-from .properties import convert_property_definitions_to_values
+from .properties import convert_property_definitions_to_values, merge_raw_property_definitions, get_assigned_and_defined_property_values
 from aria import Issue
-from aria.utils import merge, deepclone
+from aria.utils import deepclone
 from collections import OrderedDict
+
+#
+# CapabilityType
+#
+
+def get_inherited_valid_source_types(context, presentation):
+    """
+    If we haven't set the "valid\_source\_types" fields, uses that value from our parent, if we have one (recursively).
+    """
+    
+    valid_source_types = presentation.valid_source_types
+    
+    if valid_source_types is None:
+        parent = presentation._get_parent(context)
+        valid_source_types = get_inherited_valid_source_types(context, parent) if parent is not None else None
+
+    return valid_source_types
 
 #
 # NodeType
@@ -10,36 +27,57 @@ from collections import OrderedDict
 
 def get_inherited_capability_definitions(context, presentation, for_presentation=None):
     """
-    Returns our capability capability_definitions added on top of those of our parent, if we have one (recursively).
+    Returns our capability capability definitions added on top of those of our parent, if we have one (recursively).
     
     Allows overriding all aspects of parent capability properties except data type.  
     """
 
-    # Get capability_definitions from parent
+    # Get capability definitions from parent
     parent = presentation._get_parent(context)
     capability_definitions = get_inherited_capability_definitions(context, parent, for_presentation=presentation) if parent is not None else OrderedDict()
-    
+
     # Add/merge our capability_definitions
     our_capability_definitions = presentation.capabilities
     if our_capability_definitions is not None:
-        for name, our_capability_definition in our_capability_definitions.iteritems():
-            if name in capability_definitions:
-                capability_definition = capability_definitions[name]
+        for capability_name, our_capability_definition in our_capability_definitions.iteritems():
+            if capability_name in capability_definitions:
+                capability_definition = capability_definitions[capability_name]
                 
                 # Check if we changed the type
-                #type1 = getattr(capability_definition, 'type', None)
-                #type2 = getattr(our_capability_definition, 'type', None)
-                #if type1 != type2:
-                #    context.validation.report('override changes type from "%s" to "%s" for property "%s" for "%s"' % (type1, type2, name, presentation._fullname), locator=presentation._get_grandchild_locator(field_name, name), level=Issue.BETWEEN_TYPES)
+                type1 = capability_definition.type
+                type2 = our_capability_definition.type
+                if type1 != type2:
+                    context.validation.report('capability definition changes type from "%s" to "%s" for "%s"' % (type1, type2, presentation._fullname), locator=our_capability_definition._locator, level=Issue.BETWEEN_TYPES)
                 
-                merge(capability_definition._raw, deepclone(our_capability_definition._raw))
+                capability_definition = capability_definition._clone(for_presentation)
+                capability_definitions[capability_name] = capability_definition
             else:
-                if for_presentation is not None:
-                    capability_definitions[name] = our_capability_definition._clone(for_presentation)
-                else:
-                    capability_definitions[name] = our_capability_definition
+                capability_definition = our_capability_definition._clone(for_presentation)
+                capability_definitions[capability_name] = capability_definition
+
+            merge_capability_definition_from_type(context, presentation, capability_definition)
         
     return capability_definitions
+
+def merge_capability_definition_from_type(context, presentation, capability_definition):
+    raw_properties = OrderedDict()
+
+    # Merge raw_properties from type
+    the_type = capability_definition._get_type(context)
+    type_property_defintions = the_type._get_properties(context)
+    merge_raw_property_definitions(context, presentation, raw_properties, type_property_defintions, 'properties')
+
+    # Merge our raw_properties
+    merge_raw_property_definitions(context, presentation, raw_properties, capability_definition.properties, 'properties')
+    
+    if raw_properties:
+        capability_definition._raw['properties'] = raw_properties
+    
+    # Merge valid_source_types
+    if capability_definition._raw.get('valid_source_types') is None:
+        valid_source_types = the_type._get_valid_source_types(context)
+        if valid_source_types is not None:
+            capability_definition._raw['valid_source_types'] = deepclone(valid_source_types)
 
 #
 # NodeTemplate
@@ -61,18 +99,22 @@ def get_template_capabilities(context, presentation):
 
     # Copy over capability definitions from the type (will initialize properties with default values)
     if capability_definitions is not None:
-        for capability_name, capability in capability_definitions.iteritems():
-            capability_assignments[capability_name] = convert_capability_from_definition_to_assignment(context, capability, presentation)
+        for capability_name, capability_definition in capability_definitions.iteritems():
+            capability_assignments[capability_name] = convert_capability_from_definition_to_assignment(context, capability_definition, presentation)
 
     # Fill in our capability assignments
     our_capability_assignments = presentation.capabilities
     if our_capability_assignments is not None:
         for capability_name, our_capability_assignment in our_capability_assignments.iteritems():
             if capability_name in capability_assignments:
-                # TODO
-                assign_raw_properties(context)
+                capability_assignment = capability_assignments[capability_name]
+                
+                # Assign properties
+                values = get_assigned_and_defined_property_values(context, our_capability_assignment)
+                if values:
+                    capability_assignment._raw['properties'] = values
             else:
-                context.validation.report('capability "%s" not declared in node type "%s" for "%s"' % (capability_name, presentation.type, presentation._fullname), locator=our_capability_assignment._locator, level=Issue.BETWEEN_TYPES)
+                context.validation.report('capability_definition "%s" not declared in node type "%s" for "%s"' % (capability_name, presentation.type, presentation._fullname), locator=our_capability_assignment._locator, level=Issue.BETWEEN_TYPES)
 
     return capability_assignments
 
@@ -85,13 +127,10 @@ def convert_capability_from_definition_to_assignment(context, presentation, cont
     
     raw = OrderedDict()
     
-    properties = presentation._get_properties(context)
+    properties = presentation.properties
     if properties is not None:
         raw['properties'] = convert_property_definitions_to_values(properties)
 
     # TODO attributes
 
     return CapabilityAssignment(name=presentation._name, raw=raw, container=container)
-
-def assign_raw_properties(context):
-    pass

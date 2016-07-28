@@ -42,6 +42,10 @@ relationship_types:
           inputs:
             input2:
               type: integer
+          implementation:
+            primary: scripts/doit.sh
+            dependencies:
+              - utils/os.sh
 
 topology_template:
 
@@ -79,7 +83,7 @@ topology_template:
             node: node_cellar_database
             capability: database_endpoint
             relationship:
-              type: ConnectsTo # relationship type or relationship template
+              type: connects_to # relationship type or relationship template
               properties:
                 credential:
                   user: admin
@@ -94,10 +98,10 @@ topology_template:
         #- database:
         #    node: node_cellar_database
         #    capability: tosca.capabilities.Endpoint.Database
-            
       capabilities:
         app_endpoint:
           properties:
+            protocol: udp
             url_path: /nodecellar
     
     node_cellar_database:
@@ -142,6 +146,10 @@ topology_template:
         standard:
           inputs:
             openstack_credential: *OPENSTACK_CREDENTIAL
+      capabilities:
+        scalable:
+          properties:
+            max_instances: 10
 
     data_host:
       description: >-
@@ -158,6 +166,10 @@ topology_template:
         standard:
           inputs:
             openstack_credential: *OPENSTACK_CREDENTIAL
+      capabilities:
+        scalable:
+          properties:
+            max_instances: 10
 
   groups:
   

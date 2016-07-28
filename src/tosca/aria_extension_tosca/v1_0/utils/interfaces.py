@@ -145,7 +145,7 @@ def get_template_interfaces(context, presentation, type_name):
                 interface_template = template_interfaces[interface_name] # InterfaceDefinitionForTemplate
                 interface_definition = interface_definitions[interface_name] # InterfaceDefinitionForType (or InterfaceDefinitionForTemplate in the case of RelationshipTemplate) 
                 
-                # Assign interface inputs
+                # Assign/merge interface inputs
                 if not is_a_template:
                     assign_raw_inputs(context, interface_template._raw, our_interface_template.inputs, interface_definition._get_inputs(context), our_interface_template, interface_name, None, presentation)
                 else:
@@ -173,7 +173,7 @@ def get_template_interfaces(context, presentation, type_name):
                         if our_implementation is not None:
                             interface_template._raw[operation_name]['implementation'] = deepclone(our_implementation._raw)
 
-                        # Assign operation inputs
+                        # Assign/merge operation inputs
                         if not is_a_template:
                             input_definitions = operation_definition.inputs if operation_definition is not None else None
                             assign_raw_inputs(context, interface_template._raw[operation_name], our_input_assignments, input_definitions, our_operation_template, interface_name, operation_name, presentation)
@@ -233,6 +233,7 @@ def convert_interface_definition_from_type_to_raw_template(context, presentation
 
 def merge_raw_input_definition(context, raw_input, our_input, interface_name, operation_name, presentation, type_name):
     # Check if we changed the type
+    # TODO: allow a sub-type?
     input_type1 = raw_input.get('type')
     input_type2 = our_input.type
     if input_type1 != input_type2:
@@ -320,10 +321,7 @@ def merge_interface_definitions(context, interfaces, our_interfaces, presentatio
         if name in interfaces:
             merge_interface_definition(context, interfaces[name], our_interface, presentation, 'definition')
         else:
-            if for_presentation is not None:
-                interfaces[name] = our_interface._clone(for_presentation)
-            else:
-                interfaces[name] = our_interface
+            interfaces[name] = our_interface._clone(for_presentation)
 
 def merge_interface_definitions_from_their_types(context, interfaces, presentation):
     for interface in interfaces.itervalues():

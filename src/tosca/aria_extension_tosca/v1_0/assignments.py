@@ -169,8 +169,12 @@ class CapabilityAssignment(ToscaPresentation):
         """
 
     @cachedmethod
-    def _get_type(self, context):
+    def _get_definition(self, context):
         node_type = self._container._get_type(context)
         capability_definitions = node_type._get_capabilities(context) if node_type is not None else None
-        capability_definition = capability_definitions.get(self._name) if capability_definitions is not None else None
+        return capability_definitions.get(self._name) if capability_definitions is not None else None
+
+    @cachedmethod
+    def _get_type(self, context):
+        capability_definition = self._get_definition(context)
         return capability_definition._get_type(context) if capability_definition is not None else None

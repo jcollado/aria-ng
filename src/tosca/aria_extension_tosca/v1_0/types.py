@@ -7,7 +7,7 @@ from .field_validators import data_type_derived_from_validator, data_type_constr
 from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions, get_inherited_operations
 from .utils.requirements import get_inherited_requirement_definitions
-from .utils.capabilities import get_inherited_capability_definitions
+from .utils.capabilities import get_inherited_valid_source_types, get_inherited_capability_definitions
 from .utils.data import data_type_class_getter, get_data_type, get_inherited_constraints, coerce_data_type_value
 from aria import dsl_specification
 from aria.utils import ReadOnlyDict, ReadOnlyList, cachedmethod
@@ -222,7 +222,7 @@ class CapabilityType(ToscaPresentation):
         :rtype: dict of str, :class:`AttributeDefinition`
         """
 
-    @field_validator(list_type_validator('note type', 'node_types'))
+    @field_validator(list_type_validator('node type', 'node_types'))
     @primitive_list_field(str)
     def valid_source_types(self):
         """
@@ -238,6 +238,10 @@ class CapabilityType(ToscaPresentation):
     @cachedmethod
     def _get_properties(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
+
+    @cachedmethod
+    def _get_valid_source_types(self, context):
+        return get_inherited_valid_source_types(context, self)
 
     def _validate(self, context):
         super(CapabilityType, self)._validate(context)

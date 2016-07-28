@@ -5,7 +5,7 @@ from aria.utils import merge, deepclone
 from collections import OrderedDict
 
 #
-# ArtifactType, DataType, CapabilityType, RelationshipType, NodeType, GroupType, PolicyType, CapabilityDefinition
+# ArtifactType, DataType, CapabilityType, RelationshipType, NodeType, GroupType, PolicyType
 #
 
 def get_inherited_property_definitions(context, presentation, field_name, for_presentation=None): # works on properties, parameters, inputs, and attributes
@@ -22,22 +22,11 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
     # Add/merge our definitions
     our_definitions = getattr(presentation, field_name, None) # if we inherit from a primitive, it does not have our field
     if our_definitions is not None:
+        our_definitions_clone = OrderedDict()
         for name, our_definition in our_definitions.iteritems():
-            if name in definitions:
-                definition = definitions[name]
-                
-                # Check if we changed the type
-                type1 = getattr(definition, 'type', None)
-                type2 = getattr(our_definition, 'type', None)
-                if type1 != type2:
-                    context.validation.report('override changes type from "%s" to "%s" for property "%s" for "%s"' % (type1, type2, name, presentation._fullname), locator=presentation._get_grandchild_locator(field_name, name), level=Issue.BETWEEN_TYPES)
-                
-                merge(definition._raw, deepclone(our_definition._raw))
-            else:
-                if for_presentation is not None:
-                    definitions[name] = our_definition._clone(for_presentation)
-                else:
-                    definitions[name] = our_definition
+            our_definitions_clone[name] = our_definition._clone(for_presentation)
+        our_definitions = our_definitions_clone
+        merge_property_definitions(context, presentation, definitions, our_definitions, field_name, for_presentation)
         
     return definitions
 
@@ -89,6 +78,34 @@ def get_assigned_and_defined_property_values(context, presentation):
 #
 # Utils
 #
+
+def merge_raw_property_definition(context, presentation, raw_property_definition, our_property_definition, field_name, property_name):
+    # Check if we changed the type
+    # TODO: allow a sub-type?
+    type1 = raw_property_definition.get('type')
+    type2 = our_property_definition.type
+    if type1 != type2:
+        context.validation.report('override changes type from "%s" to "%s" for property "%s" for "%s"' % (type1, type2, property_name, presentation._fullname), locator=presentation._get_grandchild_locator(field_name, property_name), level=Issue.BETWEEN_TYPES)
+
+    merge(raw_property_definition, our_property_definition._raw)
+
+def merge_raw_property_definitions(context, presentation, raw_property_definitions, our_property_definitions, field_name):
+    if our_property_definitions is not None:
+        for property_name, our_property_definition in our_property_definitions.iteritems():
+            if property_name in raw_property_definitions:
+                raw_property_definition = raw_property_definitions[property_name]
+                merge_raw_property_definition(context, presentation, raw_property_definition, our_property_definition, field_name, property_name)
+            else:
+                raw_property_definitions[property_name] = deepclone(our_property_definition._raw)
+
+def merge_property_definitions(context, presentation, property_definitions, our_property_definitions, field_name, for_presentation):
+    if our_property_definitions is not None:
+        for property_name, our_property_definition in our_property_definitions.iteritems():
+            if property_name in property_definitions:
+                property_definition = property_definitions[property_name]
+                merge_raw_property_definition(context, presentation, property_definition._raw, our_property_definition, field_name, property_name)
+            else:
+                property_definitions[property_name] = our_property_definition._clone()
 
 def coerce_property_value(context, value, definition): # works on both properties and inputs
     the_type = definition._get_type(context) if definition is not None else None

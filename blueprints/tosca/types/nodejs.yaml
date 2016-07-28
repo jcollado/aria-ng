@@ -26,6 +26,8 @@ node_types:
           url_path:
             type: string
             default: /
+          fish:
+            type: string
       admin_endpoint: # @override
         type: tosca.capabilities.Endpoint.Admin
         properties:

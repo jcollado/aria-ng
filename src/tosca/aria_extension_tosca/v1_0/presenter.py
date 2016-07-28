@@ -1,5 +1,6 @@
 
 from .templates import ServiceTemplate
+from aria import ReadOnlyList
 from aria.presentation import Presenter
 
 class ToscaSimplePresenter1_0(Presenter):
@@ -22,7 +23,7 @@ class ToscaSimplePresenter1_0(Presenter):
         self.service_template._validate(context)
     
     def _get_import_locations(self):
-        return [i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else []
+        return ReadOnlyList([i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else [])
 
     @property
     def repositories(self):

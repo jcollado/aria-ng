@@ -6,6 +6,7 @@ from .property_assignment import PropertyAssignment
 from .field_validators import node_template_or_type_validator, relationship_template_or_type_validator, capability_definition_or_type_validator
 from aria import dsl_specification
 from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
+from functools32 import lru_cache
 
 @short_form_field('type')
 @has_fields
@@ -35,6 +36,7 @@ class RequirementAssignmentRelationship(ToscaPresentation):
         :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
         """
 
+    @lru_cache()
     def _get_type(self, context):
         type_name = self.type
         if type_name is not None:
@@ -101,6 +103,7 @@ class RequirementAssignment(ToscaPresentation):
         :rtype: dict of str, :class:`NodeFilter`
         """
     
+    @lru_cache()
     def _get_node(self, context):
         node_name = self.node
         if node_name is not None:
@@ -112,6 +115,7 @@ class RequirementAssignment(ToscaPresentation):
                 return node, 'node_type'
         return None, None
 
+    @lru_cache()
     def _get_capability(self, context):
         capability = self.capability
         
@@ -164,6 +168,7 @@ class CapabilityAssignment(ToscaPresentation):
         :rtype: dict of str, :class:`AttributeAssignment`
         """
 
+    @lru_cache()
     def _get_type(self, context):
         node_type = self._container._get_type(context)
         capability_definitions = node_type._get_capabilities(context) if node_type is not None else None

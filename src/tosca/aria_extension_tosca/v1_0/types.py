@@ -9,8 +9,9 @@ from .utils.interfaces import get_inherited_interface_definitions, get_inherited
 from .utils.requirements import get_inherited_requirement_definitions
 from .utils.capabilities import get_inherited_capability_definitions
 from .utils.data import data_type_class_getter, get_data_type, get_inherited_constraints, coerce_data_type_value
-from aria import dsl_specification
+from aria import ReadOnlyDict, ReadOnlyList, dsl_specification
 from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_list_field, object_sequenced_list_field, object_dict_unknown_fields, field_getter, field_validator, list_type_validator, derived_from_validator
+from functools32 import lru_cache
 
 @has_fields
 @dsl_specification('3.6.3', 'tosca-simple-profile-1.0')
@@ -73,11 +74,13 @@ class ArtifactType(ToscaPresentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
     
+    @lru_cache()
     def _get_parent(self, context):
         return context.presentation.artifact_types.get(self.derived_from)
 
+    @lru_cache()
     def _get_properties(self, context):
-        return get_inherited_property_definitions(context, self, 'properties')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
     def _validate(self, context):
         super(ArtifactType, self)._validate(context)
@@ -137,12 +140,25 @@ class DataType(ToscaPresentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
+    @lru_cache()
     def _get_parent(self, context):
         return get_data_type(context, self, 'derived_from', allow_none=True)
 
-    def _get_properties(self, context):
-        return get_inherited_property_definitions(context, self, 'properties')
+    @lru_cache()
+    def _get_primitive_ancestor(self, context):
+        parent = self._get_parent(context)
+        if parent is not None:
+            if not isinstance(parent, DataType):
+                return parent
+            else:
+                return parent._get_primitive_ancestor(context)
+        return None
 
+    @lru_cache()
+    def _get_properties(self, context):
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
+
+    @lru_cache()
     def _get_constraints(self, context):
         return get_inherited_constraints(context, self)
 
@@ -152,15 +168,6 @@ class DataType(ToscaPresentation):
     
     def _coerce_value(self, context, presentation, entry_schema, constraints, value, aspect):
         return coerce_data_type_value(context, presentation, self, entry_schema, constraints, value, aspect)
-    
-    def _get_primitive_ancestor(self, context):
-        parent = self._get_parent(context)
-        if parent is not None:
-            if not isinstance(parent, DataType):
-                return parent
-            else:
-                return parent._get_primitive_ancestor(context)
-        return None
 
 @has_fields
 @dsl_specification('3.6.6', 'tosca-simple-profile-1.0')
@@ -224,11 +231,13 @@ class CapabilityType(ToscaPresentation):
         :rtype: list of str
         """
         
+    @lru_cache()
     def _get_parent(self, context):
         return context.presentation.capability_types.get(self.derived_from)
 
+    @lru_cache()
     def _get_properties(self, context):
-        return get_inherited_property_definitions(context, self, 'properties')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
     def _validate(self, context):
         super(CapabilityType, self)._validate(context)
@@ -283,14 +292,17 @@ class InterfaceType(ToscaPresentation):
     def operations(self):
         pass
 
+    @lru_cache()
     def _get_parent(self, context):
         return context.presentation.interface_types.get(self.derived_from)
 
+    @lru_cache()
     def _get_inputs(self, context):
-        return get_inherited_property_definitions(context, self, 'inputs')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'inputs'))
 
+    @lru_cache()
     def _get_operations(self, context):
-        return get_inherited_operations(context, self)
+        return ReadOnlyDict(get_inherited_operations(context, self))
 
     def _validate(self, context):
         super(InterfaceType, self)._validate(context)
@@ -367,17 +379,21 @@ class RelationshipType(ToscaPresentation):
         :rtype: list of str
         """
 
+    @lru_cache()
     def _get_parent(self, context):
         return context.presentation.relationship_types.get(self.derived_from)
 
+    @lru_cache()
     def _get_properties(self, context):
-        return get_inherited_property_definitions(context, self, 'properties')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
+    @lru_cache()
     def _get_attributes(self, context):
-        return get_inherited_property_definitions(context, self, 'attributes')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'attributes'))
 
+    @lru_cache()
     def _get_interfaces(self, context):
-        return get_inherited_interface_definitions(context, self, 'relationship type')
+        return ReadOnlyDict(get_inherited_interface_definitions(context, self, 'relationship type'))
 
     def _validate(self, context):
         super(RelationshipType, self)._validate(context)
@@ -469,23 +485,29 @@ class NodeType(ToscaPresentation):
         :rtype: dict of str, :class:`ArtifactDefinition`
         """
 
+    @lru_cache()
     def _get_parent(self, context):
         return context.presentation.node_types.get(self.derived_from)
 
+    @lru_cache()
     def _get_properties(self, context):
-        return get_inherited_property_definitions(context, self, 'properties')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
+    @lru_cache()
     def _get_attributes(self, context):
-        return get_inherited_property_definitions(context, self, 'attributes')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'attributes'))
 
+    @lru_cache()
     def _get_requirements(self, context):
-        return get_inherited_requirement_definitions(context, self)
+        return ReadOnlyList(get_inherited_requirement_definitions(context, self))
 
+    @lru_cache()
     def _get_capabilities(self, context):
-        return get_inherited_capability_definitions(context, self)
+        return ReadOnlyDict(get_inherited_capability_definitions(context, self))
 
+    @lru_cache()
     def _get_interfaces(self, context):
-        return get_inherited_interface_definitions(context, self, 'node type')
+        return ReadOnlyDict(get_inherited_interface_definitions(context, self, 'node type'))
 
     def _validate(self, context):
         super(NodeType, self)._validate(context)
@@ -560,14 +582,17 @@ class GroupType(ToscaPresentation):
         :rtype: dict of str, :class:`InterfaceDefinitionForType`
         """
 
+    @lru_cache()
     def _get_parent(self, context):
         return context.presentation.group_types.get(self.derived_from)
 
+    @lru_cache()
     def _get_properties(self, context):
-        return get_inherited_property_definitions(context, self, 'properties')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
+    @lru_cache()
     def _get_interfaces(self, context):
-        return get_inherited_interface_definitions(context, self, 'group type')
+        return ReadOnlyDict(get_inherited_interface_definitions(context, self, 'group type'))
 
     def _validate(self, context):
         super(GroupType, self)._validate(context)
@@ -629,11 +654,13 @@ class PolicyType(ToscaPresentation):
         :rtype: list of str
         """
 
+    @lru_cache()
     def _get_parent(self, context):
         return context.presentation.policy_types.get(self.derived_from)
 
+    @lru_cache()
     def _get_properties(self, context):
-        return get_inherited_property_definitions(context, self, 'properties')
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
     def _validate(self, context):
         super(PolicyType, self)._validate(context)

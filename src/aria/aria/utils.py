@@ -431,15 +431,15 @@ def print_traceback(tb=None):
     if tb is None:
         _, _, tb = sys.exc_info()
     while tb is not None:
-        f = tb.tb_frame
+        frame = tb.tb_frame
         lineno = tb.tb_lineno
-        co = f.f_code
-        filename = co.co_filename
-        name = co.co_name
+        code = frame.f_code
+        filename = code.co_filename
+        name = code.co_name
         with indent(2):
             puts('File "%s", line %s, in %s' % (colored.blue(filename), colored.cyan(lineno), colored.cyan(name)))
             linecache.checkcache(filename)
-            line = linecache.getline(filename, lineno, f.f_globals)
+            line = linecache.getline(filename, lineno, frame.f_globals)
             if line:
                 with indent(2):
                     puts(colored.black(line.strip()))
@@ -455,6 +455,3 @@ def make_agnostic(value):
         for i in range(len(value)):
             value[i] = make_agnostic(value[i])
     return value
-
-def is_primitive(value):
-    return isinstance(value, basestring) or isinstance(value, int) or isinstance(value, float) or isinstance(value, bool)

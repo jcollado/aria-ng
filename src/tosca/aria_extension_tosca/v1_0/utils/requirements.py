@@ -46,11 +46,9 @@ def get_template_requirements(context, presentation):
     
     If the requirement has a relationship, the relationship properties and interfaces are assigned.
     
-    Returns the assigned property values while making sure they are defined in our type.
-    
-    The property definition's default value, if available, will be used if we did not assign it.
-    
-    Makes sure that required properties indeed end up with a value.
+    Returns the assigned property, interface input, and interface operation input values while making
+    sure they are defined in our type. Default values, if available, will be used if we did not assign
+    them. Also makes sure that required properties and inputs indeed end up with a value.
     """
     
     def get_requirement(requirements, name):

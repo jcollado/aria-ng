@@ -40,7 +40,7 @@ class PresentationBase(object):
         return locator.get_grandchild(name1, name2) if locator is not None else None
 
     @property
-    def _cache_info(self):
+    def _method_cache_info(self):
         r = {}
         for k in self.__class__.__dict__:
             p = getattr(self, k)
@@ -48,7 +48,7 @@ class PresentationBase(object):
                 r[k] = p.cache_info()
         return r
 
-    def _reset_cache(self):
+    def _reset_method_cache(self):
         for k in self.__class__.__dict__:
             p = getattr(self, k)
             if hasattr(p, 'cache_clear'):

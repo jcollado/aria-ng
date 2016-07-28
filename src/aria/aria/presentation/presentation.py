@@ -1,7 +1,6 @@
 
-from .. import classname
+from .. import classname, deepclone
 from .utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
-from copy import deepcopy
 
 class PresentationBase(object):
     """
@@ -40,8 +39,10 @@ class PresentationBase(object):
         locator = self._locator
         return locator.get_grandchild(name1, name2) if locator is not None else None
 
-    def _clone(self, container):
-        raw = deepcopy(self._raw)
+    def _clone(self, container=None):
+        raw = deepclone(self._raw)
+        if container is None:
+            container = self._container
         return self.__class__(name=self._name, raw=raw, container=container)
 
 class Presentation(PresentationBase):

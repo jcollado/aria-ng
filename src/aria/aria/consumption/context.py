@@ -25,7 +25,7 @@ class ValidationContext(object):
     @property
     def issues(self):
         issues = [i for i in self._issues if i.level <= self.max_level] 
-        issues.sort(key=lambda i: i.level)
+        issues.sort(key=lambda i: (i.level, i.line, i.column))
         return ReadOnlyList(issues)
 
     def dump_issues(self):

@@ -1,7 +1,6 @@
 
 from .utils import *
 from .properties import *
-from .interfaces import *
 from .issue import *
 from .exceptions import *
 from .specification import *
@@ -50,6 +49,7 @@ __all__ = (
     'StrictDict',
     'classname',
     'merge',
+    'deepclone',
     'import_fullname',
     'import_modules',
     'print_exception',
@@ -59,8 +59,6 @@ __all__ = (
     'Prop',
     'has_validated_properties',
     'validated_property',
-    'has_interfaces',
-    'interfacemethod',
     'Issue',
     'AriaError',
     'UnimplementedFunctionalityError',

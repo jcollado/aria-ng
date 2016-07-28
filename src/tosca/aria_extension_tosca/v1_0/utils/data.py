@@ -1,7 +1,31 @@
 
-from aria import Issue, dsl_specification, import_fullname
+from aria import Issue, InvalidValueError, dsl_specification, import_fullname
 from collections import OrderedDict
 import re
+
+#
+# Getters
+#
+
+def data_type_class_getter(cls):
+    def getter(field, presentation):
+        raw = field._get(presentation)
+        if raw is not None:
+            try:
+                return cls(None, None, raw, None)
+            except ValueError as e:
+                raise InvalidValueError('%s is not a valid "%s.%s" in "%s": %s' % (field.fullname, cls.__module__, cls.__name__, presentation._name, repr(raw)), cause=e, locator=field.get_locator(raw))
+    return getter
+
+def get_as_data_type(context, presentation, field_name, type_name):
+    the_type = context.presentation.datatypes.get(type_name) if context.presentation.datatypes is not None else None
+    if the_type is not None:
+        value = getattr(presentation, field_name)
+        if value is not None:
+            return coerce_data_type_value(context, presentation, the_type, None, None, value, None)
+    else:
+        context.validation.report('field "%s" in "%s" refers to unknown data type "%s"' % (field_name, presentation._fullname, type_name), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+    return None
 
 #
 # DataType
@@ -96,7 +120,7 @@ def get_data_type(context, presentation, field_name, allow_none=False):
             return str
     
     # Try complex data type
-    complex = context.presentation.data_types.get(the_type)
+    complex = context.presentation.data_types.get(the_type) if context.presentation.data_types is not None else None
     if complex is not None:
         return complex 
     
@@ -333,9 +357,9 @@ def coerce_to_primitive(context, presentation, primitive_type, constraints, valu
     
     return value
 
-def coerce_to_class(context, presentation, cls, entry_schema, constraints, value, aspect=None):
+def coerce_to_data_type_class(context, presentation, cls, entry_schema, constraints, value, aspect=None):
     """
-    Returns the value after it's coerced to a custom class, reporting validation errors if it cannot be coerced.
+    Returns the value after it's coerced to a data type class, reporting validation errors if it cannot be coerced.
     Constraints will be applied after coersion.
     
     Will either call a "\_create" static function in the class, or instantiate it using a constructor if "\_create"

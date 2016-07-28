@@ -4,10 +4,8 @@ from .filters import NodeFilter
 from .definitions import InterfaceDefinitionForTemplate
 from .property_assignment import PropertyAssignment
 from .field_validators import node_template_or_type_validator, relationship_template_or_type_validator, capability_definition_or_type_validator
-from .utils.properties import get_assigned_and_defined_property_values
-from .utils.interfaces import get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
+from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
 
 @short_form_field('type')
 @has_fields
@@ -38,21 +36,15 @@ class RequirementAssignmentRelationship(ToscaPresentation):
         """
 
     def _get_type(self, context):
-        the_type = context.presentation.relationship_types.get(self.type)
-        if the_type is None:
-            the_type = context.presentation.relationship_templates.get(self.type)
-        return the_type
-
-    def _get_properties(self, context):
-        return get_assigned_and_defined_property_values(context, self)
-
-    def _get_interfaces(self, context):
-        return get_template_interfaces(context, self, 'requirement assignment')
-
-    def _validate(self, context):
-        super(RequirementAssignmentRelationship, self)._validate(context)
-        self._get_properties(context)
-        self._get_interfaces(context)
+        type_name = self.type
+        if type_name is not None:
+            the_type = context.presentation.relationship_templates.get(type_name) if context.presentation.relationship_templates is not None else None
+            if the_type is not None:
+                return the_type, 'relationship_template'
+            the_type = context.presentation.relationship_types.get(type_name) if context.presentation.relationship_types is not None else None
+            if the_type is not None:
+                return the_type, 'relationship_type'
+        return None, None
 
 @short_form_field('node')
 @has_fields
@@ -110,11 +102,14 @@ class RequirementAssignment(ToscaPresentation):
         """
     
     def _get_node(self, context):
-        node = self.node
-        if node in context.presentation.node_templates:
-            return context.presentation.node_templates[node], 'node_template'
-        elif node in context.presentation.node_types:
-            return context.presentation.node_types[node], 'node_type'
+        node_name = self.node
+        if node_name is not None:
+            node = context.presentation.node_templates.get(node_name) if context.presentation.node_templates is not None else None
+            if node is not None:
+                return node, 'node_template'
+            node = context.presentation.node_types.get(node_name) if context.presentation.node_types is not None else None
+            if node is not None:
+                return node, 'node_type'
         return None, None
 
     def _get_capability(self, context):
@@ -136,16 +131,13 @@ class RequirementAssignment(ToscaPresentation):
         
         return None, None
 
-@has_fields
 @dsl_specification('3.5.11', 'tosca-simple-profile-1.0')
-class AttributeAssignment(ToscaPresentation):
+class AttributeAssignment(AsIsPresentation):
     """
     This section defines the grammar for assigning values to named attributes within TOSCA Node and Relationship templates which are defined in their corresponding named types.
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_ATTRIBUTE_VALUE_ASSIGNMENT>`__
     """
-    
-    #TODO
 
 @has_fields
 @dsl_specification('3.7.1', 'tosca-simple-profile-1.0')
@@ -177,10 +169,3 @@ class CapabilityAssignment(ToscaPresentation):
         capability_definitions = node_type._get_capabilities(context) if node_type is not None else None
         capability_definition = capability_definitions.get(self._name) if capability_definitions is not None else None
         return capability_definition._get_type(context) if capability_definition is not None else None
-
-    def _get_properties(self, context):
-        return get_assigned_and_defined_property_values(context, self)
-
-    def _validate(self, context):
-        super(CapabilityAssignment, self)._validate(context)
-        self._get_properties(context)

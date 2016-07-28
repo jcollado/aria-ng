@@ -1,18 +1,9 @@
 
 from .presentation import ToscaPresentation
 from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
-from .utils.data import apply_constraint_to_value
+from .utils.data import get_as_data_type, apply_constraint_to_value
 from aria import dsl_specification
-from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator
-
-class Range(AsIsPresentation):
-    pass
-
-class Version(AsIsPresentation):
-    pass
-
-class Credential(AsIsPresentation):
-    pass
+from aria.presentation import has_fields, short_form_field, primitive_field, primitive_list_field, field_validator
 
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')
@@ -65,13 +56,16 @@ class Repository(ToscaPresentation):
         :rtype: str
         """
 
-    @object_field(Credential)
+    @primitive_field()
     def credential(self):
         """
         The optional Credential used to authorize access to the repository.
         
-        :rtype: :class:`tosca.datatypes.Credential`
+        :rtype: tosca.datatypes.Credential
         """
+    
+    def _get_credential(self, context):
+        return get_as_data_type(context, self, 'credential', 'tosca.datatypes.Credential')
 
 @short_form_field('file')
 @has_fields

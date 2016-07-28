@@ -1,13 +1,14 @@
 
 from .presentation import ToscaPresentation
 from .property_assignment import PropertyAssignment
-from .misc import ConstraintClause, Range
+from .misc import ConstraintClause
+from .data import Range
 from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
-from .utils.data import get_data_type, get_property_constraints
+from .utils.data import data_type_class_getter, get_data_type, get_property_constraints
 from .utils.properties import get_inherited_property_definitions, get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, type_validator, list_type_validator
+from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, field_getter, type_validator, list_type_validator
 
 @short_form_field('type')
 @has_fields
@@ -329,7 +330,7 @@ class InterfaceDefinitionForType(ToscaPresentation):
         pass
 
     def _get_type(self, context):
-        return context.presentation.interface_types.get(self.type)
+        return context.presentation.interface_types.get(self.type) if context.presentation.interface_types is not None else None
 
     def _get_inputs(self, context):
         return get_and_override_input_definitions_from_type(context, self)
@@ -364,6 +365,17 @@ class InterfaceDefinitionForTemplate(ToscaPresentation):
     @object_dict_unknown_fields(OperationDefinitionForTemplate)
     def operations(self):
         pass
+    
+    def _get_type(self, context):
+        the_type = self._container._get_type(context)
+        
+        if isinstance(the_type, tuple):
+            # In RequirementAssignmentRelationship
+            the_type = the_type[0] # This could be a RelationshipTemplate
+
+        interface_definitions = the_type._get_interfaces(context) if the_type is not None else None
+        interface_definition = interface_definitions.get(self._name) if interface_definitions is not None else None
+        return interface_definition._get_type(context) if interface_definition is not None else None
 
     def _validate(self, context):
         super(InterfaceDefinitionForTemplate, self)._validate(context)
@@ -392,7 +404,7 @@ class RequirementDefinitionRelationship(ToscaPresentation):
         """
 
     def _get_type(self, context):
-        return context.presentation.relationship_types.get(self.type)
+        return context.presentation.relationship_types.get(self.type) if context.presentation.relationship_types is not None else None
 
 @short_form_field('capability')    
 @has_fields
@@ -430,18 +442,19 @@ class RequirementDefinition(ToscaPresentation):
         :rtype: :class:`RequirementDefinitionRelationship`
         """
 
-    @object_field(Range)
+    @field_getter(data_type_class_getter(Range))
+    @primitive_field()
     def occurrences(self):
         """ 	
         The optional minimum and maximum occurrences for the requirement.
 
         Note: the keyword UNBOUNDED is also supported to represent any positive integer.
         
-        :rtype: :class:`tosca.Range`
+        :rtype: :class:`Range`
         """
 
     def _get_type(self, context):
-        return context.presentation.capability_types.get(self.capability)
+        return context.presentation.capability_types.get(self.capability) if context.presentation.capability_types is not None else None
 
     def _get_node_type(self, context):
         return context.presentation.capability_types.get(self.node)
@@ -500,19 +513,19 @@ class CapabilityDefinition(ToscaPresentation):
         :rtype: list of str
         """
 
-    @object_field(Range)
+    @field_getter(data_type_class_getter(Range))
+    @primitive_field(default=[1, 'UNBOUNDED'])
     def occurrences(self):
         """
         The optional minimum and maximum occurrences for the capability. By default, an exported Capability should allow at least one relationship to be formed with it with a maximum of UNBOUNDED relationships.
 
         Note: the keyword UNBOUNDED is also supported to represent any positive integer.
         
-        :rtype: :class:`tosca.Range`
+        :rtype: :class:`Range`
         """
-        # TODO: range of integer
 
     def _get_type(self, context):
-        return context.presentation.capability_types.get(self.type)
+        return context.presentation.capability_types.get(self.type) if context.presentation.capability_types is not None else None
 
     def _get_properties(self, context):
         return get_inherited_property_definitions(context, self, 'properties')
@@ -579,7 +592,7 @@ class ArtifactDefinition(ToscaPresentation):
         """
 
     def _get_type(self, context):
-        return context.presentation.artifact_types.get(self.type)
+        return context.presentation.artifact_types.get(self.type) if context.presentation.artifact_types is not None else None
 
 @has_fields
 @dsl_specification('3.7.5', 'tosca-simple-profile-1.0')
@@ -635,9 +648,9 @@ class GroupDefinition(ToscaPresentation):
         """
 
     def _get_type(self, context):
-        return context.presentation.group_types.get(self.type)
+        return context.presentation.group_types.get(self.type) if context.presentation.group_types is not None else None
 
-    def _get_properties(self, context):
+    def _get_property_values(self, context):
         return get_assigned_and_defined_property_values(context, self)
 
     def _get_interfaces(self, context):
@@ -645,7 +658,7 @@ class GroupDefinition(ToscaPresentation):
     
     def _validate(self, context):
         super(GroupDefinition, self)._validate(context)
-        self._get_properties(context)
+        self._get_property_values(context)
         self._get_interfaces(context)
 
 @has_fields
@@ -694,11 +707,11 @@ class PolicyDefinition(ToscaPresentation):
         """
 
     def _get_type(self, context):
-        return context.presentation.policy_types.get(self.type)
+        return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
 
-    def _get_properties(self, context):
+    def _get_property_values(self, context):
         return get_assigned_and_defined_property_values(context, self)
     
     def _validate(self, context):
         super(PolicyDefinition, self)._validate(context)
-        self._get_properties(context)
+        self._get_property_values(context)

@@ -1,6 +1,6 @@
 
-from .utils.data import coerce_to_class, report_issue_for_bad_format, coerce_value
-from aria import  dsl_specification
+from .utils.data import coerce_to_data_type_class, report_issue_for_bad_format, coerce_value
+from aria import dsl_specification
 from collections import OrderedDict
 from functools import total_ordering
 from datetime import datetime, tzinfo, timedelta
@@ -375,10 +375,10 @@ class ScalarFrequency(Scalar):
 #
 
 def coerce_timestamp(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    return coerce_to_class(context, presentation, Timestamp, entry_schema, constraints, value, aspect)
+    return coerce_to_data_type_class(context, presentation, Timestamp, entry_schema, constraints, value, aspect)
 
 def coerce_version(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    return coerce_to_class(context, presentation, Version, entry_schema, constraints, value, aspect)
+    return coerce_to_data_type_class(context, presentation, Version, entry_schema, constraints, value, aspect)
 
 def coerce_range(context, presentation, the_type, entry_schema, constraints, value, aspect):
     if aspect == 'in_range':
@@ -390,19 +390,19 @@ def coerce_range(context, presentation, the_type, entry_schema, constraints, val
         except TypeError as e:
             report_issue_for_bad_format(context, presentation, the_type, value, aspect, e)
     else:
-        return coerce_to_class(context, presentation, Range, entry_schema, constraints, value, aspect)
+        return coerce_to_data_type_class(context, presentation, Range, entry_schema, constraints, value, aspect)
 
 def coerce_list(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    return coerce_to_class(context, presentation, List, entry_schema, constraints, value, aspect)
+    return coerce_to_data_type_class(context, presentation, List, entry_schema, constraints, value, aspect)
     
 def coerce_map_value(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    return coerce_to_class(context, presentation, Map, entry_schema, constraints, value, aspect)
+    return coerce_to_data_type_class(context, presentation, Map, entry_schema, constraints, value, aspect)
 
 def coerce_scalar_unit_size(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    return coerce_to_class(context, presentation, ScalarSize, entry_schema, constraints, value, aspect)
+    return coerce_to_data_type_class(context, presentation, ScalarSize, entry_schema, constraints, value, aspect)
 
 def coerce_scalar_unit_time(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    return coerce_to_class(context, presentation, ScalarTime, entry_schema, constraints, value, aspect)
+    return coerce_to_data_type_class(context, presentation, ScalarTime, entry_schema, constraints, value, aspect)
     
 def coerce_scalar_unit_frequency(context, presentation, the_type, entry_schema, constraints, value, aspect):
-    return coerce_to_class(context, presentation, ScalarFrequency, entry_schema, constraints, value, aspect)
+    return coerce_to_data_type_class(context, presentation, ScalarFrequency, entry_schema, constraints, value, aspect)

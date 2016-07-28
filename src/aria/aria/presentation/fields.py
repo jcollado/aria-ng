@@ -5,6 +5,7 @@ from ..utils import ReadOnlyList, ReadOnlyDict, print_exception
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict
+from copy import deepcopy
 
 class Field(object):
     def __init__(self, field_type, fn, cls=None, default=None, allowed=None, required=False):
@@ -25,7 +26,7 @@ class Field(object):
 
         if self.field_type == 'object_dict_unknown_fields':
             if isinstance(raw, dict):
-                return ReadOnlyDict([(k, self.cls(name=k, raw=v, container=presentation)) for k, v in raw.iteritems() if k not in presentation.FIELDS])
+                return ReadOnlyDict(((k, self.cls(name=k, raw=v, container=presentation)) for k, v in raw.iteritems() if k not in presentation.FIELDS))
             return None
 
         is_short_form_field = (self.container.SHORT_FORM_FIELD == self.name) if hasattr(self.container, 'SHORT_FORM_FIELD') else False
@@ -48,7 +49,7 @@ class Field(object):
                 raise InvalidValueError('field "%s" is not %s' % (self.fullname, ' or '.join([repr(v) for v in self.allowed])), locator=self.get_locator(raw))
 
         if self.field_type == 'primitive':
-            if self.cls and not isinstance(value, self.cls):
+            if (self.cls is not None) and not isinstance(value, self.cls):
                 try:
                     return self.cls(value)
                 except ValueError:
@@ -58,7 +59,8 @@ class Field(object):
         elif self.field_type == 'primitive_list':
             if not isinstance(value, list):
                 raise InvalidValueError('field "%s" is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
-            if self.cls:
+            if self.cls is not None:
+                value = deepcopy(value)
                 for i in range(len(value)):
                     if not isinstance(value[i], self.cls):
                         try:
@@ -76,12 +78,12 @@ class Field(object):
         elif self.field_type == 'object_list':
             if not isinstance(value, list):
                 raise InvalidValueError('field "%s" is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
-            return ReadOnlyList([self.cls(raw=v, container=presentation) for v in value])
+            return ReadOnlyList((self.cls(raw=v, container=presentation) for v in value))
 
         elif self.field_type == 'object_dict':
             if not isinstance(value, dict):
                 raise InvalidValueError('field "%s" is not a dict: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
-            return ReadOnlyDict([(k, self.cls(name=k, raw=v, container=presentation)) for k, v in value.iteritems()])
+            return ReadOnlyDict(((k, self.cls(name=k, raw=v, container=presentation)) for k, v in value.iteritems()))
 
         elif self.field_type == 'sequenced_object_list':
             if not isinstance(value, list):
@@ -160,7 +162,7 @@ class Field(object):
 
     def get_locator(self, raw):
         if hasattr(raw, '_locator'):
-            if raw._locator.children is not None:
+            if isinstance(raw._locator.children, dict):
                 return raw._locator.children.get(self.name, raw._locator)
             return raw._locator
         return None

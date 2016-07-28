@@ -51,7 +51,7 @@ class InterfaceDefinition(Presentation):
         """
         :rtype: dict of str, :class:`Operation`
         """
-        return ReadOnlyDict([(k, Operation(raw=v)) for k, v in self._raw.iteritems()])
+        return ReadOnlyDict(((k, Operation(raw=v)) for k, v in self._raw.iteritems()))
 
 @has_fields
 @dsl_specification('groups', 'cloudify-1.3')

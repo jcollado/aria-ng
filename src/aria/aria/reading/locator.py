@@ -39,12 +39,12 @@ class Locator(object):
         self.children = None
     
     def get_child(self, name):
-        if self.children is not None:
+        if isinstance(self.children, dict):
             return self.children.get(name, self)
         return self
 
     def get_grandchild(self, name1, name2):
-        if self.children is not None:
+        if isinstance(self.children, dict):
             locator1 = self.children.get(name1)
             if (locator1 is not None) and (locator1.children is not None):
                 return locator1.children.get(name2, locator1)
@@ -65,7 +65,7 @@ class Locator(object):
                 try:
                     self.children[i].link(r)
                 except KeyError:
-                    raise ValueError('map does not match agnostic raw data: %d' % i)
+                    raise ValueError('location map does not match agnostic raw data: %d' % i)
         elif isinstance(raw, dict):
             for k, r in raw.iteritems():
                 wrapped, r = wrap(r)
@@ -74,7 +74,7 @@ class Locator(object):
                 try:
                     self.children[k].link(r)
                 except KeyError:
-                    raise ValueError('map does not match agnostic raw data: %s' % k)
+                    raise ValueError('location map does not match agnostic raw data: %s' % k)
     
     def merge(self, locator):
         if isinstance(self.children, dict) and isinstance(locator.children, dict):

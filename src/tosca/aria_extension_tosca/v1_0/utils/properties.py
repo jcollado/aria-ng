@@ -1,8 +1,7 @@
 
 from .data import coerce_value
-from aria import Issue, merge
+from aria import Issue, merge, deepclone
 from collections import OrderedDict
-from copy import deepcopy
 
 #
 # ArtifactType, DataType, CapabilityType, RelationshipType, NodeType, GroupType, PolicyType, CapabilityDefinition
@@ -32,7 +31,7 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
                 if type1 != type2:
                     context.validation.report('override changes type from "%s" to "%s" for property "%s" for "%s"' % (type1, type2, name, presentation._fullname), locator=presentation._get_grandchild_locator(field_name, name), level=Issue.BETWEEN_TYPES)
                 
-                merge(definition._raw, deepcopy(our_definition._raw))
+                merge(definition._raw, deepclone(our_definition._raw))
             else:
                 if for_presentation is not None:
                     definitions[name] = our_definition._clone(for_presentation)
@@ -42,10 +41,10 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
     return definitions
 
 #
-# NodeTemplate, RelationshipTemplate, GroupDefinition, PolicyDefinition, RequirementAssignmentRelationship
+# NodeTemplate, RelationshipTemplate, GroupDefinition, PolicyDefinition
 #
 
-def get_assigned_and_defined_property_values(context, presentation):
+def get_assigned_and_defined_property_values(context, presentation, original_presentation=None):
     """
     Returns the assigned property values while making sure they are defined in our type.
     
@@ -53,10 +52,15 @@ def get_assigned_and_defined_property_values(context, presentation):
     
     Makes sure that required properties indeed end up with a value.
     """
-    
+
     values = OrderedDict()
     
-    the_type = presentation._get_type(context) # In the case of RequirementAssignmentRelationship, this could be a RelationshipTemplate
+    the_type = presentation._get_type(context)
+    
+    if isinstance(the_type, tuple):
+        # In RequirementAssignmentRelationship
+        the_type = the_type[0] # This could be a RelationshipTemplate
+    
     assignments = presentation.properties
     definitions = the_type._get_properties(context) if the_type is not None else None
 
@@ -77,7 +81,9 @@ def get_assigned_and_defined_property_values(context, presentation):
                 values[name] = coerce_default_property_value(context, presentation, definition) 
 
             if getattr(definition, 'required', False) and (values.get(name) is None):
-                context.validation.report('required property "%s" is not assigned a value for "%s"' % (name, presentation._fullname), locator=presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
+                if original_presentation is None:
+                    original_presentation = presentation 
+                context.validation.report('required property "%s" is not assigned a value for "%s"' % (name, original_presentation._fullname), locator=original_presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
     
     return values
 
@@ -97,8 +103,10 @@ def coerce_default_property_value(context, presentation, definition): # works on
     constraints = definition._get_constraints(context) if definition is not None else None
     return coerce_value(context, presentation, the_type, entry_schema, constraints, definition.default)
 
-def convert_property_definitions_to_values(values, definitions):
+def convert_property_definitions_to_values(definitions):
+    values = OrderedDict()
     for name, definition in definitions.iteritems():
         default = definition.default
         if default is not None:
             values[name] = default
+    return values

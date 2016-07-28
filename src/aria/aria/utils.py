@@ -2,6 +2,7 @@
 from clint.textui import puts, colored, indent
 from threading import Thread, Lock
 from collections import OrderedDict
+from copy import deepcopy
 from Queue import Queue
 import sys, linecache, itertools, multiprocessing
 
@@ -194,6 +195,7 @@ class LockedList(list):
     during concurrent access, they do not guarantee atomicity. This class will
     let you gain atomicity when needed.
     """
+    
     def __init__(self):
         super(LockedList, self).__init__()
         self.lock = Lock()
@@ -235,6 +237,7 @@ class ReadOnlyDict(OrderedDict):
     After initialization it will raise TypeError exceptions if modification
     is attempted.
     """
+    
     def __init__(self, *args, **kwargs):
         self.locked = False
         super(ReadOnlyDict, self).__init__(*args, **kwargs)
@@ -256,6 +259,7 @@ class StrictList(list):
     """
     A list that raises TypeError exceptions when objects of the wrong type are inserted.
     """
+    
     def __init__(self, value_class, items=None, wrapper_fn=None, unwrapper_fn=None):
         super(StrictList, self).__init__()
         self.value_class = value_class
@@ -282,6 +286,7 @@ class StrictDict(OrderedDict):
     """
     An ordered dict that raises TypeError exceptions when keys or values of the wrong type are used.
     """
+    
     def __init__(self, key_class, value_class, items=None, wrapper_fn=None, unwrapper_fn=None):
         super(StrictDict, self).__init__()
         self.key_class = key_class
@@ -313,12 +318,14 @@ def classname(o):
     """
     The full class name of an object.
     """
+    
     return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
 
 def merge(a, b, path=[], strict=False):
     """
     Deep merge dicts.
     """
+    
     #TODO: a.add_yaml_merge(b), see https://bitbucket.org/ruamel/yaml/src/86622a1408e0f171a12e140d53c4ffac4b6caaa3/comments.py?fileviewer=file-view-default
     for key, value_b in b.iteritems():
         if key in a:
@@ -334,10 +341,38 @@ def merge(a, b, path=[], strict=False):
             a[key] = value_b
     return a
 
+def deepclone(value):
+    """
+    Like deepcopy, but makes sure to copy over "\_locator" for all elements.
+    """
+    
+    if isinstance(value, dict):
+        r = []
+        for k, v in value.iteritems():
+            r.append((k, deepclone(v)))
+        r = value.__class__(r)
+    elif isinstance(value, list):
+        r = []
+        for v in value:
+            r.append(deepclone(v))
+        r = value.__class__(r)
+    else:
+        r = deepcopy(value)
+    
+    locator = getattr(value, '_locator', None)
+    if locator is not None:
+        try:
+            setattr(r, '_locator', locator)
+        except AttributeError:
+            pass
+        
+    return r
+
 def import_fullname(name, paths=[]):
     """
     Imports a variable or class based on a full name, optionally searching for it in the paths.
     """
+    
     if name is None:
         return None
     
@@ -364,6 +399,7 @@ def import_modules(name):
     Imports a module and all its sub-modules, recursively. Relies on modules defining a 'MODULES' attribute
     listing their sub-module names.
     """
+    
     module = __import__(name, fromlist=['MODULES'], level=0)
     if hasattr(module, 'MODULES'):
         for m in module.MODULES:
@@ -391,6 +427,7 @@ def print_traceback(tb=None):
     """
     Prints the traceback with nice colors and such.
     """
+    
     if tb is None:
         _, _, tb = sys.exc_info()
     while tb is not None:

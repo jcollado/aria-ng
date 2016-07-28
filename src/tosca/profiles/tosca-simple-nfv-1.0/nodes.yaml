@@ -144,7 +144,7 @@ node_types:
     capabilities:
       virtual_linkable:
         type: tosca.capabilities.nfv.VirtualLinkable
-        occurrences: 2
+        occurrences: [ 2, UNBOUNDED ] # the spec is wrong here, must be a range
 
   tosca.nodes.nfv.VL.ELAN:
     _extensions:

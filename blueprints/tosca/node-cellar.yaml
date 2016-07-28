@@ -12,7 +12,13 @@ imports:
   - types/openstack.yaml
   - types/nodejs.yaml
   - types/mongodb.yaml
-  - tosca-simple-nfv-1.0/tosca-simple-nfv-1.0.yaml # not using this for now
+  - tosca-simple-nfv-1.0/tosca-simple-nfv-1.0.yaml # importing this only for validation
+
+dsl_definitions:
+
+  openstack_credential: &OPENSTACK_CREDENTIAL
+    user: openstackadmin
+    token: openstack123
 
 repositories:
 
@@ -21,7 +27,35 @@ repositories:
       The repository for the Node Cellar application and its dependencies.
     url: https://github.com/cloudify-cosmo/nodecellar/archive
 
+relationship_types:
+
+  ConnectsTo:
+    derived_from: tosca.relationships.ConnectsTo
+    interfaces:
+      standard2:
+        type: tosca.interfaces.node.lifecycle.Standard
+        inputs:
+          input1:
+            type: string
+            #default: hat
+        create:
+          inputs:
+            input2:
+              type: integer
+
 topology_template:
+
+  relationship_templates:
+  
+    connects_to:
+      type: ConnectsTo
+      interfaces:
+        standard2:
+          inputs:
+            input1: hello
+          create:
+            inputs:
+              input2: 2
 
   node_templates:
   
@@ -45,11 +79,18 @@ topology_template:
             node: node_cellar_database
             capability: database_endpoint
             relationship:
-              type: tosca.relationships.ConnectsTo
+              type: connects_to # relationship type or relationship template
               properties:
                 credential:
                   user: admin
                   token: admin123
+              interfaces:
+                standard2:
+                  inputs:
+                    input1: asdadsd
+                  create:
+                    inputs:
+                      input2: 23
         #- database:
         #    node: node_cellar_database
         #    capability: tosca.capabilities.Endpoint.Database
@@ -97,6 +138,10 @@ topology_template:
             password: nodejs123
             groups:
               - www-data
+      interfaces:
+        standard:
+          inputs:
+            openstack_credential: *OPENSTACK_CREDENTIAL
 
     data_host:
       description: >-
@@ -109,6 +154,10 @@ topology_template:
             password: admin123 
           mongodb:
             password: mongo123
+      interfaces:
+        standard:
+          inputs:
+            openstack_credential: *OPENSTACK_CREDENTIAL
 
   groups:
   
@@ -117,6 +166,10 @@ topology_template:
       members:
         - application_host
         - data_host
+      interfaces:
+        standard:
+          inputs:
+            openstack_credential: *OPENSTACK_CREDENTIAL
 
   policies:
   

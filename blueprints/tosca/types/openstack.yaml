@@ -38,7 +38,7 @@ node_types:
         type: map
         entry_schema: os.UserInfo
     interfaces:
-      lifecyle:
+      standard:
         inputs:
           openstack_credential:
             description: The OpenStack API credential for all operations.
@@ -60,11 +60,11 @@ group_types:
     members:
       - openstack.Instance
     interfaces:
-      lifecyle:
+      standard:
         inputs:
-          credential:
-            description: The credential for all operations.
-            type: tosca.datatypes.Credential
+          openstack_credential:
+            description: The OpenStack API credential for all operations.
+            type: openstack.Credential
         create:
           implementation:
             primary: openstack/create_secured_group.sh

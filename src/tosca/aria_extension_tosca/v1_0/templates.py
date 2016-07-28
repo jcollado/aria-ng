@@ -8,7 +8,8 @@ from .types import ArtifactType, DataType, CapabilityType, InterfaceType, Relati
 from .filters import NodeFilter
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_template_interfaces
-from .utils.reqs_and_caps import get_template_requirements, get_template_capabilities
+from .utils.requirements import get_template_requirements
+from .utils.capabilities import get_template_capabilities
 from aria import dsl_specification
 from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
 
@@ -113,9 +114,9 @@ class NodeTemplate(ToscaPresentation):
         """
     
     def _get_type(self, context):
-        return context.presentation.node_types.get(self.type)
+        return context.presentation.node_types.get(self.type) if context.presentation.node_types is not None else None
 
-    def _get_properties(self, context):
+    def _get_property_values(self, context):
         return get_assigned_and_defined_property_values(context, self)
 
     def _get_requirements(self, context):
@@ -129,7 +130,9 @@ class NodeTemplate(ToscaPresentation):
 
     def _validate(self, context):
         super(NodeTemplate, self)._validate(context)
-        self._get_properties(context)
+        self._get_property_values(context)
+        self._get_requirements(context)
+        self._get_capabilities(context)
         self._get_interfaces(context)
 
 @has_fields
@@ -193,9 +196,9 @@ class RelationshipTemplate(ToscaPresentation):
         """
 
     def _get_type(self, context):
-        return context.presentation.relationship_types.get(self.type)
+        return context.presentation.relationship_types.get(self.type) if context.presentation.relationship_types is not None else None
 
-    def _get_properties(self, context):
+    def _get_property_values(self, context):
         return get_assigned_and_defined_property_values(context, self)
 
     def _get_interfaces(self, context):
@@ -203,7 +206,7 @@ class RelationshipTemplate(ToscaPresentation):
     
     def _validate(self, context):
         super(RelationshipTemplate, self)._validate(context)
-        self._get_properties(context)
+        self._get_property_values(context)
         self._get_interfaces(context)
 
 @has_fields

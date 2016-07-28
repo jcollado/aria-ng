@@ -39,6 +39,21 @@ class PresentationBase(object):
         locator = self._locator
         return locator.get_grandchild(name1, name2) if locator is not None else None
 
+    @property
+    def _cache_info(self):
+        r = {}
+        for k in self.__class__.__dict__:
+            p = getattr(self, k)
+            if hasattr(p, 'cache_info'):
+                r[k] = p.cache_info()
+        return r
+
+    def _reset_cache(self):
+        for k in self.__class__.__dict__:
+            p = getattr(self, k)
+            if hasattr(p, 'cache_clear'):
+                p.cache_clear()
+
     def _clone(self, container=None):
         raw = deepclone(self._raw)
         if container is None:

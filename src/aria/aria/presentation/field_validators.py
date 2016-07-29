@@ -17,7 +17,7 @@ def type_validator(type_name, types_dict_name):
         if value is not None:
             types_dict = getattr(context.presentation, types_dict_name) or {}
             if value not in types_dict:
-                report_issue_for_unknown_type(context, presentation, type_name, field.name)
+                report_issue_for_unknown_type(context, presentation, type_name, field.name, value)
         
     return fn
 
@@ -39,7 +39,7 @@ def list_type_validator(type_name, types_dict_name):
             types_dict = getattr(context.presentation, types_dict_name) or {}
             for value in values:
                 if value not in types_dict:
-                    report_issue_for_unknown_type(context, presentation, type_name, field.name)
+                    report_issue_for_unknown_type(context, presentation, type_name, field.name, value)
         
     return fn
 
@@ -59,7 +59,7 @@ def list_length_validator(length):
         values = getattr(presentation, field.name)
         if isinstance(values, list):
             if len(values) != length:
-                context.validation.report('field "%s" does not have exactly %d elements for "%s"' % (field.name, length, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
+                context.validation.report('field "%s" does not have exactly %d elements in "%s"' % (field.name, length, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
         
     return fn
 

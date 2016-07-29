@@ -50,6 +50,17 @@ node_types:
             dependencies:
               - openstack/utils/api.sh
               - utils/os.sh
+    requirements:
+      - local_storage: # @override
+          capability: tosca.capabilities.Attachment
+          node: openstack.Volume
+          relationship: tosca.relationships.AttachesTo
+          occurrences: [ 0, UNBOUNDED ]
+
+  openstack.Volume:
+    description: >-
+      OpenStack volume.
+    derived_from: tosca.nodes.BlockStorage
 
 group_types:
 

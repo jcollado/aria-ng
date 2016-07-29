@@ -105,8 +105,12 @@ topology_template:
         #            inputs:
         #              input2: 23
         #- database:
-        #    node: node_cellar_database
         #    capability: tosca.capabilities.Endpoint.Database
+        - database:
+            node: mongodb.Database
+        #- database:
+        #    node: node_cellar_database
+        #    capability: database_endpoint
       capabilities:
         app_endpoint:
           properties:
@@ -130,13 +134,15 @@ topology_template:
     # Server software
     
     nodejs:
+      description: >-
+        Node.js instance.
       type: nodejs.Server
       requirements:
         - host: application_host
 
     mongodb:
       description: >-
-        MongoDB database.
+        MongoDB instance.
       type: mongodb.Server
       requirements:
         - host: data_host
@@ -166,7 +172,7 @@ topology_template:
 
     data_host:
       description: >-
-        Host for databases.
+        Host for data.
       type: openstack.Instance
       properties:
         flavor_name: m1.large
@@ -179,10 +185,21 @@ topology_template:
         standard:
           inputs:
             openstack_credential: *OPENSTACK_CREDENTIAL
+      requirements:
+        - local_storage:
+            node: data_volume
+            relationship:
+              properties:
+                location: /mnt/volume
       capabilities:
         scalable:
           properties:
             max_instances: 10
+
+    data_volume:
+      type: openstack.Volume
+      properties:
+        size: 10 GB
 
   groups:
   

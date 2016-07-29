@@ -27,7 +27,7 @@ def data_type_validator(type_name='data type'):
                 return True
             # Can be a primitive data type
             if get_primitive_data_type(value) is None:
-                report_issue_for_unknown_type(context, presentation, type_name, field.name)
+                report_issue_for_unknown_type(context, presentation, type_name, field.name, value)
     
         return False
 
@@ -64,10 +64,10 @@ def entry_schema_validator(field, presentation, context):
     
     if use_entry_schema:
         if value is None:
-            context.validation.report('"entry_schema" does not have a value as required by data type "%s" for "%s"' % (get_data_type_name(the_type), presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+            context.validation.report('"entry_schema" does not have a value as required by data type "%s" in "%s"' % (get_data_type_name(the_type), presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
     else:
         if value is not None:
-            context.validation.report('"entry_schema" has a value but it is not used by data type "%s" for "%s"' % (get_data_type_name(the_type), presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+            context.validation.report('"entry_schema" has a value but it is not used by data type "%s" in "%s"' % (get_data_type_name(the_type), presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
 def data_value_validator(field, presentation, context):
     """
@@ -174,9 +174,9 @@ def constraint_clause_in_range_validator(field, presentation, context):
                 
                 # Second "in_range" value must be greater than first
                 if (lower is not None) and (upper is not None) and (lower >= upper):
-                    context.validation.report('upper bound of "in_range" constraint is not greater than the lower bound for "%s": %s <= %s' % (presentation._container._fullname, repr(lower), repr(upper)), locator=presentation._locator, level=Issue.FIELD)
+                    context.validation.report('upper bound of "in_range" constraint is not greater than the lower bound in "%s": %s <= %s' % (presentation._container._fullname, repr(lower), repr(upper)), locator=presentation._locator, level=Issue.FIELD)
         else:
-            context.validation.report('constraint "%s" is not a list of exactly 2 elements for "%s"' % (field.name, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
+            context.validation.report('constraint "%s" is not a list of exactly 2 elements in "%s"' % (field.name, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD)
 
 def constraint_clause_valid_values_validator(field, presentation, context):
     """
@@ -208,7 +208,7 @@ def constraint_clause_pattern_validator(field, presentation, context):
             # Note: the TOSCA 1.0 spec does not specify the regular expression grammar, so we will just use Python's
             re.compile(value)
         except re.error as e:
-            context.validation.report('constraint "%s" is not a valid regular expression for "%s"' % (field.name, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD, exception=e)
+            context.validation.report('constraint "%s" is not a valid regular expression in "%s"' % (field.name, presentation._fullname), locator=presentation._get_child_locator(field.name), level=Issue.FIELD, exception=e)
 
 #
 # RequirementAssignment
@@ -218,7 +218,7 @@ def node_template_or_type_validator(field, presentation, context):
     """
     Makes sure that the field refers to either a node template or a node type.
     
-    Used as @field\_validator for the "type" field in :class:`RequirementAssignment`.
+    Used as @field\_validator for the "node" field in :class:`RequirementAssignment`.
     """
     
     field._validate(presentation, context)
@@ -228,11 +228,11 @@ def node_template_or_type_validator(field, presentation, context):
         node_templates = context.presentation.node_templates or {}
         node_types = context.presentation.node_types or {}
         if (value not in node_templates) and (value not in node_types):
-            report_issue_for_unknown_type(context, presentation, 'node template or node type', field.name)
+            report_issue_for_unknown_type(context, presentation, 'node template or node type', field.name, value)
 
 def capability_definition_or_type_validator(field, presentation, context):
     """
-    Makes sure refers to either a capability definition name (in the node template or node type referred to by the "node" field)
+    Makes sure refers to either a capability assignment name in the node template referred to by the "node" field
     or a general capability type.
     
     If the value refers to a capability type, make sure the "node" field was not assigned.  
@@ -244,19 +244,22 @@ def capability_definition_or_type_validator(field, presentation, context):
     
     value = getattr(presentation, field.name)
     if value is not None:
-        node, _ = presentation._get_node(context)
-        capability_definitions_or_assignments = node._get_capabilities(context) if node is not None else None
-        
-        if (capability_definitions_or_assignments is not None) and (value in capability_definitions_or_assignments):
-            return
+        node, node_variant = presentation._get_node(context)
+        if node_variant == 'node_template':
+            capabilities = node._get_capabilities(context)
+            if value in capabilities:
+                return
 
         capability_types = context.presentation.capability_types
-        if (context.presentation.capability_types is not None) and (value in capability_types):
+        if (capability_types is not None) and (value in capability_types):
             if node is not None:
-                context.validation.report('"%s" refers to a capability type even though "node" has a value for "%s"' % (presentation._name, presentation._container._fullname), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_FIELDS)
+                context.validation.report('"%s" refers to a capability type even though "node" has a value in "%s"' % (presentation._name, presentation._container._fullname), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_FIELDS)
             return
         
-        context.validation.report('"%s" refers to an unknown capability definition name or capability type for "%s"' % (presentation._name, presentation._container._fullname), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
+        if node_variant == 'node_template':
+            context.validation.report('"%s" refers to an unknown capability definition name or capability type in "%s": %s' % (presentation._name, presentation._container._fullname, repr(value)), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
+        else:
+            context.validation.report('"%s" refers to an unknown capability type in "%s": %s' % (presentation._name, presentation._container._fullname, repr(value)), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
 
 #
 # RequirementAssignmentRelationship
@@ -276,7 +279,7 @@ def relationship_template_or_type_validator(field, presentation, context):
         relationship_templates = context.presentation.relationship_templates or {}
         relationship_types = context.presentation.relationship_types or {}
         if (value not in relationship_templates) and (value not in relationship_types):
-            report_issue_for_unknown_type(context, presentation, 'relationship template or relationship type', field.name)
+            report_issue_for_unknown_type(context, presentation, 'relationship template or relationship type', field.name, value)
 
 #
 # PolicyType
@@ -299,7 +302,7 @@ def list_node_type_or_group_type_validator(field, presentation, context):
             node_types = context.presentation.node_types or {}
             group_types = context.presentation.group_types or {}
             if (value not in node_types) and (value not in group_types):
-                report_issue_for_unknown_type(context, presentation, 'node type or group type', field.name)
+                report_issue_for_unknown_type(context, presentation, 'node type or group type', field.name, value)
 
 #
 # PolicyDefinition
@@ -322,4 +325,4 @@ def list_node_template_or_group_validator(field, presentation, context):
             node_templates = context.presentation.node_templates or {}
             groups = context.presentation.groups or {}
             if (value not in node_templates) and (value not in groups):
-                report_issue_for_unknown_type(context, presentation, 'node template or group', field.name)
+                report_issue_for_unknown_type(context, presentation, 'node template or group', field.name, value)

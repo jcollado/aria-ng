@@ -6,8 +6,8 @@ from .assignments import AttributeAssignment, RequirementAssignment, CapabilityA
 from .property_assignment import PropertyAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
-from .deployment import get_node_template_deployment
-from .utils.properties import get_assigned_and_defined_property_values
+from .deployment import get_topology
+from .utils.properties import get_assigned_and_defined_property_values, get_inherited_property_definitions
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
 from .utils.capabilities import get_template_capabilities
@@ -141,9 +141,6 @@ class NodeTemplate(ToscaPresentation):
         self._get_requirements(context)
         self._get_capabilities(context)
         self._get_interfaces(context)
-    
-    def _get_deployment(self, context):
-        return get_node_template_deployment(context, self)
 
 @has_fields
 @dsl_specification('3.7.4', 'tosca-simple-profile-1.0')
@@ -296,6 +293,19 @@ class TopologyTemplate(ToscaPresentation):
 
         This also includes the mappings between the external Node Types named capabilities and requirements to existing implementations of those capabilities and requirements on Node templates declared within the topology template.
         """
+
+    @cachedmethod
+    def _get_inputs(self, context):
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'inputs'))
+    
+    @cachedmethod
+    def _get_topology(self, context):
+        return get_topology(context, self)
+
+    def _validate(self, context):
+        super(TopologyTemplate, self)._validate(context)
+        self._get_inputs(context)
+        self._get_topology(context)
 
 @has_fields
 @dsl_specification('3.9', 'tosca-simple-profile-1.0')

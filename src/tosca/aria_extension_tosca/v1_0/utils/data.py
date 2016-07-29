@@ -83,7 +83,7 @@ def coerce_data_type_value(context, presentation, data_type, entry_schema, const
                     definition_constraints = definition._get_constraints(context)
                     r[name] = coerce_value(context, presentation, definition_type, definition_entry_schema, definition_constraints, v)
                 else:
-                    context.validation.report('assignment to undefined property "%s" in type "%s" for "%s"' % (name, data_type._fullname, presentation._fullname), locator=v._locator, level=Issue.BETWEEN_TYPES)
+                    context.validation.report('assignment to undefined property "%s" in type "%s" in "%s"' % (name, data_type._fullname, presentation._fullname), locator=v._locator, level=Issue.BETWEEN_TYPES)
 
             # Fill in defaults from the definitions, and check if required definitions have not been assigned
             for name, definition in definitions.iteritems():
@@ -91,11 +91,11 @@ def coerce_data_type_value(context, presentation, data_type, entry_schema, const
                     r[name] = definition.default
     
                 if getattr(definition, 'required', False) and (r.get(name) is None):
-                    context.validation.report('required property "%s" in type "%s" is not assigned a value for "%s"' % (name, data_type._fullname, presentation._fullname), locator=presentation._get_child_locator('definitions'), level=Issue.BETWEEN_TYPES)
+                    context.validation.report('required property "%s" in type "%s" is not assigned a value in "%s"' % (name, data_type._fullname, presentation._fullname), locator=presentation._get_child_locator('definitions'), level=Issue.BETWEEN_TYPES)
             
             value = r
         else:
-            context.validation.report('value of type "%s" is not a dict for "%s"' % (data_type._fullname, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
+            context.validation.report('value of type "%s" is not a dict in "%s"' % (data_type._fullname, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
             value = None
     
     return value

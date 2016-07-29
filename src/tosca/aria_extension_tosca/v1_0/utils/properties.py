@@ -34,7 +34,7 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
 # NodeTemplate, RelationshipTemplate, GroupDefinition, PolicyDefinition
 #
 
-def get_assigned_and_defined_property_values(context, presentation):
+def get_assigned_and_defined_property_values(context, presentation, original_presentation=None):
     """
     Returns the assigned property values while making sure they are defined in our type.
     
@@ -42,6 +42,9 @@ def get_assigned_and_defined_property_values(context, presentation):
     
     Makes sure that required properties indeed end up with a value.
     """
+
+    if original_presentation is None:
+        original_presentation = presentation
 
     values = OrderedDict()
     
@@ -62,7 +65,7 @@ def get_assigned_and_defined_property_values(context, presentation):
                 if value.value is not None:
                     values[name] = coerce_property_value(context, value, definition)
             else:
-                context.validation.report('assignment to undefined property "%s" for "%s"' % (name, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
+                context.validation.report('assignment to undefined property "%s" in "%s"' % (name, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
     
     # Fill in defaults from the definitions, and check if required properties have not been assigned
     if definitions is not None:
@@ -71,7 +74,7 @@ def get_assigned_and_defined_property_values(context, presentation):
                 values[name] = coerce_default_property_value(context, presentation, definition) 
 
             if getattr(definition, 'required', False) and (values.get(name) is None):
-                context.validation.report('required property "%s" is not assigned a value for "%s"' % (name, presentation._fullname), locator=presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
+                context.validation.report('required property "%s" is not assigned a value in "%s"' % (name, presentation._fullname), locator=original_presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
     
     return values
 
@@ -85,7 +88,7 @@ def merge_raw_property_definition(context, presentation, raw_property_definition
     type1 = raw_property_definition.get('type')
     type2 = our_property_definition.type
     if type1 != type2:
-        context.validation.report('override changes type from "%s" to "%s" for property "%s" for "%s"' % (type1, type2, property_name, presentation._fullname), locator=presentation._get_grandchild_locator(field_name, property_name), level=Issue.BETWEEN_TYPES)
+        context.validation.report('override changes type from "%s" to "%s" for property "%s" in "%s"' % (type1, type2, property_name, presentation._fullname), locator=presentation._get_grandchild_locator(field_name, property_name), level=Issue.BETWEEN_TYPES)
 
     merge(raw_property_definition, our_property_definition._raw)
 

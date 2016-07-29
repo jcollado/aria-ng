@@ -47,7 +47,7 @@ def get_inherited_capability_definitions(context, presentation, for_presentation
                 type1 = capability_definition.type
                 type2 = our_capability_definition.type
                 if type1 != type2:
-                    context.validation.report('capability definition changes type from "%s" to "%s" for "%s"' % (type1, type2, presentation._fullname), locator=our_capability_definition._locator, level=Issue.BETWEEN_TYPES)
+                    context.validation.report('capability definition changes type from "%s" to "%s" in "%s"' % (type1, type2, presentation._fullname), locator=our_capability_definition._locator, level=Issue.BETWEEN_TYPES)
 
                 # Already cloned?
                 #capability_definition = capability_definition._clone(for_presentation)
@@ -95,7 +95,7 @@ def get_template_capabilities(context, presentation):
                 if values:
                     capability_assignment._raw['properties'] = values
             else:
-                context.validation.report('capability "%s" not declared in node type "%s" for "%s"' % (capability_name, presentation.type, presentation._fullname), locator=our_capability_assignment._locator, level=Issue.BETWEEN_TYPES)
+                context.validation.report('capability "%s" not declared at node type "%s" in "%s"' % (capability_name, presentation.type, presentation._fullname), locator=our_capability_assignment._locator, level=Issue.BETWEEN_TYPES)
 
     return capability_assignments
 

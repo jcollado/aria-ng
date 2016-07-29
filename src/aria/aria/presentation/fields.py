@@ -40,25 +40,25 @@ class Field(object):
 
         if value is None:
             if self.required:
-                raise InvalidValueError('required field "%s" does not have a value' % self.fullname, locator=self.get_locator(raw))
+                raise InvalidValueError('required %s does not have a value' % self.fullname, locator=self.get_locator(raw))
             else:
                 return None
         
         if self.allowed is not None:
             if value not in self.allowed:
-                raise InvalidValueError('field "%s" is not %s' % (self.fullname, ' or '.join([repr(v) for v in self.allowed])), locator=self.get_locator(raw))
+                raise InvalidValueError('%s is not %s' % (self.fullname, ' or '.join([repr(v) for v in self.allowed])), locator=self.get_locator(raw))
 
         if self.field_type == 'primitive':
             if (self.cls is not None) and not isinstance(value, self.cls):
                 try:
                     return self.cls(value)
                 except ValueError:
-                    raise InvalidValueError('field "%s" is not a valid "%s": %s' % (self.fullname, self.fullclass, repr(value)), locator=self.get_locator(raw))
+                    raise InvalidValueError('%s is not a valid "%s": %s' % (self.fullname, self.fullclass, repr(value)), locator=self.get_locator(raw))
             return value
 
         elif self.field_type == 'primitive_list':
             if not isinstance(value, list):
-                raise InvalidValueError('field "%s" is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                raise InvalidValueError('%s is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             if self.cls is not None:
                 value = deepcopy(value)
                 for i in range(len(value)):
@@ -66,34 +66,34 @@ class Field(object):
                         try:
                             value[i] = self.cls(value[i])
                         except ValueError:
-                            raise InvalidValueError('field "%s" is not a list of "%s": element %d is %s' % (self.fullname, self.fullclass, i, repr(value[i])), locator=self.get_locator(raw))
+                            raise InvalidValueError('%s is not a list of "%s": element %d is %s' % (self.fullname, self.fullclass, i, repr(value[i])), locator=self.get_locator(raw))
             return ReadOnlyList(value)
 
         elif self.field_type == 'object':
             try:
                 return self.cls(raw=value, container=presentation)
             except TypeError as e:
-                raise InvalidValueError('field "%s" cannot not be initialized to an instance of "%s": %s' % (self.fullname, self.fullclass, repr(value)), cause=e, locator=self.get_locator(raw))
+                raise InvalidValueError('%s cannot not be initialized to an instance of "%s": %s' % (self.fullname, self.fullclass, repr(value)), cause=e, locator=self.get_locator(raw))
 
         elif self.field_type == 'object_list':
             if not isinstance(value, list):
-                raise InvalidValueError('field "%s" is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                raise InvalidValueError('%s is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             return ReadOnlyList((self.cls(raw=v, container=presentation) for v in value))
 
         elif self.field_type == 'object_dict':
             if not isinstance(value, dict):
-                raise InvalidValueError('field "%s" is not a dict: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                raise InvalidValueError('%s is not a dict: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             return ReadOnlyDict(((k, self.cls(name=k, raw=v, container=presentation)) for k, v in value.iteritems()))
 
         elif self.field_type == 'sequenced_object_list':
             if not isinstance(value, list):
-                raise InvalidValueError('field "%s" is not a sequenced list (a list of dicts, each with exactly one key): %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                raise InvalidValueError('%s is not a sequenced list (a list of dicts, each with exactly one key): %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             sequence = []
             for v in value:
                 if not isinstance(v, dict):
-                    raise InvalidValueError('field "%s" list elements are not all dicts with exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                    raise InvalidValueError('%s list elements are not all dicts with exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
                 if len(v) != 1:
-                    raise InvalidValueError('field "%s" list elements do not all have exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+                    raise InvalidValueError('%s list elements do not all have exactly one key: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
                 k, vv = v.items()[0]
                 sequence.append((k, self.cls(name=k, raw=vv, container=presentation)))
             return ReadOnlyList(sequence)
@@ -101,7 +101,7 @@ class Field(object):
         else:
             locator = self.get_locator(raw)
             location = (', at %s' % locator) if locator is not None else ''
-            raise AttributeError('field "%s" has unsupported field type: "%s"%s' % (self.fullname, self.field_type, location))
+            raise AttributeError('%s has unsupported field type: "%s"%s' % (self.fullname, self.field_type, location))
 
     def set(self, presentation, value):
         return self._set(presentation, value)

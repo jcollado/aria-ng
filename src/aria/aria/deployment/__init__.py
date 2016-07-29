@@ -1,10 +1,10 @@
 
-from .elements import *
+from .topology import *
 from .ids import *
 from .deployment_plan import *
 
 __all__ = (
-    'Deployment',
+    'Topology',
     'NodeTemplate',
     'Interface',
     'Operation',

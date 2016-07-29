@@ -121,17 +121,14 @@ class RequirementAssignment(ToscaPresentation):
         
         if capability is not None:
             node, node_variant = self._get_node(context)
-            capability_definitions_or_assignments = node._get_capabilities(context) if node is not None else None
-            
-            if (capability_definitions_or_assignments is not None) and (capability in capability_definitions_or_assignments):
-                if node_variant == 'node_template':
-                    return capability_definitions_or_assignments[capability], 'capability_assignment'
-                else:
-                    return capability_definitions_or_assignments[capability], 'capability_definition'
-        
-            capability_types = context.presentation.capability_types
-            if (context.presentation.capability_types is not None) and (capability in capability_types):
-                return capability_types[capability], 'capability_type'
+            if node_variant == 'node_template':
+                capabilities = node._get_capabilities(context)
+                if capability in capabilities:
+                    return capabilities[capability], 'capability_assignment'
+            else:
+                capability_types = context.presentation.capability_types
+                if (capability_types is not None) and (capability in capability_types):
+                    return capability_types[capability], 'capability_type'
         
         return None, None
 

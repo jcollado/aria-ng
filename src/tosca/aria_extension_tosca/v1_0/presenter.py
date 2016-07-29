@@ -25,13 +25,16 @@ class ToscaSimplePresenter1_0(Presenter):
     def _get_import_locations(self):
         return ReadOnlyList([i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else [])
 
+    def _get_topology(self, context):
+        return self.service_template.topology_template._get_topology(context)
+
     @property
     def repositories(self):
         return self.service_template.repositories
 
     @property
     def inputs(self):
-        return self.service_template.topology_template.inputs
+        return self.service_template.topology_template.inputs if self.service_template.topology_template is not None else None
             
     @property
     def data_types(self):
@@ -67,12 +70,12 @@ class ToscaSimplePresenter1_0(Presenter):
 
     @property
     def node_templates(self):
-        return self.service_template.topology_template.node_templates
+        return self.service_template.topology_template.node_templates if self.service_template.topology_template is not None else None
 
     @property
     def relationship_templates(self):
-        return self.service_template.topology_template.relationship_templates
+        return self.service_template.topology_template.relationship_templates if self.service_template.topology_template is not None else None
 
     @property
     def groups(self):
-        return self.service_template.topology_template.groups
+        return self.service_template.topology_template.groups if self.service_template.topology_template is not None else None

@@ -28,14 +28,14 @@ def validate_known_fields(presentation, context):
         for _, field in presentation._iter_fields():
             field.validate(presentation, context)
 
-def report_issue_for_unknown_type(context, presentation, type_name, field_name):
-    context.validation.report('"%s" refers to an unknown %s for "%s"' % (getattr(presentation, field_name), type_name, presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
+def report_issue_for_unknown_type(context, presentation, type_name, field_name, value):
+    context.validation.report('"%s" refers to an unknown %s in "%s": %s' % (getattr(presentation, field_name), type_name, presentation._fullname, repr(value)), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_parent_is_self(context, presentation, field_name):
     context.validation.report('parent type of "%s" is self' % presentation._fullname, locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_unknown_parent_type(context, presentation, field_name):
-    context.validation.report('unknown parent type "%s" for "%s"' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
+    context.validation.report('unknown parent type "%s" in "%s"' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)
 
 def report_issue_for_circular_type_hierarchy(context, presentation, field_name):
     context.validation.report('"%s" of "%s" creates a circular type hierarchy' % (getattr(presentation, field_name), presentation._fullname), locator=presentation._get_child_locator(field_name), level=Issue.BETWEEN_TYPES)

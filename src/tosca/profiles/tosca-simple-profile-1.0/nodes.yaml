@@ -107,17 +107,17 @@ node_types:
         type: string
         required: false
         status: experimental
+    requirements:
+      - application:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.RoutesTo
+          occurrences: [ 0, UNBOUNDED ]
     capabilities:
       client:
         description: >-
           The Floating (IP) client's on the public network can connect to.
         type: tosca.capabilities.Endpoint.Public
         occurrences: [ 0, UNBOUNDED ]
-    requirements:
-      - application:
-          capability: tosca.capabilities.Endpoint
-          relationship: tosca.relationships.RoutesTo
-          occurrences: [ 0, UNBOUNDED ]
   
   #
   # Software

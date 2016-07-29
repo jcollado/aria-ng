@@ -186,20 +186,28 @@ class Range(object):
             raise ValueError('range value does not have exactly 2 elements: %s' % repr(value))
         
         try:
-            float(value[0])
+            value[0] = int(value[0])
         except ValueError:
-            raise ValueError('lower bound of range is not a valid number: %s' % repr(value[0]))
+            raise ValueError('lower bound of range is not a valid integer: %s' % repr(value[0]))
 
         if value[1] != 'UNBOUNDED':
             try:
-                float(value[1])
+                value[1] = int(value[1])
             except ValueError:
-                raise ValueError('upper bound of range is not a valid number or "UNBOUNDED": %s' % repr(value[0]))
+                raise ValueError('upper bound of range is not a valid integer or "UNBOUNDED": %s' % repr(value[0]))
 
         if value[0] >= value[1]:
             raise ValueError('upper bound of range is not greater than the lower bound: %s >= %s' % (repr(value[0]), repr(value[1])))
         
         self.value = value
+    
+    def is_in(self, value):
+        if value < self.value[0]:
+            return False
+        if self.value[1] != 'UNBOUNDED':
+            if value > self.value[1]:
+                return False
+        return True
 
 @dsl_specification('3.2.4', 'tosca-simple-profile-1.0')
 class List(object):

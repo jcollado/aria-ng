@@ -23,6 +23,10 @@ node_types:
         type: os.Archive
         file: https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1604-3.2.8.tgz
         deploy_path: /opt/mongodb
+    capabilities:
+      host: # @override
+        type: tosca.capabilities.Container
+        valid_source_types: [ mongodb.Database ]
 
   mongodb.Database:
     description: >-
@@ -39,6 +43,12 @@ node_types:
             dependencies:
               - mongodb/utils/api.sh
               - utils/os.sh
+    requirements:
+      - host: # @override
+          capability: tosca.capabilities.Container
+          node: mongodb.Server
+          relationship: tosca.relationships.HostedOn
+          occurrences: [ 0, UNBOUNDED ]
 
 artifact_types:
 

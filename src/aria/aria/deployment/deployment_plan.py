@@ -1,5 +1,5 @@
 
-from .utils import generate_id
+from .ids import generate_id
 
 class DeploymentPlan(object):
     """

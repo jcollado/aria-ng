@@ -48,9 +48,10 @@ def get_inherited_capability_definitions(context, presentation, for_presentation
                 type2 = our_capability_definition.type
                 if type1 != type2:
                     context.validation.report('capability definition changes type from "%s" to "%s" for "%s"' % (type1, type2, presentation._fullname), locator=our_capability_definition._locator, level=Issue.BETWEEN_TYPES)
-                
-                capability_definition = capability_definition._clone(for_presentation)
-                capability_definitions[capability_name] = capability_definition
+
+                # Already cloned?
+                #capability_definition = capability_definition._clone(for_presentation)
+                #capability_definitions[capability_name] = capability_definition
             else:
                 capability_definition = our_capability_definition._clone(for_presentation)
                 capability_definitions[capability_name] = capability_definition
@@ -58,26 +59,6 @@ def get_inherited_capability_definitions(context, presentation, for_presentation
             merge_capability_definition_from_type(context, presentation, capability_definition)
         
     return capability_definitions
-
-def merge_capability_definition_from_type(context, presentation, capability_definition):
-    raw_properties = OrderedDict()
-
-    # Merge raw_properties from type
-    the_type = capability_definition._get_type(context)
-    type_property_defintions = the_type._get_properties(context)
-    merge_raw_property_definitions(context, presentation, raw_properties, type_property_defintions, 'properties')
-
-    # Merge our raw_properties
-    merge_raw_property_definitions(context, presentation, raw_properties, capability_definition.properties, 'properties')
-    
-    if raw_properties:
-        capability_definition._raw['properties'] = raw_properties
-    
-    # Merge valid_source_types
-    if capability_definition._raw.get('valid_source_types') is None:
-        valid_source_types = the_type._get_valid_source_types(context)
-        if valid_source_types is not None:
-            capability_definition._raw['valid_source_types'] = deepclone(valid_source_types)
 
 #
 # NodeTemplate
@@ -114,7 +95,7 @@ def get_template_capabilities(context, presentation):
                 if values:
                     capability_assignment._raw['properties'] = values
             else:
-                context.validation.report('capability_definition "%s" not declared in node type "%s" for "%s"' % (capability_name, presentation.type, presentation._fullname), locator=our_capability_assignment._locator, level=Issue.BETWEEN_TYPES)
+                context.validation.report('capability "%s" not declared in node type "%s" for "%s"' % (capability_name, presentation.type, presentation._fullname), locator=our_capability_assignment._locator, level=Issue.BETWEEN_TYPES)
 
     return capability_assignments
 
@@ -134,3 +115,23 @@ def convert_capability_from_definition_to_assignment(context, presentation, cont
     # TODO attributes
 
     return CapabilityAssignment(name=presentation._name, raw=raw, container=container)
+
+def merge_capability_definition_from_type(context, presentation, capability_definition):
+    raw_properties = OrderedDict()
+
+    # Merge raw_properties from type
+    the_type = capability_definition._get_type(context)
+    type_property_defintions = the_type._get_properties(context)
+    merge_raw_property_definitions(context, presentation, raw_properties, type_property_defintions, 'properties')
+
+    # Merge our raw_properties
+    merge_raw_property_definitions(context, presentation, raw_properties, capability_definition.properties, 'properties')
+    
+    if raw_properties:
+        capability_definition._raw['properties'] = raw_properties
+    
+    # Merge valid_source_types
+    if capability_definition._raw.get('valid_source_types') is None:
+        valid_source_types = the_type._get_valid_source_types(context)
+        if valid_source_types is not None:
+            capability_definition._raw['valid_source_types'] = deepclone(valid_source_types)

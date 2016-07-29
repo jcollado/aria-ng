@@ -1,4 +1,5 @@
 
+from ..utils import make_agnostic
 from clint.textui import colored, indent
 
 class Style(object):
@@ -22,4 +23,5 @@ class Style(object):
         return colored.magenta(value, bold=True)
 
     def literal(self, value):
+        value = make_agnostic(value)
         return colored.yellow(repr(value), bold=True)

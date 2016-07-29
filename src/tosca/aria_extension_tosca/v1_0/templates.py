@@ -6,6 +6,7 @@ from .assignments import AttributeAssignment, RequirementAssignment, CapabilityA
 from .property_assignment import PropertyAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
+from .deployment import get_node_template_deployment
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
@@ -140,6 +141,9 @@ class NodeTemplate(ToscaPresentation):
         self._get_requirements(context)
         self._get_capabilities(context)
         self._get_interfaces(context)
+    
+    def _get_deployment(self, context):
+        return get_node_template_deployment(context, self)
 
 @has_fields
 @dsl_specification('3.7.4', 'tosca-simple-profile-1.0')

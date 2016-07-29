@@ -43,6 +43,11 @@ node_types:
 
   nodejs.Application:
     derived_from: tosca.nodes.WebApplication
+    requirements:
+      - host: # @override
+          capability: tosca.capabilities.Container
+          node: nodejs.Server
+          relationship: tosca.relationships.HostedOn
     capabilities:
       app_endpoint: # @override
         type: tosca.capabilities.Endpoint

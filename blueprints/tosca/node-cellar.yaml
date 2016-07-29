@@ -47,6 +47,15 @@ relationship_types:
             dependencies:
               - utils/os.sh
 
+node_types:
+
+  NodeMongoApplication:
+    derived_from: nodejs.Application
+    requirements:
+      - database:
+          capability: tosca.capabilities.Endpoint.Database
+          node: mongodb.Database
+
 topology_template:
 
   relationship_templates:
@@ -68,7 +77,7 @@ topology_template:
     node_cellar:
       description: >-
         Node Cellar Node.js web application.
-      type: nodejs.Application
+      type: NodeMongoApplication
       artifacts:
         node_cellar:
           description: >-
@@ -79,22 +88,22 @@ topology_template:
           deploy_path: /opt/nodejs/applications/node-cellar
       requirements:
         #- database: node_cellar_database
-        - database:
-            node: node_cellar_database
-            capability: database_endpoint
-            relationship:
-              type: connects_to # relationship type or relationship template
-              properties:
-                credential:
-                  user: admin
-                  token: admin123
-              interfaces:
-                standard2:
-                  inputs:
-                    input1: asdadsd
-                  create:
-                    inputs:
-                      input2: 23
+        #- database:
+        #    node: node_cellar_database
+        #    capability: database_endpoint
+        #    relationship:
+        #      type: connects_to # relationship type or relationship template
+        #      properties:
+        #        credential:
+        #          user: admin
+        #          token: admin123
+        #      interfaces:
+        #        standard2:
+        #          inputs:
+        #            input1: asdadsd
+        #          create:
+        #            inputs:
+        #              input2: 23
         #- database:
         #    node: node_cellar_database
         #    capability: tosca.capabilities.Endpoint.Database
@@ -122,11 +131,15 @@ topology_template:
     
     nodejs:
       type: nodejs.Server
+      requirements:
+        - host: application_host
 
     mongodb:
       description: >-
         MongoDB database.
       type: mongodb.Server
+      requirements:
+        - host: data_host
     
     # Hosts
 

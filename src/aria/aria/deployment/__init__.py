@@ -1,7 +1,15 @@
 
+from .elements import *
+from .ids import *
 from .deployment_plan import *
-from .utils import *
 
 __all__ = (
-    'DeploymentPlan',
-    'generate_id')
+    'Deployment',
+    'NodeTemplate',
+    'Interface',
+    'Operation',
+    'Requirement',
+    'Relationship',
+    'Capability',
+    'generate_id',
+    'DeploymentPlan')

@@ -470,7 +470,7 @@ class RequirementDefinition(ToscaPresentation):
 
     @cachedmethod
     def _get_node_type(self, context):
-        return context.presentation.capability_types.get(self.node)
+        return context.presentation.node_types.get(self.node)
 
 @short_form_field('type')
 @has_fields
@@ -527,7 +527,7 @@ class CapabilityDefinition(ToscaPresentation):
         """
 
     @field_getter(data_type_class_getter(Range))
-    @primitive_field(default=[1, 'UNBOUNDED'])
+    @primitive_field()
     def occurrences(self):
         """
         The optional minimum and maximum occurrences for the capability. By default, an exported Capability should allow at least one relationship to be formed with it with a maximum of UNBOUNDED relationships.

@@ -3,9 +3,10 @@ from .exceptions import *
 from .context import *
 from .consumer import *
 from .validate import *
-from .deploy import *
-from .printing import *
 from .yaml import *
+from .template import *
+from .topology import *
+from .plan import *
 from .style import *
 
 MODULES = (
@@ -18,7 +19,8 @@ __all__ = (
     'ConsumptionContext',
     'Consumer',
     'Validate',
-    'Deploy',
-    'Print',
     'Yaml',
+    'Template',
+    'Topology',
+    'Plan',
     'Style')

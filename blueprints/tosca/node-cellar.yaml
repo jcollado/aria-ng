@@ -106,8 +106,10 @@ topology_template:
         #              input2: 23
         #- database:
         #    capability: tosca.capabilities.Endpoint.Database
-        - database:
-            node: mongodb.Database
+        #- database:
+        #    node: mongodb.Database
+        #- database:
+        #    node: tosca.nodes.LoadBalancer
         #- database:
         #    node: node_cellar_database
         #    capability: database_endpoint
@@ -154,7 +156,7 @@ topology_template:
         Host for applications.
       type: openstack.Instance
       properties:
-        users:
+        os_users: # map of os.UserInfo
           root:
             password: admin123
           nodejs:
@@ -176,7 +178,7 @@ topology_template:
       type: openstack.Instance
       properties:
         flavor_name: m1.large
-        users:
+        os_users: # map of os.UserInfo
           root:
             password: admin123 
           mongodb:
@@ -200,10 +202,14 @@ topology_template:
       type: openstack.Volume
       properties:
         size: 10 GB
+      interfaces:
+        standard:
+          inputs:
+            openstack_credential: *OPENSTACK_CREDENTIAL
 
   groups:
   
-    node_cellar:
+    node_cellar_group:
       type: openstack.Secured
       members:
         - application_host
@@ -220,4 +226,4 @@ topology_template:
       properties:
         bandwidth_threshold: 2 GB
       targets: # node templates or groups
-        - node_cellar
+        - node_cellar_group

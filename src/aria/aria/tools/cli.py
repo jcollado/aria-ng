@@ -8,7 +8,7 @@ class ArgumentParser(CommonArgumentParser):
     def __init__(self):
         super(ArgumentParser, self).__init__(description='CLI', prog='aria')
         self.add_argument('uri', help='URI or file path to profile')
-        self.add_argument('consumer', nargs='?', default='aria.consumption.Print', help='consumer class')
+        self.add_argument('consumer', nargs='?', default='aria.consumption.Plan', help='consumer class')
 
 def main():
     try:

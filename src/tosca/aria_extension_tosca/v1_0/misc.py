@@ -1,10 +1,11 @@
 
 from .presentation import ToscaPresentation
+from .description import Description
 from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
 from .utils.data import get_as_data_type, apply_constraint_to_value
 from aria import dsl_specification
 from aria.utils import cachedmethod
-from aria.presentation import has_fields, short_form_field, primitive_field, primitive_list_field, field_validator
+from aria.presentation import has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator
 
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')
@@ -38,15 +39,13 @@ class Repository(ToscaPresentation):
     
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_REPOSITORY_DEF>`__
     """
-    
-    @primitive_field(str)
+
+    @object_field(Description)
     def description(self):
         """
         The optional description for the repository.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @primitive_field(str, required=True)
@@ -110,6 +109,12 @@ class Import(ToscaPresentation):
         
         :rtype: str
         """
+
+    #def _dump(self, context):
+    #    puts('Import:')
+    #    with context.style.indent:
+    #        if self.credential:
+    #            puts('File: %s' % context.style.literal(self.credential))
 
 @has_fields
 @dsl_specification('3.5.2', 'tosca-simple-profile-1.0')

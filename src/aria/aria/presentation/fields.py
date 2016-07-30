@@ -6,6 +6,7 @@ from functools import wraps
 from types import MethodType
 from collections import OrderedDict
 from copy import deepcopy
+from clint.textui import puts
 
 class Field(object):
     def __init__(self, field_type, fn, cls=None, default=None, allowed=None, required=False):
@@ -167,6 +168,46 @@ class Field(object):
             return raw._locator
         return None
     
+    def dump(self, presentation, context):
+        value = getattr(presentation, self.name)
+        if value is None:
+            return
+
+        if self.field_type == 'primitive':
+            puts('%s: %s' % (self.name, context.style.literal(value)))
+
+        if self.field_type == 'primitive_list':
+            puts('%s:' % self.name)
+            with context.style.indent:
+                for v in value:
+                    puts(context.style.literal(v))
+
+        if self.field_type == 'object':
+            puts('%s:' % self.name)
+            with context.style.indent:
+                if hasattr(value, '_dump'):
+                    value._dump(context)
+    
+        if self.field_type == 'object_list':
+            puts('%s:' % self.name)
+            with context.style.indent:
+                for v in value:
+                    if hasattr(v, '_dump'):
+                        v._dump(context)
+
+        elif self.field_type == 'sequenced_object_list':
+            puts('%s:' % self.name)
+            for _, v in value:
+                if hasattr(v, '_dump'):
+                    v._dump(context)
+        
+        elif (self.field_type == 'object_dict') or (self.field_type == 'object_dict_unknown_fields'):
+            puts('%s:' % self.name)
+            with context.style.indent:
+                for v in value.itervalues():
+                    if hasattr(v, '_dump'):
+                        v._dump(context)
+    
 def has_fields_iter_field_names(self):
     for name in self.__class__.FIELDS:
         yield name
@@ -234,7 +275,13 @@ def has_fields(cls):
         if hasattr(base, 'FIELDS'):
             cls.FIELDS.update(base.FIELDS)
     
-    for name, field in cls.__dict__.iteritems():
+    # We could do this:
+    #  for name, field in cls.__dict__.iteritems():
+    # But dir() is better because it has a deterministic order (alphabetical)
+    
+    for name in dir(cls):
+        field = getattr(cls, name)
+        
         if isinstance(field, Field):
             # Accumulate
             cls.FIELDS[name] = field

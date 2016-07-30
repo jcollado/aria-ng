@@ -1,15 +1,18 @@
 
 from .consumer import Consumer
 
-class Deploy(Consumer):
+class Topology(Consumer):
     """
-    ARIA deployer.
+    ARIA deployment topology.
     
-    Created a deployment plan for the presentation.
+    Created a deployment topology for the presentation.
     """
 
     def consume(self):
         topology = self.topology
+        topology.link(self.context)
+        if self.context.validation.dump_issues():
+            exit(0)
         topology.dump(self.context)
     
     @property

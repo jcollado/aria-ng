@@ -25,3 +25,6 @@ class Style(object):
     def literal(self, value):
         value = make_agnostic(value)
         return colored.yellow(repr(value), bold=True)
+
+    def meta(self, value):
+        return colored.green(value)

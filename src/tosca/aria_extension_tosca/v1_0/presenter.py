@@ -1,5 +1,6 @@
 
 from .templates import ServiceTemplate
+from .topology import normalize_topology
 from aria.presentation import Presenter
 from aria.utils import ReadOnlyList
 
@@ -19,14 +20,18 @@ class ToscaSimplePresenter1_0(Presenter):
         dsl = raw.get('tosca_definitions_version')
         return dsl == 'tosca_simple_yaml_1_0'
 
+    def _dump(self, context):
+        self.service_template._dump(context)
+
     def _validate(self, context):
         self.service_template._validate(context)
+        self._get_topology(context).validate(context)
     
     def _get_import_locations(self):
         return ReadOnlyList([i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else [])
 
     def _get_topology(self, context):
-        return self.service_template.topology_template._get_topology(context)
+        return normalize_topology(context, self)
 
     @property
     def repositories(self):

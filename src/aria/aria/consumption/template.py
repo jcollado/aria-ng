@@ -2,8 +2,11 @@
 from .consumer import Consumer
 from clint.textui import puts, colored
 
-class Print(Consumer):
+class Template(Consumer):
     def consume(self):
+        self.context.presentation._dump(self.context)
+    
+    def old(self):
         puts(self.context.style.section('Type:'))
         with self.context.style.indent:
             puts(self.context.presentation.__class__.__name__)

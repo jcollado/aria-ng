@@ -1,8 +1,8 @@
 
 from .properties import convert_property_definitions_to_values, get_assigned_and_defined_property_values
-from .interfaces import convert_interface_definition_from_type_to_raw_template, get_template_interfaces
+from .interfaces import convert_interface_definition_from_type_to_raw_template
 from aria import Issue
-from aria.utils import merge, deepclone
+from aria.utils import deepclone
 from collections import OrderedDict
 
 #
@@ -134,7 +134,7 @@ def merge_requirement_assignment(context, requirement, our_requirement):
         
     our_node = our_requirement.node
     if our_node is not None:
-        requirement._raw['our_node'] = deepclone(our_node)
+        requirement._raw['node'] = deepclone(our_node)
         
     our_relationship = our_requirement.relationship # RequirementAssignmentRelationship
     if our_relationship is not None:

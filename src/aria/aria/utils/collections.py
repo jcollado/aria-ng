@@ -80,12 +80,19 @@ class StrictList(list):
             value = self.wrapper_fn(value)
         return super(StrictList, self).__setitem__(key, value)
 
+    def append(self, value):
+        if not isinstance(value, self.value_class):
+            raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
+        if self.wrapper_fn:
+            value = self.wrapper_fn(value)
+        return super(StrictList, self).append(value)
+
 class StrictDict(OrderedDict):
     """
     An ordered dict that raises TypeError exceptions when keys or values of the wrong type are used.
     """
     
-    def __init__(self, key_class, value_class, items=None, wrapper_fn=None, unwrapper_fn=None):
+    def __init__(self, key_class, value_class=None, items=None, wrapper_fn=None, unwrapper_fn=None):
         super(StrictDict, self).__init__()
         self.key_class = key_class
         self.value_class = value_class
@@ -106,8 +113,9 @@ class StrictDict(OrderedDict):
     def __setitem__(self, key, value):
         if not isinstance(key, self.key_class):
             raise TypeError('key must be a %s.%s' % (self.key_class.__module__, self.key_class.__name__))
-        if not isinstance(value, self.value_class):
-            raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
+        if self.value_class is not None:
+            if not isinstance(value, self.value_class):
+                raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
         if self.wrapper_fn:
             value = self.wrapper_fn(value)
         return super(StrictDict, self).__setitem__(key, value)

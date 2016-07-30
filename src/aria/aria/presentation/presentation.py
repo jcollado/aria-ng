@@ -1,6 +1,7 @@
 
 from ..utils import classname, deepclone
 from .utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
+from clint.textui import puts
 
 class PresentationBase(object):
     """
@@ -53,6 +54,28 @@ class PresentationBase(object):
             p = getattr(self, k)
             if hasattr(p, 'cache_clear'):
                 p.cache_clear()
+
+    def _dump(self, context):
+        if self._name:
+            puts(context.style.node(self._name))
+            with context.style.indent:
+                self._dump_content(context)
+        else:
+            self._dump_content(context)
+                            
+    def _dump_content(self, context, field_names=None):
+        if field_names:
+            for field_name in field_names:
+                self._dump_field(context, field_name)
+        elif hasattr(self, '_iter_field_names'):
+            for field_name in self._iter_field_names():
+                self._dump_field(context, field_name)
+        else:
+            puts(context.style.literal(self._raw))
+
+    def _dump_field(self, context, field_name):
+        field = self.FIELDS[field_name]
+        field.dump(self, context) 
 
     def _clone(self, container=None):
         raw = deepclone(self._raw)

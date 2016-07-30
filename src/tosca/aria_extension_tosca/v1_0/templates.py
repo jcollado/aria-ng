@@ -1,12 +1,12 @@
 
 from .presentation import ToscaPresentation
+from .description import Description
 from .misc import MetaData, Repository, Import
 from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinitionForTemplate, ArtifactDefinition
 from .assignments import AttributeAssignment, RequirementAssignment, CapabilityAssignment
 from .property_assignment import PropertyAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
-from .deployment import get_topology
 from .utils.properties import get_assigned_and_defined_property_values, get_inherited_property_definitions
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
@@ -33,14 +33,12 @@ class NodeTemplate(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         An optional description for the Node Template.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @primitive_list_field(str)
@@ -160,14 +158,12 @@ class RelationshipTemplate(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         An optional description for the Relationship Template.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @object_dict_field(PropertyAssignment)
@@ -228,14 +224,12 @@ class TopologyTemplate(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_TOPOLOGY_TEMPLATE>`__
     """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description for the Topology Template.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @object_dict_field(ParameterDefinition)
@@ -297,15 +291,17 @@ class TopologyTemplate(ToscaPresentation):
     @cachedmethod
     def _get_inputs(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'inputs'))
-    
-    @cachedmethod
-    def _get_topology(self, context):
-        return get_topology(context, self)
 
-    def _validate(self, context):
-        super(TopologyTemplate, self)._validate(context)
-        self._get_inputs(context)
-        self._get_topology(context)
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'inputs',
+            'node_templates',
+            'relationship_templates',
+            'groups',
+            'policies',
+            'outputs',
+            'substitution_mappings'))
 
 @has_fields
 @dsl_specification('3.9', 'tosca-simple-profile-1.0')
@@ -337,15 +333,13 @@ class ServiceTemplate(ToscaPresentation):
         :rtype: :class:`MetaData`
         """
 
-    @primitive_field(str)
+    @object_field(Description)
     @dsl_specification('3.9.3.6', 'tosca-simple-profile-1.0')
     def description(self):
         """
         Declares a description for this Service Template and its contents.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
     
     @primitive_field()
@@ -454,3 +448,20 @@ class ServiceTemplate(ToscaPresentation):
         
         :rtype: :class:`TopologyTemplate`
         """
+
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'tosca_definitions_version',
+            'metadata',
+            'repositories',
+            'imports',
+            'artifact_types',
+            'data_types',
+            'capability_types',
+            'interface_types',
+            'relationship_types',
+            'node_types',
+            'group_types',
+            'policy_types',
+            'topology_template'))

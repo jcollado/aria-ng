@@ -34,16 +34,21 @@ node_types:
         type: string
         default: m1.medium
         required: false
-      users:
+      availability_zone:
+        description: >-
+          OpenStack availability zone.
+        type: string
+        required: false
+      os_users:
         type: map
         entry_schema: os.UserInfo
     interfaces:
       standard:
+        type: tosca.interfaces.node.lifecycle.Standard
         inputs:
           openstack_credential:
             description: The OpenStack API credential for all operations.
             type: openstack.Credential
-        type: tosca.interfaces.node.lifecycle.Standard
         create:
           implementation:
             primary: openstack/create_instance.sh
@@ -60,7 +65,61 @@ node_types:
   openstack.Volume:
     description: >-
       OpenStack volume.
+      
+      See: http://developer.openstack.org/api-ref-blockstorage-v2.html
     derived_from: tosca.nodes.BlockStorage
+    properties:
+      tenant_id:
+        type: openstack.UUID
+        required: false
+      availability_zone:
+        type: string
+        required: false
+      source_volid:
+        type: openstack.UUID
+        required: false
+      description:
+        type: string
+        required: false
+      multiattach:
+        type: boolean
+        default: false
+      #snapshot_id: # @override
+      #  type: openstack.UUID
+      #  required: false
+      name:
+        type: string
+        required: false
+      volume_type:
+        type: string
+        required: false
+      metadata:
+        type: map
+        entry_schema: string
+        required: false
+      source_replica:
+        type: openstack.UUID
+        required: false
+      consistencygroup_id:
+        type: openstack.UUID
+        required: false
+      scheduler_hints:
+        type: map
+        entry_schema: string
+        required: false
+    interfaces:
+      standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+        inputs:
+          openstack_credential:
+            description: The OpenStack API credential for all operations.
+            type: openstack.Credential
+        create:
+          implementation:
+            primary: openstack/create_volume.sh
+            dependencies:
+              - openstack/utils/api.sh
+              - utils/os.sh
 
 group_types:
 

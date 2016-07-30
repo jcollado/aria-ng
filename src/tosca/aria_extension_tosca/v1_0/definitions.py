@@ -1,6 +1,7 @@
 
 from .presentation import ToscaPresentation
 from .property_assignment import PropertyAssignment
+from .description import Description
 from .misc import ConstraintClause
 from .data import Range
 from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
@@ -25,12 +26,10 @@ class EntrySchema(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @object_list_field(ConstraintClause)
@@ -65,14 +64,12 @@ class PropertyDefinition(ToscaPresentation):
         :rtype: str
         """
     
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description for the property.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @primitive_field(bool, default=True)
@@ -144,16 +141,13 @@ class AttributeDefinition(ToscaPresentation):
         :rtype: str
         """
     
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description for the attribute.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
-        return self._get_primitive('description')
 
     @field_validator(data_value_validator)
     @primitive_field(str)
@@ -242,14 +236,12 @@ class OperationDefinitionForType(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_OPERATION_DEF>`__
     """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description string for the associated named operation.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @object_field(OperationDefinitionImplementation)
@@ -278,14 +270,12 @@ class OperationDefinitionForTemplate(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_OPERATION_DEF>`__
     """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description string for the associated named operation.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @object_field(OperationDefinitionImplementation)
@@ -491,14 +481,12 @@ class CapabilityDefinition(ToscaPresentation):
         :rtype: str
         """
     
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description of the Capability definition.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @object_dict_field(PropertyDefinition)
@@ -533,6 +521,8 @@ class CapabilityDefinition(ToscaPresentation):
         The optional minimum and maximum occurrences for the capability. By default, an exported Capability should allow at least one relationship to be formed with it with a maximum of UNBOUNDED relationships.
 
         Note: the keyword UNBOUNDED is also supported to represent any positive integer.
+        
+        Note: The spec seems wrong here: the implied default should be [0,UNBOUNDED], not [1,UNBOUNDED], otherwise it would imply that at 1 least one relationship *must* be formed.
         
         :rtype: :class:`Range`
         """
@@ -582,14 +572,12 @@ class ArtifactDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description for the artifact definition.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @primitive_field(str)
@@ -621,14 +609,12 @@ class GroupDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description for the group definition.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @object_dict_field(PropertyAssignment)
@@ -691,14 +677,12 @@ class PolicyDefinition(ToscaPresentation):
         :rtype: str
         """
 
-    @primitive_field(str)
+    @object_field(Description)
     def description(self):
         """
         The optional description for the policy definition.
         
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
-        
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @object_dict_field(PropertyAssignment)

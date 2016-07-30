@@ -221,7 +221,7 @@ def convert_interface_definition_from_type_to_raw_template(context, presentation
             raw[operation_name] = OrderedDict()
             description = operation.description
             if description is not None:
-                raw[operation_name]['description'] = deepclone(description)
+                raw[operation_name]['description'] = deepclone(description._raw)
             implementation = operation.implementation
             if implementation is not None:
                 raw[operation_name]['implementation'] = deepclone(implementation._raw)

@@ -9,6 +9,7 @@ __all__ = (
     'OpenClose',
     'classname',
     'cachedmethod',
+    'HasCachedMethods',
     'ReadOnlyList',
     'EMPTY_READ_ONLY_LIST',
     'ReadOnlyDict',

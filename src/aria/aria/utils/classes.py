@@ -27,3 +27,29 @@ def classname(o):
     return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
 
 cachedmethod = lru_cache()
+
+class HasCachedMethods(object):
+    @property
+    def _method_cache_info(self):
+        """
+        The cache infos of all cached methods.
+        
+        :rtype: dict of str, CacheInfo
+        """
+        
+        r = {}
+        for k in self.__class__.__dict__:
+            p = getattr(self, k)
+            if hasattr(p, 'cache_info'):
+                r[k] = p.cache_info()
+        return r
+
+    def _reset_method_cache(self):
+        """
+        Resets the caches of all cached methods.
+        """
+        
+        for k in self.__class__.__dict__:
+            p = getattr(self, k)
+            if hasattr(p, 'cache_clear'):
+                p.cache_clear()

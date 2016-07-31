@@ -3,11 +3,11 @@ from .writer import Writer, one_line
 from aria.utils import make_agnostic
 
 class CodeProperty(object):
-    def __init__(self, generator, name, description=None, type=None, default=None):
+    def __init__(self, generator, name, description=None, type_name=None, default=None):
         self.generator = generator
         self.name = name
         self.description = description
-        self.type = type
+        self.type = type_name
         self.default = default
 
     @property

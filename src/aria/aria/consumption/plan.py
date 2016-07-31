@@ -1,16 +1,14 @@
 
-from .topology import Topology
+from .template import Template
 
-class Plan(Topology):
+class Plan(Template):
     """
-    ARIA deployment plan.
-    
-    Created a deployment plan for the presentation.
+    Emits the deployment plan instantiated from the deployment template.
     """
 
     def consume(self):
         topology = self.topology
         topology.link(self.context)
         if self.context.validation.dump_issues():
-            exit(0)
+            return
         topology.dump(self.context)

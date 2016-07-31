@@ -6,9 +6,7 @@ import ruamel.yaml as yaml # @UnresolvedImport
 
 class Yaml(Consumer):
     """
-    ARIA YAML writer.
-    
-    Outputs the presentation's raw data as YAML text.
+    Emits the presentation's raw data as YAML.
     """
     
     def consume(self):

@@ -145,7 +145,8 @@ def constraint_clause_field_validator(field, presentation, context):
     value = getattr(presentation, field.name)
     if value is not None:
         the_type = presentation._get_type(context)
-        coerce_value(context, presentation, the_type, None, None, value, field.name)
+        constraints = the_type._get_constraints(context) if hasattr(the_type, '_get_constraints') else None
+        coerce_value(context, presentation, the_type, None, constraints, value, field.name)
 
 def constraint_clause_in_range_validator(field, presentation, context):
     """
@@ -257,9 +258,24 @@ def capability_definition_or_type_validator(field, presentation, context):
             return
         
         if node_variant == 'node_template':
-            context.validation.report('"%s" refers to an unknown capability definition name or capability type in "%s": %s' % (presentation._name, presentation._container._fullname, repr(value)), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
+            context.validation.report('requirement "%s" refers to an unknown capability definition name or capability type in "%s": %s' % (presentation._name, presentation._container._fullname, repr(value)), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
         else:
-            context.validation.report('"%s" refers to an unknown capability type in "%s": %s' % (presentation._name, presentation._container._fullname, repr(value)), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
+            context.validation.report('requirement "%s" refers to an unknown capability type in "%s": %s' % (presentation._name, presentation._container._fullname, repr(value)), locator=presentation._get_child_locator(field.name), level=Issue.BETWEEN_TYPES)
+
+def node_filter_validator(field, presentation, context):
+    """
+    Makes sure that the field has a value only if "node" refers to a node type.
+
+    Used as @field\_validator for the "node\_filter" field in :class:`RequirementAssignment`.
+    """
+
+    field._validate(presentation, context)
+    
+    value = getattr(presentation, field.name)
+    if value is not None:
+        _, node_type_variant = presentation._get_node(context)
+        if node_type_variant != 'node_type':
+            context.validation.report('requirement "%s" has a node filter even though "node" does not refer to a node type in "%s"' % (presentation._fullname, presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
 
 #
 # RequirementAssignmentRelationship
@@ -289,8 +305,6 @@ def list_node_type_or_group_type_validator(field, presentation, context):
     """
     Makes sure that the field's elements refer to either node types or a group types.
 
-    Assumes that the field is a list.
-
     Used as @field\_validator for the "targets" field in :class:`PolicyType`.
     """
     
@@ -312,8 +326,6 @@ def list_node_template_or_group_validator(field, presentation, context):
     """
     Makes sure that the field's elements refer to either node templates or groups.
 
-    Assumes that the field is a list.
-
     Used as @field\_validator for the "targets" field in :class:`PolicyDefinition`.
     """
     
@@ -326,3 +338,51 @@ def list_node_template_or_group_validator(field, presentation, context):
             groups = context.presentation.groups or {}
             if (value not in node_templates) and (value not in groups):
                 report_issue_for_unknown_type(context, presentation, 'node template or group', field.name, value)
+
+#
+# NodeFilter
+#
+
+def node_filter_properties_validator(field, presentation, context):
+    """
+    Makes sure that the field's elements refer to defined properties in the target node type.
+    
+    Used as @field\_validator for the "properties" field in :class:`NodeFilter`.
+    """
+    
+    field._validate(presentation, context)
+    
+    values = getattr(presentation, field.name)
+    if values is not None:
+        node_type = presentation._get_node_type(context)
+        if node_type is not None:
+            properties = node_type._get_properties(context)
+            for name, _ in values:
+                if name not in properties:
+                    context.validation.report('node filter refers to an unknown property definition in "%s": %s' % (node_type._name, name), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+
+def node_filter_capabilities_validator(field, presentation, context):
+    """
+    Makes sure that the field's elements refer to defined capabilities and properties in the target node type.
+    
+    Used as @field\_validator for the "capabilities" field in :class:`NodeFilter`.
+    """
+
+    field._validate(presentation, context)
+    
+    values = getattr(presentation, field.name)
+    if values is not None:
+        node_type = presentation._get_node_type(context)
+        if node_type is not None:
+            capabilities = node_type._get_capabilities(context)
+            for name, value in values:
+                capability = capabilities.get(name)
+                if capability is not None:
+                    properties = value.properties
+                    capability_properties = capability.properties
+                    if (properties is not None) and (capability_properties is not None):
+                        for property_name, _ in properties:
+                            if property_name not in capability_properties:
+                                context.validation.report('node filter refers to an unknown capability definition property in "%s": %s' % (node_type._name, property_name), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+                else:
+                    context.validation.report('node filter refers to an unknown capability definition in "%s": %s' % (node_type._name, name), locator=presentation._locator, level=Issue.BETWEEN_TYPES)

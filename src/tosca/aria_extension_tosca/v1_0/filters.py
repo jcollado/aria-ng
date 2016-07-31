@@ -1,8 +1,33 @@
 
 #from .definitions import PropertyDefinition, CapabilityDefinition
 from .presentation import ToscaPresentation
+from .misc import ConstraintClause
+from .field_validators import node_filter_properties_validator, node_filter_capabilities_validator
 from aria import dsl_specification
-from aria.presentation import has_fields, object_sequenced_list_field
+from aria.presentation import has_fields, object_sequenced_list_field, field_validator
+from aria.utils import cachedmethod
+
+@has_fields
+class CapabilityFilter(ToscaPresentation):
+    @object_sequenced_list_field(ConstraintClause)
+    def properties(self):
+        pass
+
+    @cachedmethod
+    def _get_node_type(self, context):
+        return self._container._get_node_type(context)
+
+    @cachedmethod
+    def _get_type_for_name(self, context, name):
+        node_type = self._get_node_type(context)
+        if node_type is not None:
+            capabilities = node_type._get_capabilities(context)
+            capability = capabilities.get(self._name)
+            properties = capability.properties if capability is not None else None
+            prop = properties.get(name) if properties is not None else None
+            return prop._get_type(context) if prop is not None else None
+
+        return None
 
 @has_fields
 @dsl_specification('3.5.4', 'tosca-simple-profile-1.0')
@@ -13,15 +38,20 @@ class NodeFilter(ToscaPresentation):
     See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_NODE_FILTER_DEFN>`__
     """
 
-    #@object_sequenced_list_field(PropertyDefinition)
+    @field_validator(node_filter_properties_validator)
+    @object_sequenced_list_field(ConstraintClause)
+    @dsl_specification('3.5.3', 'tosca-simple-profile-1.0')
     def properties(self):
         """
         An optional sequenced list of property filters that would be used to select (filter) matching TOSCA entities (e.g., Node Template, Node Type, Capability Types, etc.) based upon their property definitions' values.
+
+        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_FILTER_DEFN>`__
         
-        :rtype: list of (str, :class:`PropertyDefinition`)
+        :rtype: list of (str, :class:`ConstraintClause`)
         """
 
-    #@object_sequenced_list_field(CapabilityDefinition)
+    @field_validator(node_filter_capabilities_validator)
+    @object_sequenced_list_field(CapabilityFilter)
     def capabilities(self):
         """
         An optional sequenced list of property filters that would be used to select (filter) matching TOSCA entities (e.g., Node Template, Node Type, Capability Types, etc.) based upon their capabilities' property definitions' values.
@@ -29,13 +59,19 @@ class NodeFilter(ToscaPresentation):
         :rtype: list of (str, :class:`CapabilityDefinition`)
         """
 
-@has_fields
-@dsl_specification('3.5.3', 'tosca-simple-profile-1.0')
-class PropertyFilter(ToscaPresentation):
-    """
-    A property filter definition defines criteria, using constraint clauses, for selection of a TOSCA entity based upon it property values.
-    
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_FILTER_DEFN>`__
-    """
+    @cachedmethod
+    def _get_node_type(self, context):
+        if hasattr(self._container, '_get_node'):
+            node_type, node_type_variant = self._container._get_node(context)
+            return node_type if node_type_variant == 'node_type' else None
+        return None
 
-    # TODO
+    @cachedmethod
+    def _get_type_for_name(self, context, name):
+        node_type = self._get_node_type(context)
+        if node_type is not None:
+            properties = node_type._get_properties(context)
+            prop = properties.get(name)
+            return prop._get_type(context) if prop is not None else None
+        
+        return None

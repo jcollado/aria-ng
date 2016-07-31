@@ -3,10 +3,10 @@ from .writer import Writer, repr_assignment
 from collections import OrderedDict
 
 class CodeNodeTemplate(object):
-    def __init__(self, generator, name, type, description):
+    def __init__(self, generator, name, type_name, description):
         self.generator = generator
         self.name = name
-        self.type = type
+        self.type = type_name
         self.description = description
         self.assignments = OrderedDict()
         self.relationships = []

@@ -64,7 +64,7 @@ def coerce_data_type_value(context, presentation, data_type, entry_schema, const
        be used if we did not assign it. We also make sure that required definitions indeed end up with
        a value.
     """
-
+    
     primitive_type = data_type._get_primitive_ancestor(context)
     if primitive_type is not None:
         # Must be coercible to primitive ancestor
@@ -206,7 +206,7 @@ def apply_constraint_to_value(context, presentation, constraint_clause, value):
             return False
 
     elif constraint_key == 'valid_values':
-        constraint = (coerce(v) for v in constraint_clause.valid_values)
+        constraint = tuple(coerce(v) for v in constraint_clause.valid_values)
         if value not in constraint:
             report('is not one of', constraint)
             return False
@@ -329,7 +329,7 @@ def coerce_value(context, presentation, the_type, entry_schema, constraints, val
             return coerce_value_fn(context, presentation, the_type, entry_schema, constraints, value, aspect)
 
     if hasattr(the_type, '_coerce_value'):
-        # Delegate to type (likely a DataType instance)
+        # Delegate to _coerce_value (likely a DataType instance)
         return the_type._coerce_value(context, presentation, entry_schema, constraints, value, aspect)
 
     if the_type is not None:

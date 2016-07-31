@@ -1,9 +1,9 @@
 
-from ..utils import classname, deepclone
+from ..utils import classname, deepclone, HasCachedMethods
 from .utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
 from clint.textui import puts
 
-class PresentationBase(object):
+class PresentationBase(HasCachedMethods):
     """
     Base class for ARIA presentation classes.
     """
@@ -14,10 +14,21 @@ class PresentationBase(object):
         self._container = container
 
     def _validate(self, context):
-        pass
+        """
+        Validates the presentation while reporting errors in the validation context but
+        *not* raising exceptions.
+        
+        The base class does not thing, but subclasses may override this for specialized
+        validation.
+        """
 
     @property
     def _fullname(self):
+        """
+        Always returns a usable full name of the presentation, whether it itself is named,
+        or recursing to its container, and finally defaulting to the class name. 
+        """
+        
         if self._name is not None:
             return self._name
         elif self._container is not None:
@@ -26,6 +37,13 @@ class PresentationBase(object):
 
     @property
     def _locator(self):
+        """
+        Attempts to return the most relevant locator, whether we have one, or recursing
+        to our container.
+        
+        :rtype: :class:`aria.reading.Locator`
+        """
+        
         if hasattr(self._raw, '_locator'):
             return self._raw._locator
         elif self._container is not None:
@@ -33,29 +51,42 @@ class PresentationBase(object):
         return None
 
     def _get_child_locator(self, name):
-        locator = self._locator
-        return locator.get_child(name) if locator is not None else None
+        """
+        Attempts to return the locator of one our children. Will default to our locator
+        if not found.
+        
+        :rtype: :class:`aria.reading.Locator`
+        """
+        
+        if hasattr(self._raw, '_locator'):
+            locator = self._raw._locator
+            if locator is not None:
+                return locator.get_child(name)
+        return self._locator
 
     def _get_grandchild_locator(self, name1, name2):
-        locator = self._locator
-        return locator.get_grandchild(name1, name2) if locator is not None else None
+        """
+        Attempts to return the locator of one our grand children. Will default to our
+        locator if not found.
+        
+        :rtype: :class:`aria.reading.Locator`
+        """
 
-    @property
-    def _method_cache_info(self):
-        r = {}
-        for k in self.__class__.__dict__:
-            p = getattr(self, k)
-            if hasattr(p, 'cache_info'):
-                r[k] = p.cache_info()
-        return r
-
-    def _reset_method_cache(self):
-        for k in self.__class__.__dict__:
-            p = getattr(self, k)
-            if hasattr(p, 'cache_clear'):
-                p.cache_clear()
+        if hasattr(self._raw, '_locator'):
+            locator = self._raw._locator
+            if locator is not None:
+                return locator.get_grandchild(name1, name2)
+        return self._locator
 
     def _dump(self, context):
+        """
+        Emits a colorized representation.
+        
+        The base class will emit a sensible default representation of the fields,
+        (by calling \_dump\_content), but subclasses may override this for specialized
+        dumping. 
+        """
+        
         if self._name:
             puts(context.style.node(self._name))
             with context.style.indent:
@@ -64,6 +95,13 @@ class PresentationBase(object):
             self._dump_content(context)
                             
     def _dump_content(self, context, field_names=None):
+        """
+        Emits a colorized representation of the contents.
+        
+        The base class will call \_dump\_field on all the fields, but subclasses may
+        override this for specialized dumping. 
+        """
+
         if field_names:
             for field_name in field_names:
                 self._dump_field(context, field_name)
@@ -74,10 +112,21 @@ class PresentationBase(object):
             puts(context.style.literal(self._raw))
 
     def _dump_field(self, context, field_name):
+        """
+        Emits a colorized representation of the field.
+        
+        According to the field type, this may trigger nested recursion. The nested
+        types will delegate to their \_dump methods.
+        """
+        
         field = self.FIELDS[field_name]
         field.dump(self, context) 
 
     def _clone(self, container=None):
+        """
+        Creates a clone of this presentation, optionally allowing for a new container.
+        """
+        
         raw = deepclone(self._raw)
         if container is None:
             container = self._container

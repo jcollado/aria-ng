@@ -141,13 +141,30 @@ topology_template:
       type: nodejs.Server
       requirements:
         - host: application_host
+      node_filter: # cannot be validated
+        properties:
+          - flavor_name: { valid_values: [ m1.small ] }
+        capabilities:
+          - scalable:
+              properties:
+                - max_instances: { greater_or_equal: 8 }
 
     mongodb:
       description: >-
         MongoDB instance.
       type: mongodb.Server
       requirements:
-        - host: data_host
+        #- host: data_host
+        - host:
+            node: openstack.Instance #tosca.nodes.Compute
+            node_filter:
+              properties:
+                - flavor_name: { valid_values: [ m1.medium, m1.large ] }
+                - flavor_id: { pattern: '5d6' }
+              capabilities:
+                - scalable:
+                    properties:
+                      - max_instances: { greater_or_equal: 8 }
     
     # Hosts
 
@@ -156,6 +173,7 @@ topology_template:
         Host for applications.
       type: openstack.Instance
       properties:
+        flavor_name: m1.small
         os_users: # map of os.UserInfo
           root:
             password: admin123
@@ -178,6 +196,7 @@ topology_template:
       type: openstack.Instance
       properties:
         flavor_name: m1.large
+        flavor_id: 5d62e82c-924e-4fa9-b1e4-c133867596f7
         os_users: # map of os.UserInfo
           root:
             password: admin123 

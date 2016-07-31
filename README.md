@@ -1,38 +1,52 @@
 ARIA
 ====
 
-TOSCA
------
+ARIA is a platform and a set of tools for building TOSCA-based products, such as orchestrators.
+Its features can be accessed via a well-documented Python API, as well as a language-agnostic
+RESTful API that can be deployed as a microservice.
 
-ARIA adheres strictly and meticulously to the [TOSCA Simple Profile v1.0 specification](http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html).
+On its own, ARIA it provides built-in tools for blueprint validation and for creating ready-to-run
+deployment plans. 
+
+ARIA adheres strictly and meticulously to the
+[TOSCA Simple Profile v1.0 specification](http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html),
+providing state-of-the-art validation at seven different levels:
+
+0. Platform errors. E.g. network, hardware, of even an internal bug in ARIA (let us know,
+   please!).
+1. Syntax and format errors. E.g. non-compliant YAML, XML, JSON.
+2. Field validation. E.g. assigning a string where an integer is expected, using a list
+   instead of a dict.
+3. Relationships between fields within a type. This is "grammar" as it applies to rules for
+   setting the values of fields in relation to each other.
+4. Relationships between types. E.g. referring to an unknown type, causing a type inheritance
+   loop. 
+5. Topology. These errors happen if requirements and capabilities cannot be matched in order
+   to assemble a valid topology.
+6. External dependencies. These errors happen if requirement/capability matching fails due to
+   external resources missing, e.g. the lack of a valid virtual machine, API credentials, etc. 
+
+Validation errors include a plain English message and when relevant the exact location (file,
+row, column) of the data the caused the error.
+
 The ARIA API documentation always links to the relevant section of the specification, and
 likewise we provide an annotated version of the specification that links back to the API
 documentation.
-
-There are seven possible levels of validation errors:
-
-0. Platform errors. E.g. network, hardware, of even an internal bug in ARIA (let us know, please!).
-1. Syntax and format errors. E.g. non-compliant YAML, XML, JSON.
-2. Field validation. E.g. assigning a string where an integer is expected, using a list instead of a dict.
-3. Relationships between fields within a type. This is "grammar" as it applies to rules for setting the values of fields in relation to each other.
-4. Relationships between types. E.g. referring to an unknown type, causing a type inheritance loop. 
-5. Topology. These errors happen if requirements and capabilities cannot be matched in order to assemble a valid topology.
-6. External dependencies. These errors happen if requirement/capability matching fails due to external resources missing, e.g. the lack of a valid virtual machine, API credentials, etc. 
 
 
 Quick Start
 -----------
 
-You need Python. Use a [virtualenv](https://virtualenv.pypa.io/en/stable/):
+You need Python v2.7. Use a [virtualenv](https://virtualenv.pypa.io/en/stable/):
 
 	pip install virtualenv
 	virtualenv env
 	. env/bin/activate
 	make aria-requirements
 
-Now run a quick TOSCA blueprint validation:
+Now create a deployment plan from a TOSCA blueprint:
 
-	./aria blueprints/tosca/node-cellar.yaml 
+	./aria blueprints/tosca/node-cellar.yaml
 
 
 `aria.parsing`
@@ -80,35 +94,33 @@ Though you can simply make use of presentation without using the ARIA consumer A
 the advantage of using it is that you may benefit from other tools that make use of
 the API.
 
-### Validator
+With the CLI tool, just include the name of the consumer after the blueprint.
 
-One important built-in consumer is the validator. It actually works quite simply:
-it goes over the entire presentation, attempts to read all the fields, and accumulates
-all the error messages into a single report. Error messages include the exact location
-(file, line, column) where the error occurred.
+The following consumers are built-in and useful for seeing ARIA at work at different
+phases:
 
-### Deployer
-
-Here the validated blueprint is converted into a deployment plan. Requirements are matched
-with capabilities, node templates become node instances, and a relationship graph is formed
-between them. This is the primary output from ARIA. The deployment plan, like most
-everything else in ARIA, is agnostic raw data, and can be output to JSON, YAML, or any other
-useful structure.
+* `yaml`: emits a combined, validated, and normalized YAML representation of the
+   blueprint.
+* `presentation`: emits a colorized textual representation of the Python presentation
+   classes wrapping the blueprint. 
+* `template`: emits a colorized textual representation of the complete topology
+   template derived from the validated blueprint. This includes all the node templates,
+   with their requirements satisfied at the level of relating to other node templates.
+* `plan`: emits a colorized textual representation of a deployment plan instantiated
+   from the deployment template. Here the node templates are each used to create one or
+   more nodes, with the appropriate relationships between them. Note that every time you
+   run this consumer, you will get a different set of node IDs.
 
 ### Generator (extension)
 
-This converts the blueprint into an Python code, which is a bunch of Python classes
-representing the TOSCA structure. Thus, node types become classes, the instances being
-nodes, interfaces can be turned into methods, and these are connected to each other
-via special relationship classes. You can use these classes directly in your product,
-allowing a quick and easy way to move from a TOSCA blueprint to a topology.
-
-The TOSCA specification defines a large set of common node and relationship types,
-for virtual machines, networks, databases, IP addresses, etc.
+This converts the blueprint into Python code: a bunch of Python classes representing
+the blueprint. Thus, node types become classes, the instances being nodes, interfaces
+can be turned into methods, and these are connected to each other via special
+relationship classes. You can use these classes directly in your product, allowing
+a quick and easy way to move from a TOSCA blueprint to executable code.
 
 Note that the generator is entirely optional: it is very much possible to consume
-the validated TOSCA presentation as is appropriate for your product without converting
-it into Python code.
+the deployment plan without converting it into Python code.
 
 
 CLI Tool
@@ -117,14 +129,14 @@ CLI Tool
 Though ARIA is fully exposed as an API, it also comes with a CLI tool to allow you to
 work from the shell:
 
-	aria blueprints/tosca/node-cellar.yaml
+	aria blueprints/tosca/node-cellar.yaml plan
 
-The tool loads YAML files and run consumers on them. It can be useful for quickly
+The tool loads YAML files and runs consumers on them. It can be useful for quickly
 validating a blueprint.
 
 If other consumers are in the Python path, it can run them, too: it can thus serve as
-a useful entry point for complex TOSCA-based tools, such as deployers, orchestractors,
-etc.
+a useful entry point for complex TOSCA-based tools, such as orchestractors, graphical
+representers, etc.
 
 REST Tool
 ---------

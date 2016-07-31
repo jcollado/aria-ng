@@ -1,6 +1,6 @@
 
 from .templates import ServiceTemplate
-from .topology import normalize_topology
+from .utils.deployment import normalize_topology
 from aria.presentation import Presenter
 from aria.utils import ReadOnlyList
 

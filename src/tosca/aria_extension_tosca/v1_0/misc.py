@@ -205,7 +205,9 @@ class ConstraintClause(ToscaPresentation):
     
     @cachedmethod
     def _get_type(self, context):
-        if hasattr(self._container, '_get_type'):
+        if hasattr(self._container, '_get_type_for_name'):
+            return self._container._get_type_for_name(context, self._name)
+        elif hasattr(self._container, '_get_type'):
             return self._container._get_type(context)
         else:
             # We are inside DataType, so the DataType itself is our type 

@@ -97,12 +97,12 @@ class NodeTemplate(ToscaPresentation):
         :rtype: dict of str, :class:`ArtifactDefinition`
         """
 
-    @object_dict_field(NodeFilter)
+    @object_field(NodeFilter)
     def node_filter(self):
         """
         The optional filter definition that TOSCA orchestrators would use to select the correct target node. This keyname is only valid if the directive has the value of "selectable" set.
         
-        :rtype: dict of str, :class:`NodeFilter`
+        :rtype: :class:`NodeFilter`
         """
 
     @primitive_field(str)

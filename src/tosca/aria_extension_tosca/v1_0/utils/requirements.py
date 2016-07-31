@@ -136,6 +136,10 @@ def merge_requirement_assignment(context, requirement, our_requirement):
     if our_node is not None:
         requirement._raw['node'] = deepclone(our_node)
         
+    our_node_filter = our_requirement.node_filter
+    if our_node_filter is not None:
+        requirement._raw['node_filter'] = deepclone(our_node_filter._raw)
+
     our_relationship = our_requirement.relationship # RequirementAssignmentRelationship
     if our_relationship is not None:
         # Make sure we have a dict

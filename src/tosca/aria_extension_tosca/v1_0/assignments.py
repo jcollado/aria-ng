@@ -3,7 +3,7 @@ from .presentation import ToscaPresentation
 from .filters import NodeFilter
 from .definitions import InterfaceDefinitionForTemplate
 from .property_assignment import PropertyAssignment
-from .field_validators import node_template_or_type_validator, relationship_template_or_type_validator, capability_definition_or_type_validator
+from .field_validators import node_template_or_type_validator, relationship_template_or_type_validator, capability_definition_or_type_validator, node_filter_validator
 from aria import dsl_specification
 from aria.utils import cachedmethod
 from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
@@ -95,12 +95,13 @@ class RequirementAssignment(ToscaPresentation):
         :rtype: :class:`RequirementRelationshipAssignment`
         """
 
-    @object_dict_field(NodeFilter)
+    @field_validator(node_filter_validator)
+    @object_field(NodeFilter)
     def node_filter(self):
         """
         The optional filter definition that TOSCA orchestrators or providers would use to select a type-compatible target node that can fulfill the associated abstract requirement at runtime.
         
-        :rtype: dict of str, :class:`NodeFilter`
+        :rtype: :class:`NodeFilter`
         """
     
     @cachedmethod

@@ -205,9 +205,10 @@ class Interface(object):
             operation.validate(context, topology)
 
     def dump(self, context):
+        puts(context.style.node(self.name))
         dump_properties(context, self.inputs, 'Inputs')
-        if self.operations:
-            with context.style.indent:
+        with context.style.indent:
+            if self.operations:
                 puts('Operations:')
                 with context.style.indent:
                     for operation in self.operations.itervalues():
@@ -390,5 +391,6 @@ def dump_interfaces(context, interfaces):
         return
     with context.style.indent:
         puts('Interfaces:')
-        for interface in interfaces.itervalues():
-            interface.dump(context)
+        with context.style.indent:
+            for interface in interfaces.itervalues():
+                interface.dump(context)

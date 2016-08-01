@@ -1,7 +1,7 @@
 
 from .utils.data import coerce_to_data_type_class, report_issue_for_bad_format, coerce_value
 from aria import dsl_specification
-from collections import OrderedDict
+from aria.utils import StrictDict
 from functools import total_ordering
 from datetime import datetime, tzinfo, timedelta
 import re
@@ -210,7 +210,7 @@ class Range(object):
         return True
 
 @dsl_specification('3.2.4', 'tosca-simple-profile-1.0')
-class List(object):
+class List(list):
     """
     The list type allows for specifying multiple values for a parameter of property. For example, if an application allows for being configured to listen on multiple ports, a list of ports could be configured using the list data type.
     
@@ -225,22 +225,16 @@ class List(object):
         entry_schema_type = entry_schema._get_type(context)
         entry_schema_constraints = entry_schema.constraints
 
-        r = []
+        r = List()
         for v in value:
             v = coerce_value(context, presentation, entry_schema_type, None, entry_schema_constraints, v, aspect)
             if v is not None:
                 r.append(v)
 
-        return List(r)
-    
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return repr(self.value)
+        return r
 
 @dsl_specification('3.2.5', 'tosca-simple-profile-1.0')
-class Map(object):
+class Map(StrictDict):
     """
     The map type allows for specifying multiple values for a parameter of property as a map. In contrast to the list type, where each entry can only be addressed by its index in the list, entries in a map are named elements that can be addressed by their keys.
     
@@ -258,19 +252,16 @@ class Map(object):
         entry_schema_type = entry_schema._get_type(context)
         entry_schema_constraints = entry_schema.constraints
 
-        r = OrderedDict()
+        r = Map()
         for k, v in value.iteritems():
             v = coerce_value(context, presentation, entry_schema_type, None, entry_schema_constraints, v, aspect)
             if v is not None:
                 r[k] = v
 
-        return Map(r)
-    
-    def __init__(self, value):
-        self.value = value
+        return r
 
-    def __repr__(self):
-        return repr(self.value)
+    def __init__(self):
+        super(Map, self).__init__(str)
 
 @total_ordering
 @dsl_specification('3.2.6', 'tosca-simple-profile-1.0')

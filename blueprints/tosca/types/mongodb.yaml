@@ -48,7 +48,6 @@ node_types:
           capability: tosca.capabilities.Container
           node: mongodb.Server
           relationship: tosca.relationships.HostedOn
-          occurrences: [ 0, UNBOUNDED ]
 
 artifact_types:
 

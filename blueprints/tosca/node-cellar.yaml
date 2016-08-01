@@ -37,7 +37,7 @@ relationship_types:
         inputs:
           input1:
             type: string
-            #default: hat
+            default: hat
         create:
           inputs:
             input2:
@@ -55,6 +55,17 @@ node_types:
       - database:
           capability: tosca.capabilities.Endpoint.Database
           node: mongodb.Database
+          relationship:
+            type: tosca.relationships.AttachesTo #test
+            interfaces:
+              standard1:
+                inputs:
+                  fishy:
+                    type: string
+                create3:
+                  inputs:
+                    fuasd:
+                      type: integer
 
 topology_template:
 
@@ -65,10 +76,11 @@ topology_template:
       interfaces:
         standard2:
           inputs:
-            input1: hello
+            input1: hello!!
           create:
             inputs:
               input2: 2
+            implementation: test
 
   node_templates:
   
@@ -88,22 +100,31 @@ topology_template:
           deploy_path: /opt/nodejs/applications/node-cellar
       requirements:
         #- database: node_cellar_database
-        #- database:
-        #    node: node_cellar_database
-        #    capability: database_endpoint
-        #    relationship:
-        #      type: connects_to # relationship type or relationship template
-        #      properties:
-        #        credential:
-        #          user: admin
-        #          token: admin123
-        #      interfaces:
-        #        standard2:
-        #          inputs:
-        #            input1: asdadsd
-        #          create:
-        #            inputs:
-        #              input2: 23
+        - database:
+            node: node_cellar_database
+            capability: database_endpoint
+            relationship:
+              #type: tosca.relationships.AttachesTo # relationship type or relationship template
+              #type: ConnectsTo
+              #type: connects_to
+              properties:
+                credential:
+                  user: admin
+                  token: admin123
+                location: /dev/s
+              interfaces:
+                standard1:
+                  inputs:
+                    fishy: ddddddddddddddd
+                  create3:
+                    inputs:
+                      fuasd: 222
+                #standard2:
+                  #inputs:
+                  #  input1: asdadsd
+                #  create:
+                #    inputs:
+                #      input2: 23
         #- database:
         #    capability: tosca.capabilities.Endpoint.Database
         #- database:

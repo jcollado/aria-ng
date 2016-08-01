@@ -395,7 +395,7 @@ class RequirementDefinitionRelationship(ToscaPresentation):
         :rtype: str
         """
     
-    @object_list_field(InterfaceDefinitionForType)
+    @object_dict_field(InterfaceDefinitionForType)
     def interfaces(self):
         """
         The optional reserved keyname used to reference declared (named) interface definitions of the corresponding Relationship Type in order to declare additional Property definitions for these interfaces or operations of these interfaces.

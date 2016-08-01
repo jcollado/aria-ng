@@ -176,7 +176,7 @@ def make_agnostic(value):
     """
     Converts subclasses of dict and list to standard dicts and lists, recursively.
     """
-    
+
     if isinstance(value, dict) and (type(value) != dict):
         value = dict(value)
     elif isinstance(value, list) and (type(value) != list):

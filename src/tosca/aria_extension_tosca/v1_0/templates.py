@@ -185,7 +185,7 @@ class RelationshipTemplate(ToscaPresentation):
     @object_dict_field(InterfaceDefinitionForTemplate)
     def interfaces(self):
         """
-        An optional list of named interface definitions for the Node Template.
+        An optional list of named interface definitions for the Node Template. (Spec is wrong here, should be Relationship Template.)
         
         :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
         """

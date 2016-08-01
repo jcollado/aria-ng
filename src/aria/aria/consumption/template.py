@@ -9,7 +9,7 @@ class Template(Consumer):
     def consume(self):
         topology = self.topology
         topology.link(self.context)
-        if self.context.validation.dump_issues():
+        if self.context.validation.issues:
             return
         topology.dump(self.context)
     

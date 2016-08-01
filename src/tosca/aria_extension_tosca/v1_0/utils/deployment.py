@@ -47,6 +47,13 @@ def normalize_node_template(context, node_template):
         for property_name, prop in properties.iteritems():
             r.properties[property_name] = prop
 
+    interfaces = node_template._get_interfaces(context)
+    if interfaces:
+        for interface_name, interface in interfaces.iteritems():
+            interface = normalize_interface(context, interface)
+            if interface is not None:
+                r.interfaces[interface_name] = interface
+
     requirements = node_template._get_requirements(context)
     if requirements:
         for _, requirement in requirements:
@@ -72,9 +79,10 @@ def normalize_interface(context, interface):
     operations = interface.operations
     if operations:
         for operation_name, operation in operations.iteritems():
+            #if operation.implementation is not None:
             r.operations[operation_name] = normalize_operation(context, operation)
     
-    return r
+    return r #if r.operations else None
 
 def normalize_operation(context, operation):
     r = Operation(name=operation._name)
@@ -135,7 +143,9 @@ def normalize_relationship(context, relationship):
     interfaces = relationship.interfaces
     if interfaces:
         for interface_name, interface in interfaces.iteritems():
-            r.interfaces[interface_name] = normalize_interface(context, interface)
+            interface = normalize_interface(context, interface)
+            if interface is not None:
+                r.interfaces[interface_name] = interface
     
     return r
 

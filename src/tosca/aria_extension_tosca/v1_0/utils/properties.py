@@ -34,7 +34,7 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
 # NodeTemplate, RelationshipTemplate, GroupDefinition, PolicyDefinition
 #
 
-def get_assigned_and_defined_property_values(context, presentation, original_presentation=None):
+def get_assigned_and_defined_property_values(context, presentation):
     """
     Returns the assigned property values while making sure they are defined in our type.
     
@@ -43,17 +43,9 @@ def get_assigned_and_defined_property_values(context, presentation, original_pre
     Makes sure that required properties indeed end up with a value.
     """
 
-    if original_presentation is None:
-        original_presentation = presentation
-
     values = OrderedDict()
     
     the_type = presentation._get_type(context)
-    
-    if isinstance(the_type, tuple):
-        # In RequirementAssignmentRelationship
-        the_type = the_type[0] # This could be a RelationshipTemplate
-    
     assignments = presentation.properties
     definitions = the_type._get_properties(context) if the_type is not None else None
 
@@ -67,20 +59,30 @@ def get_assigned_and_defined_property_values(context, presentation, original_pre
             else:
                 context.validation.report('assignment to undefined property "%s" in "%s"' % (name, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
     
-    # Fill in defaults from the definitions, and check if required properties have not been assigned
+    # Fill in defaults from the definitions
     if definitions is not None:
         for name, definition in definitions.iteritems():
             if (values.get(name) is None) and hasattr(definition, 'default') and (definition.default is not None):
                 values[name] = coerce_default_property_value(context, presentation, definition) 
 
-            if getattr(definition, 'required', False) and (values.get(name) is None):
-                context.validation.report('required property "%s" is not assigned a value in "%s"' % (name, presentation._fullname), locator=original_presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
+    validate_required_values(context, presentation, values, definitions)
     
     return values
 
 #
 # Utils
 #
+
+def validate_required_values(context, presentation, values, definitions):
+    """
+    Check if required properties have not been assigned.
+    """
+    
+    if definitions is None:
+        return
+    for name, definition in definitions.iteritems():
+        if getattr(definition, 'required', False) and ((values is None) or (values.get(name) is None)):
+            context.validation.report('required property "%s" is not assigned a value in "%s"' % (name, presentation._fullname), locator=presentation._get_child_locator('properties'), level=Issue.BETWEEN_TYPES)
 
 def merge_raw_property_definition(context, presentation, raw_property_definition, our_property_definition, field_name, property_name):
     # Check if we changed the type
@@ -93,22 +95,24 @@ def merge_raw_property_definition(context, presentation, raw_property_definition
     merge(raw_property_definition, our_property_definition._raw)
 
 def merge_raw_property_definitions(context, presentation, raw_property_definitions, our_property_definitions, field_name):
-    if our_property_definitions is not None:
-        for property_name, our_property_definition in our_property_definitions.iteritems():
-            if property_name in raw_property_definitions:
-                raw_property_definition = raw_property_definitions[property_name]
-                merge_raw_property_definition(context, presentation, raw_property_definition, our_property_definition, field_name, property_name)
-            else:
-                raw_property_definitions[property_name] = deepclone(our_property_definition._raw)
+    if our_property_definitions is None:
+        return
+    for property_name, our_property_definition in our_property_definitions.iteritems():
+        if property_name in raw_property_definitions:
+            raw_property_definition = raw_property_definitions[property_name]
+            merge_raw_property_definition(context, presentation, raw_property_definition, our_property_definition, field_name, property_name)
+        else:
+            raw_property_definitions[property_name] = deepclone(our_property_definition._raw)
 
 def merge_property_definitions(context, presentation, property_definitions, our_property_definitions, field_name, for_presentation):
-    if our_property_definitions is not None:
-        for property_name, our_property_definition in our_property_definitions.iteritems():
-            if property_name in property_definitions:
-                property_definition = property_definitions[property_name]
-                merge_raw_property_definition(context, presentation, property_definition._raw, our_property_definition, field_name, property_name)
-            else:
-                property_definitions[property_name] = our_property_definition._clone()
+    if our_property_definitions is None:
+        return
+    for property_name, our_property_definition in our_property_definitions.iteritems():
+        if property_name in property_definitions:
+            property_definition = property_definitions[property_name]
+            merge_raw_property_definition(context, presentation, property_definition._raw, our_property_definition, field_name, property_name)
+        else:
+            property_definitions[property_name] = our_property_definition._clone()
 
 def coerce_property_value(context, value, definition): # works on both properties and inputs
     the_type = definition._get_type(context) if definition is not None else None

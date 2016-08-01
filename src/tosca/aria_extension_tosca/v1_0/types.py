@@ -451,6 +451,10 @@ class NodeType(ToscaPresentation):
         """
         An optional sequenced list of requirement definitions for the Node Type.
         
+        NOTE: The spec seems wrong to make this a sequenced list. It seems that when you have more than one requirement of the same
+        name, behavior is undefined. The idea is to use the "occurrences" field if you need to limit the number of requirement
+        assignments.
+        
         :rtype: list of (str, :class:`RequirementDefinition`)
         """
 

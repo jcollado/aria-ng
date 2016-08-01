@@ -1,8 +1,8 @@
 
-from .properties import convert_property_definitions_to_values, get_assigned_and_defined_property_values
-from .interfaces import convert_interface_definition_from_type_to_raw_template
+from .properties import convert_property_definitions_to_values, validate_required_values
+from .interfaces import convert_requirement_interface_definitions_from_type_to_raw_template, merge_interface_definitions, merge_interface, validate_required_inputs
 from aria import Issue
-from aria.utils import deepclone
+from aria.utils import merge, deepclone
 from collections import OrderedDict
 
 #
@@ -55,10 +55,11 @@ def get_template_requirements(context, presentation):
     our_requirement_assignments = presentation.requirements
     if our_requirement_assignments is not None:
         for requirement_name, our_requirement_assignment in our_requirement_assignments:
-            requirement_definition = get_requirement(requirement_definitions, requirement_name)
+            requirement_definition = get_first_requirement(requirement_definitions, requirement_name)
             if requirement_definition is not None:
-                requirement_assignment = convert_requirement_from_definition_to_assignment(context, requirement_definition, presentation)
-                merge_requirement_assignment(context, requirement_assignment, our_requirement_assignment)
+                requirement_assignment, relationship_property_definitions, relationship_interface_definitions = convert_requirement_from_definition_to_assignment(context, requirement_definition, our_requirement_assignment, presentation)
+                merge_requirement_assignment(context, presentation, relationship_property_definitions, relationship_interface_definitions, requirement_assignment, our_requirement_assignment)
+                validate_requirement_assignment(context, our_requirement_assignment.relationship or our_requirement_assignment, requirement_assignment, relationship_property_definitions, relationship_interface_definitions)
                 requirement_assignments.append((requirement_name, requirement_assignment))
             else:
                 context.validation.report('requirement "%s" not declared at node type "%s" in "%s"' % (requirement_name, presentation.type, presentation._fullname), locator=our_requirement_assignment._locator, level=Issue.BETWEEN_TYPES)
@@ -80,7 +81,8 @@ def get_template_requirements(context, presentation):
                 # If not specified, we interpret this to mean that exactly 1 occurrence is required
                 if actual_occurrences == 0:
                     # If it's not there, We will automatically add it
-                    requirement_assignment = convert_requirement_from_definition_to_assignment(context, requirement_definition, presentation)
+                    requirement_assignment, relationship_property_definitions, relationship_interface_definitions = convert_requirement_from_definition_to_assignment(context, requirement_definition, None, presentation)
+                    validate_requirement_assignment(context, presentation, requirement_assignment, relationship_property_definitions, relationship_interface_definitions)
                     requirement_assignments.append((requirement_name, requirement_assignment))
                 elif actual_occurrences > 1:
                     context.validation.report('requirement "%s" is allowed only one occurrence in "%s": %d' % (requirement_name, presentation._fullname, actual_occurrences), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
@@ -97,37 +99,79 @@ def get_template_requirements(context, presentation):
 # Utils
 #
 
-def convert_requirement_from_definition_to_assignment(context, presentation, container):
+def convert_requirement_from_definition_to_assignment(context, requirement_definition, our_requirement_assignment, container):
     from ..assignments import RequirementAssignment
     
     raw = OrderedDict()
     
-    raw['capability'] = deepclone(presentation.capability) # capability type name
+    raw['capability'] = deepclone(requirement_definition.capability) # capability type name
     
-    node_type = presentation._get_node_type(context)
+    node_type = requirement_definition._get_node_type(context)
     if node_type is not None:
         raw['node'] = deepclone(node_type._name)
-        
-    relationship = presentation.relationship # RequirementDefinitionRelationship
-    if relationship is not None:
+    
+    relationship_type = None
+    relationship_template = None
+    relationship_property_definitions = None
+    relationship_interface_definitions = None
+    
+    # First try our type if exists
+    our_relationship = our_requirement_assignment.relationship if our_requirement_assignment is not None else None # RequirementAssignmentRelationship
+    if our_relationship is not None:
+        relationship_type, relationship_type_variant = our_relationship._get_type(context)
+        if relationship_type_variant == 'relationship_template':
+            relationship_template = relationship_type
+            relationship_type = relationship_template._get_type(context)
+    
+    # If not exists, try the node type
+    relationship_definition = None
+    if relationship_type is None:
+        relationship_definition = requirement_definition.relationship # RequirementDefinitionRelationship
+        if relationship_definition is not None:
+            relationship_type = relationship_definition._get_type(context)
+
+    if relationship_type is not None:
         raw['relationship'] = OrderedDict()
-        relationship_type = relationship._get_type(context)
-        if relationship_type is not None:
-            raw['relationship']['type'] = deepclone(relationship_type._name)
-            
-            # Convert property definitions to values
-            property_definitions = relationship_type._get_properties(context)
-            if property_definitions:
-                raw['properties'] = convert_property_definitions_to_values(property_definitions)
-            
+        
+        type_name = our_relationship.type if our_relationship is not None else None
+        if type_name is None:
+            type_name = relationship_type._name
+        
+        raw['relationship']['type'] = deepclone(type_name)
+        
+        # These are our property definitions
+        relationship_property_definitions = relationship_type._get_properties(context)
+
+        if relationship_template is not None:
+            # Property values from template
+            raw['properties'] = relationship_template._get_property_values(context)
+        else:
+            if relationship_property_definitions:
+                # Convert property definitions to values
+                raw['properties'] = convert_property_definitions_to_values(relationship_property_definitions)
+        
+        # These are our interface definitions
+        relationship_interface_definitions = OrderedDict(relationship_type._get_interfaces(context)) # InterfaceDefinitionForType
+
+        if relationship_definition:
+            # Merge extra interface definitions
+            relationship_interface_definitions = relationship_definition.interfaces # InterfaceDefinitionForType
+            merge_interface_definitions(context, relationship_interface_definitions, relationship_interface_definitions, requirement_definition, container)
+
+        if relationship_template is not None:
+            # Interfaces from template
+            interfaces = relationship_template._get_interfaces(context)
+            if interfaces:
+                raw['relationship']['interfaces'] = OrderedDict()
+                for interface_name, interface in interfaces.iteritems():
+                    raw['relationship']['interfaces'][interface_name] = interface._raw
+        else:
             # Convert interface definitions to templates
-            interface_definitions = relationship_type._get_interfaces(context) # InterfaceDefinitionForType
-            if interface_definitions:
-                raw['interfaces'] = convert_interface_definition_from_type_to_raw_template(context, interface_definitions)
+            convert_requirement_interface_definitions_from_type_to_raw_template(context, raw['relationship'], relationship_interface_definitions)
 
-    return RequirementAssignment(name=presentation._name, raw=raw, container=container)
+    return RequirementAssignment(name=requirement_definition._name, raw=raw, container=container), relationship_property_definitions, relationship_interface_definitions
 
-def merge_requirement_assignment(context, requirement, our_requirement):
+def merge_requirement_assignment(context, presentation, relationship_property_definitions, relationship_interface_definitions, requirement, our_requirement):
     our_capability = our_requirement.capability
     if our_capability is not None:
         requirement._raw['capability'] = deepclone(our_capability)
@@ -146,40 +190,55 @@ def merge_requirement_assignment(context, requirement, our_requirement):
         if 'relationship' not in requirement._raw:
             requirement._raw['relationship'] = OrderedDict()
         elif not isinstance(requirement._raw['relationship'], dict):
-            # Convert from short form to long form
+            # Convert existing short form to long form
             the_type = requirement._raw['relationship']
             requirement._raw['relationship'] = OrderedDict()
             requirement._raw['relationship']['type'] = deepclone(the_type)
 
-        the_type = our_relationship.type
-        if the_type is not None:
-            requirement._raw['relationship']['type'] = deepclone(the_type)
+        merge_requirement_assignment_relationship(context, our_relationship, relationship_property_definitions, relationship_interface_definitions, requirement, our_relationship)
+
+def merge_requirement_assignment_relationship(context, presentation, property_definitions, interface_definitions, requirement, our_relationship):
+    the_type = our_relationship.type
+    if the_type is not None:
+        requirement._raw['relationship']['type'] = deepclone(the_type) # could be a type or a template
+
+    our_relationship_properties = our_relationship._raw.get('properties')
+    if our_relationship_properties:
+        # Make sure we have a dict
+        if 'properties' not in requirement._raw['relationship']:
+            requirement._raw['relationship']['properties'] = OrderedDict()
+        
+        # Merge our properties
+        merge(requirement._raw['relationship']['properties'], deepclone(our_relationship_properties))
+
+    our_interfaces = our_relationship.interfaces
+    if our_interfaces:
+        # Make sure we have a dict
+        if 'interfaces' not in requirement._raw['relationship']:
+            requirement._raw['relationship']['interfaces'] = OrderedDict()
+
+        # Merge interfaces
+        for interface_name, our_interface in our_interfaces.iteritems():
+            if interface_name not in requirement._raw['relationship']['interfaces']:
+                requirement._raw['relationship']['interfaces'][interface_name] = OrderedDict()
             
-        our_relationship_properties = our_relationship.properties # PropertyAssignment
-        if our_relationship_properties:
-            # Make sure we have a dict
-            if 'properties' not in requirement._raw['relationship']:
-                requirement._raw['relationship']['properties'] = OrderedDict()
-                
-            # Merge our relationship property assignments
-            for property_name, our_relationship_property in our_relationship_properties.iteritems():
-                requirement._raw['relationship']['properties'][property_name] = deepclone(our_relationship_property.value)
+            if interface_name in interface_definitions:
+                interface_definition = interface_definitions[interface_name]
+                interface_assignment = requirement.relationship.interfaces[interface_name]
+                merge_interface(context, presentation, interface_assignment, our_interface, interface_definition, interface_name)
+            else:
+                context.validation.report('interface definition "%s" not declared at definition of requirement "%s" in "%s"' % (interface_name, presentation._fullname, presentation._container._container._fullname), locator=our_relationship._locator, level=Issue.BETWEEN_TYPES)
 
-        # Reinitialize relationship properties (will trigger validation)
-        values = get_assigned_and_defined_property_values(context, requirement.relationship, our_relationship)
-        if values:
-            requirement._raw['relationship']['properties'] = values
+def validate_requirement_assignment(context, presentation, requirement_assignment, relationship_property_definitions, relationship_interface_definitions):
+    relationship = requirement_assignment.relationship
+    validate_required_values(context, presentation, relationship.properties, relationship_property_definitions)
+    
+    if relationship_interface_definitions:
+        for interface_name, relationship_interface_definition in relationship_interface_definitions.iteritems():
+            interface_assignment = relationship.interfaces.get(interface_name) if relationship.interfaces is not None else None
+            validate_required_inputs(context, presentation, interface_assignment, relationship_interface_definition, None, interface_name)
 
-        our_relationship_interfaces = our_relationship.interfaces # InterfaceDefinitionForTemplate
-        if our_relationship_interfaces is not None:
-            # Make sure we have a dict
-            if 'interfaces' not in requirement._raw['relationship']:
-                requirement._raw['relationship']['interfaces'] = OrderedDict()
-            
-            for interface_name, our_relationship_interface in our_relationship_interfaces.iteritems():
-                requirement._raw['relationship']['interfaces'][interface_name] = our_relationship_interface._clone(requirement)
-
-def get_requirement(requirement_definitions, name):
+def get_first_requirement(requirement_definitions, name):
     if requirement_definitions is not None:
         for n, requirement in requirement_definitions:
             if n == name:

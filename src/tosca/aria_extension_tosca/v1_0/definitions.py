@@ -184,7 +184,7 @@ class AttributeDefinition(ToscaPresentation):
 
 @has_fields
 @dsl_specification('3.5.12', 'tosca-simple-profile-1.0')
-class ParameterDefinition(ToscaPresentation):
+class ParameterDefinition(PropertyDefinition):
     """
     A parameter definition is essentially a TOSCA property definition; however, it also allows a value to be assigned to it (as for a TOSCA property assignment). In addition, in the case of output parameters, it can optionally inherit the data type of the value assigned to it rather than have an explicit data type defined for it.
     
@@ -202,6 +202,7 @@ class ParameterDefinition(ToscaPresentation):
         :rtype: str
         """
 
+    @field_validator(data_value_validator)
     @primitive_field()
     def value(self):
         """

@@ -246,6 +246,7 @@ topology_template:
       type: openstack.Volume
       properties:
         size: 10 GB
+        volume_type: { get_property: [ SELF, size, a, b, c] }
       interfaces:
         standard:
           inputs:
@@ -275,4 +276,13 @@ topology_template:
   outputs:
     user_port:
       type: tosca.datatypes.network.PortInfo
-      value: { get_nodes_of_type: xxx }
+      value: { get_nodes_of_type: openstack.Instance }
+    prop:
+      value: { get_property: [ connects_to, size, a, b, c] }
+    in:
+      type: string
+      value: { get_input: { get_input: openstack_credential } }
+    test:
+      type: string
+      value: { token: [ 'one,two,three', ',', 1 ] }
+

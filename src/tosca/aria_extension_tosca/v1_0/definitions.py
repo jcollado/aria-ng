@@ -3,9 +3,10 @@ from .presentation import ToscaPresentation
 from .property_assignment import PropertyAssignment
 from .description import Description
 from .misc import ConstraintClause
-from .data import Range
+from .data_types import Range
+from .field_getters import data_type_class_getter
 from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
-from .utils.data import data_type_class_getter, get_data_type, get_property_constraints
+from .utils.data_types import get_data_type, get_property_constraints
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
 from aria import dsl_specification

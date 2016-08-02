@@ -16,15 +16,35 @@ class ReadOnlyList(list):
         super(ReadOnlyList, self).__init__(*args, **kwargs)
         self.locked = True
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, index, value):
         if self.locked:
             raise TypeError('read-only list')
-        return super(ReadOnlyList, self).__setitem__(key, value)
+        return super(ReadOnlyList, self).__setitem__(index, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, index):
         if self.locked:
             raise TypeError('read-only list')
-        return super(ReadOnlyList, self).__delitem__(key)
+        return super(ReadOnlyList, self).__delitem__(index)
+    
+    def __iadd__(self, values):
+        if self.locked:
+            raise TypeError('read-only list')
+        return super(ReadOnlyList, self).__iadd__(values)
+
+    def append(self, value):
+        if self.locked:
+            raise TypeError('read-only list')
+        return super(ReadOnlyList, self).append(value)
+
+    def extend(self, values):
+        if self.locked:
+            raise TypeError('read-only list')
+        return super(ReadOnlyList, self).append(values)
+
+    def insert(self, index, value):
+        if self.locked:
+            raise TypeError('read-only list')
+        return super(ReadOnlyList, self).insert(index, value)
 
 EMPTY_READ_ONLY_LIST = ReadOnlyList()
 
@@ -66,26 +86,39 @@ class StrictList(list):
         if items:
             for item in items:
                 self.append(item)
+    
+    def _wrap(self, value):
+        if not isinstance(value, self.value_class):
+            raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
+        if self.wrapper_fn:
+            value = self.wrapper_fn(value)
+        return value
 
-    def __getitem__(self, key):
-        value = super(StrictList, self).__getitem__(key)
+    def __getitem__(self, index):
+        value = super(StrictList, self).__getitem__(index)
         if self.unwrapper_fn:
             value = self.unwrapper_fn(value)
         return value
         
-    def __setitem__(self, key, value):
-        if not isinstance(value, self.value_class):
-            raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
-        if self.wrapper_fn:
-            value = self.wrapper_fn(value)
-        return super(StrictList, self).__setitem__(key, value)
+    def __setitem__(self, index, value):
+        value = self._wrap(value)
+        return super(StrictList, self).__setitem__(index, value)
+
+    def __iadd__(self, values):
+        values = [self._wrap(v) for v in values]
+        return super(StrictList, self).__iadd__(values)
 
     def append(self, value):
-        if not isinstance(value, self.value_class):
-            raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
-        if self.wrapper_fn:
-            value = self.wrapper_fn(value)
+        value = self._wrap(value)
         return super(StrictList, self).append(value)
+
+    def extend(self, values):
+        values = [self._wrap(v) for v in values]
+        return super(StrictList, self).extend(values)
+
+    def insert(self, index, value):
+        value = self._wrap(value)
+        return super(StrictList, self).insert(index, value)
 
 class StrictDict(OrderedDict):
     """

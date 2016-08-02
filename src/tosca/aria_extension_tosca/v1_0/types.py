@@ -3,13 +3,14 @@ from .presentation import ToscaPresentation
 from .description import Description
 from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition, OperationDefinitionForType
 from .misc import ConstraintClause
-from .data import Version
+from .data_types import Version
+from .field_getters import data_type_class_getter
 from .field_validators import data_type_derived_from_validator, data_type_constraints_validator, data_type_properties_validator, list_node_type_or_group_type_validator
 from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions, get_inherited_operations
 from .utils.requirements import get_inherited_requirement_definitions
 from .utils.capabilities import get_inherited_valid_source_types, get_inherited_capability_definitions
-from .utils.data import data_type_class_getter, get_data_type, get_inherited_constraints, coerce_data_type_value
+from .utils.data_types import get_data_type, get_inherited_constraints, coerce_data_type_value
 from aria import dsl_specification
 from aria.utils import ReadOnlyDict, ReadOnlyList, cachedmethod
 from aria.presentation import has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_dict_field, object_list_field, object_sequenced_list_field, object_dict_unknown_fields, field_getter, field_validator, list_type_validator, derived_from_validator

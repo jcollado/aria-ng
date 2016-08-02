@@ -1,6 +1,6 @@
 
 from aria.deployment import Topology, Type, NodeTemplate, Interface, Operation, Requirement, Relationship, Capability
-from .data import coerce_value
+from .data_types import coerce_value
 import re
 
 def normalize_topology(context, presenter):

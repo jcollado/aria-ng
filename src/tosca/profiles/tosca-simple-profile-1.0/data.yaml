@@ -7,11 +7,11 @@ data_types:
   
   timestamp:
     _extensions:
-      coerce_value: aria_extension_tosca.v1_0.data.coerce_timestamp
+      coerce_value: aria_extension_tosca.v1_0.data_types.coerce_timestamp
 
   version:
     _extensions:
-      coerce_value: aria_extension_tosca.v1_0.data.coerce_version
+      coerce_value: aria_extension_tosca.v1_0.data_types.coerce_version
       type_qualified_name: tosca:version
       specification: tosca-simple-profile-1.0
       specification_section: 3.2.2
@@ -19,7 +19,7 @@ data_types:
 
   range:
     _extensions:
-      coerce_value: aria_extension_tosca.v1_0.data.coerce_range
+      coerce_value: aria_extension_tosca.v1_0.data_types.coerce_range
       type_qualified_name: tosca:range
       specification: tosca-simple-profile-1.0
       specification_section: 3.2.3
@@ -32,7 +32,7 @@ data_types:
   list:
     _extensions:
       use_entry_schema: true
-      coerce_value: aria_extension_tosca.v1_0.data.coerce_list
+      coerce_value: aria_extension_tosca.v1_0.data_types.coerce_list
       type_qualified_name: tosca:list
       specification: tosca-simple-profile-1.0
       specification_section: 3.2.4
@@ -41,7 +41,7 @@ data_types:
   map:
     _extensions:
       use_entry_schema: true
-      coerce_value: aria_extension_tosca.v1_0.data.coerce_map_value
+      coerce_value: aria_extension_tosca.v1_0.data_types.coerce_map_value
       type_qualified_name: tosca:map
       specification: tosca-simple-profile-1.0
       specification_section: 3.2.5
@@ -53,7 +53,7 @@ data_types:
 
   scalar-unit.size:
     _extensions:
-      coerce_value: aria_extension_tosca.v1_0.data.coerce_scalar_unit_size
+      coerce_value: aria_extension_tosca.v1_0.data_types.coerce_scalar_unit_size
       type_qualified_name: tosca:scalar-unit.size
       specification: tosca-simple-profile-1.0
       specification_section: 3.2.6.4
@@ -61,7 +61,7 @@ data_types:
 
   scalar-unit.time:
     _extensions:
-      coerce_value: aria_extension_tosca.v1_0.data.coerce_scalar_unit_time
+      coerce_value: aria_extension_tosca.v1_0.data_types.coerce_scalar_unit_time
       type_qualified_name: tosca:scalar-unit.time
       specification: tosca-simple-profile-1.0
       specification_section: 3.2.6.5
@@ -69,7 +69,7 @@ data_types:
 
   scalar-unit.frequency:
     _extensions:
-      coerce_value: aria_extension_tosca.v1_0.data.coerce_scalar_unit_frequency
+      coerce_value: aria_extension_tosca.v1_0.data_types.coerce_scalar_unit_frequency
       type_qualified_name: tosca:scalar-unit.frequency
       specification: tosca-simple-profile-1.0
       specification_section: 3.2.6.6

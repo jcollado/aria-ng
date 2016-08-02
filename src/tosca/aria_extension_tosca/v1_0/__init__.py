@@ -8,7 +8,7 @@ from .filters import *
 from .templates import *
 from .types import *
 from .misc import *
-from .data import *
+from .data_types import *
 
 MODULES = (
     'utils',)

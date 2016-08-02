@@ -69,6 +69,10 @@ node_types:
 
 topology_template:
 
+  inputs:
+    openstack_credential:
+      type: openstack.Credential
+
   relationship_templates:
   
     connects_to:
@@ -245,7 +249,7 @@ topology_template:
       interfaces:
         standard:
           inputs:
-            openstack_credential: *OPENSTACK_CREDENTIAL
+            openstack_credential: { get_input: openstack_credential }
 
   groups:
   
@@ -267,3 +271,8 @@ topology_template:
         bandwidth_threshold: 2 GB
       targets: # node templates or groups
         - node_cellar_group
+
+  outputs:
+    user_port:
+      type: tosca.datatypes.network.PortInfo
+      value: { get_nodes_of_type: xxx }

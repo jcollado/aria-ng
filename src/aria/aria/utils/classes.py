@@ -28,6 +28,8 @@ def classname(o):
 
 cachedmethod = lru_cache()
 
+# See also: http://code.activestate.com/recipes/498245-lru-and-lfu-cache-decorators/
+
 class HasCachedMethods(object):
     @property
     def _method_cache_info(self):

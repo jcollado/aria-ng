@@ -1,8 +1,9 @@
 
 from .presentation import ToscaPresentation
 from .description import Description
+from .field_getters import data_type_getter
 from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
-from .utils.data import get_as_data_type, apply_constraint_to_value
+from .utils.data_types import apply_constraint_to_value
 from aria import dsl_specification
 from aria.utils import cachedmethod
 from aria.presentation import has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator
@@ -66,7 +67,7 @@ class Repository(ToscaPresentation):
     
     @cachedmethod
     def _get_credential(self, context):
-        return get_as_data_type(context, self, 'credential', 'tosca.datatypes.Credential')
+        return data_type_getter(context, self, 'credential', 'tosca.datatypes.Credential')
 
 @short_form_field('file')
 @has_fields
@@ -109,12 +110,6 @@ class Import(ToscaPresentation):
         
         :rtype: str
         """
-
-    #def _dump(self, context):
-    #    puts('Import:')
-    #    with context.style.indent:
-    #        if self.credential:
-    #            puts('File: %s' % context.style.literal(self.credential))
 
 @has_fields
 @dsl_specification('3.5.2', 'tosca-simple-profile-1.0')
@@ -206,17 +201,14 @@ class ConstraintClause(ToscaPresentation):
     @cachedmethod
     def _get_type(self, context):
         if hasattr(self._container, '_get_type_for_name'):
+            # NodeFilter or CapabilityFilter
             return self._container._get_type_for_name(context, self._name)
         elif hasattr(self._container, '_get_type'):
+            # Properties
             return self._container._get_type(context)
         else:
-            # We are inside DataType, so the DataType itself is our type 
+            # DataType (the DataType itself is our type) 
             return self._container
     
-    @cachedmethod
-    def _is_typed(self):
-        key = self._raw.keys()[0]
-        return key in ('equal', 'greater_than', 'greater_or_equal', 'less_than', 'less_or_equal', 'less_or_equal', 'in_range', 'valid_values')
-                
     def _apply_to_value(self, context, presentation, value):
         return apply_constraint_to_value(context, presentation, self, value)

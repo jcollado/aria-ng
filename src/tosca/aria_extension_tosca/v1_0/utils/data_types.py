@@ -1,32 +1,9 @@
 
-from aria import Issue, InvalidValueError, dsl_specification
+from ..functions import get_function
+from aria import Issue, dsl_specification
 from aria.utils import import_fullname
 from collections import OrderedDict
 import re
-
-#
-# Getters
-#
-
-def data_type_class_getter(cls):
-    def getter(field, presentation):
-        raw = field._get(presentation)
-        if raw is not None:
-            try:
-                return cls(None, None, raw, None)
-            except ValueError as e:
-                raise InvalidValueError('%s is not a valid "%s.%s" in "%s": %s' % (field.fullname, cls.__module__, cls.__name__, presentation._name, repr(raw)), cause=e, locator=field.get_locator(raw))
-    return getter
-
-def get_as_data_type(context, presentation, field_name, type_name):
-    the_type = context.presentation.datatypes.get(type_name) if context.presentation.datatypes is not None else None
-    if the_type is not None:
-        value = getattr(presentation, field_name)
-        if value is not None:
-            return coerce_data_type_value(context, presentation, the_type, None, None, value, None)
-    else:
-        context.validation.report('field "%s" in "%s" refers to unknown data type "%s"' % (field_name, presentation._fullname, type_name), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
-    return None
 
 #
 # DataType
@@ -250,21 +227,6 @@ def apply_constraint_to_value(context, presentation, constraint_clause, value):
     
     return True
 
-def apply_constraints_to_value(context, presentation, constraints, value):
-    """
-    Applies all constraints to the value. If the value conforms, returns the value.
-    If it does not conform, returns None.
-    """
-
-    if (value is not None) and (constraints is not None):
-        valid = True
-        for constraint in constraints:
-            if not constraint._apply_to_value(context, presentation, value):
-                valid = False
-        if not valid:
-            value = None
-    return value
-
 #
 # Utils
 #
@@ -312,6 +274,10 @@ def coerce_value(context, presentation, the_type, entry_schema, constraints, val
     Data types can use the "coerce\_value" extension to hook their own specialized function. If the extension
     is present, we will delegate to that hook.
     """
+
+    is_function, fn = get_function(context, presentation, value)
+    if is_function:
+        return fn
     
     if the_type is None:
         return None
@@ -383,6 +349,21 @@ def coerce_to_data_type_class(context, presentation, cls, entry_schema, constrai
     # Check constraints
     value = apply_constraints_to_value(context, presentation, constraints, value)
         
+    return value
+
+def apply_constraints_to_value(context, presentation, constraints, value):
+    """
+    Applies all constraints to the value. If the value conforms, returns the value.
+    If it does not conform, returns None.
+    """
+
+    if (value is not None) and (constraints is not None):
+        valid = True
+        for constraint in constraints:
+            if not constraint._apply_to_value(context, presentation, value):
+                valid = False
+        if not valid:
+            value = None
     return value
 
 def report_issue_for_bad_format(context, presentation, the_type, value, aspect, e):

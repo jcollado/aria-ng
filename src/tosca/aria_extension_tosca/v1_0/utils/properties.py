@@ -1,5 +1,5 @@
 
-from .data import coerce_value
+from .data_types import coerce_value
 from aria import Issue
 from aria.utils import merge, deepclone
 from collections import OrderedDict

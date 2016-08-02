@@ -1,5 +1,5 @@
 
-from .utils.data import coerce_to_data_type_class, report_issue_for_bad_format, coerce_value
+from .utils.data_types import coerce_to_data_type_class, report_issue_for_bad_format, coerce_value
 from aria import dsl_specification
 from aria.utils import StrictDict
 from functools import total_ordering
@@ -28,6 +28,7 @@ class Timezone(tzinfo):
 UTC = Timezone()
 
 @total_ordering
+@dsl_specification('timestamp', 'yaml-1.1')
 class Timestamp(object):
     '''
     TOSCA timestamps follow the YAML specification, which in turn is a variant of ISO8601.

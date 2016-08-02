@@ -140,6 +140,20 @@ class NodeTemplate(ToscaPresentation):
         self._get_capabilities(context)
         self._get_interfaces(context)
 
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'type',
+            'directives',
+            'properties',
+            'attributes',
+            'requirements',
+            'capabilities',
+            'interfaces',
+            'artifacts',
+            'node_filter',
+            'copy'))
+
 @has_fields
 @dsl_specification('3.7.4', 'tosca-simple-profile-1.0')
 class RelationshipTemplate(ToscaPresentation):
@@ -214,6 +228,15 @@ class RelationshipTemplate(ToscaPresentation):
         super(RelationshipTemplate, self)._validate(context)
         self._get_property_values(context)
         self._get_interfaces(context)
+
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'type',
+            'properties',
+            'attributes',
+            'interfaces',
+            'copy'))
 
 @has_fields
 @dsl_specification('3.8', 'tosca-simple-profile-1.0')

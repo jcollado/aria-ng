@@ -2,7 +2,7 @@
 from .template import *
 from .plan import Plan
 from .ids import *
-from .deployment_plan import *
+from .classic_plan import *
 
 __all__ = (
     'TopologyTemplate',

@@ -1,16 +1,10 @@
 
 from aria import dsl_specification, InvalidValueError, Issue
+from aria.deployment import Function
 from aria.utils import ReadOnlyList
 
 NODE_TEMPLATE_TARGET_SYMBOLS = ('SELF', 'HOST')
 RELATIONSHIP_TEMPLATE_TARGET_SYMBOLS = ('SELF', 'SOURCE', 'TARGET')
-
-class Function(object):
-    def __init__(self, context, presentation, argument):
-        pass
-    
-    def evaluate(self, context):
-        return None
     
 #
 # Intrinsic
@@ -175,7 +169,7 @@ def get_function(context, presentation, value):
                 return True, None
     return False, None
 
-def get_SELF(presentation):
+def get_self(presentation):
     from .templates import NodeTemplate, RelationshipTemplate
     
     if presentation is None:
@@ -185,7 +179,7 @@ def get_SELF(presentation):
     elif isinstance(presentation, RelationshipTemplate):
         return presentation, 'relationship_template'
     else:
-        return get_SELF(presentation._container)
+        return get_self(presentation._container)
 
 def parse_string_expression(context, presentation, name, index, explanation, value):
     is_function, fn = get_function(context, presentation, value)
@@ -208,18 +202,19 @@ def parse_bool(context, presentation, name, index, explanation, value):
         raise invalid_value(name, index, 'a boolean', explanation, value)
     return value
 
+@dsl_specification('4.1', 'tosca-simple-profile-1.0')
 def parse_modelable_entity_name(context, presentation, name, index, value):
     value = parse_string_expression(context, presentation, name, index, 'the modelable entity name', value)
     if value == 'SELF':
-        the_self, _ = get_SELF(presentation)
+        the_self, _ = get_self(presentation)
         if the_self is None:
             raise invalid_modelable_entity_name(name, index, value, 'a node template or a relationship template')
     elif value == 'HOST':
-        _, self_variant = get_SELF(presentation)
+        _, self_variant = get_self(presentation)
         if self_variant != 'node_template':
             raise invalid_modelable_entity_name(name, index, value, 'a node template')
     elif (value == 'SOURCE') or (value == 'TARGET'):
-        _, self_variant = get_SELF(presentation)
+        _, self_variant = get_self(presentation)
         if self_variant != 'relationship_template':
             raise invalid_modelable_entity_name(name, index, value, 'a relationship template')
     elif isinstance(value, basestring):

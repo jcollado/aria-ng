@@ -1,21 +1,21 @@
 
-from aria.deployment import Topology, Type, NodeTemplate, Interface, Operation, Requirement, Relationship, Capability
+from aria.deployment import DeploymentTemplate, Type, NodeTemplate, Interface, Operation, Requirement, Relationship, Capability
 from .data_types import coerce_value
 import re
 
-def normalize_topology(context, presenter):
-    topology = Topology()
+def get_deployment_template(context, presenter):
+    r = DeploymentTemplate()
 
-    normalize_types(context, topology.node_types, presenter.node_types)
-    normalize_types(context, topology.capability_types, presenter.capability_types)
+    normalize_types(context, r.node_types, presenter.node_types)
+    normalize_types(context, r.capability_types, presenter.capability_types)
     
     topology_template = presenter.service_template.topology_template
     if topology_template is not None:
         if topology_template.node_templates:
             for node_template_name, node_template in topology_template.node_templates.iteritems():
-                topology.node_templates[node_template_name] = normalize_node_template(context, node_template)
+                r.node_templates[node_template_name] = normalize_node_template(context, node_template)
 
-    return topology
+    return r
 
 def normalize_types(context, root, types):
     if types is None:

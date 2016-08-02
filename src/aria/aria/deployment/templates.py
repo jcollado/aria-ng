@@ -1,19 +1,18 @@
 
-from .. import Issue
+from .utils import dump_properties, dump_interfaces
+from .. import Issue, UnimplementedFunctionalityError, classname
 from ..utils import StrictList, StrictDict
-from .plan import Node
-from .ids import generate_id
+from .plan import Plan, Node
 from clint.textui import puts
-from collections import OrderedDict
 from types import FunctionType
 
-class Topology(object):
+class DeploymentTemplate(object):
     def __init__(self):
         self.node_types = TypeHierarchy()
         self.capability_types = TypeHierarchy()
         self.node_templates = StrictDict(str, NodeTemplate)
-        self.groups = OrderedDict() # TODO
-        self.policies = OrderedDict() # TODO
+        self.groups = StrictDict(str) # TODO
+        self.policies = StrictDict(str) # TODO
 
     def link(self, context):
         linked = True
@@ -21,7 +20,14 @@ class Topology(object):
             if not node_template.link(context, self):
                 linked = False
         return linked
-                    
+
+    def instantiate(self):
+        r = Plan()
+        for node_template in self.node_templates.itervalues():
+            node = node_template.instantiate()
+            r.nodes[node.id] = node
+        return r
+
     def find_target_node_template_capability(self, context, source_node_template, requirement):
         for target_node_template in self.node_templates.itervalues():
             target_capability = None
@@ -136,6 +142,10 @@ class TypeHierarchy(Type):
         self.name = None
         self.children = StrictList(Type)
 
+class Function(object):
+    def evaluate(self, context):
+        raise UnimplementedFunctionalityError(classname(self) + '.evaluate')
+
 class NodeTemplate(object):
     def __init__(self, name, type_name):
         if not isinstance(name, basestring):
@@ -152,9 +162,7 @@ class NodeTemplate(object):
         self.target_node_type_constraints = StrictList(FunctionType)
     
     def instantiate(self):
-        id = generate_id()
-        id = '%s_%s' % (self.name, id)
-        return Node(id, self)
+        return Node(self)
     
     def link(self, context, topology):
         satisfied = True
@@ -376,21 +384,3 @@ class Capability(object):
             if self.valid_source_node_type_names:
                 puts('Valid source node types: %s' % ', '.join((str(context.style.type(v)) for v in self.valid_source_node_type_names)))
         dump_properties(context, self.properties)
-
-def dump_properties(context, properties, name='Properties'):
-    if not properties:
-        return
-    with context.style.indent:
-        puts('%s:' % name)
-        with context.style.indent:
-            for property_name, value in properties.iteritems():
-                puts('%s = %s' % (context.style.property(property_name), context.style.literal(value)))
-
-def dump_interfaces(context, interfaces):
-    if not interfaces:
-        return
-    with context.style.indent:
-        puts('Interfaces:')
-        with context.style.indent:
-            for interface in interfaces.itervalues():
-                interface.dump(context)

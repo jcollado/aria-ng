@@ -1,7 +1,7 @@
 
 from ..issue import Issue
 from ..exceptions import InvalidValueError, AriaError
-from ..utils import ReadOnlyList, ReadOnlyDict, print_exception
+from ..utils import ReadOnlyList, ReadOnlyDict, print_exception, cachedmethod
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict
@@ -289,12 +289,13 @@ def has_fields(cls):
             field.name = name
             field.container = cls
             
-            # Convert to Python property
+            # This function is here just to create an enclosed scope for "field"
             def closure(field):
-                # By convention, we will have the getter wrap the original function.
+                
+                # By convention, we have the getter wrap the original function.
                 # (It is, for example, where the Python help() function will look for
-                # docstrings.)
-
+                # docstrings when encountering a property.)
+                @cachedmethod
                 @wraps(field.fn)
                 def getter(self):
                     return field.get(self)
@@ -302,6 +303,7 @@ def has_fields(cls):
                 def setter(self, value):
                     field.set(self, value)
 
+                # Convert to Python property
                 return property(fget=getter, fset=setter)
 
             setattr(cls, name, closure(field))

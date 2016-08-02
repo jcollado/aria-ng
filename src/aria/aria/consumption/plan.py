@@ -7,8 +7,7 @@ class Plan(Template):
     """
 
     def consume(self):
-        topology = self.topology
-        topology.link(self.context)
-        if self.context.validation.issues:
-            return
-        topology.dump(self.context)
+        deployment_template = self.deployment_template
+        if deployment_template is not None:
+            plan = deployment_template.instantiate()
+            plan.dump(self.context)

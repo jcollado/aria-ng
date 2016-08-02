@@ -240,7 +240,7 @@ class RelationshipTemplate(ToscaPresentation):
 
 @has_fields
 @dsl_specification('3.8', 'tosca-simple-profile-1.0')
-class TopologyTemplate(ToscaPresentation):
+class DeploymentTemplate(ToscaPresentation):
     """
     This section defines the topology template of a cloud application. The main ingredients of the topology template are node templates representing components of the application and relationship templates representing links between the components. These elements are defined in the nested node_templates section and the nested relationship_templates sections, respectively. Furthermore, a topology template allows for defining input parameters, output parameters as well as grouping of node templates.
     
@@ -464,12 +464,12 @@ class ServiceTemplate(ToscaPresentation):
         :rtype: dict of str, :class:`PolicyType`
         """
 
-    @object_field(TopologyTemplate)
+    @object_field(DeploymentTemplate)
     def topology_template(self):
         """
         Defines the topology template of an application or service, consisting of node templates that represent the application's or service's components, as well as relationship templates representing relations between the components.
         
-        :rtype: :class:`TopologyTemplate`
+        :rtype: :class:`DeploymentTemplate`
         """
 
     def _dump(self, context):

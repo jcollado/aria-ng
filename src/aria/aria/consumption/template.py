@@ -7,12 +7,12 @@ class Template(Consumer):
     """
 
     def consume(self):
-        topology = self.topology
-        topology.link(self.context)
-        if self.context.validation.issues:
-            return
-        topology.dump(self.context)
+        deployment_template = self.deployment_template
+        if deployment_template is not None:
+            deployment_template.dump(self.context)
     
     @property
-    def topology(self):
-        return self.context.presentation._get_topology(self.context)
+    def deployment_template(self):
+        deployment_template = self.context.presentation._get_deployment_template(self.context)
+        deployment_template.link(self.context)
+        return deployment_template if not self.context.validation.issues else None

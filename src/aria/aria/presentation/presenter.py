@@ -9,9 +9,6 @@ class Presenter(Presentation):
     Presenters provide a robust API over agnostic raw data.
     """
 
-    def _get_import_locations(self):
-        return []
-    
     def _merge_import(self, presentation):
         merge(self._raw, presentation._raw)
         if hasattr(self._raw, '_locator') and hasattr(presentation._raw, '_locator'):
@@ -21,8 +18,10 @@ class Presenter(Presentation):
         locator = self._raw._locator
         locator.link(self._raw)
 
-    @property
-    def deployment_plan(self):
+    def _get_import_locations(self):
+        return None
+    
+    def _get_deployment_template(self, context):
         return None
 
     @property

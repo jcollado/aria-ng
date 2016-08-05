@@ -5,7 +5,7 @@ from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition,
 from .assignments import AttributeAssignment, RequirementAssignment, CapabilityAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
-from .utils.properties import get_assigned_and_defined_property_values, get_inherited_property_definitions
+from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
 from .utils.capabilities import get_template_capabilities
@@ -238,7 +238,7 @@ class RelationshipTemplate(ToscaPresentation):
 
 @has_fields
 @dsl_specification('3.8', 'tosca-simple-profile-1.0')
-class DeploymentTemplate(ToscaPresentation):
+class TopologyTemplate(ToscaPresentation):
     """
     This section defines the topology template of a cloud application. The main ingredients of the topology template are node templates representing components of the application and relationship templates representing links between the components. These elements are defined in the nested node_templates section and the nested relationship_templates sections, respectively. Furthermore, a topology template allows for defining input parameters, output parameters as well as grouping of node templates.
     
@@ -310,8 +310,8 @@ class DeploymentTemplate(ToscaPresentation):
         """
 
     @cachedmethod
-    def _get_inputs(self, context):
-        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'inputs'))
+    def _get_input_values(self, context):
+        return ReadOnlyDict(get_parameter_values(context, self))
 
     def _dump(self, context):
         self._dump_content(context, (
@@ -462,12 +462,12 @@ class ServiceTemplate(ToscaPresentation):
         :rtype: dict of str, :class:`PolicyType`
         """
 
-    @object_field(DeploymentTemplate)
+    @object_field(TopologyTemplate)
     def topology_template(self):
         """
         Defines the topology template of an application or service, consisting of node templates that represent the application's or service's components, as well as relationship templates representing relations between the components.
         
-        :rtype: :class:`DeploymentTemplate`
+        :rtype: :class:`TopologyTemplate`
         """
 
     def _dump(self, context):

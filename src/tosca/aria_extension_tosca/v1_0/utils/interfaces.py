@@ -350,7 +350,7 @@ def assign_raw_inputs(context, values, assignments, definitions, target, interfa
         # Note: default value has already been assigned 
         
         # Coerce value
-        values['inputs'][input_name] = coerce_property_value(context, assignment, definition)
+        values['inputs'][input_name] = coerce_property_value(context, assignment, definition, assignment.value)
 
 def validate_required_inputs(context, presentation, assignment, definition, original_assignment, interface_name, operation_name=None):
     input_definitions = definition.inputs

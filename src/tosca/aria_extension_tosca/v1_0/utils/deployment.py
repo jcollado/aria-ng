@@ -1,5 +1,5 @@
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, Interface, Operation, Requirement, Capability
+from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, Interface, Operation, Requirement
 from .data_types import coerce_value
 import re
 
@@ -11,9 +11,15 @@ def get_deployment_template(context, presenter):
     
     topology_template = presenter.service_template.topology_template
     if topology_template is not None:
-        if topology_template.node_templates:
-            for node_template_name, node_template in topology_template.node_templates.iteritems():
+        node_templates = topology_template.node_templates
+        if node_templates:
+            for node_template_name, node_template in node_templates.iteritems():
                 r.node_templates[node_template_name] = normalize_node_template(context, node_template)
+
+        groups = topology_template.groups
+        if groups:
+            for group_name, group in groups.iteritems():
+                r.group_templates[group_name] = normalize_group(context, group)
 
     return r
 
@@ -151,7 +157,7 @@ def normalize_relationship(context, relationship):
 
 def normalize_capability(context, capability):
     capability_type = capability._get_type(context)
-    r = Capability(name=capability._name, type_name=capability_type._name)
+    r = CapabilityTemplate(name=capability._name, type_name=capability_type._name)
     
     capability_definition = capability._get_definition(context)
     occurrences = capability_definition.occurrences
@@ -159,8 +165,6 @@ def normalize_capability(context, capability):
         r.min_occurrences = occurrences.value[0]
         if occurrences.value[1] != 'UNBOUNDED':
             r.max_occurrences = occurrences.value[1]
-    else:
-        r.min_occurrences = 1
     
     valid_source_types = capability_definition.valid_source_types
     if valid_source_types:
@@ -170,6 +174,29 @@ def normalize_capability(context, capability):
     if properties:
         for property_name, prop in properties.iteritems():
             r.properties[property_name] = prop.value
+    
+    return r
+
+def normalize_group(context, group):
+    group_type = group._get_type(context)
+    r = GroupTemplate(name=group._name, type_name=group_type._name)
+
+    properties = group._get_property_values(context)
+    if properties:
+        for property_name, prop in properties.iteritems():
+            r.properties[property_name] = prop.value
+
+    interfaces = group._get_interfaces(context)
+    if interfaces:
+        for interface_name, interface in interfaces.iteritems():
+            interface = normalize_interface(context, interface)
+            if interface is not None:
+                r.interfaces[interface_name] = interface
+    
+    members = group.members
+    if members:
+        for member in members:
+            r.member_node_template_names.append(member)
     
     return r
 
@@ -198,8 +225,11 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
     constraint_key = constraint_clause._raw.keys()[0]
     the_type = constraint_clause._get_type(context)
 
-    def coerce(constraint):
-        return coerce_value(context, node_filter, the_type, None, None, constraint, constraint_key) if the_type is not None else constraint
+    def coerce(constraint, container):
+        constraint = coerce_value(context, node_filter, the_type, None, None, constraint, constraint_key) if the_type is not None else constraint
+        if hasattr(constraint, 'evaluate'):
+            constraint = constraint.evaluate(context, container)
+        return constraint
     
     def get_value(node_type):
         if capability_name is not None:
@@ -208,55 +238,49 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
         return node_type.properties.get(property_name)
 
     if constraint_key == 'equal':
-        constraint = coerce(constraint_clause.equal)
-
-        def equal(node_type):
+        def equal(node_type, container):
+            constraint = coerce(constraint_clause.equal, container)
             value = get_value(node_type)
             return value == constraint
         
         return equal
 
     elif constraint_key == 'greater_than':
-        constraint = coerce(constraint_clause.greater_than)
-
-        def greater_than(node_type):
+        def greater_than(node_type, container):
+            constraint = coerce(constraint_clause.greater_than, container)
             value = get_value(node_type)
             return value > constraint
         
         return greater_than
 
     elif constraint_key == 'greater_or_equal':
-        constraint = coerce(constraint_clause.greater_or_equal)
-
-        def greater_or_equal(node_type):
+        def greater_or_equal(node_type, container):
+            constraint = coerce(constraint_clause.greater_or_equal, container)
             value = get_value(node_type)
             return value >= constraint
         
         return greater_or_equal
 
     elif constraint_key == 'less_than':
-        constraint = coerce(constraint_clause.less_than)
-
-        def less_than(node_type):
+        def less_than(node_type, container):
+            constraint = coerce(constraint_clause.less_than, container)
             value = get_value(node_type)
             return value < constraint
         
         return less_than
 
     elif constraint_key == 'less_or_equal':
-        constraint = coerce(constraint_clause.less_or_equal)
-
-        def less_or_equal(node_type):
+        def less_or_equal(node_type, container):
+            constraint = coerce(constraint_clause.less_or_equal, container)
             value = get_value(node_type)
             return value <= constraint
         
         return less_or_equal
 
     elif constraint_key == 'in_range':
-        lower, upper = constraint_clause.in_range
-        lower, upper = coerce(lower), coerce(upper)
-
-        def in_range(node_type):
+        def in_range(node_type, container):
+            lower, upper = constraint_clause.in_range
+            lower, upper = coerce(lower, container), coerce(upper, container)
             value = get_value(node_type)
             if value < lower:
                 return False
@@ -267,45 +291,40 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
         return in_range
 
     elif constraint_key == 'valid_values':
-        constraint = tuple(coerce(v) for v in constraint_clause.valid_values)
-
-        def valid_values(node_type):
+        def valid_values(node_type, container):
+            constraint = tuple(coerce(v, container) for v in constraint_clause.valid_values)
             value = get_value(node_type)
             return value in constraint
 
         return valid_values
 
     elif constraint_key == 'length':
-        constraint = constraint_clause.length
-
-        def length(node_type):
+        def length(node_type, container):
+            constraint = constraint_clause.length
             value = get_value(node_type)
             return len(value) == constraint
 
         return length
 
     elif constraint_key == 'min_length':
-        constraint = constraint_clause.min_length
-
-        def min_length(node_type):
+        def min_length(node_type, container):
+            constraint = constraint_clause.min_length
             value = get_value(node_type)
             return len(value) >= constraint
 
         return min_length
 
     elif constraint_key == 'max_length':
-        constraint = constraint_clause.max_length
-
-        def max_length(node_type):
+        def max_length(node_type, container):
+            constraint = constraint_clause.max_length
             value = get_value(node_type)
             return len(value) >= constraint
 
         return max_length
 
     elif constraint_key == 'pattern':
-        constraint = constraint_clause.pattern
-
-        def pattern(node_type):
+        def pattern(node_type, container):
+            constraint = constraint_clause.pattern
             # Note: the TOSCA 1.0 spec does not specify the regular expression grammar, so we will just use Python's
             value = node_type.properties.get(property_name)
             return re.match(constraint, str(value)) is not None

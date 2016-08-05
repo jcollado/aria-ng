@@ -1,8 +1,8 @@
 
-from .properties import convert_property_definitions_to_values, validate_required_values
+from .properties import convert_property_definitions_to_values, validate_required_values, coerce_property_value
 from .interfaces import convert_requirement_interface_definitions_from_type_to_raw_template, merge_interface_definitions, merge_interface, validate_required_inputs
 from aria import Issue
-from aria.utils import merge, deepclone
+from aria.utils import deepclone
 from collections import OrderedDict
 
 #
@@ -80,7 +80,7 @@ def get_template_requirements(context, presentation):
             if allowed_occurrences is None:
                 # If not specified, we interpret this to mean that exactly 1 occurrence is required
                 if actual_occurrences == 0:
-                    # If it's not there, We will automatically add it
+                    # If it's not there, we will automatically add it (this behavior is not in the TOSCA spec, but seems implied)
                     requirement_assignment, relationship_property_definitions, relationship_interface_definitions = convert_requirement_from_definition_to_assignment(context, requirement_definition, None, presentation)
                     validate_requirement_assignment(context, presentation, requirement_assignment, relationship_property_definitions, relationship_interface_definitions)
                     requirement_assignments.append((requirement_name, requirement_assignment))
@@ -209,7 +209,12 @@ def merge_requirement_assignment_relationship(context, presentation, property_de
             requirement._raw['relationship']['properties'] = OrderedDict()
         
         # Merge our properties
-        merge(requirement._raw['relationship']['properties'], deepclone(our_relationship_properties))
+        for property_name, prop in our_relationship_properties.iteritems():
+            if property_name in property_definitions:
+                definition = property_definitions[property_name]
+                requirement._raw['relationship']['properties'][property_name] = coerce_property_value(context, presentation, definition, prop)
+            else:
+                context.validation.report('relationship property "%s" not declared at definition of requirement "%s" in "%s"' % (property_name, presentation._fullname, presentation._container._container._fullname), locator=our_relationship._get_grandchild_locator('properties', property_name), level=Issue.BETWEEN_TYPES)
 
     our_interfaces = our_relationship.interfaces
     if our_interfaces:
@@ -222,7 +227,7 @@ def merge_requirement_assignment_relationship(context, presentation, property_de
             if interface_name not in requirement._raw['relationship']['interfaces']:
                 requirement._raw['relationship']['interfaces'][interface_name] = OrderedDict()
             
-            if interface_name in interface_definitions:
+            if (interface_definitions is not None) and (interface_name in interface_definitions):
                 interface_definition = interface_definitions[interface_name]
                 interface_assignment = requirement.relationship.interfaces[interface_name]
                 merge_interface(context, presentation, interface_assignment, our_interface, interface_definition, interface_name)

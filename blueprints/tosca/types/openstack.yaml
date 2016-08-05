@@ -60,6 +60,14 @@ node_types:
           capability: tosca.capabilities.Attachment
           node: openstack.Volume
           relationship: tosca.relationships.AttachesTo
+#          relationship:
+#            type: tosca.relationships.AttachesTo
+#            interfaces:
+#              standard:
+#                inputs:
+#                  xxx:
+#                    type: string
+#                    default: { concat: [ a, b ] }
           occurrences: [ 0, UNBOUNDED ]
 
   openstack.Volume:

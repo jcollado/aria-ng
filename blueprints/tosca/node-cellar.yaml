@@ -17,9 +17,9 @@ imports:
 
 dsl_definitions:
 
-  openstack_credential: &OPENSTACK_CREDENTIAL
+  default_openstack_credential: &DEFAULT_OPENSTACK_CREDENTIAL
     user: openstackadmin
-    token: openstack123
+    token: { concat: [ openstack, 123 ] }
 
 repositories:
 
@@ -42,9 +42,7 @@ topology_template:
   inputs:
     openstack_credential:
       type: openstack.Credential
-      value:
-        user: openstackadmin
-        token: openstack123
+      value: *DEFAULT_OPENSTACK_CREDENTIAL
 
   node_templates:
   
@@ -94,6 +92,7 @@ topology_template:
         - host: application_host
       node_filter: # cannot be validated
         properties:
+          #- flavor_name: { valid_values: [ {concat:[m1,.,small]} ] } # won't work because not validated :/
           - flavor_name: { valid_values: [ m1.small ] }
         capabilities:
           - scalable:
@@ -109,7 +108,8 @@ topology_template:
             node: openstack.Instance
             node_filter:
               properties:
-                - flavor_name: { valid_values: [ m1.medium, m1.large ] }
+                - flavor_name: { valid_values: [ m1.medium, { concat: [ { concat: [ m1, . ] }, large ] } ] }
+                #- flavor_name: { valid_values: [ m1.medium, m1.large ] }
               capabilities:
                 - scalable:
                     properties:
@@ -140,7 +140,7 @@ topology_template:
       interfaces:
         standard:
           inputs:
-            openstack_credential: *OPENSTACK_CREDENTIAL
+            openstack_credential: { get_input: openstack_credential }
 
     application_host:
       description: >-
@@ -158,7 +158,7 @@ topology_template:
       interfaces:
         standard:
           inputs:
-            openstack_credential: *OPENSTACK_CREDENTIAL
+            openstack_credential: { get_input: openstack_credential }
       capabilities:
         scalable:
           properties:
@@ -179,13 +179,13 @@ topology_template:
       interfaces:
         standard:
           inputs:
-            openstack_credential: *OPENSTACK_CREDENTIAL
+            openstack_credential: { get_input: openstack_credential }
       requirements:
         - local_storage:
             node: data_volume
             relationship:
               properties:
-                location: /mnt/volume
+                location: { concat: [ /mnt/volume, { get_property: [ SELF, flavor_name ] } ] }
       capabilities:
         scalable:
           properties:
@@ -211,7 +211,7 @@ topology_template:
       interfaces:
         standard:
           inputs:
-            openstack_credential: *OPENSTACK_CREDENTIAL
+            openstack_credential: { get_input: openstack_credential }
 
   policies:
   

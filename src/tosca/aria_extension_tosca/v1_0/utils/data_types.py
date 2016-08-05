@@ -64,8 +64,11 @@ def coerce_data_type_value(context, presentation, data_type, entry_schema, const
 
             # Fill in defaults from the definitions, and check if required definitions have not been assigned
             for name, definition in definitions.iteritems():
-                if (r.get(name) is None) and hasattr(definition, 'default'):
-                    r[name] = definition.default
+                if (r.get(name) is None) and hasattr(definition, 'default') and (definition.default is not None):
+                    definition_type = definition._get_type(context)
+                    definition_entry_schema = definition.entry_schema
+                    definition_constraints = definition._get_constraints(context)
+                    r[name] = coerce_value(context, presentation, definition_type, definition_entry_schema, definition_constraints, definition.default)
     
                 if getattr(definition, 'required', False) and (r.get(name) is None):
                     context.validation.report('required property "%s" in type "%s" is not assigned a value in "%s"' % (name, data_type._fullname, presentation._fullname), locator=presentation._get_child_locator('definitions'), level=Issue.BETWEEN_TYPES)

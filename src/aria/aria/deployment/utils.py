@@ -1,21 +1,32 @@
-from clint.textui import puts
 
-def instantiate_value(context, value):
-    if hasattr(value, 'evaluate'):
-        value = value.evaluate(context)
+from .. import InvalidValueError
+from clint.textui import puts
+from collections import OrderedDict
+
+def instantiate_value(context, container, value):
+    if isinstance(value, list):
+        return [instantiate_value(context, container, v) for v in value]
+    elif isinstance(value, dict):
+        return OrderedDict((k, instantiate_value(context, container, v)) for k, v in value.iteritems())
+    elif hasattr(value, 'evaluate'):
+        value = value.evaluate(context, container)
+        value = instantiate_value(context, container, value)
     return value
 
-def instantiate_properties(context, properties, from_properties):
+def instantiate_properties(context, container, properties, from_properties):
     if not from_properties:
         return
     for property_name, value in from_properties.iteritems():
-        properties[property_name] = instantiate_value(context, value)
+        try:
+            properties[property_name] = instantiate_value(context, container, value)
+        except InvalidValueError as e:
+            context.validation.report(issue=e.issue)
 
-def instantiate_interfaces(context, interfaces, from_interfaces):
+def instantiate_interfaces(context, container, interfaces, from_interfaces):
     if not from_interfaces:
         return
     for interface_name, interface in from_interfaces.iteritems():
-        interfaces[interface_name] = interface.instantiate(context)
+        interfaces[interface_name] = interface.instantiate(context, container)
 
 def dump_properties(context, properties, name='Properties'):
     if not properties:

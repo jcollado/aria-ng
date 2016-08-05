@@ -55,7 +55,7 @@ def get_assigned_and_defined_property_values(context, presentation):
             if (definitions is not None) and (name in definitions):
                 definition = definitions[name]
                 if value.value is not None:
-                    values[name] = coerce_property_value(context, value, definition)
+                    values[name] = coerce_property_value(context, value, definition, value.value)
             else:
                 context.validation.report('assignment to undefined property "%s" in "%s"' % (name, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
     
@@ -63,9 +63,28 @@ def get_assigned_and_defined_property_values(context, presentation):
     if definitions is not None:
         for name, definition in definitions.iteritems():
             if (values.get(name) is None) and hasattr(definition, 'default') and (definition.default is not None):
-                values[name] = coerce_default_property_value(context, presentation, definition) 
+                values[name] = coerce_property_value(context, presentation, definition, definition.default) 
 
     validate_required_values(context, presentation, values, definitions)
+    
+    return values
+
+#
+# TopologyTemplate
+#
+
+def get_parameter_values(context, presentation):
+    values = OrderedDict()
+    
+    inputs = presentation.inputs
+
+    # Fill in defaults and values
+    for name, definition in inputs.iteritems():
+        if (values.get(name) is None):
+            if hasattr(definition, 'value') and (definition.value is not None):
+                values[name] = coerce_property_value(context, presentation, definition, definition.value) # for parameters only 
+            elif hasattr(definition, 'default') and (definition.default is not None):
+                values[name] = coerce_property_value(context, presentation, definition, definition.default)
     
     return values
 
@@ -114,17 +133,11 @@ def merge_property_definitions(context, presentation, property_definitions, our_
         else:
             property_definitions[property_name] = our_property_definition._clone()
 
-def coerce_property_value(context, value, definition): # works on both properties and inputs
+def coerce_property_value(context, presentation, definition, default_value): # works on properties, inputs, and parameters
     the_type = definition._get_type(context) if definition is not None else None
     entry_schema = definition.entry_schema if definition is not None else None
     constraints = definition._get_constraints(context) if definition is not None else None
-    return coerce_value(context, value, the_type, entry_schema, constraints, value.value)
-
-def coerce_default_property_value(context, presentation, definition): # works on both properties and inputs
-    the_type = definition._get_type(context) if definition is not None else None
-    entry_schema = definition.entry_schema if definition is not None else None
-    constraints = definition._get_constraints(context) if definition is not None else None
-    return coerce_value(context, presentation, the_type, entry_schema, constraints, definition.default)
+    return coerce_value(context, presentation, the_type, entry_schema, constraints, default_value)
 
 def convert_property_definitions_to_values(definitions):
     values = OrderedDict()

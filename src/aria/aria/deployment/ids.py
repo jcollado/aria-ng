@@ -10,13 +10,15 @@ def generate_id():
 
 GENERATED_IDS = set()
 
-def generate_id_old():
-    # TODO: a bad way to make sure our IDs are unique (they won't be unique across
-    # multiple running instances of ARIA), but better than nothing
+def generate_classic_id():
     def gen():
         return '%05x' % random.randrange(16 ** 5)
     id = gen()
+    
+    # TODO: a bad way to make sure our IDs are unique (they won't be unique across
+    # multiple running instances of ARIA), but better than nothing
     while id in GENERATED_IDS:
         id = gen()
     GENERATED_IDS.add(id)
+
     return id

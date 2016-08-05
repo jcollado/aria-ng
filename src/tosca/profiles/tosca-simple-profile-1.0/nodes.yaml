@@ -26,18 +26,18 @@ node_types:
           The state of the node instance.
         type: string
         default: initial
+    interfaces:
+      standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+    capabilities:
+      feature:
+        type: tosca.capabilities.Node  
     requirements:
       - dependency:
           capability: tosca.capabilities.Node
           node: tosca.nodes.Root
           relationship: tosca.relationships.DependsOn
           occurrences: [ 0, UNBOUNDED ]
-    capabilities:
-      feature:
-        type: tosca.capabilities.Node  
-    interfaces:
-      standard:
-        type: tosca.interfaces.node.lifecycle.Standard
   
   tosca.nodes.Compute:
     _extensions:
@@ -72,12 +72,6 @@ node_types:
         type: map
         entry_schema:
           type: tosca.datatypes.network.PortInfo
-    requirements:
-      - local_storage:
-          capability: tosca.capabilities.Attachment
-          node: tosca.nodes.BlockStorage
-          relationship: tosca.relationships.AttachesTo
-          occurrences: [ 0, UNBOUNDED ]
     capabilities:
       host:
          type: tosca.capabilities.Container
@@ -88,6 +82,12 @@ node_types:
          type: tosca.capabilities.OperatingSystem
       scalable:
          type: tosca.capabilities.Scalable
+    requirements:
+      - local_storage:
+          capability: tosca.capabilities.Attachment
+          node: tosca.nodes.BlockStorage
+          relationship: tosca.relationships.AttachesTo
+          occurrences: [ 0, UNBOUNDED ]
 
   tosca.nodes.LoadBalancer:
     _extensions:
@@ -107,17 +107,17 @@ node_types:
         type: string
         required: false
         status: experimental
-    requirements:
-      - application:
-          capability: tosca.capabilities.Endpoint
-          relationship: tosca.relationships.RoutesTo
-          occurrences: [ 0, UNBOUNDED ]
     capabilities:
       client:
         description: >-
           The Floating (IP) client's on the public network can connect to.
         type: tosca.capabilities.Endpoint.Public
         occurrences: [ 0, UNBOUNDED ]
+    requirements:
+      - application:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.RoutesTo
+          occurrences: [ 0, UNBOUNDED ]
   
   #
   # Software
@@ -188,14 +188,14 @@ node_types:
           The web application's context root which designates the application's URL path within the web server it is hosted on.
         type: string
         required: false
+    capabilities:
+      app_endpoint:
+        type: tosca.capabilities.Endpoint
     requirements:
       - host:
           capability: tosca.capabilities.Container
           node: tosca.nodes.WebServer
           relationship: tosca.relationships.HostedOn
-    capabilities:
-      app_endpoint:
-        type: tosca.capabilities.Endpoint
   
   tosca.nodes.DBMS:
     _extensions:
@@ -253,14 +253,14 @@ node_types:
           The password associated with the user account provided in the 'user' property.
         type: string
         required: false
+    capabilities:
+      database_endpoint:
+        type: tosca.capabilities.Endpoint.Database
     requirements:
       - host:
           capability: tosca.capabilities.Container
           node: tosca.nodes.DBMS
           relationship: tosca.relationships.HostedOn
-    capabilities:
-      database_endpoint:
-        type: tosca.capabilities.Endpoint.Database
   
   #
   # Container

@@ -26,8 +26,6 @@ node_types:
           url_path:
             type: string
             default: /
-          fish:
-            type: string
       admin_endpoint: # @override
         type: tosca.capabilities.Endpoint.Admin
         properties:
@@ -43,11 +41,6 @@ node_types:
 
   nodejs.Application:
     derived_from: tosca.nodes.WebApplication
-    requirements:
-      - host: # @override
-          capability: tosca.capabilities.Container
-          node: nodejs.Server
-          relationship: tosca.relationships.HostedOn
     capabilities:
       app_endpoint: # @override
         type: tosca.capabilities.Endpoint
@@ -55,3 +48,8 @@ node_types:
           port:
             type: tosca.datatypes.network.PortDef
             default: 8080
+    requirements:
+      - host: # @override
+          capability: tosca.capabilities.Container
+          node: nodejs.Server
+          relationship: tosca.relationships.HostedOn

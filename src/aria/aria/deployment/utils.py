@@ -1,5 +1,22 @@
 from clint.textui import puts
 
+def instantiate_value(context, value):
+    if hasattr(value, 'evaluate'):
+        value = value.evaluate(context)
+    return value
+
+def instantiate_properties(context, properties, from_properties):
+    if not from_properties:
+        return
+    for property_name, value in from_properties.iteritems():
+        properties[property_name] = instantiate_value(context, value)
+
+def instantiate_interfaces(context, interfaces, from_interfaces):
+    if not from_interfaces:
+        return
+    for interface_name, interface in from_interfaces.iteritems():
+        interfaces[interface_name] = interface.instantiate(context)
+
 def dump_properties(context, properties, name='Properties'):
     if not properties:
         return

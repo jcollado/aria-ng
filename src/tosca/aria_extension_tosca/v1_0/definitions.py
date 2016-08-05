@@ -1,8 +1,6 @@
 
 from .presentation import ToscaPresentation
-from .property_assignment import PropertyAssignment
-from .description import Description
-from .misc import ConstraintClause
+from .misc import Description, PropertyAssignment, ConstraintClause
 from .data_types import Range
 from .field_getters import data_type_class_getter
 from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator

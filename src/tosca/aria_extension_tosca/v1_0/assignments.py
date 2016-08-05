@@ -2,7 +2,7 @@
 from .presentation import ToscaPresentation
 from .filters import NodeFilter
 from .definitions import InterfaceDefinitionForTemplate
-from .property_assignment import PropertyAssignment
+from .misc import PropertyAssignment
 from .field_validators import node_template_or_type_validator, relationship_template_or_type_validator, capability_definition_or_type_validator, node_filter_validator
 from aria import dsl_specification
 from aria.utils import cachedmethod

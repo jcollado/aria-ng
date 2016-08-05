@@ -2,6 +2,7 @@
 from .. import Issue
 from ..utils import ReadOnlyList, print_exception
 from ..reading import ReadingContext
+from ..deployment import DeploymentContext
 from .style import Style
 from clint.textui import puts, colored, indent
 import sys
@@ -22,6 +23,10 @@ class ValidationContext(object):
                 return
             
         self._issues.append(issue)
+    
+    @property
+    def has_issues(self):
+        return len(self._issues) > 0
 
     @property
     def issues(self):
@@ -54,3 +59,4 @@ class ConsumptionContext(object):
         self.args = []
         self.validation = ValidationContext()
         self.reading = ReadingContext()
+        self.deployment = DeploymentContext()

@@ -1,8 +1,7 @@
 
 from .presentation import ToscaPresentation
-from .description import Description
 from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition, OperationDefinitionForType
-from .misc import ConstraintClause
+from .misc import Description, ConstraintClause
 from .data_types import Version
 from .field_getters import data_type_class_getter
 from .field_validators import data_type_derived_from_validator, data_type_constraints_validator, data_type_properties_validator, list_node_type_or_group_type_validator
@@ -86,6 +85,15 @@ class ArtifactType(ToscaPresentation):
         super(ArtifactType, self)._validate(context)
         self._get_properties(context)
 
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'version',
+            'derived_from',
+            'mime_type',
+            'file_ext',
+            'properties'))
+
 @has_fields
 @dsl_specification('3.6.5', 'tosca-simple-profile-1.0')
 class DataType(ToscaPresentation):
@@ -167,6 +175,14 @@ class DataType(ToscaPresentation):
     def _coerce_value(self, context, presentation, entry_schema, constraints, value, aspect):
         return coerce_data_type_value(context, presentation, self, entry_schema, constraints, value, aspect)
 
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'version',
+            'derived_from',
+            'constraints',
+            'properties'))
+
 @has_fields
 @dsl_specification('3.6.6', 'tosca-simple-profile-1.0')
 class CapabilityType(ToscaPresentation):
@@ -243,6 +259,15 @@ class CapabilityType(ToscaPresentation):
         super(CapabilityType, self)._validate(context)
         self._get_properties(context)
 
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'version',
+            'derived_from',
+            'valid_source_types',
+            'properties',
+            'attributes'))
+
 @allow_unknown_fields
 @has_fields
 @dsl_specification('3.6.4', 'tosca-simple-profile-1.0')
@@ -307,6 +332,14 @@ class InterfaceType(ToscaPresentation):
         self._get_inputs(context)
         for operation in self.operations.itervalues():
             operation._validate(context)
+
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'version',
+            'derived_from',
+            'inputs',
+            'operations'))
 
 @has_fields
 @dsl_specification('3.6.9', 'tosca-simple-profile-1.0')
@@ -396,6 +429,16 @@ class RelationshipType(ToscaPresentation):
         self._get_properties(context)
         self._get_attributes(context)
         self._get_interfaces(context)
+
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'version',
+            'derived_from',
+            'valid_target_types',
+            'properties',
+            'attributes',
+            'interfaces'))
 
 @has_fields
 @dsl_specification('3.6.8', 'tosca-simple-profile-1.0')
@@ -515,6 +558,18 @@ class NodeType(ToscaPresentation):
         self._get_capabilities(context)
         self._get_interfaces(context)
 
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'version',
+            'derived_from',
+            'properties',
+            'attributes',
+            'interfaces',
+            'artifacts',
+            'requirements',
+            'capabilities'))
+
 @has_fields
 @dsl_specification('3.6.10', 'tosca-simple-profile-1.0')
 class GroupType(ToscaPresentation):
@@ -595,6 +650,15 @@ class GroupType(ToscaPresentation):
         self._get_properties(context)
         self._get_interfaces(context)
 
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'version',
+            'derived_from',
+            'members',
+            'properties',
+            'interfaces'))
+
 @has_fields
 @dsl_specification('3.6.11', 'tosca-simple-profile-1.0')
 class PolicyType(ToscaPresentation):
@@ -659,3 +723,11 @@ class PolicyType(ToscaPresentation):
     def _validate(self, context):
         super(PolicyType, self)._validate(context)
         self._get_properties(context)
+
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'version',
+            'derived_from',
+            'targets',
+            'properties'))

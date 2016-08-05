@@ -32,6 +32,8 @@ def main():
             exit(0)
 
         consumer_class(context).consume()
+        
+        context.validation.dump_issues()
     except Exception as e:
         print_exception(e)
 

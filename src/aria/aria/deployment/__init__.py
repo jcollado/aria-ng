@@ -1,18 +1,25 @@
 
-from .templates import *
-from .plan import Plan
-from .ids import *
+from .context import *
+from .plan import *
 from .classic_plan import *
+from .templates import *
+from .elements import *
+from .hierarchy import *
+from .ids import *
 
 __all__ = (
+    'DeploymentContext',
+    'DeploymentPlan',
+    'ClassicDeploymentPlan',
     'DeploymentTemplate',
     'NodeTemplate',
+    'Element',
     'Interface',
     'Operation',
     'Requirement',
     'Relationship',
     'Capability',
-    'Plan',
     'Function',
-    'generate_id',
-    'DeploymentPlan')
+    'TypeHierarchy',
+    'Type',
+    'generate_id')

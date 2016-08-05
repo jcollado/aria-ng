@@ -1,7 +1,6 @@
 
 from .presenter import *
-from .presentation import ToscaPresentation
-from .property_assignment import *
+from .presentation import *
 from .assignments import *
 from .definitions import *
 from .filters import *

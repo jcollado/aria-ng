@@ -7,12 +7,13 @@ class Template(Consumer):
     """
 
     def consume(self):
-        deployment_template = self.deployment_template
-        if deployment_template is not None:
-            deployment_template.dump(self.context)
+        self.create_deployment_template()
+        if not self.context.validation.has_issues:
+            self.context.deployment.dump_types(self.context)
+            self.context.deployment.template.dump(self.context)
     
-    @property
-    def deployment_template(self):
-        deployment_template = self.context.presentation._get_deployment_template(self.context)
-        deployment_template.link(self.context)
-        return deployment_template if not self.context.validation.issues else None
+    def create_deployment_template(self):
+        if hasattr(self.context.presentation, '_get_deployment_template'):
+            self.context.deployment.template = self.context.presentation._get_deployment_template(self.context)
+            if self.context.deployment.template is not None:
+                self.context.deployment.template.validate(self.context)

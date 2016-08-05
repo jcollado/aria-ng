@@ -1,13 +1,13 @@
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, Interface, Operation, Requirement, Relationship, Capability
+from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, Interface, Operation, Requirement, Capability
 from .data_types import coerce_value
 import re
 
 def get_deployment_template(context, presenter):
     r = DeploymentTemplate()
 
-    normalize_types(context, r.node_types, presenter.node_types)
-    normalize_types(context, r.capability_types, presenter.capability_types)
+    normalize_types(context, context.deployment.node_types, presenter.node_types)
+    normalize_types(context, context.deployment.capability_types, presenter.capability_types)
     
     topology_template = presenter.service_template.topology_template
     if topology_template is not None:
@@ -107,33 +107,33 @@ def normalize_requirement(context, requirement):
     node, node_variant = requirement._get_node(context)
     if node is not None:
         if node_variant == 'node_type':
-            r['node_type_name'] = node._name
+            r['target_node_type_name'] = node._name
         else:
-            r['node_template_name'] = node._name
+            r['target_node_template_name'] = node._name
 
     capability, capability_variant = requirement._get_capability(context)
     if capability is not None:
         if capability_variant == 'capability_type':
-            r['capability_type_name'] = capability._name
+            r['target_capability_type_name'] = capability._name
         else:
-            r['capability_name'] = capability._name
+            r['target_capability_name'] = capability._name
 
     r = Requirement(**r)
 
-    normalize_node_filter(context, requirement.node_filter, r.node_type_constraints)
+    normalize_node_filter(context, requirement.node_filter, r.target_node_type_constraints)
 
     relationship = requirement.relationship
     if relationship is not None:
-        r.relationship = normalize_relationship(context, relationship)
+        r.relationship_template = normalize_relationship(context, relationship)
         
     return r
 
 def normalize_relationship(context, relationship):
     relationship_type, relationship_type_variant = relationship._get_type(context)
     if relationship_type_variant == 'relationship_type':
-        r = Relationship(type_name=relationship_type._name)
+        r = RelationshipTemplate(type_name=relationship_type._name)
     else:
-        r = Relationship(template_name=relationship_type._name)
+        r = RelationshipTemplate(template_name=relationship_type._name)
 
     properties = relationship.properties
     if properties:

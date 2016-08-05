@@ -21,7 +21,6 @@ class ToscaSimplePresenter1_0(Presenter):
 
     def _validate(self, context):
         self.service_template._validate(context)
-        self._get_deployment_template(context).validate(context)
 
     # Presenter
 

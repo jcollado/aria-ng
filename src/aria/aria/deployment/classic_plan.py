@@ -1,7 +1,7 @@
 
 from .ids import generate_id
 
-class DeploymentPlan(object):
+class ClassicDeploymentPlan(object):
     """
     
     """

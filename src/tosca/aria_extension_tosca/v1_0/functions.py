@@ -56,6 +56,12 @@ class GetInput(Function):
             inputs = context.presentation.inputs
             if (inputs is None) or (self.input_property_name not in inputs):
                 raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument))
+    
+    def evaluate(self, context):
+        input_definition = context.presentation.inputs.get(self.input_property_name)
+        if input_definition is not None:
+            return input_definition.value
+        return None
 
 @dsl_specification('4.4.2', 'tosca-simple-profile-1.0')
 class GetProperty(Function):

@@ -231,6 +231,9 @@ def merge_requirement_assignment_relationship(context, presentation, property_de
 
 def validate_requirement_assignment(context, presentation, requirement_assignment, relationship_property_definitions, relationship_interface_definitions):
     relationship = requirement_assignment.relationship
+    if relationship is None:
+        return
+
     validate_required_values(context, presentation, relationship.properties, relationship_property_definitions)
     
     if relationship_interface_definitions:

@@ -1,10 +1,8 @@
 
 from .presentation import ToscaPresentation
-from .description import Description
-from .misc import MetaData, Repository, Import
+from .misc import Description, PropertyAssignment, MetaData, Repository, Import
 from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinitionForTemplate, ArtifactDefinition
 from .assignments import AttributeAssignment, RequirementAssignment, CapabilityAssignment
-from .property_assignment import PropertyAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
 from .utils.properties import get_assigned_and_defined_property_values, get_inherited_property_definitions

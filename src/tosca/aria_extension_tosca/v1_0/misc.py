@@ -1,12 +1,29 @@
 
 from .presentation import ToscaPresentation
-from .description import Description
 from .field_getters import data_type_getter
 from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
 from .utils.data_types import apply_constraint_to_value
 from aria import dsl_specification
 from aria.utils import cachedmethod
-from aria.presentation import has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator
+from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator
+from clint.textui import puts
+
+@dsl_specification('3.5.1', 'tosca-simple-profile-1.0')
+class Description(AsIsPresentation):
+    """
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
+    """
+
+    def _dump(self, context):
+        puts(context.style.meta(self.value))
+
+@dsl_specification('3.5.9', 'tosca-simple-profile-1.0')
+class PropertyAssignment(AsIsPresentation):
+    """
+    This section defines the grammar for assigning values to named properties within TOSCA Node and Relationship templates that are defined in their corresponding named types.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_VALUE_ASSIGNMENT>`__
+    """
 
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')

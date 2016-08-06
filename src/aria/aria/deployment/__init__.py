@@ -17,6 +17,7 @@ __all__ = (
     'ClassicDeploymentPlan',
     'DeploymentTemplate',
     'NodeTemplate',
+    'Requirement',
     'CapabilityTemplate',
     'RelationshipTemplate',
     'GroupTemplate',
@@ -25,7 +26,6 @@ __all__ = (
     'Function',
     'Interface',
     'Operation',
-    'Requirement',
     'TypeHierarchy',
     'Type',
     'generate_id')

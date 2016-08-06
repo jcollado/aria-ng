@@ -3,6 +3,7 @@ from __future__ import absolute_import # so we can import standard 'collections'
 
 from collections import OrderedDict
 from copy import deepcopy
+import json
 
 class ReadOnlyList(list):
     """
@@ -153,6 +154,16 @@ class StrictDict(OrderedDict):
             value = self.wrapper_fn(value)
         return super(StrictDict, self).__setitem__(key, value)
 
+class JSONValueEncoder(json.JSONEncoder):
+    def default(self, o):
+        try:
+            return iter(o)
+        except TypeError:
+            if hasattr(o, 'value'):
+                return o.value
+            return str(o)
+        return json.JSONEncoder.default(self, o)
+
 def merge(a, b, path=[], strict=False):
     """
     Merges dicts, recursively.
@@ -223,3 +234,25 @@ def make_agnostic(value):
             value[i] = make_agnostic(value[i])
             
     return value
+
+def is_removable(v):
+    return (v is None) or ((isinstance(v, dict) or isinstance(v, list)) and (len(v) == 0))
+
+def prune(value, is_removable=is_removable):
+    """
+    Deletes nulls and empty lists and dicts, recursively.
+    """
+    
+    if isinstance(value, dict):
+        for k, v in value.iteritems():
+            if is_removable(v):
+                del value[k]
+            else:
+                prune(v)
+    elif isinstance(value, list):
+        for i in range(len(value)):
+            v = value[i]
+            if is_removable(v):
+                del value[i]
+            else:
+                prune(v)

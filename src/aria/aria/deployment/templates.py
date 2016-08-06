@@ -1,5 +1,5 @@
 
-from .elements import Template, Interface, Requirement
+from .elements import Element, Template, Interface
 from .utils import instantiate_properties, instantiate_interfaces, dump_properties, dump_interfaces
 from .plan import DeploymentPlan, Node, Capability, Relationship, Group
 from .. import Issue
@@ -12,6 +12,8 @@ class DeploymentTemplate(Template):
         self.node_templates = StrictDict(str, NodeTemplate)
         self.group_templates = StrictDict(str, GroupTemplate)
         self.policies = StrictDict(str) # TODO
+        self.inputs = StrictDict(str)
+        self.outputs = StrictDict(str)
 
     def instantiate(self, context, container):
         r = DeploymentPlan()
@@ -22,6 +24,8 @@ class DeploymentTemplate(Template):
         for group_template in self.group_templates.itervalues():
             group = group_template.instantiate(context, container)
             r.groups[group.name] = group
+        instantiate_properties(context, self, r.inputs, self.inputs)
+        instantiate_properties(context, self, r.outputs, self.outputs)
         return r
 
     def validate(self, context):
@@ -39,6 +43,8 @@ class DeploymentTemplate(Template):
             group_template.dump(context)
         for policy in self.policies.itervalues():
             policy.dump(context)
+        dump_properties(context, self.inputs, 'Inputs')
+        dump_properties(context, self.outputs, 'Outputs')
 
 class NodeTemplate(Template):
     def __init__(self, name, type_name):
@@ -84,9 +90,8 @@ class NodeTemplate(Template):
         puts('Node template: %s' % context.style.node(self.name))
         with context.style.indent:
             puts('Type: %s' % context.style.type(self.type_name))
-        dump_properties(context, self.properties)
-        dump_interfaces(context, self.interfaces)
-        with context.style.indent:
+            dump_properties(context, self.properties)
+            dump_interfaces(context, self.interfaces)
             if self.capabilities:
                 puts('Capabilities:')
                 with context.style.indent:
@@ -97,6 +102,91 @@ class NodeTemplate(Template):
                 with context.style.indent:
                     for requirement in self.requirements:
                         requirement.dump(context)
+
+class Requirement(Element):
+    def __init__(self, name, target_node_type_name=None, target_node_template_name=None, target_capability_type_name=None, target_capability_name=None):
+        if not isinstance(name, basestring):
+            raise ValueError('must set name (string)')
+        if target_node_type_name and not isinstance(target_node_type_name, basestring):
+            raise ValueError('target_node_type_name must be string')
+        if target_node_template_name and not isinstance(target_node_template_name, basestring):
+            raise ValueError('target_node_template_name must be string')
+        if target_capability_type_name and not isinstance(target_capability_type_name, basestring):
+            raise ValueError('target_capability_type_name must be string')
+        if target_capability_name and not isinstance(target_capability_name, basestring):
+            raise ValueError('target_capability_name must be string')
+        if (target_node_type_name and target_node_template_name) or ((not target_node_type_name) and (not target_node_template_name)):
+            raise ValueError('must set either target_node_type_name or target_node_template_name')
+        if target_capability_type_name and target_capability_name:
+            raise ValueError('can set either target_capability_type_name or target_capability_name')
+        
+        self.name = name
+        self.target_node_type_name = target_node_type_name
+        self.target_node_template_name = target_node_template_name
+        self.target_node_type_constraints = StrictList(FunctionType)
+        self.target_capability_type_name = target_capability_type_name
+        self.target_capability_name = target_capability_name
+        self.relationship_template = None # optional
+
+    def find_target(self, context, source_node_template):
+        # We might already have a specific node template, so we'll just verify it
+        if self.target_node_template_name:
+            target_node_template = context.deployment.template.node_templates.get(self.target_node_template_name)
+            
+            if not source_node_template.is_target_node_valid(target_node_template):
+                context.validation.report('requirement "%s" of node template "%s" is for node template "%s" but it does not match constraints' % (self.name, self.target_node_template_name, source_node_template.name), level=Issue.BETWEEN_TYPES)
+                return None, None
+            
+            target_capability = self.find_target_capability(context, source_node_template, target_node_template)
+            if target_capability is None:
+                return None, None
+            
+            return target_node_template, target_capability
+
+        # Find first node that matches the type
+        elif self.target_node_type_name is not None:
+            for target_node_template in context.deployment.template.node_templates.itervalues():
+                if not context.deployment.node_types.is_descendant(self.target_node_type_name, target_node_template.type_name):
+                    continue
+                
+                if not source_node_template.is_target_node_valid(target_node_template):
+                    continue
+    
+                target_capability = self.find_target_capability(context, source_node_template, target_node_template)
+                if target_capability is None:
+                    continue
+                
+                return target_node_template, target_capability
+        
+        return None, None
+
+    def find_target_capability(self, context, source_node_template, target_node_template):
+        for capability in target_node_template.capabilities.itervalues():
+            if capability.satisfies_requirement(context, source_node_template, self, target_node_template):
+                return capability
+        return None
+
+    def validate(self, context):
+        if (self.target_node_type_name) and (context.deployment.node_types.get_descendant(self.target_node_type_name) is None):
+            context.validation.report('requirement "%s" refers to an unknown node type: %s' % (self.name, repr(self.target_node_type_name)), level=Issue.BETWEEN_TYPES)        
+        if (self.target_capability_type_name) and (context.deployment.capability_types.get_descendant(self.target_capability_type_name) is None):
+            context.validation.report('requirement "%s" refers to an unknown capability type: %s' % (self.name, repr(self.target_capability_type_name)), level=Issue.BETWEEN_TYPES)        
+        if self.relationship_template:
+            self.relationship_template.validate(context)
+
+    def dump(self, context):
+        puts(context.style.node(self.name))
+        with context.style.indent:
+            if self.target_node_type_name is not None:
+                puts('Target node type: %s' % context.style.type(self.target_node_type_name))
+            elif self.target_node_template_name is not None:
+                puts('Target node template: %s' % context.style.node(self.target_node_template_name))
+            if self.target_capability_type_name is not None:
+                puts('Target capability type: %s' % context.style.type(self.target_capability_type_name))
+            elif self.target_capability_name is not None:
+                puts('Target capability name: %s' % context.style.node(self.target_capability_name))
+            if self.relationship_template:
+                self.relationship_template.dump(context)
 
 class CapabilityTemplate(Template):
     def __init__(self, name, type_name):
@@ -149,7 +239,7 @@ class CapabilityTemplate(Template):
             puts('Occurrences: %s%s' % (self.min_occurrences or 0, (' to %d' % self.max_occurrences) if self.max_occurrences is not None else ' or more'))
             if self.valid_source_node_type_names:
                 puts('Valid source node types: %s' % ', '.join((str(context.style.type(v)) for v in self.valid_source_node_type_names)))
-        dump_properties(context, self.properties)
+            dump_properties(context, self.properties)
 
 class RelationshipTemplate(Template):
     def __init__(self, type_name=None, template_name=None):
@@ -180,8 +270,9 @@ class RelationshipTemplate(Template):
             puts('Relationship type: %s' % context.style.type(self.type_name))
         else:
             puts('Relationship template: %s' % context.style.node(self.template_name))
-        dump_properties(context, self.properties)
-        dump_interfaces(context, self.interfaces)
+        with context.style.indent:
+            dump_properties(context, self.properties)
+            dump_interfaces(context, self.interfaces)
 
 class GroupTemplate(Template):
     def __init__(self, name, type_name):
@@ -210,8 +301,7 @@ class GroupTemplate(Template):
         puts('Group template: %s' % context.style.node(self.name))
         with context.style.indent:
             puts('Type: %s' % context.style.type(self.type_name))
-        dump_properties(context, self.properties)
-        dump_interfaces(context, self.interfaces)
-        with context.style.indent:
+            dump_properties(context, self.properties)
+            dump_interfaces(context, self.interfaces)
             if self.member_node_template_names:
                 puts('Member node templates: %s' % ', '.join((str(context.style.node(v)) for v in self.member_node_template_names)))

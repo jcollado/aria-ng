@@ -11,6 +11,9 @@ def get_deployment_template(context, presenter):
     
     topology_template = presenter.service_template.topology_template
     if topology_template is not None:
+        normalize_property_values(r.inputs, topology_template._get_input_values(context))
+        normalize_properties(r.outputs, topology_template.outputs)
+
         node_templates = topology_template.node_templates
         if node_templates:
             for node_template_name, node_template in node_templates.iteritems():
@@ -48,17 +51,8 @@ def normalize_node_template(context, node_template):
     the_type = node_template._get_type(context)
     r = NodeTemplate(name=node_template._name, type_name=the_type._name)
 
-    properties = node_template._get_property_values(context)
-    if properties:
-        for property_name, prop in properties.iteritems():
-            r.properties[property_name] = prop
-
-    interfaces = node_template._get_interfaces(context)
-    if interfaces:
-        for interface_name, interface in interfaces.iteritems():
-            interface = normalize_interface(context, interface)
-            if interface is not None:
-                r.interfaces[interface_name] = interface
+    normalize_property_values(r.properties, node_template._get_property_values(context))
+    normalize_interfaces(context, r.interfaces, node_template._get_interfaces(context))
 
     requirements = node_template._get_requirements(context)
     if requirements:
@@ -141,17 +135,8 @@ def normalize_relationship(context, relationship):
     else:
         r = RelationshipTemplate(template_name=relationship_type._name)
 
-    properties = relationship.properties
-    if properties:
-        for property_name, prop in properties.iteritems():
-            r.properties[property_name] = prop.value
-
-    interfaces = relationship.interfaces
-    if interfaces:
-        for interface_name, interface in interfaces.iteritems():
-            interface = normalize_interface(context, interface)
-            if interface is not None:
-                r.interfaces[interface_name] = interface
+    normalize_properties(r.properties, relationship.properties)
+    normalize_interfaces(context, r.interfaces, relationship.interfaces)
     
     return r
 
@@ -170,10 +155,7 @@ def normalize_capability(context, capability):
     if valid_source_types:
         r.valid_source_node_type_names = valid_source_types
 
-    properties = capability.properties
-    if properties:
-        for property_name, prop in properties.iteritems():
-            r.properties[property_name] = prop.value
+    normalize_properties(r.properties, capability.properties)
     
     return r
 
@@ -181,17 +163,8 @@ def normalize_group(context, group):
     group_type = group._get_type(context)
     r = GroupTemplate(name=group._name, type_name=group_type._name)
 
-    properties = group._get_property_values(context)
-    if properties:
-        for property_name, prop in properties.iteritems():
-            r.properties[property_name] = prop.value
-
-    interfaces = group._get_interfaces(context)
-    if interfaces:
-        for interface_name, interface in interfaces.iteritems():
-            interface = normalize_interface(context, interface)
-            if interface is not None:
-                r.interfaces[interface_name] = interface
+    normalize_property_values(r.properties, group._get_property_values(context))
+    normalize_interfaces(context, r.interfaces, group._get_interfaces(context))
     
     members = group.members
     if members:
@@ -199,6 +172,27 @@ def normalize_group(context, group):
             r.member_node_template_names.append(member)
     
     return r
+
+#
+# Utils
+#
+
+def normalize_property_values(properties, source_properties):
+    if source_properties:
+        for property_name, prop in source_properties.iteritems():
+            properties[property_name] = prop
+
+def normalize_properties(properties, source_properties):
+    if source_properties:
+        for property_name, prop in source_properties.iteritems():
+            properties[property_name] = prop.value
+
+def normalize_interfaces(context, interfaces, source_interfaces):
+    if source_interfaces:
+        for interface_name, interface in source_interfaces.iteritems():
+            interface = normalize_interface(context, interface)
+            if interface is not None:
+                interfaces[interface_name] = interface
 
 def normalize_node_filter(context, node_filter, node_type_constraints):
     if node_filter is None:

@@ -4,12 +4,15 @@ from .ids import generate_id
 from .utils import dump_properties, dump_interfaces
 from .. import Issue
 from ..utils import StrictList, StrictDict, ReadOnlyList
+from collections import OrderedDict
 from clint.textui import puts, indent
 
 class DeploymentPlan(Element):
     def __init__(self):
         self.nodes = StrictDict(str, Node) 
         self.groups = StrictDict(str, Group) 
+        self.inputs = StrictDict(str)
+        self.outputs = StrictDict(str)
 
     def satisfy_requirements(self, context):
         satisfied = True
@@ -54,11 +57,21 @@ class DeploymentPlan(Element):
         for group in self.groups.itervalues():
             group.validate(context)
 
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('nodes', [v.as_raw for v in self.nodes.itervalues()]),
+            ('groups', [v.as_raw for v in self.groups.itervalues()]),
+            ('inputs', self.inputs),
+            ('outputs', self.outputs)))
+
     def dump(self, context):
         for node in self.nodes.itervalues():
             node.dump(context)
         for group in self.groups.itervalues():
             group.dump(context)
+        dump_properties(context, self.inputs, 'Inputs')
+        dump_properties(context, self.outputs, 'Outputs')
 
     def dump_graph(self, context):
         for node in self.nodes.itervalues():
@@ -133,14 +146,23 @@ class Node(Element):
             capability.validate(context)
         for relationship in self.relationships:
             relationship.validate(context)
+
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('id', self.id),
+            ('template_name', self.template_name),
+            ('properties', self.properties),
+            ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
+            ('capabilities', [v.as_raw for v in self.capabilities.itervalues()]),
+            ('relationships', [v.as_raw for v in self.relationships])))
             
     def dump(self, context):
         puts('Node: %s' % context.style.node(self.id))
         with context.style.indent:
             puts('Template: %s' % context.style.node(self.template_name))
-        dump_properties(context, self.properties)
-        dump_interfaces(context, self.interfaces)
-        with context.style.indent:
+            dump_properties(context, self.properties)
+            dump_interfaces(context, self.interfaces)
             if self.capabilities:
                 puts('Capabilities:')
                 with context.style.indent:
@@ -179,12 +201,19 @@ class Capability(Element):
         self.occurrences += 1
         return True 
 
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('name', self.name),
+            ('type_name', self.type_name),
+            ('properties', self.properties)))
+            
     def dump(self, context):
         puts(context.style.node(self.name))
         with context.style.indent:
             puts('Type: %s' % context.style.type(self.type_name))
             puts('Occurrences: %s (%s%s)' % (self.occurrences, self.min_occurrences or 0, (' to %d' % self.max_occurrences) if self.max_occurrences is not None else ' or more'))
-        dump_properties(context, self.properties)
+            dump_properties(context, self.properties)
 
 class Relationship(Element):
     def __init__(self, type_name=None, template_name=None):
@@ -205,6 +234,15 @@ class Relationship(Element):
     def validate(self, context):
         for interface in self.interfaces.itervalues():
             interface.validate(context)
+
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('target_node_id', self.target_node_id),
+            ('target_capability_name', self.target_capability_name),
+            ('type_name', self.type_name),
+            ('properties', self.properties),
+            ('interfaces', [v.as_raw for v in self.interfaces.itervalues()])))            
 
     def dump(self, context):
         puts('Target node: %s' % context.style.node(self.target_node_id))
@@ -229,13 +267,21 @@ class Group(Element):
         self.interfaces = StrictDict(str, Interface)
         self.member_node_ids = StrictList(str)
 
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('name', self.name),
+            ('type_name', self.type_name),
+            ('properties', self.properties),
+            ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
+            ('member_node_ids', self.member_node_ids)))
+
     def dump(self, context):
         puts('Group: %s' % context.style.node(self.name))
         with context.style.indent:
             puts('Type: %s' % context.style.type(self.type_name))
-        dump_properties(context, self.properties)
-        dump_interfaces(context, self.interfaces)
-        with context.style.indent:
+            dump_properties(context, self.properties)
+            dump_interfaces(context, self.interfaces)
             if self.member_node_ids:
                 puts('Member nodes:')
                 with context.style.indent:

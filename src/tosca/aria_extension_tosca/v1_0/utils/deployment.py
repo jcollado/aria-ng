@@ -221,8 +221,8 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
 
     def coerce(constraint, container):
         constraint = coerce_value(context, node_filter, the_type, None, None, constraint, constraint_key) if the_type is not None else constraint
-        if hasattr(constraint, 'evaluate'):
-            constraint = constraint.evaluate(context, container)
+        if hasattr(constraint, '_evaluate'):
+            constraint = constraint._evaluate(context, container)
         return constraint
     
     def get_value(node_type):

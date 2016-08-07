@@ -21,8 +21,8 @@ class Template(Element):
         pass
 
 class Function(object):
-    def evaluate(self, context, container):
-        raise UnimplementedFunctionalityError(classname(self) + '.evaluate')
+    def _evaluate(self, context, container):
+        raise UnimplementedFunctionalityError(classname(self) + '._evaluate')
 
 class Interface(Template):
     def __init__(self, name):
@@ -82,7 +82,7 @@ class Operation(Template):
     def as_raw(self):
         return OrderedDict((
             ('name', self.name),
-            ('implementation', self.name),
+            ('implementation', self.implementation),
             ('dependencies', self.dependencies),
             ('inputs', self.inputs)))
 

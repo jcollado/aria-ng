@@ -115,7 +115,7 @@ def convert_requirement_from_definition_to_assignment(context, requirement_defin
     relationship_property_definitions = None
     relationship_interface_definitions = None
     
-    # First try our type if exists
+    # First try to find the relationship if we declared it
     our_relationship = our_requirement_assignment.relationship if our_requirement_assignment is not None else None # RequirementAssignmentRelationship
     if our_relationship is not None:
         relationship_type, relationship_type_variant = our_relationship._get_type(context)
@@ -123,7 +123,7 @@ def convert_requirement_from_definition_to_assignment(context, requirement_defin
             relationship_template = relationship_type
             relationship_type = relationship_template._get_type(context)
     
-    # If not exists, try the node type
+    # If not exists, try at the node type
     relationship_definition = None
     if relationship_type is None:
         relationship_definition = requirement_definition.relationship # RequirementDefinitionRelationship

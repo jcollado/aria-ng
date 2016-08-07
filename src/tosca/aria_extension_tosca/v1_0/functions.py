@@ -4,9 +4,6 @@ from aria.deployment import Function
 from aria.utils import ReadOnlyList
 from cStringIO import StringIO
 
-NODE_TEMPLATE_TARGET_SYMBOLS = ('SELF', 'HOST')
-RELATIONSHIP_TEMPLATE_TARGET_SYMBOLS = ('SELF', 'SOURCE', 'TARGET')
-    
 #
 # Intrinsic
 #
@@ -28,11 +25,11 @@ class Concat(Function):
             string_expressions.append(parse_string_expression(context, presentation, 'concat', index, None, argument[index]))
         self.string_expressions = ReadOnlyList(string_expressions)    
 
-    def evaluate(self, context, container):
+    def _evaluate(self, context, container):
         r = StringIO()
         for e in self.string_expressions:
-            if hasattr(e, 'evaluate'):
-                e = e.evaluate(context, container)
+            if hasattr(e, '_evaluate'):
+                e = e._evaluate(context, container)
             r.write(str(e))
         return r.getvalue()
 
@@ -51,6 +48,11 @@ class Token(Function):
         self.string_with_tokens = parse_string_expression(context, presentation, 'token', 0, 'the string to tokenize', argument[0])
         self.string_of_token_chars = parse_string_expression(context, presentation, 'token', 1, 'the token separator characters', argument[1])
         self.substring_index = parse_int(context, presentation, 'token', 2, 'the 0-based index of the token to return', argument[2])
+
+    def _evaluate(self, context, container):
+        string_with_tokens = self.string_with_tokens
+        if hasattr(string_with_tokens, '_evaluate'):
+            string_with_tokens = string_with_tokens._evaluate(context, container)
 
 #
 # Property
@@ -72,9 +74,50 @@ class GetInput(Function):
             if (inputs is None) or (self.input_property_name not in inputs):
                 raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
     
-    def evaluate(self, context, container):
+    def _evaluate(self, context, container):
         inputs = context.presentation.service_template.topology_template._get_input_values(context) if context.presentation.service_template.topology_template is not None else None
         return inputs.get(self.input_property_name) if inputs is not None else None
+
+@dsl_specification('4.1', 'tosca-simple-profile-1.0')
+def get_modelable_entities(context, container, locator, modelable_entity_name):
+    """
+    The following keywords MAY be used in some TOSCA function in place of a TOSCA Node or Relationship Template name.
+    """
+    
+    if modelable_entity_name == 'SELF':
+        return get_self(context, container)
+    elif modelable_entity_name == 'HOST':
+        return get_host(context, container)
+    elif modelable_entity_name == 'SOURCE':
+        return get_source(context, container)
+    elif modelable_entity_name == 'TARGET':
+        return get_target(context, container)
+
+    raise InvalidValueError('function "get_property" could not find modelable entity "%s"' % modelable_entity_name, locator=locator)
+
+def get_self(context, container):
+    """
+    A TOSCA orchestrator will interpret this keyword as the Node or Relationship Template instance that contains the function at the time the function is evaluated.
+    """
+    
+    return [container]
+
+def get_host(context, container):
+    """
+    A TOSCA orchestrator will interpret this keyword to refer to the all nodes that "host" the node using this reference (i.e., as identified by its HostedOn relationship).
+    
+    Specifically, TOSCA orchestrators that encounter this keyword when evaluating the get_attribute or get_property functions SHALL search each node along the "HostedOn" relationship chain starting at the immediate node that hosts the node where the function was evaluated (and then that node's host node, and so forth) until a match is found or the "HostedOn" relationship chain ends.
+    """
+
+def get_source(context, container):
+    """
+    A TOSCA orchestrator will interpret this keyword as the Node Template instance that is at the source end of the relationship that contains the referencing function.
+    """
+
+def get_target(context, container):
+    """
+    A TOSCA orchestrator will interpret this keyword as the Node Template instance that is at the target end of the relationship that contains the referencing function.
+    """
 
 @dsl_specification('4.4.2', 'tosca-simple-profile-1.0')
 class GetProperty(Function):
@@ -91,22 +134,39 @@ class GetProperty(Function):
         self.modelable_entity_name = parse_modelable_entity_name(context, presentation, 'get_property', 0, argument[0])
         self.nested_property_name_or_index = argument[1:] # the first of these will be tried as a req-or-cap name
 
-    def evaluate(self, context, container):
-        if self.modelable_entity_name == 'SELF':
-            if container is None:
-                raise InvalidValueError('function "get_property" could not access "SELF"', locator=self.locator)
-            if container.properties:
-                value = container.properties
-                for n in self.nested_property_name_or_index:
-                    if n in value:
+    def _evaluate(self, context, container):
+        modelable_entities = get_modelable_entities(context, container, self.locator, self.modelable_entity_name)
+        
+        req_or_cap_name = self.nested_property_name_or_index[0]
+        
+        for modelable_entity in modelable_entities:
+            #if (modelable_entity.requirements) and (req_or_cap_name in modelable_entity.requirements):
+            #    # First argument refers to a requirement
+            #    properties = modelable_entity.requirements[req_or_cap_name].properties
+            #    nested_property_name_or_index = self.nested_property_name_or_index[1:]
+            if (modelable_entity.capabilities) and (req_or_cap_name in modelable_entity.capabilities):
+                # First argument refers to a capability
+                properties = modelable_entity.capabilities[req_or_cap_name].properties
+                nested_property_name_or_index = self.nested_property_name_or_index[1:]
+            else:
+                properties = modelable_entity.properties
+                nested_property_name_or_index = self.nested_property_name_or_index
+    
+            if properties:
+                found = True
+                value = properties
+                for n in nested_property_name_or_index:
+                    if (isinstance(value, dict) and (n in value)) or (isinstance(value, list) and n < len(list)):
                         value = value[n]
-                        if hasattr(value, 'evaluate'):
-                            value = value.evaluate(context, container)
+                        if hasattr(value, '_evaluate'):
+                            value = value._evaluate(context, modelable_entity)
                     else:
-                        raise InvalidValueError('function "get_property" could not find "%s" in "%s"' % ('.'.join(self.nested_property_name_or_index), self.modelable_entity_name), locator=self.locator)
-                return value
-            raise InvalidValueError('function "get_property" could not access "SELF"', locator=self.locator)
-        raise InvalidValueError('function "get_property" could not be called', locator=self.locator)
+                        found = False
+                        break
+                if found:
+                    return value
+
+        raise InvalidValueError('function "get_property" could not find "%s" in modelable entity "%s"' % ('.'.join(self.nested_property_name_or_index), self.modelable_entity_name), locator=self.locator)
 
 #
 # Attribute
@@ -168,6 +228,9 @@ class GetNodesOfType(Function):
             if (node_types is None) or (self.input_property_name not in node_types):
                 raise InvalidValueError('function "get_nodes_of_type" argument is not a valid node type name: %s' % repr(argument), locator=self.locator)
 
+    def _evaluate(self, context, container):
+        pass
+
 #
 # Artifact
 #
@@ -214,18 +277,6 @@ def get_function(context, presentation, value):
                 return True, None
     return False, None
 
-def get_self(presentation):
-    from .templates import NodeTemplate, RelationshipTemplate
-    
-    if presentation is None:
-        return None, None    
-    elif isinstance(presentation, NodeTemplate):
-        return presentation, 'node_template'
-    elif isinstance(presentation, RelationshipTemplate):
-        return presentation, 'relationship_template'
-    else:
-        return get_self(presentation._container)
-
 def parse_string_expression(context, presentation, name, index, explanation, value):
     is_function, fn = get_function(context, presentation, value)
     if is_function:
@@ -247,19 +298,18 @@ def parse_bool(context, presentation, name, index, explanation, value):
         raise invalid_value(name, index, 'a boolean', explanation, value, presentation._locator)
     return value
 
-@dsl_specification('4.1', 'tosca-simple-profile-1.0')
 def parse_modelable_entity_name(context, presentation, name, index, value):
     value = parse_string_expression(context, presentation, name, index, 'the modelable entity name', value)
     if value == 'SELF':
-        the_self, _ = get_self(presentation)
+        the_self, _ = parse_self(presentation)
         if the_self is None:
             raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a node template or a relationship template')
     elif value == 'HOST':
-        _, self_variant = get_self(presentation)
+        _, self_variant = parse_self(presentation)
         if self_variant != 'node_template':
             raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a node template')
     elif (value == 'SOURCE') or (value == 'TARGET'):
-        _, self_variant = get_self(presentation)
+        _, self_variant = parse_self(presentation)
         if self_variant != 'relationship_template':
             raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a relationship template')
     elif isinstance(value, basestring):
@@ -269,8 +319,20 @@ def parse_modelable_entity_name(context, presentation, name, index, value):
             raise InvalidValueError('function "%s" parameter %d is not a valid modelable entity name: %s' % (name, index + 1, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
     return value
 
+def parse_self(presentation):
+    from .templates import NodeTemplate, RelationshipTemplate
+    
+    if presentation is None:
+        return None, None    
+    elif isinstance(presentation, NodeTemplate):
+        return presentation, 'node_template'
+    elif isinstance(presentation, RelationshipTemplate):
+        return presentation, 'relationship_template'
+    else:
+        return parse_self(presentation._container)
+
 def invalid_modelable_entity_name(name, index, value, locator, contexts):
-    raise InvalidValueError('function "%s" parameter %d can be "%s" only in %s' % (name, index + 1, value, contexts), locator=locator, level=Issue.FIELD)
+    return InvalidValueError('function "%s" parameter %d can be "%s" only in %s' % (name, index + 1, value, contexts), locator=locator, level=Issue.FIELD)
 
 def invalid_value(name, index, the_type, explanation, value, locator):
     return InvalidValueError('function "%s" %s is not %s%s: %s' % (name, ('parameter %d' % (index + 1)) if index is not None else 'argument', the_type, (', %s' % explanation) if explanation is not None else '', repr(value)), locator=locator, level=Issue.FIELD)

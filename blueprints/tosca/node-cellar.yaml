@@ -185,7 +185,8 @@ topology_template:
             node: data_volume
             relationship:
               properties:
-                location: { concat: [ /mnt/volume, { get_property: [ SELF, flavor_name ] } ] }
+                #location: { concat: [ /mnt/volume, { get_property: [ SELF, flavor_name ] } ] }
+                location: { concat: [ /mnt/volume, { get_property: [ SELF, os_users, root, password ] } ] }
       capabilities:
         scalable:
           properties:

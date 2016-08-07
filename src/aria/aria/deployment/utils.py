@@ -8,8 +8,8 @@ def instantiate_value(context, container, value):
         return [instantiate_value(context, container, v) for v in value]
     elif isinstance(value, dict):
         return OrderedDict((k, instantiate_value(context, container, v)) for k, v in value.iteritems())
-    elif hasattr(value, 'evaluate'):
-        value = value.evaluate(context, container)
+    elif hasattr(value, '_evaluate'):
+        value = value._evaluate(context, container)
         value = instantiate_value(context, container, value)
     return value
 

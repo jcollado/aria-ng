@@ -1,7 +1,7 @@
 
 from .elements import Element, Template, Interface, Artifact
-from .utils import instantiate_properties, instantiate_interfaces, dump_dict_values, dump_properties, dump_interfaces
-from .plan import DeploymentPlan, Node, Capability, Relationship, Group
+from .utils import instantiate_properties, instantiate_interfaces, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
+from .plan import DeploymentPlan, Node, Capability, Relationship, Group, Policy
 from .. import Issue
 from ..utils import StrictList, StrictDict
 from clint.textui import puts
@@ -11,7 +11,7 @@ class DeploymentTemplate(Template):
     def __init__(self):
         self.node_templates = StrictDict(str, NodeTemplate)
         self.group_templates = StrictDict(str, GroupTemplate)
-        self.policies = StrictDict(str) # TODO
+        self.policy_templates = StrictDict(str, PolicyTemplate)
         self.inputs = StrictDict(str)
         self.outputs = StrictDict(str)
 
@@ -23,7 +23,10 @@ class DeploymentTemplate(Template):
             r.nodes[node.id] = node
         for group_template in self.group_templates.itervalues():
             group = group_template.instantiate(context, container)
-            r.groups[group.name] = group
+            r.groups[group.id] = group
+        for policy_template in self.policy_templates.itervalues():
+            policy = policy_template.instantiate(context, container)
+            r.policies[policy.name] = policy
         instantiate_properties(context, self, r.inputs, self.inputs)
         instantiate_properties(context, self, r.outputs, self.outputs)
         return r
@@ -33,16 +36,16 @@ class DeploymentTemplate(Template):
             node_template.validate(context)
         for group_template in self.group_templates.itervalues():
             group_template.validate(context)
-        for policy in self.policies.itervalues():
-            policy.validate(context)
+        for policy_template in self.policy_templates.itervalues():
+            policy_template.validate(context)
 
     def dump(self, context):
         for node_template in self.node_templates.itervalues():
             node_template.dump(context)
         for group_template in self.group_templates.itervalues():
             group_template.dump(context)
-        for policy in self.policies.itervalues():
-            policy.dump(context)
+        for policy_template in self.policy_templates.itervalues():
+            policy_template.dump(context)
         dump_properties(context, self.inputs, 'Inputs')
         dump_properties(context, self.outputs, 'Outputs')
 
@@ -71,12 +74,13 @@ class NodeTemplate(Template):
     
     def instantiate(self, context, container):
         r = Node(self.name)
-        instantiate_properties(context, self, r.properties, self.properties)
-        instantiate_interfaces(context, self, r.interfaces, self.interfaces)
+        instantiate_properties(context, r, r.properties, self.properties)
+        instantiate_interfaces(context, r, r.interfaces, self.interfaces)
         for artifact_name, artifact in self.artifacts.iteritems():
-            r.artifacts[artifact_name] = artifact.instantiate(context, self)
+            r.artifacts[artifact_name] = artifact.instantiate(context, r)
         for capability_name, capability in self.capabilities.iteritems():
-            r.capabilities[capability_name] = capability.instantiate(context, self)
+            r.capabilities[capability_name] = capability.instantiate(context, r)
+        r.coerce_values(context, r, False)
         return r
     
     def validate(self, context):
@@ -99,7 +103,7 @@ class NodeTemplate(Template):
             dump_interfaces(context, self.interfaces)
             dump_dict_values(context, self.artifacts, 'Artifacts')
             dump_dict_values(context, self.capabilities, 'Capabilities')
-            dump_dict_values(context, self.requirements, 'Requirements')
+            dump_list_values(context, self.requirements, 'Requirements')
 
 class Requirement(Element):
     def __init__(self, name, target_node_type_name=None, target_node_template_name=None, target_capability_type_name=None, target_capability_name=None):
@@ -286,7 +290,7 @@ class GroupTemplate(Template):
         self.member_node_template_names = StrictList(str)
 
     def instantiate(self, context, container):
-        r = Group(self.name, self.type_name)
+        r = Group(self.name)
         instantiate_properties(context, self, r.properties, self.properties)
         instantiate_interfaces(context, self, r.interfaces, self.interfaces)
         for member_node_template_name in self.member_node_template_names:
@@ -303,3 +307,39 @@ class GroupTemplate(Template):
             dump_interfaces(context, self.interfaces)
             if self.member_node_template_names:
                 puts('Member node templates: %s' % ', '.join((str(context.style.node(v)) for v in self.member_node_template_names)))
+
+class PolicyTemplate(Template):
+    def __init__(self, name, type_name):
+        if not isinstance(name, basestring):
+            raise ValueError('must set name (string)')
+        if not isinstance(type_name, basestring):
+            raise ValueError('must set type_name (string)')
+        
+        self.name = name
+        self.type_name = type_name
+        self.properties = StrictDict(str)
+        self.target_node_template_names = StrictList(str)
+        self.target_group_template_names = StrictList(str)
+
+    def instantiate(self, context, container):
+        r = Policy(self.name, self.type_name)
+        instantiate_properties(context, self, r.properties, self.properties)
+        for node_template_name in self.target_node_template_names:
+            for node in context.deployment.plan.find_nodes(node_template_name):
+                if node not in r.target_node_ids:
+                    r.target_node_ids.append(node.id)
+        for group_template_name in self.target_group_template_names:
+            for group in context.deployment.plan.find_groups(group_template_name):
+                if group not in r.target_group_ids:
+                    r.target_group_ids.append(group.id)
+        return r
+
+    def dump(self, context):
+        puts('Policy template: %s' % context.style.node(self.name))
+        with context.style.indent:
+            puts('Type: %s' % context.style.type(self.type_name))
+            dump_properties(context, self.properties)
+            if self.target_node_template_names:
+                puts('Target node templates: %s' % ', '.join((str(context.style.node(v)) for v in self.target_node_template_names)))
+            if self.target_group_template_names:
+                puts('Target group templates: %s' % ', '.join((str(context.style.node(v)) for v in self.target_group_template_names)))

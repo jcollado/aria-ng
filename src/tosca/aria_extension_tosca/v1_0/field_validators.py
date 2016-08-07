@@ -322,9 +322,10 @@ def list_node_type_or_group_type_validator(field, presentation, context):
 # PolicyDefinition
 #
 
-def list_node_template_or_group_validator(field, presentation, context):
+def policy_node_template_or_group_validator(field, presentation, context):
     """
-    Makes sure that the field's elements refer to either node templates or groups.
+    Makes sure that the field's elements refer to either node templates or groups, and that
+    they match the node types and group types declared in the policy type.
 
     Used as @field\_validator for the "targets" field in :class:`PolicyDefinition`.
     """
@@ -338,6 +339,29 @@ def list_node_template_or_group_validator(field, presentation, context):
             groups = context.presentation.groups or {}
             if (value not in node_templates) and (value not in groups):
                 report_issue_for_unknown_type(context, presentation, 'node template or group', field.name, value)
+            
+            policy_type = presentation._get_type(context)    
+            if policy_type is not None:
+                node_types, group_types = policy_type._get_targets(context)
+
+                ok = False
+                
+                if value in node_templates:
+                    our_node_type = node_templates[value]._get_type(context)
+                    for node_type in node_types:
+                        if node_type._is_descendant(context, our_node_type):
+                            ok = True
+                            break
+
+                elif value in groups:
+                    our_group_type = groups[value]._get_type(context)
+                    for group_type in group_types:
+                        if group_type._is_descendant(context, our_group_type):
+                            ok = True
+                            break
+
+                if not ok:
+                    context.validation.report('policy definition target does not match either a node type or a group type declared in the policy type in "%s": %s' % (presentation._name, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
 #
 # NodeFilter

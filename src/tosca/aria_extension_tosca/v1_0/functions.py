@@ -109,6 +109,9 @@ def get_host(context, container):
     Specifically, TOSCA orchestrators that encounter this keyword when evaluating the get_attribute or get_property functions SHALL search each node along the "HostedOn" relationship chain starting at the immediate node that hosts the node where the function was evaluated (and then that node's host node, and so forth) until a match is found or the "HostedOn" relationship chain ends.
     """
 
+    print container.relationships
+    exit()
+
 def get_source(context, container):
     """
     A TOSCA orchestrator will interpret this keyword as the Node Template instance that is at the source end of the relationship that contains the referencing function.
@@ -247,10 +250,10 @@ class GetArtifact(Function):
         if (not isinstance(argument, list)) or (len(argument) < 2) or (len(argument) > 4):
             raise InvalidValueError('function "get_artifact" argument must be a list of 2 to 4 parameters: %s' % repr(argument), locator=self.locator)
 
-        self.modelable_entity_name = parse_string_expression(context, presentation, 'get_nodes_of_type', 0, 'modelable entity name', argument[0])
-        self.artifact_name = parse_string_expression(context, presentation, 'get_nodes_of_type', 1, 'the artifact name', argument[1])
-        self.location = parse_string_expression(context, presentation, 'get_nodes_of_type', 2, 'the location or "LOCAL_FILE"', argument[2])
-        self.remove = parse_bool(context, presentation, 'get_nodes_of_type', 3, 'the removal flag', argument[3])
+        self.modelable_entity_name = parse_string_expression(context, presentation, 'get_artifact', 0, 'modelable entity name', argument[0])
+        self.artifact_name = parse_string_expression(context, presentation, 'get_artifact', 1, 'the artifact name', argument[1])
+        self.location = parse_string_expression(context, presentation, 'get_artifact', 2, 'the location or "LOCAL_FILE"', argument[2])
+        self.remove = parse_bool(context, presentation, 'get_artifact', 3, 'the removal flag', argument[3])
 
 #
 # Utils

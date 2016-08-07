@@ -3,12 +3,13 @@ from .presentation import ToscaPresentation
 from .misc import Description, PropertyAssignment, ConstraintClause
 from .data_types import Range
 from .field_getters import data_type_class_getter
-from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, list_node_template_or_group_validator
+from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, policy_node_template_or_group_validator
 from .utils.data_types import get_data_type, get_property_constraints
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
+from .utils.policies import get_policy_targets
 from aria import dsl_specification
-from aria.utils import ReadOnlyDict, cachedmethod
+from aria.utils import ReadOnlyList, ReadOnlyDict, cachedmethod
 from aria.presentation import has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_dict_unknown_fields, field_validator, field_getter, type_validator, list_type_validator
 
 @short_form_field('type')
@@ -715,7 +716,7 @@ class PolicyDefinition(ToscaPresentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
-    @field_validator(list_node_template_or_group_validator)
+    @field_validator(policy_node_template_or_group_validator)
     @primitive_list_field(str)
     def targets(self):
         """
@@ -731,7 +732,12 @@ class PolicyDefinition(ToscaPresentation):
     @cachedmethod
     def _get_property_values(self, context):
         return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
-    
+
+    @cachedmethod
+    def _get_targets(self, context):
+        node_templates, groups = get_policy_targets(context, self)
+        return ReadOnlyList(node_templates), ReadOnlyList(groups)
+
     def _validate(self, context):
         super(PolicyDefinition, self)._validate(context)
         self._get_property_values(context)

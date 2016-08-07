@@ -3,24 +3,30 @@ from .. import InvalidValueError
 from clint.textui import puts
 from collections import OrderedDict
 
-def instantiate_value(context, container, value):
+def coerce_value(context, container, value, report_issues=False):
     if isinstance(value, list):
-        return [instantiate_value(context, container, v) for v in value]
+        return [coerce_value(context, container, v, report_issues) for v in value]
     elif isinstance(value, dict):
-        return OrderedDict((k, instantiate_value(context, container, v)) for k, v in value.iteritems())
+        return OrderedDict((k, coerce_value(context, container, v, report_issues)) for k, v in value.iteritems())
     elif hasattr(value, '_evaluate'):
-        value = value._evaluate(context, container)
-        value = instantiate_value(context, container, value)
+        try:
+            value = value._evaluate(context, container)
+        except InvalidValueError as e:
+            if report_issues:
+                context.validation.report(e.issue)
+            return value
+        value = coerce_value(context, container, value, report_issues)
     return value
+
+def coerce_dict_values(context, container, the_dict, report_issues=False):
+    for k, value in the_dict.iteritems():
+        the_dict[k] = coerce_value(context, container, value, report_issues)
 
 def instantiate_properties(context, container, properties, from_properties):
     if not from_properties:
         return
     for property_name, value in from_properties.iteritems():
-        try:
-            properties[property_name] = instantiate_value(context, container, value)
-        except InvalidValueError as e:
-            context.validation.report(issue=e.issue)
+        properties[property_name] = coerce_value(context, container, value)
 
 def instantiate_interfaces(context, container, interfaces, from_interfaces):
     if not from_interfaces:

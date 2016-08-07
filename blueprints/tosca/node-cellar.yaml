@@ -63,6 +63,11 @@ topology_template:
           file: master.tar.gz
           repository: node_cellar
           deploy_path: /opt/nodejs/applications/node-cellar
+          properties:
+            unpack_credential:
+              user: gigaspaces
+              token: { get_property: [ SELF, app_endpoint, protocol ] }
+              #token: { get_property: [ HOST, flavor_name ] }
       requirements:
         - database: node_cellar_database
       capabilities:
@@ -172,8 +177,7 @@ topology_template:
             node: data_volume
             relationship:
               properties:
-                #location: { concat: [ /mnt/volume, { get_property: [ SELF, flavor_name ] } ] }
-                location: { concat: [ /mnt/volume, { get_property: [ SELF, os_users, root, password ] } ] }
+                location: /mnt/volume
       capabilities:
         scalable:
           properties:

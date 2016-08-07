@@ -26,6 +26,10 @@ artifact_types:
       - tar
       - tar.gz
       - tar.xz
+    properties:
+      unpack_credential:
+        type: tosca.datatypes.Credential
+        required: false
 
   os.Deb:
     description: >-

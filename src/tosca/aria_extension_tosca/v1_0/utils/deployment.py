@@ -1,5 +1,5 @@
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, Interface, Operation, Artifact, Requirement
+from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, PolicyTemplate, Interface, Operation, Artifact, Requirement
 from .data_types import coerce_value
 import re
 
@@ -23,6 +23,11 @@ def get_deployment_template(context, presenter):
         if groups:
             for group_name, group in groups.iteritems():
                 r.group_templates[group_name] = normalize_group(context, group)
+
+        policies = topology_template.policies
+        if policies:
+            for policy_name, policy in policies.iteritems():
+                r.policy_templates[policy_name] = normalize_policy(context, policy)
 
     return r
 
@@ -192,6 +197,20 @@ def normalize_group(context, group):
     if members:
         for member in members:
             r.member_node_template_names.append(member)
+    
+    return r
+
+def normalize_policy(context, policy):
+    policy_type = policy._get_type(context)
+    r = PolicyTemplate(name=policy._name, type_name=policy_type._name)
+
+    normalize_property_values(r.properties, policy._get_property_values(context))
+    
+    node_templates, groups = policy._get_targets(context)
+    for node_template in node_templates:
+        r.target_node_template_names.append(node_template._name)
+    for group in groups:
+        r.target_group_template_names.append(group._name)
     
     return r
 

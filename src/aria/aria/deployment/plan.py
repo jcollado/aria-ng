@@ -6,11 +6,13 @@ from .. import Issue
 from ..utils import StrictList, StrictDict, ReadOnlyList
 from collections import OrderedDict
 from clint.textui import puts, indent
+from aria.deployment.utils import coerce_dict_values
 
 class DeploymentPlan(Element):
     def __init__(self):
         self.nodes = StrictDict(str, Node) 
         self.groups = StrictDict(str, Group) 
+        self.policies = StrictDict(str, Policy)
         self.inputs = StrictDict(str)
         self.outputs = StrictDict(str)
 
@@ -28,12 +30,19 @@ class DeploymentPlan(Element):
                 satisfied = False
         return satisfied
     
-    def find_nodes(self, target_node_template_name):
+    def find_nodes(self, node_template_name):
         nodes = []
         for node in self.nodes.itervalues():
-            if node.template_name == target_node_template_name:
+            if node.template_name == node_template_name:
                 nodes.append(node)
         return ReadOnlyList(nodes)
+    
+    def find_groups(self, group_template_name):
+        groups = []
+        for group in self.groups.itervalues():
+            if group.template_name == group_template_name:
+                groups.append(group)
+        return ReadOnlyList(groups)
     
     def is_node_a_target(self, context, target_node):
         for node in self.nodes.itervalues():
@@ -56,12 +65,25 @@ class DeploymentPlan(Element):
             node.validate(context)
         for group in self.groups.itervalues():
             group.validate(context)
+        for policy in self.policies.itervalues():
+            policy.validate(context)
+
+    def coerce_values(self, context, container, report_issues):
+        for node in self.nodes.itervalues():
+            node.coerce_values(context, self, report_issues)
+        for group in self.groups.itervalues():
+            group.coerce_values(context, self, report_issues)
+        for policy in self.policies.itervalues():
+            policy.coerce_values(context, self, report_issues)
+        coerce_dict_values(context, container, self.inputs, report_issues)
+        coerce_dict_values(context, container, self.outputs, report_issues)
 
     @property
     def as_raw(self):
         return OrderedDict((
             ('nodes', [v.as_raw for v in self.nodes.itervalues()]),
             ('groups', [v.as_raw for v in self.groups.itervalues()]),
+            ('policies', [v.as_raw for v in self.policies.itervalues()]),
             ('inputs', self.inputs),
             ('outputs', self.outputs)))
 
@@ -70,6 +92,8 @@ class DeploymentPlan(Element):
             node.dump(context)
         for group in self.groups.itervalues():
             group.dump(context)
+        for policy in self.policies.itervalues():
+            policy.dump(context)
         dump_properties(context, self.inputs, 'Inputs')
         dump_properties(context, self.outputs, 'Outputs')
 
@@ -152,6 +176,17 @@ class Node(Element):
         for relationship in self.relationships:
             relationship.validate(context)
 
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, self, self.properties, report_issues)
+        for interface in self.interfaces.itervalues():
+            interface.coerce_values(context, self, report_issues)
+        for artifact in self.artifacts.itervalues():
+            artifact.coerce_values(context, self, report_issues)
+        for capability in self.capabilities.itervalues():
+            capability.coerce_values(context, self, report_issues)
+        for relationship in self.relationships:
+            relationship.coerce_values(context, self, report_issues)
+
     @property
     def as_raw(self):
         return OrderedDict((
@@ -206,6 +241,9 @@ class Capability(Element):
             ('name', self.name),
             ('type_name', self.type_name),
             ('properties', self.properties)))
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
             
     def dump(self, context):
         puts(context.style.node(self.name))
@@ -234,6 +272,11 @@ class Relationship(Element):
         for interface in self.interfaces.itervalues():
             interface.validate(context)
 
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
+        for interface in self.interfaces.itervalues():
+            interface.coerce_values(context, container, report_issues)
+
     @property
     def as_raw(self):
         return OrderedDict((
@@ -255,6 +298,47 @@ class Relationship(Element):
             dump_interfaces(context, self.interfaces)
 
 class Group(Element):
+    def __init__(self, template_name):
+        if not isinstance(template_name, basestring):
+            raise ValueError('must set template_name (string)')
+
+        self.id = '%s_%s' % (template_name, generate_id())
+        self.template_name = template_name
+        self.properties = StrictDict(str)
+        self.interfaces = StrictDict(str, Interface)
+        self.member_node_ids = StrictList(str)
+
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('id', self.id),
+            ('template_name', self.template_name),
+            ('properties', self.properties),
+            ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
+            ('member_node_ids', self.member_node_ids)))
+
+    def validate(self, context):
+        for interface in self.interfaces.itervalues():
+            interface.validate(context)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
+        for interface in self.interfaces.itervalues():
+            interface.coerce_values(context, container, report_issues)
+
+    def dump(self, context):
+        puts('Group: %s' % context.style.node(self.id))
+        with context.style.indent:
+            puts('Template: %s' % context.style.type(self.template_name))
+            dump_properties(context, self.properties)
+            dump_interfaces(context, self.interfaces)
+            if self.member_node_ids:
+                puts('Member nodes:')
+                with context.style.indent:
+                    for node_id in self.member_node_ids:
+                        puts(context.style.node(node_id))
+
+class Policy(Element):
     def __init__(self, name, type_name):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
@@ -264,8 +348,8 @@ class Group(Element):
         self.name = name
         self.type_name = type_name
         self.properties = StrictDict(str)
-        self.interfaces = StrictDict(str, Interface)
-        self.member_node_ids = StrictList(str)
+        self.target_node_ids = StrictList(str)
+        self.target_group_ids = StrictList(str)
 
     @property
     def as_raw(self):
@@ -273,17 +357,21 @@ class Group(Element):
             ('name', self.name),
             ('type_name', self.type_name),
             ('properties', self.properties),
-            ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
-            ('member_node_ids', self.member_node_ids)))
+            ('target_node_ids', self.target_node_ids),
+            ('target_group_ids', self.target_group_ids)))
 
     def dump(self, context):
-        puts('Group: %s' % context.style.node(self.name))
+        puts('Policy: %s' % context.style.node(self.name))
         with context.style.indent:
             puts('Type: %s' % context.style.type(self.type_name))
             dump_properties(context, self.properties)
-            dump_interfaces(context, self.interfaces)
-            if self.member_node_ids:
-                puts('Member nodes:')
+            if self.target_node_ids:
+                puts('Target nodes:')
                 with context.style.indent:
-                    for node_id in self.member_node_ids:
+                    for node_id in self.target_node_ids:
                         puts(context.style.node(node_id))
+            if self.target_group_ids:
+                puts('Target groups:')
+                with context.style.indent:
+                    for group_id in self.target_group_ids:
+                        puts(context.style.node(group_id))

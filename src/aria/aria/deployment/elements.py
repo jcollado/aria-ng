@@ -1,5 +1,5 @@
 
-from .utils import instantiate_properties, dump_dict_values, dump_properties
+from .utils import instantiate_properties, coerce_dict_values, dump_dict_values, dump_properties
 from .. import UnimplementedFunctionalityError, classname
 from ..utils import StrictList, StrictDict, make_agnostic
 from collections import OrderedDict
@@ -7,6 +7,9 @@ from clint.textui import puts
 
 class Element(object):
     def validate(self, context):
+        pass
+
+    def coerce_values(self, context, container, report_issues):
         pass
     
     @property
@@ -43,6 +46,11 @@ class Interface(Template):
     def validate(self, context):
         for operation in self.operations.itervalues():
             operation.validate(context)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.inputs, report_issues)
+        for operation in self.operations.itervalues():
+            operation.coerce_values(context, container, report_issues)
     
     @property
     def as_raw(self):
@@ -73,6 +81,9 @@ class Operation(Template):
         r.dependencies = self.dependencies
         instantiate_properties(context, container, r.inputs, self.inputs)
         return r
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.inputs, report_issues)
 
     @property
     def as_raw(self):
@@ -113,8 +124,11 @@ class Artifact(Template):
         r.target_path = self.target_path
         r.repository_url = self.repository_url
         r.repository_credential = self.repository_credential
-        instantiate_properties(context, self, r.properties, self.properties)
+        instantiate_properties(context, container, r.properties, self.properties)
         return r
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
 
     @property
     def as_raw(self):

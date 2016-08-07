@@ -10,6 +10,7 @@ from .utils.interfaces import get_inherited_interface_definitions, get_inherited
 from .utils.requirements import get_inherited_requirement_definitions
 from .utils.capabilities import get_inherited_valid_source_types, get_inherited_capability_definitions
 from .utils.artifacts import get_inherited_artifact_definitions
+from .utils.policies import get_inherited_targets
 from .utils.data_types import get_data_type, get_inherited_constraints, coerce_data_type_value
 from aria import dsl_specification
 from aria.utils import ReadOnlyDict, ReadOnlyList, cachedmethod
@@ -532,6 +533,14 @@ class NodeType(ToscaPresentation):
         return context.presentation.node_types.get(self.derived_from)
 
     @cachedmethod
+    def _is_descendant(self, context, the_type):
+        if the_type is None:
+            return False
+        elif the_type == self:
+            return True
+        return self._is_descendant(context, the_type._get_parent(context))
+
+    @cachedmethod
     def _get_properties(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
@@ -644,6 +653,14 @@ class GroupType(ToscaPresentation):
         return context.presentation.group_types.get(self.derived_from)
 
     @cachedmethod
+    def _is_descendant(self, context, the_type):
+        if the_type is None:
+            return False
+        elif the_type == self:
+            return True
+        return self._is_descendant(context, the_type._get_parent(context))
+
+    @cachedmethod
     def _get_properties(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
@@ -725,6 +742,11 @@ class PolicyType(ToscaPresentation):
     @cachedmethod
     def _get_properties(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
+
+    @cachedmethod
+    def _get_targets(self, context):
+        node_types, group_types = get_inherited_targets(context, self)
+        return ReadOnlyList(node_types), ReadOnlyList(group_types)
 
     def _validate(self, context):
         super(PolicyType, self)._validate(context)

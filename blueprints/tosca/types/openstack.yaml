@@ -160,6 +160,9 @@ policy_types:
       bandwidth_threshold:
         type: scalar-unit.size
         default: 1 GB
+    targets:
+      - openstack.Instance
+      - openstack.Secured
 
 data_types:
 

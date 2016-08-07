@@ -9,6 +9,8 @@ from .utils.properties import get_assigned_and_defined_property_values, get_para
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
 from .utils.capabilities import get_template_capabilities
+from .utils.artifacts import get_inherited_artifact_definitions
+from .utils.copy import get_default_raw_from_copy
 from aria import dsl_specification
 from aria.utils import ReadOnlyDict, ReadOnlyList, cachedmethod
 from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
@@ -103,6 +105,7 @@ class NodeTemplate(ToscaPresentation):
         :rtype: :class:`NodeFilter`
         """
 
+    @field_validator(type_validator('node template', 'node_templates'))
     @primitive_field(str)
     def copy(self):
         """
@@ -110,6 +113,10 @@ class NodeTemplate(ToscaPresentation):
         
         :rtype: str
         """
+    
+    @cachedmethod
+    def _get_default_raw(self):
+        return get_default_raw_from_copy(self, 'node_templates')
     
     @cachedmethod
     def _get_type(self, context):
@@ -130,6 +137,10 @@ class NodeTemplate(ToscaPresentation):
     @cachedmethod
     def _get_interfaces(self, context):
         return ReadOnlyDict(get_template_interfaces(context, self, 'node template'))
+    
+    @cachedmethod
+    def _get_artifacts(self, context):
+        return ReadOnlyDict(get_inherited_artifact_definitions(context, self))
 
     def _validate(self, context):
         super(NodeTemplate, self)._validate(context)
@@ -137,6 +148,7 @@ class NodeTemplate(ToscaPresentation):
         self._get_requirements(context)
         self._get_capabilities(context)
         self._get_interfaces(context)
+        self._get_artifacts(context)
 
     def _dump(self, context):
         self._dump_content(context, (
@@ -202,6 +214,7 @@ class RelationshipTemplate(ToscaPresentation):
         :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
         """
 
+    @field_validator(type_validator('relationship template', 'relationship_templates'))
     @primitive_field(str)
     def copy(self):
         """
@@ -209,6 +222,10 @@ class RelationshipTemplate(ToscaPresentation):
         
         :rtype: str
         """
+
+    @cachedmethod
+    def _get_default_raw(self):
+        return get_default_raw_from_copy(self, 'relationship_templates')
 
     @cachedmethod
     def _get_type(self, context):

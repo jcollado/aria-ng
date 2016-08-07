@@ -23,7 +23,7 @@ def data_type_validator(type_name='data type'):
         value = getattr(presentation, field.name)
         if value is not None:
             # Can be a complex data type
-            if value in context.presentation.data_types:
+            if (context.presentation.data_types is not None) and (value in context.presentation.data_types):
                 return True
             # Can be a primitive data type
             if get_primitive_data_type(value) is None:

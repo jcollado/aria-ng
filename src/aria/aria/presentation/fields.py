@@ -1,18 +1,17 @@
 
 from ..issue import Issue
 from ..exceptions import InvalidValueError, AriaError
-from ..utils import ReadOnlyList, ReadOnlyDict, print_exception, cachedmethod
+from ..utils import ReadOnlyList, ReadOnlyDict, print_exception, deepclone, merge, cachedmethod
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict
-from copy import deepcopy
 from clint.textui import puts
 
 class Field(object):
-    def __init__(self, field_type, fn, cls=None, default=None, allowed=None, required=False):
-        self.container = None
+    def __init__(self, field_variant, fn, cls=None, default=None, allowed=None, required=False):
+        self.container_cls = None
         self.name = None
-        self.field_type = field_type
+        self.field_variant = field_variant
         self.fn = fn
         self.cls = cls
         self.default = default
@@ -23,14 +22,20 @@ class Field(object):
         return self._get(presentation)
     
     def _get(self, presentation):
-        raw = getattr(presentation, '_raw')
+        default_raw = presentation._get_default_raw() if hasattr(presentation, '_get_default_raw') else None
 
-        if self.field_type == 'object_dict_unknown_fields':
+        if default_raw is None:
+            raw = presentation._raw
+        else:
+            raw = deepclone(default_raw)
+            merge(raw, presentation._raw)
+        
+        if self.field_variant == 'object_dict_unknown_fields':
             if isinstance(raw, dict):
                 return ReadOnlyDict(((k, self.cls(name=k, raw=v, container=presentation)) for k, v in raw.iteritems() if k not in presentation.FIELDS))
             return None
 
-        is_short_form_field = (self.container.SHORT_FORM_FIELD == self.name) if hasattr(self.container, 'SHORT_FORM_FIELD') else False
+        is_short_form_field = (self.container_cls.SHORT_FORM_FIELD == self.name) if hasattr(self.container_cls, 'SHORT_FORM_FIELD') else False
         is_dict = isinstance(raw, dict)
 
         value = None
@@ -49,7 +54,7 @@ class Field(object):
             if value not in self.allowed:
                 raise InvalidValueError('%s is not %s' % (self.fullname, ' or '.join([repr(v) for v in self.allowed])), locator=self.get_locator(raw))
 
-        if self.field_type == 'primitive':
+        if self.field_variant == 'primitive':
             if (self.cls is not None) and not isinstance(value, self.cls):
                 try:
                     return self.cls(value)
@@ -57,11 +62,11 @@ class Field(object):
                     raise InvalidValueError('%s is not a valid "%s": %s' % (self.fullname, self.fullclass, repr(value)), locator=self.get_locator(raw))
             return value
 
-        elif self.field_type == 'primitive_list':
+        elif self.field_variant == 'primitive_list':
             if not isinstance(value, list):
                 raise InvalidValueError('%s is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             if self.cls is not None:
-                value = deepcopy(value)
+                value = deepclone(value)
                 for i in range(len(value)):
                     if not isinstance(value[i], self.cls):
                         try:
@@ -70,23 +75,23 @@ class Field(object):
                             raise InvalidValueError('%s is not a list of "%s": element %d is %s' % (self.fullname, self.fullclass, i, repr(value[i])), locator=self.get_locator(raw))
             return ReadOnlyList(value)
 
-        elif self.field_type == 'object':
+        elif self.field_variant == 'object':
             try:
                 return self.cls(raw=value, container=presentation)
             except TypeError as e:
                 raise InvalidValueError('%s cannot not be initialized to an instance of "%s": %s' % (self.fullname, self.fullclass, repr(value)), cause=e, locator=self.get_locator(raw))
 
-        elif self.field_type == 'object_list':
+        elif self.field_variant == 'object_list':
             if not isinstance(value, list):
                 raise InvalidValueError('%s is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             return ReadOnlyList((self.cls(raw=v, container=presentation) for v in value))
 
-        elif self.field_type == 'object_dict':
+        elif self.field_variant == 'object_dict':
             if not isinstance(value, dict):
                 raise InvalidValueError('%s is not a dict: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             return ReadOnlyDict(((k, self.cls(name=k, raw=v, container=presentation)) for k, v in value.iteritems()))
 
-        elif self.field_type == 'sequenced_object_list':
+        elif self.field_variant == 'sequenced_object_list':
             if not isinstance(value, list):
                 raise InvalidValueError('%s is not a sequenced list (a list of dicts, each with exactly one key): %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
             sequence = []
@@ -102,13 +107,13 @@ class Field(object):
         else:
             locator = self.get_locator(raw)
             location = (', at %s' % locator) if locator is not None else ''
-            raise AttributeError('%s has unsupported field type: "%s"%s' % (self.fullname, self.field_type, location))
+            raise AttributeError('%s has unsupported field variant: "%s"%s' % (self.fullname, self.field_variant, location))
 
     def set(self, presentation, value):
         return self._set(presentation, value)
 
     def _set(self, presentation, value):
-        raw = getattr(presentation, '_raw')
+        raw = presentation._raw
         old = self.get(presentation)
         raw[self.name] = value
         try:
@@ -136,16 +141,16 @@ class Field(object):
                     print_exception(e)
         
         if isinstance(value, list):
-            if self.field_type == 'object_list':
+            if self.field_variant == 'object_list':
                 for v in value:
                     if hasattr(v, '_validate'):
                         v._validate(context)
-            elif self.field_type == 'sequenced_object_list':
+            elif self.field_variant == 'sequenced_object_list':
                 for _, v in value:
                     if hasattr(v, '_validate'):
                         v._validate(context)
         elif isinstance(value, dict):
-            if (self.field_type == 'object_dict') or (self.field_type == 'object_dict_unknown_fields'):
+            if (self.field_variant == 'object_dict') or (self.field_variant == 'object_dict_unknown_fields'):
                 for v in value.itervalues():
                     if hasattr(v, '_validate'):
                         v._validate(context)
@@ -155,7 +160,7 @@ class Field(object):
 
     @property
     def fullname(self):
-        return 'field "%s" in %s.%s' % (self.name, self.container.__module__, self.container.__name__)
+        return 'field "%s" in %s.%s' % (self.name, self.container_cls.__module__, self.container_cls.__name__)
 
     @property
     def fullclass(self):
@@ -173,35 +178,35 @@ class Field(object):
         if value is None:
             return
 
-        if self.field_type == 'primitive':
+        if self.field_variant == 'primitive':
             puts('%s: %s' % (self.name, context.style.literal(value)))
 
-        if self.field_type == 'primitive_list':
+        if self.field_variant == 'primitive_list':
             puts('%s:' % self.name)
             with context.style.indent:
                 for v in value:
                     puts(context.style.literal(v))
 
-        if self.field_type == 'object':
+        if self.field_variant == 'object':
             puts('%s:' % self.name)
             with context.style.indent:
                 if hasattr(value, '_dump'):
                     value._dump(context)
     
-        if self.field_type == 'object_list':
+        if self.field_variant == 'object_list':
             puts('%s:' % self.name)
             with context.style.indent:
                 for v in value:
                     if hasattr(v, '_dump'):
                         v._dump(context)
 
-        elif self.field_type == 'sequenced_object_list':
+        elif self.field_variant == 'sequenced_object_list':
             puts('%s:' % self.name)
             for _, v in value:
                 if hasattr(v, '_dump'):
                     v._dump(context)
         
-        elif (self.field_type == 'object_dict') or (self.field_type == 'object_dict_unknown_fields'):
+        elif (self.field_variant == 'object_dict') or (self.field_variant == 'object_dict_unknown_fields'):
             puts('%s:' % self.name)
             with context.style.indent:
                 for v in value.itervalues():
@@ -287,7 +292,7 @@ def has_fields(cls):
             cls.FIELDS[name] = field
             
             field.name = name
-            field.container = cls
+            field.container_cls = cls
             
             # This function is here just to create an enclosed scope for "field"
             def closure(field):
@@ -356,7 +361,7 @@ def primitive_field(cls=None, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(field_type='primitive', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_variant='primitive', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def primitive_list_field(cls=None, default=None, allowed=None, required=False):
@@ -366,7 +371,7 @@ def primitive_list_field(cls=None, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(field_type='primitive_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_variant='primitive_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_field(cls, default=None, allowed=None, required=False):
@@ -376,7 +381,7 @@ def object_field(cls, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(field_type='object', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_variant='object', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_list_field(cls, default=None, allowed=None, required=False):
@@ -386,7 +391,7 @@ def object_list_field(cls, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(field_type='object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_variant='object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_dict_field(cls, default=None, allowed=None, required=False):
@@ -396,7 +401,7 @@ def object_dict_field(cls, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(field_type='object_dict', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_variant='object_dict', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_sequenced_list_field(cls, default=None, allowed=None, required=False):
@@ -406,7 +411,7 @@ def object_sequenced_list_field(cls, default=None, allowed=None, required=False)
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(field_type='sequenced_object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_variant='sequenced_object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_dict_unknown_fields(cls, default=None, allowed=None, required=False):
@@ -416,7 +421,7 @@ def object_dict_unknown_fields(cls, default=None, allowed=None, required=False):
     The function must be a method in a class decorated with :func:`has\_fields`.
     """
     def decorator(fn):
-        return Field(field_type='object_dict_unknown_fields', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+        return Field(field_variant='object_dict_unknown_fields', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def field_getter(getter_fn):

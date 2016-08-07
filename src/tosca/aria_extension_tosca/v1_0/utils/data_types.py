@@ -231,6 +231,20 @@ def apply_constraint_to_value(context, presentation, constraint_clause, value):
     return True
 
 #
+# Repository
+#
+
+def get_data_type_value(context, presentation, field_name, type_name):
+    the_type = context.presentation.data_types.get(type_name) if context.presentation.data_types is not None else None
+    if the_type is not None:
+        value = getattr(presentation, field_name)
+        if value is not None:
+            return coerce_data_type_value(context, presentation, the_type, None, None, value, None)
+    else:
+        context.validation.report('field "%s" in "%s" refers to unknown data type "%s"' % (field_name, presentation._fullname, type_name), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+    return None
+
+#
 # Utils
 #
 

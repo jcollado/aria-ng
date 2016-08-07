@@ -1,6 +1,6 @@
 
-from .elements import Element, Template, Interface
-from .utils import instantiate_properties, instantiate_interfaces, dump_properties, dump_interfaces
+from .elements import Element, Template, Interface, Artifact
+from .utils import instantiate_properties, instantiate_interfaces, dump_dict_values, dump_properties, dump_interfaces
 from .plan import DeploymentPlan, Node, Capability, Relationship, Group
 from .. import Issue
 from ..utils import StrictList, StrictDict
@@ -57,6 +57,7 @@ class NodeTemplate(Template):
         self.type_name = type_name
         self.properties = StrictDict(str)
         self.interfaces = StrictDict(str, Interface)
+        self.artifacts = StrictDict(str, Artifact)
         self.capabilities = StrictDict(str, CapabilityTemplate)
         self.requirements = StrictList(Requirement)
         self.target_node_type_constraints = StrictList(FunctionType)
@@ -72,6 +73,8 @@ class NodeTemplate(Template):
         r = Node(self.name)
         instantiate_properties(context, self, r.properties, self.properties)
         instantiate_interfaces(context, self, r.interfaces, self.interfaces)
+        for artifact_name, artifact in self.artifacts.iteritems():
+            r.artifacts[artifact_name] = artifact.instantiate(context, self)
         for capability_name, capability in self.capabilities.iteritems():
             r.capabilities[capability_name] = capability.instantiate(context, self)
         return r
@@ -81,6 +84,8 @@ class NodeTemplate(Template):
             context.validation.report('node template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
         for interface in self.interfaces.itervalues():
             interface.validate(context)
+        for artifact in self.artifacts.itervalues():
+            artifact.validate(context)
         for capability in self.capabilities.itervalues():
             capability.validate(context)
         for requirement in self.requirements:
@@ -92,16 +97,9 @@ class NodeTemplate(Template):
             puts('Type: %s' % context.style.type(self.type_name))
             dump_properties(context, self.properties)
             dump_interfaces(context, self.interfaces)
-            if self.capabilities:
-                puts('Capabilities:')
-                with context.style.indent:
-                    for capabilitiy in self.capabilities.itervalues():
-                        capabilitiy.dump(context)
-            if self.requirements:
-                puts('Requirements:')
-                with context.style.indent:
-                    for requirement in self.requirements:
-                        requirement.dump(context)
+            dump_dict_values(context, self.artifacts, 'Artifacts')
+            dump_dict_values(context, self.capabilities, 'Capabilities')
+            dump_dict_values(context, self.requirements, 'Requirements')
 
 class Requirement(Element):
     def __init__(self, name, target_node_type_name=None, target_node_template_name=None, target_capability_type_name=None, target_capability_name=None):

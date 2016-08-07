@@ -27,6 +27,9 @@ repositories:
     description: >-
       The repository for the Node Cellar application and its dependencies.
     url: https://github.com/cloudify-cosmo/nodecellar/archive
+    credential:
+      user: guest
+      token: ''
 
 node_types:
 
@@ -133,53 +136,37 @@ topology_template:
         os_users: # map of os.UserInfo
           root:
             password: admin123
-          nodejs:
-            password: nodejs123
-            groups:
-              - www-data
       interfaces:
         standard:
           inputs:
             openstack_credential: { get_input: openstack_credential }
 
     application_host:
+      copy: loadbalancer_host
       description: >-
         Host for applications.
-      type: openstack.Instance
       properties:
         flavor_name: m1.small
         os_users: # map of os.UserInfo
-          root:
-            password: admin123
           nodejs:
             password: nodejs123
             groups:
               - www-data
-      interfaces:
-        standard:
-          inputs:
-            openstack_credential: { get_input: openstack_credential }
       capabilities:
         scalable:
           properties:
             max_instances: 10
 
     data_host:
+      copy: loadbalancer_host
       description: >-
         Host for data.
-      type: openstack.Instance
       properties:
         flavor_name: m1.large
         flavor_id: 5d62e82c-924e-4fa9-b1e4-c133867596f7
         os_users: # map of os.UserInfo
-          root:
-            password: admin123 
           mongodb:
             password: mongo123
-      interfaces:
-        standard:
-          inputs:
-            openstack_credential: { get_input: openstack_credential }
       requirements:
         - local_storage:
             node: data_volume

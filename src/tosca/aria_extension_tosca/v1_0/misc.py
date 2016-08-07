@@ -1,8 +1,7 @@
 
 from .presentation import ToscaPresentation
-from .field_getters import data_type_getter
 from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
-from .utils.data_types import apply_constraint_to_value
+from .utils.data_types import get_data_type_value, apply_constraint_to_value
 from aria import dsl_specification
 from aria.utils import cachedmethod
 from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator
@@ -84,7 +83,7 @@ class Repository(ToscaPresentation):
     
     @cachedmethod
     def _get_credential(self, context):
-        return data_type_getter(context, self, 'credential', 'tosca.datatypes.Credential')
+        return get_data_type_value(context, self, 'credential', 'tosca.datatypes.Credential')
 
 @short_form_field('file')
 @has_fields

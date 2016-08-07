@@ -1,5 +1,5 @@
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, Interface, Operation, Requirement
+from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, Interface, Operation, Artifact, Requirement
 from .data_types import coerce_value
 import re
 
@@ -54,6 +54,11 @@ def normalize_node_template(context, node_template):
     normalize_property_values(r.properties, node_template._get_property_values(context))
     normalize_interfaces(context, r.interfaces, node_template._get_interfaces(context))
 
+    artifacts = node_template._get_artifacts(context)
+    if artifacts:
+        for artifact_name, artifact in artifacts.iteritems():
+            r.artifacts[artifact_name] = normalize_artifact(context, artifact)
+
     requirements = node_template._get_requirements(context)
     if requirements:
         for _, requirement in requirements:
@@ -98,6 +103,23 @@ def normalize_operation(context, operation):
     if inputs:
         for input_name, the_input in inputs.iteritems():
             r.inputs[input_name] = the_input.value
+    
+    return r
+
+def normalize_artifact(context, artifact):
+    r = Artifact(name=artifact._name, type_name=artifact.type, source_path=artifact.file)
+
+    r.target_path = artifact.deploy_path
+
+    repository = artifact._get_repository(context)
+    if repository is not None:
+        r.repository_url = repository.url
+        credential = repository._get_credential(context)
+        if credential:
+            for k, v in credential.iteritems():
+                r.repository_credential[k] = v
+
+    normalize_property_values(r.properties, artifact._get_property_values(context))
     
     return r
 

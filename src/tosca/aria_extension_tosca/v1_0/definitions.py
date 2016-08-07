@@ -588,8 +588,30 @@ class ArtifactDefinition(ToscaPresentation):
         :rtype: str
         """
 
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        Not mentioned in spec, but is implied.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @cachedmethod
     def _get_type(self, context):
         return context.presentation.artifact_types.get(self.type) if context.presentation.artifact_types is not None else None
+
+    @cachedmethod
+    def _get_repository(self, context):
+        return context.presentation.repositories.get(self.repository) if context.presentation.repositories is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+
+    @cachedmethod
+    def _validate(self, context):
+        super(ArtifactDefinition, self)._validate(context)
+        self._get_property_values(context)
 
 @has_fields
 @dsl_specification('3.7.5', 'tosca-simple-profile-1.0')

@@ -28,6 +28,19 @@ def instantiate_interfaces(context, container, interfaces, from_interfaces):
     for interface_name, interface in from_interfaces.iteritems():
         interfaces[interface_name] = interface.instantiate(context, container)
 
+def dump_list_values(context, the_list, name):
+    if not the_list:
+        return
+    puts('%s:' % name)
+    with context.style.indent:
+        for value in the_list:
+            value.dump(context)
+
+def dump_dict_values(context, the_dict, name):
+    if not the_dict:
+        return
+    dump_list_values(context, the_dict.itervalues(), name)
+
 def dump_properties(context, properties, name='Properties'):
     if not properties:
         return

@@ -36,7 +36,7 @@ def get_inherited_capability_definitions(context, presentation, for_presentation
     parent = presentation._get_parent(context)
     capability_definitions = get_inherited_capability_definitions(context, parent, for_presentation=presentation) if parent is not None else OrderedDict()
 
-    # Add/merge our capability_definitions
+    # Add/merge our capability definitions
     our_capability_definitions = presentation.capabilities
     if our_capability_definitions is not None:
         for capability_name, our_capability_definition in our_capability_definitions.iteritems():

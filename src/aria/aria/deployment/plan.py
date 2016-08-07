@@ -1,7 +1,7 @@
 
-from .elements import Element, Interface
+from .elements import Element, Interface, Artifact
 from .ids import generate_id
-from .utils import dump_properties, dump_interfaces
+from .utils import dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from .. import Issue
 from ..utils import StrictList, StrictDict, ReadOnlyList
 from collections import OrderedDict
@@ -97,6 +97,7 @@ class Node(Element):
         self.template_name = template_name
         self.properties = StrictDict(str)
         self.interfaces = StrictDict(str, Interface)
+        self.artifacts = StrictDict(str, Artifact)
         self.capabilities = StrictDict(str, Capability)
         self.relationships = StrictList(Relationship)
     
@@ -142,6 +143,10 @@ class Node(Element):
         return satisfied
 
     def validate(self, context):
+        for interface in self.interfaces.itervalues():
+            interface.validate(context)
+        for artifact in self.artifacts.itervalues():
+            artifact.validate(context)
         for capability in self.capabilities.itervalues():
             capability.validate(context)
         for relationship in self.relationships:
@@ -154,6 +159,7 @@ class Node(Element):
             ('template_name', self.template_name),
             ('properties', self.properties),
             ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
+            ('artifacts', [v.as_raw for v in self.artifacts.itervalues()]),
             ('capabilities', [v.as_raw for v in self.capabilities.itervalues()]),
             ('relationships', [v.as_raw for v in self.relationships])))
             
@@ -163,16 +169,9 @@ class Node(Element):
             puts('Template: %s' % context.style.node(self.template_name))
             dump_properties(context, self.properties)
             dump_interfaces(context, self.interfaces)
-            if self.capabilities:
-                puts('Capabilities:')
-                with context.style.indent:
-                    for capability in self.capabilities.itervalues():
-                        capability.dump(context)
-            if self.relationships:
-                puts('Relationships:')
-                with context.style.indent:
-                    for relationship in self.relationships:
-                        relationship.dump(context)
+            dump_dict_values(context, self.artifacts, 'Artifacts')
+            dump_dict_values(context, self.capabilities, 'Capabilities')
+            dump_list_values(context, self.relationships, 'Relationships')
 
 class Capability(Element):
     def __init__(self, name, type_name):
@@ -246,13 +245,14 @@ class Relationship(Element):
 
     def dump(self, context):
         puts('Target node: %s' % context.style.node(self.target_node_id))
-        puts('Target capability: %s' % context.style.node(self.target_capability_name))
-        if self.type_name is not None:
-            puts('Relationship type: %s' % context.style.type(self.type_name))
-        else:
-            puts('Relationship template: %s' % context.style.node(self.template_name))
-        dump_properties(context, self.properties)
-        dump_interfaces(context, self.interfaces)
+        with context.style.indent:
+            puts('Target capability: %s' % context.style.node(self.target_capability_name))
+            if self.type_name is not None:
+                puts('Relationship type: %s' % context.style.type(self.type_name))
+            else:
+                puts('Relationship template: %s' % context.style.node(self.template_name))
+            dump_properties(context, self.properties)
+            dump_interfaces(context, self.interfaces)
 
 class Group(Element):
     def __init__(self, name, type_name):

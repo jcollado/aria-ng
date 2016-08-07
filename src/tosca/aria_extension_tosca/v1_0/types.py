@@ -9,6 +9,7 @@ from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions, get_inherited_operations
 from .utils.requirements import get_inherited_requirement_definitions
 from .utils.capabilities import get_inherited_valid_source_types, get_inherited_capability_definitions
+from .utils.artifacts import get_inherited_artifact_definitions
 from .utils.data_types import get_data_type, get_inherited_constraints, coerce_data_type_value
 from aria import dsl_specification
 from aria.utils import ReadOnlyDict, ReadOnlyList, cachedmethod
@@ -550,6 +551,10 @@ class NodeType(ToscaPresentation):
     def _get_interfaces(self, context):
         return ReadOnlyDict(get_inherited_interface_definitions(context, self, 'node type'))
 
+    @cachedmethod
+    def _get_artifacts(self, context):
+        return ReadOnlyDict(get_inherited_artifact_definitions(context, self))
+
     def _validate(self, context):
         super(NodeType, self)._validate(context)
         self._get_properties(context)
@@ -557,6 +562,7 @@ class NodeType(ToscaPresentation):
         self._get_requirements(context)
         self._get_capabilities(context)
         self._get_interfaces(context)
+        self._get_artifacts(context)
 
     def _dump(self, context):
         self._dump_content(context, (

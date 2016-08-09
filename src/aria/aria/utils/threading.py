@@ -3,7 +3,7 @@ from __future__ import absolute_import # so we can import standard 'threading'
 
 from .exceptions import print_exception
 from threading import Thread, Lock
-from Queue import Queue
+from Queue import Queue, Empty
 import itertools, multiprocessing
 
 # https://gist.github.com/tliron/81dd915166b0bfc64be08b4f8e22c835
@@ -39,7 +39,9 @@ class FixedThreadPoolExecutor(object):
             executor.raise_first()
             print executor.returns
     """
-    
+
+    _CYANIDE = object() # Special task marker used to kill worker threads.
+
     def __init__(self, size=multiprocessing.cpu_count() * 2 + 1, timeout=None, print_exceptions=False):
         """
         :param size: Number of threads in the pool (fixed).
@@ -56,8 +58,15 @@ class FixedThreadPoolExecutor(object):
         self._id_creator = itertools.count()
         self._lock = Lock() # for console output
 
-        self._workers = [FixedThreadPoolExecutor._Worker(self, index) for index in range(size)]
-    
+        self._workers = []
+        for index in range(size):
+            worker = Thread(
+                name='%s%d' % (self.__class__.__name__, index),
+                target=self._thread_worker)
+            worker.daemon = True
+            worker.start()
+            self._workers.append(worker)
+
     def submit(self, fn, *args, **kwargs):
         """
         Submit a task for execution.
@@ -76,8 +85,8 @@ class FixedThreadPoolExecutor(object):
         """
         self.drain()
         while self.is_alive:
-            self._tasks.put(FixedThreadPoolExecutor._CYANIDE, timeout=self.timeout)
-        self._workers =  None
+            self._tasks.put(self._CYANIDE, timeout=self.timeout)
+        self._workers = None
 
     def drain(self):
         """
@@ -121,31 +130,17 @@ class FixedThreadPoolExecutor(object):
         if exceptions:
             raise exceptions[0]
 
-    _CYANIDE = object()
-    """
-    Special task marker used to kill worker threads.
-    """
+    def _thread_worker(self):
+        while True:
+            if not self._execute_next_task():
+                break
 
-    class _Worker(Thread):
-        """
-        Worker thread.
-        
-        Keeps executing tasks until fed with cyanide.
-        """
-        def __init__(self, executor, index):
-            super(FixedThreadPoolExecutor._Worker, self).__init__(name='FixedThreadPoolExecutor%d' % index)
-            self.executor = executor
-            self.daemon = True
-            self.start()
-        
-        def run(self):
-            while True:
-                if not self.executor._execute_next_task():
-                    break
-    
     def _execute_next_task(self):
-        task = self._tasks.get(timeout=self.timeout)
-        if task == FixedThreadPoolExecutor._CYANIDE:
+        try:
+            task = self._tasks.get(timeout=self.timeout)
+        except Empty:
+            return True
+        if task == self._CYANIDE:
             # Time to die :(
             return False
         self._execute_task(*task)
@@ -169,6 +164,7 @@ class FixedThreadPoolExecutor(object):
         self.close()
         return False
 
+
 class LockedList(list):
     """
     A list that supports the "with" keyword with a built-in lock.
@@ -177,14 +173,13 @@ class LockedList(list):
     during concurrent access, they do not guarantee atomicity. This class will
     let you gain atomicity when needed.
     """
-    
-    def __init__(self):
-        super(LockedList, self).__init__()
+
+    def __init__(self, *args, **kwargs):
+        super(LockedList, self).__init__(*args, **kwargs)
         self.lock = Lock()
-    
+
     def __enter__(self):
         return self.lock.__enter__()
-        
+
     def __exit__(self, type, value, traceback):
         return self.lock.__exit__(type, value, traceback)
-

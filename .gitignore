@@ -12,3 +12,5 @@ out/
 *.csv
 
 .DS_Store
+
+.idea/

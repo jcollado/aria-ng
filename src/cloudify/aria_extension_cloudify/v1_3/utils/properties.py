@@ -1,11 +1,11 @@
 
 from .data_types import coerce_value
 from aria import Issue
-from aria.utils import merge, deepclone
+from aria.utils import merge
 from collections import OrderedDict
 
 #
-# ArtifactType, DataType, CapabilityType, RelationshipType, NodeType, GroupType, PolicyType
+# NodeType, RelationshipType, PolicyType, DataType
 #
 
 def get_inherited_property_definitions(context, presentation, field_name, for_presentation=None): # works on properties, parameters, inputs, and attributes
@@ -16,11 +16,11 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
     """
     
     # Get definitions from parent
-    parent = presentation._get_parent(context) if hasattr(presentation, '_get_parent') else None # if we inherit from a primitive, it does not have a parent
+    parent = presentation._get_parent(context)
     definitions = get_inherited_property_definitions(context, parent, field_name, for_presentation=presentation) if parent is not None else OrderedDict()
     
     # Add/merge our definitions
-    our_definitions = getattr(presentation, field_name, None) # if we inherit from a primitive, it does not have our field
+    our_definitions = getattr(presentation, field_name)
     if our_definitions is not None:
         our_definitions_clone = OrderedDict()
         for name, our_definition in our_definitions.iteritems():
@@ -31,7 +31,7 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
     return definitions
 
 #
-# NodeTemplate, RelationshipTemplate, GroupDefinition, PolicyDefinition
+# NodeTemplate, RelationshipTemplate
 #
 
 def get_assigned_and_defined_property_values(context, presentation):
@@ -81,9 +81,7 @@ def get_input_values(context, presentation):
     # Fill in defaults and values
     for name, definition in inputs.iteritems():
         if (values.get(name) is None):
-            if hasattr(definition, 'value') and (definition.value is not None):
-                values[name] = coerce_property_value(context, presentation, definition, definition.value) # for parameters only 
-            elif hasattr(definition, 'default') and (definition.default is not None):
+            if hasattr(definition, 'default') and (definition.default is not None):
                 values[name] = coerce_property_value(context, presentation, definition, definition.default)
     
     return values
@@ -113,16 +111,6 @@ def merge_raw_property_definition(context, presentation, raw_property_definition
 
     merge(raw_property_definition, our_property_definition._raw)
 
-def merge_raw_property_definitions(context, presentation, raw_property_definitions, our_property_definitions, field_name):
-    if our_property_definitions is None:
-        return
-    for property_name, our_property_definition in our_property_definitions.iteritems():
-        if property_name in raw_property_definitions:
-            raw_property_definition = raw_property_definitions[property_name]
-            merge_raw_property_definition(context, presentation, raw_property_definition, our_property_definition, field_name, property_name)
-        else:
-            raw_property_definitions[property_name] = deepclone(our_property_definition._raw)
-
 def merge_property_definitions(context, presentation, property_definitions, our_property_definitions, field_name, for_presentation):
     if our_property_definitions is None:
         return
@@ -135,14 +123,4 @@ def merge_property_definitions(context, presentation, property_definitions, our_
 
 def coerce_property_value(context, presentation, definition, value): # works on properties, inputs, and parameters
     the_type = definition._get_type(context) if definition is not None else None
-    entry_schema = definition.entry_schema if definition is not None else None
-    constraints = definition._get_constraints(context) if definition is not None else None
-    return coerce_value(context, presentation, the_type, entry_schema, constraints, value)
-
-def convert_property_definitions_to_values(definitions):
-    values = OrderedDict()
-    for name, definition in definitions.iteritems():
-        default = definition.default
-        if default is not None:
-            values[name] = default
-    return values
+    return coerce_value(context, presentation, the_type, value)

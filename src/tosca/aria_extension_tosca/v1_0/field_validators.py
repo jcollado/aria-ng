@@ -12,7 +12,7 @@ def data_type_validator(type_name='data type'):
     """
     Makes sure that the field refers to a valid data type, whether complex or primitive. 
     
-    Used as @field\_validator for "type" fields in :class:`PropertyDefinition`, :class:`AttributeDefinition`, :class:`ParameterDefinition`, and :class:`EntrySchema`.
+    Used with the :func:`field_validator` decorator for "type" fields in :class:`PropertyDefinition`, :class:`AttributeDefinition`, :class:`ParameterDefinition`, and :class:`EntrySchema`.
     
     Extra behavior beyond validation: generated function returns true if field is a complex data type.
     """
@@ -39,10 +39,10 @@ def data_type_validator(type_name='data type'):
 
 def entry_schema_validator(field, presentation, context):
     """
-    According to whether the data type supports entry\_schema (e.g., it is or inherits from list or map),
+    According to whether the data type supports "entry\_schema" (e.g., it is or inherits from list or map),
     make sure that we either have or don't have a valid data type value.
     
-    Used as @field\_validator for the "entry\_schema" field in :class:`PropertyDefinition` and :class:`AttributeDefinition`.
+    Used with the :func:`field_validator` decorator for the "entry\_schema" field in :class:`PropertyDefinition` and :class:`AttributeDefinition`.
     """
 
     field._validate(presentation, context)
@@ -73,7 +73,7 @@ def data_value_validator(field, presentation, context):
     """
     Makes sure that the field contains a valid value according to data type and constraints.
     
-    Used as @field\_validator for the "default" field in :class:`PropertyDefinition` and :class:`AttributeDefinition`.
+    Used with the :func:`field_validator` decorator for the "default" field in :class:`PropertyDefinition` and :class:`AttributeDefinition`.
     """
 
     field._validate(presentation, context)
@@ -96,7 +96,7 @@ def data_type_derived_from_validator(field, presentation, context):
     """
     Makes sure that the field refers to a valid parent data type (complex or primitive).
     
-    Used as @field\_validator for the "derived\_from" field in :class:`DataType`.
+    Used with the :func:`field_validator` decorator for the "derived\_from" field in :class:`DataType`.
     """
     
     if _data_type_validator(field, presentation, context):
@@ -119,7 +119,7 @@ def data_type_properties_validator(field, presentation, context):
     """
     Makes sure that we do not have properties if we have a primitive ancestor.
     
-    Used as @field\_validator for the "properties" field in :class:`DataType`.
+    Used with the :func:`field_validator` decorator for the "properties" field in :class:`DataType`.
     """
 
     field._validate(presentation, context)
@@ -137,7 +137,7 @@ def constraint_clause_field_validator(field, presentation, context):
     """
     Makes sure that field contains a valid value for the container type.
     
-    Used as @field\_validator for various field in :class:`ConstraintClause`.
+    Used with the :func:`field_validator` decorator for various field in :class:`ConstraintClause`.
     """
 
     field._validate(presentation, context)
@@ -154,7 +154,7 @@ def constraint_clause_in_range_validator(field, presentation, context):
     value for the container type, and that the upper bound is either "UNBOUNDED" or a valid value for the
     container type.
     
-    Used as @field\_validator for the "in\_range" field in :class:`ConstraintClause`.
+    Used with the :func:`field_validator` decorator for the "in\_range" field in :class:`ConstraintClause`.
     """
 
     field._validate(presentation, context)
@@ -183,7 +183,7 @@ def constraint_clause_valid_values_validator(field, presentation, context):
     """
     Makes sure that the value is a list of valid values for the container type.
     
-    Used as @field\_validator for the "valid\_values" field in :class:`ConstraintClause`.
+    Used with the :func:`field_validator` decorator for the "valid\_values" field in :class:`ConstraintClause`.
     """
     
     field._validate(presentation, context)
@@ -198,7 +198,7 @@ def constraint_clause_pattern_validator(field, presentation, context):
     """
     Makes sure that the value is a valid regular expression.
     
-    Used as @field\_validator for the "pattern" field in :class:`ConstraintClause`.
+    Used with the :func:`field_validator` decorator for the "pattern" field in :class:`ConstraintClause`.
     """
 
     field._validate(presentation, context)
@@ -219,7 +219,7 @@ def node_template_or_type_validator(field, presentation, context):
     """
     Makes sure that the field refers to either a node template or a node type.
     
-    Used as @field\_validator for the "node" field in :class:`RequirementAssignment`.
+    Used with the :func:`field_validator` decorator for the "node" field in :class:`RequirementAssignment`.
     """
     
     field._validate(presentation, context)
@@ -238,7 +238,7 @@ def capability_definition_or_type_validator(field, presentation, context):
     
     If the value refers to a capability type, make sure the "node" field was not assigned.  
     
-    Used as @field\_validator for the "capability" field in :class:`RequirementAssignment`.
+    Used with the :func:`field_validator` decorator for the "capability" field in :class:`RequirementAssignment`.
     """
     
     field._validate(presentation, context)
@@ -266,7 +266,7 @@ def node_filter_validator(field, presentation, context):
     """
     Makes sure that the field has a value only if "node" refers to a node type.
 
-    Used as @field\_validator for the "node\_filter" field in :class:`RequirementAssignment`.
+    Used with the :func:`field_validator` decorator for the "node\_filter" field in :class:`RequirementAssignment`.
     """
 
     field._validate(presentation, context)
@@ -285,7 +285,7 @@ def relationship_template_or_type_validator(field, presentation, context):
     """
     Makes sure that the field refers to either a relationship template or a relationship type.
     
-    Used as @field\_validator for the "type" field in :class:`RequirementAssignmentRelationship`.
+    Used with the :func:`field_validator` decorator for the "type" field in :class:`RequirementAssignmentRelationship`.
     """
     
     field._validate(presentation, context)
@@ -305,7 +305,7 @@ def list_node_type_or_group_type_validator(field, presentation, context):
     """
     Makes sure that the field's elements refer to either node types or a group types.
 
-    Used as @field\_validator for the "targets" field in :class:`PolicyType`.
+    Used with the :func:`field_validator` decorator for the "targets" field in :class:`PolicyType`.
     """
     
     field._validate(presentation, context)
@@ -322,12 +322,12 @@ def list_node_type_or_group_type_validator(field, presentation, context):
 # PolicyDefinition
 #
 
-def policy_node_template_or_group_validator(field, presentation, context):
+def policy_targets_validator(field, presentation, context):
     """
     Makes sure that the field's elements refer to either node templates or groups, and that
     they match the node types and group types declared in the policy type.
 
-    Used as @field\_validator for the "targets" field in :class:`PolicyDefinition`.
+    Used with the :func:`field_validator` decorator for the "targets" field in :class:`PolicyDefinition`.
     """
     
     field._validate(presentation, context)
@@ -371,7 +371,7 @@ def node_filter_properties_validator(field, presentation, context):
     """
     Makes sure that the field's elements refer to defined properties in the target node type.
     
-    Used as @field\_validator for the "properties" field in :class:`NodeFilter`.
+    Used with the :func:`field_validator` decorator for the "properties" field in :class:`NodeFilter`.
     """
     
     field._validate(presentation, context)
@@ -389,7 +389,7 @@ def node_filter_capabilities_validator(field, presentation, context):
     """
     Makes sure that the field's elements refer to defined capabilities and properties in the target node type.
     
-    Used as @field\_validator for the "capabilities" field in :class:`NodeFilter`.
+    Used with the :func:`field_validator` decorator for the "capabilities" field in :class:`NodeFilter`.
     """
 
     field._validate(presentation, context)

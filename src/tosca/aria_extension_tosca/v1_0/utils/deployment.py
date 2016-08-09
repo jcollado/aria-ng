@@ -12,22 +12,23 @@ def get_deployment_template(context, presenter):
     topology_template = presenter.service_template.topology_template
     if topology_template is not None:
         normalize_property_values(r.inputs, topology_template._get_input_values(context))
-        normalize_properties(r.outputs, topology_template.outputs)
+        
+    normalize_properties(r.outputs, presenter.outputs)
 
-        node_templates = topology_template.node_templates
-        if node_templates:
-            for node_template_name, node_template in node_templates.iteritems():
-                r.node_templates[node_template_name] = normalize_node_template(context, node_template)
+    node_templates = presenter.node_templates
+    if node_templates:
+        for node_template_name, node_template in node_templates.iteritems():
+            r.node_templates[node_template_name] = normalize_node_template(context, node_template)
 
-        groups = topology_template.groups
-        if groups:
-            for group_name, group in groups.iteritems():
-                r.group_templates[group_name] = normalize_group(context, group)
+    groups = presenter.groups
+    if groups:
+        for group_name, group in groups.iteritems():
+            r.group_templates[group_name] = normalize_group(context, group)
 
-        policies = topology_template.policies
-        if policies:
-            for policy_name, policy in policies.iteritems():
-                r.policy_templates[policy_name] = normalize_policy(context, policy)
+    policies = presenter.policies
+    if policies:
+        for policy_name, policy in policies.iteritems():
+            r.policy_templates[policy_name] = normalize_policy(context, policy)
 
     return r
 

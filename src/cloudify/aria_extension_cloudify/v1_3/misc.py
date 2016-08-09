@@ -10,7 +10,7 @@ class Version(AsIsPresentation):
 @dsl_specification('outputs', 'cloudify-1.3')
 class Output(Presentation):
     """
-    Outputs provide a way of exposing global aspects of a deployment. When deployed, a blueprint can expose specific outputs of that deployment - for instance, an endpoint of a server or any other runtime or static information of a specific resource.
+    :code:`outputs` provide a way of exposing global aspects of a deployment. When deployed, a blueprint can expose specific outputs of that deployment - for instance, an endpoint of a server or any other runtime or static information of a specific resource.
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-outputs/>`__.
     """
@@ -19,8 +19,6 @@ class Output(Presentation):
     def description(self):
         """
         An optional description for the output.
-        
-        See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_DESCRIPTION>`__
         
         :rtype: str
         """
@@ -34,10 +32,12 @@ class Output(Presentation):
 @short_form_field('implementation')
 @has_fields
 class Operation(Presentation):
-    @primitive_field(str) # the spec says this is required, but actually sometimes it's not
+    @primitive_field(str)
     def implementation(self):
         """
         The script or plugin task name to execute.
+        
+        ARIA NOTE: The spec seems to mistakingly mark this as a required field.
         
         :rtype: str
         """
@@ -61,7 +61,7 @@ class Operation(Presentation):
     @primitive_field(str)
     def max_retries(self):
         """
-        Maximum number of retries for a task. -1 means infinite retries (Default: task_retries in manager blueprint Cloudify Manager Type for remote workflows and task_retries workflow configuration for local workflows).
+        Maximum number of retries for a task. -1 means infinite retries (Default: :code:`task_retries` in manager blueprint Cloudify Manager Type for remote workflows and :code:`task_retries` workflow configuration for local workflows).
         
         :rtype: int
         """
@@ -69,7 +69,7 @@ class Operation(Presentation):
     @primitive_field(int)
     def retry_interval(self):
         """
-        Minimum wait time (in seconds) in between task retries (Default: task_retry_interval in manager blueprint Cloudify Manager Type for remote workflows and task_retry_interval workflow configuration for local workflows).
+        Minimum wait time (in seconds) in between task retries (Default: :code:`task_retry_interval` in manager blueprint Cloudify Manager Type for remote workflows and :code:`task_retry_interval` workflow configuration for local workflows).
         
         :rtype: int
         """
@@ -79,7 +79,7 @@ class Operation(Presentation):
 @dsl_specification('workflows', 'cloudify-1.3')
 class Workflow(Presentation):
     """
-    Workflows define a set of tasks that can be executed on a node or a group of nodes, and the execution order of these tasks, serially or in parallel. A task may be an operation (implemented by a plugin), but it may also be other actions, including arbitrary code.
+    :code:`workflows` define a set of tasks that can be executed on a node or a group of nodes, and the execution order of these tasks, serially or in parallel. A task may be an operation (implemented by a plugin), but it may also be other actions, including arbitrary code.
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-workflows/>`__.
     """
@@ -105,7 +105,7 @@ class Workflow(Presentation):
 @dsl_specification('plugins', 'cloudify-1.3')
 class Plugin(Presentation):
     """
-    The instances key is used for configuring the deployment characteristics of the node template.
+    By declaring :code:`plugins` we can install python modules and use the installed or preinstalled modules to perform different operations. We can also decide where a specific plugin's operations will be executed.
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-plugins/>`__.
     """
@@ -113,7 +113,7 @@ class Plugin(Presentation):
     @primitive_field(str, required=True)
     def executor(self):
         """
-        Where to execute the plugin's operations. Valid Values: central_deployment_agent, host_agent.
+        Where to execute the plugin's operations. Valid Values: central\_deployment\_agent, host_agent.
         
         :rtype: str
         """
@@ -137,7 +137,7 @@ class Plugin(Presentation):
     @primitive_field(bool, default=True)
     def install(self):
         """
-        Whether to install the plugin or not as it might already be installed as part of the agent. Defaults to true. (Supported since: cloudify_dsl_1_1)
+        Whether to install the plugin or not as it might already be installed as part of the agent. Defaults to true. (Supported since: cloudify\_dsl\_1\_1)
         
         :rtype: bool
         """
@@ -145,7 +145,7 @@ class Plugin(Presentation):
     @primitive_field(str)
     def package_name(self):
         """
-        Managed plugin package name. (Supported since: cloudify_dsl_1_2) If install is false, pacakge_name is redundant. If install is true, package_name (or source) is mandatory.
+        Managed plugin package name. (Supported since: :code:`cloudify_dsl_1_2`) If install is false, pacakge_name is redundant. If install is true, package_name (or source) is mandatory.
         
         :rtype: str
         """
@@ -153,7 +153,7 @@ class Plugin(Presentation):
     @object_field(Version)
     def package_version(self):
         """
-        Managed plugin package version. (Supported since: cloudify_dsl_1_2)
+        Managed plugin package version. (Supported since: :code:`cloudify_dsl_1_2`)
         
         :rtype: :class:`Version`
         """
@@ -161,7 +161,7 @@ class Plugin(Presentation):
     @primitive_field(str)
     def supported_platform(self):
         """
-        Managed plugin supported platform (e.g. linux_x86_64). (Supported since: cloudify_dsl_1_2)
+        Managed plugin supported platform (e.g. linux\_x86\_64). (Supported since: :code:`cloudify_dsl_1_2`)
         
         :rtype: str
         """
@@ -169,7 +169,7 @@ class Plugin(Presentation):
     @primitive_field(str)
     def distribution(self):
         """
-        Managed plugin distribution. (Supported since: cloudify_dsl_1_2)
+        Managed plugin distribution. (Supported since: :code:`cloudify_dsl_1_2`)
         
         :rtype: str
         """
@@ -177,7 +177,7 @@ class Plugin(Presentation):
     @object_field(Version)
     def distribution_version(self):
         """
-        Managed plugin distribution version. (Supported since: cloudify_dsl_1_2)
+        Managed plugin distribution version. (Supported since: :code:`cloudify_dsl_1_2`)
         
         :rtype: :class:`Version`
         """
@@ -185,7 +185,7 @@ class Plugin(Presentation):
     @primitive_field(str)
     def distribution_release(self):
         """
-        Managed plugin distribution release. (Supported since: cloudify_dsl_1_2)
+        Managed plugin distribution release. (Supported since: :code:`cloudify_dsl_1_2`)
         
         :rtype: str
         """
@@ -193,7 +193,7 @@ class Plugin(Presentation):
 @has_fields
 class Scalable(Presentation):
     """
-    The capabilities.scalable.properties key is used for configuring the deployment characteristics of the node template.
+    The :code:`capabilities.scalable.properties` key is used for configuring the deployment characteristics of the node template.
     """
     
     @primitive_field(int, default=1)
@@ -226,7 +226,7 @@ class Scalable(Presentation):
 @dsl_specification('policy-triggers', 'cloudify-1.3')
 class PolicyTrigger(Presentation):
     """
-    policy_triggers specify the implementation of actions invoked by policies and declare the properties that define the trigger's behavior.
+    :code:`policy_triggers` specify the implementation of actions invoked by policies and declare the properties that define the trigger's behavior.
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policy-triggers/>`__.
     """

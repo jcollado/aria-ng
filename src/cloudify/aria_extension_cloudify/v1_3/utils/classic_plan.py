@@ -1,5 +1,5 @@
 
-from .ids import generate_id
+from aria.deployment import generate_id
 
 class ClassicDeploymentPlan(object):
     """

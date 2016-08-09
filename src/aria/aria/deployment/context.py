@@ -22,9 +22,9 @@ class DeploymentContext(object):
         return json.dumps(raw, indent=indent, cls=JSONValueEncoder)
 
     def dump_types(self, context):
-        if self.node_types:
+        if self.node_types.children:
             puts('Node types:')
             self.node_types.dump(context)
-        if self.capability_types:
+        if self.capability_types.children:
             puts('Capability types:')
             self.capability_types.dump(context)

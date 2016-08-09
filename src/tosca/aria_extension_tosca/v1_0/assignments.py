@@ -23,7 +23,7 @@ class RequirementAssignmentRelationship(ToscaPresentation):
     @object_dict_field(PropertyAssignment)
     def properties(self):
         """
-        The spec doesn't mention this but shows it in examples.
+        ARIA NOTE: This field is not mentioned in the spec, but is implied.
         
         :rtype: dict of str, :class:`PropertyAssignment`
         """

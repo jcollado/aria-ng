@@ -26,4 +26,4 @@ def evaluate_functions(payload, context,
     :param get_node_method: A method for getting a node.
     :return: payload.
     """
-    print '!!! evaluate_functsion'
+    print '!!! evaluate_function'

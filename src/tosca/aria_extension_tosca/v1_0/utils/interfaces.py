@@ -108,13 +108,13 @@ def get_inherited_interface_definitions(context, presentation, type_name, for_pr
 def get_template_interfaces(context, presentation, type_name):
     """
     Returns the assigned interface_template values while making sure they are defined in the type. This includes
-    the template_interfaces themselves, their operations, and inputs for template_interfaces and operations.
+    the interfaces themselves, their operations, and inputs for interfaces and operations.
     
     Interface and operation inputs' default values, if available, will be used if we did not assign them.
     
     Makes sure that required inputs indeed end up with a value.
     
-    This code is especially complex due to the levels of nesting involved.
+    This code is especially complex due to the many levels of nesting involved.
     """
     
     template_interfaces = OrderedDict()

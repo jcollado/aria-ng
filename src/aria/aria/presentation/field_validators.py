@@ -6,7 +6,7 @@ def type_validator(type_name, types_dict_name):
     """
     Makes sure that the field refers to an existing type defined in the root presenter.
     
-    Can be used with @field\_validator.
+    Can be used with the :func:`field_validator` decorator.
     """
     
     def fn(field, presentation, context):
@@ -27,7 +27,7 @@ def list_type_validator(type_name, types_dict_name):
     
     Assumes that the field is a list.
     
-    Can be used with @field\_validator.
+    Can be used with the :func:`field_validator` decorator.
     """
 
     def fn(field, presentation, context):
@@ -49,7 +49,7 @@ def list_length_validator(length):
     
     Assumes that the field is a list.
     
-    Can be used with @field\_validator.
+    Can be used with the :func:`field_validator` decorator.
     """
 
     def fn(field, presentation, context):
@@ -67,7 +67,7 @@ def derived_from_validator(types_dict_name):
     """
     Makes sure that the field refers to a valid parent type defined in the root presenter.
     
-    Can be used with @field\_validator.
+    Can be used with the :func:`field_validator` decorator.
     """
 
     def fn(field, presentation, context):

@@ -10,7 +10,7 @@ from collections import OrderedDict
 
 def get_inherited_valid_source_types(context, presentation):
     """
-    If we haven't set the "valid\_source\_types" fields, uses that value from our parent, if we have one (recursively).
+    If we haven't set the :code:`valid_source_types` fields, uses that value from our parent, if we have one (recursively).
     """
     
     valid_source_types = presentation.valid_source_types

@@ -2,18 +2,18 @@
 from ..v1_2 import Instances
 from .definitions import PropertyDefinition, InterfaceDefinition, GroupDefinition, PolicyDefinition
 from .assignments import PropertyAssignment
-from .types import NodeType, RelationshipType, PolicyType
+from .types import NodeType, RelationshipType, PolicyType, DataType
 from .misc import Output, Workflow, Plugin, Scalable, PolicyTrigger
+from .utils.properties import get_assigned_and_defined_property_values, get_input_values
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
-
-from aria_extension_tosca.v1_0.types import DataType
+from aria.utils import ReadOnlyDict, cachedmethod
 
 @has_fields
 @dsl_specification('relationships-1', 'cloudify-1.3')
 class RelationshipTemplate(Presentation):
     """
-    Relationships let you define how nodes relate to one another. For example, a web_server node can be contained_in a vm node or an application node can be connected_to a database node.
+    :code:`relationships` let you define how nodes relate to one another. For example, a :code:`web_server` node can be :code:`contained_in` a :code:`vm` node or an :code:`application` node can be :code:`connected_to` a :code:`database` node.
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-relationships/>`__
     """
@@ -34,6 +34,14 @@ class RelationshipTemplate(Presentation):
         
         :rtype: str
         """
+
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        ARIA NOTE: This field is not mentioned in the spec, but is implied.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
     
     @primitive_field(str, required=True)
     def target(self):
@@ -46,7 +54,7 @@ class RelationshipTemplate(Presentation):
     @primitive_field(str)
     def connection_type(self):
         """
-        valid values: all_to_all and all_to_one
+        valid values: :code:`all_to_all` and :code:`all_to_one`
         
         :rtype: str
         """
@@ -67,13 +75,25 @@ class RelationshipTemplate(Presentation):
         :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.relationship_types.get(self.type) if context.presentation.relationship_types is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+
+    def _validate(self, context):
+        super(RelationshipTemplate, self)._validate(context)
+        self._get_property_values(context)
+
 @has_fields
 @dsl_specification('node-templates', 'cloudify-1.3')
 class NodeTemplate(Presentation):
     """
-    node_templates represent the actual instances of node types which would eventually represent a running application/service as described in the blueprint.
+    :code:`node_templates` represent the actual instances of node types which would eventually represent a running application/service as described in the blueprint.
 
-    node_templates are more commonly referred to as nodes. nodes can comprise more than one instance. For example, you could define a node which contains two vms. Each vm will then be called a node_instance.
+    :code:`node_templates` are more commonly referred to as :code:`nodes`. Nodes can comprise more than one instance. For example, you could define a node which contains two vms. Each vm will then be called a :code:`node_instance`.
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-templates/>`__
     """
@@ -106,7 +126,7 @@ class NodeTemplate(Presentation):
     @object_field(Instances)
     def instances(self):
         """
-        Instances configuration. (Deprecated. Replaced by capabilities.scalable.)
+        Instances configuration. (Deprecated. Replaced by :code:`capabilities.scalable`.)
         
         :rtype: :class:`Instances`
         """
@@ -130,8 +150,22 @@ class NodeTemplate(Presentation):
     @object_dict_field(Scalable)
     def capabilities(self):
         """
+        Used for specifying the node template capabilities (Supported since: :code:`cloudify_dsl_1_3`. At the moment only scalable capability is supported)
+        
         :rtype: dict of str, :class:`Scalable`
         """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.node_types.get(self.type) if context.presentation.node_types is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+
+    def _validate(self, context):
+        super(NodeTemplate, self)._validate(context)
+        self._get_property_values(context)
 
 @has_fields
 class ServiceTemplate(Presentation):
@@ -147,7 +181,7 @@ class ServiceTemplate(Presentation):
     @dsl_specification('versioning', 'cloudify-1.3')
     def tosca_definitions_version(self):
         """
-        tosca_definitions_version is a top level property of the blueprint which is used to specify the DSL version used. For Cloudify 3.4, the versions that are currently defined are cloudify_dsl_1_0, cloudify_dsl_1_1, cloudify_dsl_1_2 and cloudify_dsl_1_3.
+        :code:`tosca_definitions_version` is a top level property of the blueprint which is used to specify the DSL version used. For Cloudify 3.4, the versions that are currently defined are :code:`cloudify_dsl_1_0`, :code:`:code:`cloudify\_dsl\_1\_1``, :code:`cloudify_dsl_1_2` and :code:`cloudify_dsl_1_3`.
 
         The version declaration must be included in the main blueprint file. It may also be included in YAML files that are imported in it (transitively), in which case, the version specified in the imported YAMLs must match the version specified in the main blueprint file.
 
@@ -162,7 +196,7 @@ class ServiceTemplate(Presentation):
     @dsl_specification('imports', 'cloudify-1.3')
     def imports(self):
         """
-        imports allow the author of a blueprint to reuse blueprint files or parts of them and use predefined types (e.g. from the types.yaml file).
+        :code:`imports` allow the author of a blueprint to reuse blueprint files or parts of them and use predefined types (e.g. from the types.yaml file).
         
         See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-imports/>`__
         
@@ -173,7 +207,7 @@ class ServiceTemplate(Presentation):
     @dsl_specification('inputs', 'cloudify-1.3')
     def inputs(self):
         """
-        Inputs are parameters injected into the blueprint upon deployment creation. These parameters can be referenced by using the get_input intrinsic function.
+        :code:`inputs` are parameters injected into the blueprint upon deployment creation. These parameters can be referenced by using the :code:`get_input` intrinsic function.
 
         Inputs are useful when there's a need to inject parameters to the blueprint which were unknown when the blueprint was created and can be used for distinction between different deployments of the same blueprint.
         
@@ -247,3 +281,29 @@ class ServiceTemplate(Presentation):
         """
         :rtype: dict of str, :class:`DataType`
         """
+
+    @cachedmethod
+    def _get_input_values(self, context):
+        return ReadOnlyDict(get_input_values(context, self))
+
+    def _validate(self, context):
+        super(ServiceTemplate, self)._validate(context)
+        self._get_input_values(context)
+
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'tosca_definitions_version',
+            'imports',
+            'plugins',
+            'data_types',
+            'node_types',
+            'policy_types',
+            'inputs',
+            'node_templates',
+            'relationships',
+            'groups',
+            'policies',
+            'policy_triggers',
+            'outputs',
+            'workflows'))

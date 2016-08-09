@@ -25,5 +25,6 @@ __all__ = (
     'print_traceback',
     'import_fullname',
     'import_modules',
+    'ExecutorException',
     'FixedThreadPoolExecutor',
     'LockedList')

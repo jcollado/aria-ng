@@ -18,16 +18,6 @@ This is the core ARIA API.
 
 .. automodule:: aria.deployment
 
-:mod:`aria.execution`
-*********************
-
-.. automodule:: aria.execution
-
-:mod:`aria.execution.cloudify`
-******************************
-
-.. automodule:: aria.execution.cloudify
-
 :mod:`aria.loading`
 *******************
 
@@ -52,3 +42,8 @@ This is the core ARIA API.
 *****************
 
 .. automodule:: aria.tools
+
+:mod:`aria.utils`
+*****************
+
+.. automodule:: aria.utils

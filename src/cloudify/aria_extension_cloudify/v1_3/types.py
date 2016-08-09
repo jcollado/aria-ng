@@ -1,13 +1,16 @@
 
 from .definitions import InterfaceDefinition, PropertyDefinition
+from .utils.properties import get_inherited_property_definitions
+from .utils.data_types import coerce_data_type_value
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field, object_dict_field, field_validator, derived_from_validator
+from aria.utils import ReadOnlyDict, cachedmethod
 
 @has_fields
 @dsl_specification('node-types', 'cloudify-1.3')
 class NodeType(Presentation):
     """
-    node_types are used for defining common properties and behaviors for node-templates. node-templates can then be created based on these types, inheriting their definitions.
+    :code:`node_types` are used for defining common properties and behaviors for :code:`node_templates`. :code:`node_templates` can then be created based on these types, inheriting their definitions.
 
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-types/>`__
     """
@@ -44,6 +47,18 @@ class NodeType(Presentation):
         
         :rtype: dict of str, :class:`PropertyDefinition`
         """
+
+    @cachedmethod
+    def _get_parent(self, context):
+        return context.presentation.node_types.get(self.derived_from)
+
+    @cachedmethod
+    def _get_properties(self, context):
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
+
+    def _validate(self, context):
+        super(NodeType, self)._validate(context)
+        self._get_properties(context)
 
 @has_fields
 @dsl_specification('relationships-2', 'cloudify-1.3')
@@ -90,16 +105,36 @@ class RelationshipType(Presentation):
     @primitive_field(str, allowed=('all_to_all', 'all_to_one'))
     def connection_type(self):
         """
-        valid values: all_to_all and all_to_one
+        valid values: :code:`all_to_all` and :code:`all_to_one`
         
         :rtype: str
         """
+    
+    @object_dict_field(PropertyDefinition)
+    def properties(self):
+        """
+        ARIA NOTE: This field is not mentioned in the spec, but is implied.
+        
+        :rtype: dict of str, :class:`PropertyDefinition`
+        """
+
+    @cachedmethod
+    def _get_parent(self, context):
+        return context.presentation.relationship_types.get(self.derived_from)
+
+    @cachedmethod
+    def _get_properties(self, context):
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
+
+    def _validate(self, context):
+        super(RelationshipType, self)._validate(context)
+        self._get_properties(context)
 
 @has_fields
 @dsl_specification('policy-types', 'cloudify-1.3')
 class PolicyType(Presentation):
     """
-    policies provide a way of analyzing a stream of events that correspond to a group of nodes (and their instances).
+    :code:`policies` provide a way of analyzing a stream of events that correspond to a group of nodes (and their instances).
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policy-types/>`__.
     """
@@ -132,7 +167,7 @@ class PolicyType(Presentation):
 @dsl_specification('data-types', 'cloudify-1.3')
 class DataType(Presentation):
     """
-    data_types are useful for grouping together and re-using a common set of properties, along with their types and default values.
+    :code:`data_types` are useful for grouping together and re-using a common set of properties, along with their types and default values.
     
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-data-types/>`__.
     """
@@ -161,3 +196,18 @@ class DataType(Presentation):
         
         :rtype: str
         """
+
+    @cachedmethod
+    def _get_parent(self, context):
+        return context.presentation.data_types.get(self.derived_from)
+
+    @cachedmethod
+    def _get_properties(self, context):
+        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
+
+    def _validate(self, context):
+        super(DataType, self)._validate(context)
+        self._get_properties(context)
+
+    def _coerce_value(self, context, presentation, value, aspect):
+        return coerce_data_type_value(context, presentation, self, value, aspect)

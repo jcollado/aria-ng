@@ -19,7 +19,7 @@ aria-requirements:
 docs-requirements:
 	pip install --upgrade --requirement $(SPHINX_SRC)/requirements.txt
 
-docs: docs-requirements
+docs: docs-requirements aria-requirements
 	rm -rf $(DOCS)
 	sphinx-build -b html -c $(SPHINX_SRC) $(ARIA_SRC) $(DOCS)
 

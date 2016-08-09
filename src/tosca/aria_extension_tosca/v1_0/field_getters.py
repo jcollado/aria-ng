@@ -4,6 +4,8 @@ from aria import InvalidValueError
 def data_type_class_getter(cls):
     """
     Wraps the field value in a specialized data type class.
+
+    Can be used with the :func:`field_getter` decorator.
     """
     
     def getter(field, presentation):

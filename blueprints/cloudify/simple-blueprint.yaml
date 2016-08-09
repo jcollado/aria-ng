@@ -31,6 +31,7 @@ inputs:
   agent_user:
       description: >
         Username for SSH connections to hosts from Cloudify Manager
+      default: admin # ARIA
 
   agent_private_key_path:
       description: >
@@ -90,6 +91,7 @@ node_templates:
       agent_config:
         user: { get_input: agent_user }
         key: { get_input: agent_private_key_path }
+        install_method: none # ARIA: this was not provided
 
   mongod_host:
     type: nodecellar.nodes.MonitoredServer
@@ -98,6 +100,7 @@ node_templates:
       agent_config:
         user: { get_input: agent_user }
         key: { get_input: agent_private_key_path }
+        install_method: none # ARIA: this was not provided
 
 ###########################################################
 # The outputs section exposes the application endpoint.

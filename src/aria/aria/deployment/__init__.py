@@ -1,7 +1,6 @@
 
 from .context import *
 from .plan import *
-from .classic_plan import *
 from .templates import *
 from .elements import *
 from .hierarchy import *
@@ -15,7 +14,6 @@ __all__ = (
     'Relationship',
     'Group',
     'Policy',
-    'ClassicDeploymentPlan',
     'DeploymentTemplate',
     'NodeTemplate',
     'Requirement',

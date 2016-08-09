@@ -101,3 +101,8 @@ class ToscaSimplePresenter1_0(Presenter):
     @cachedmethod
     def groups(self):
         return self.service_template.topology_template.groups if self.service_template.topology_template is not None else None
+
+    @property
+    @cachedmethod
+    def policies(self):
+        return self.service_template.topology_template.policies if self.service_template.topology_template is not None else None

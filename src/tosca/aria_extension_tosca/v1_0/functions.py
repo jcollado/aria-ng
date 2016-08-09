@@ -11,7 +11,7 @@ from cStringIO import StringIO
 @dsl_specification('4.3.1', 'tosca-simple-profile-1.0')
 class Concat(Function):
     """
-    The concat function is used to concatenate two or more string values within a TOSCA service template.
+    The :code:`concat` function is used to concatenate two or more string values within a TOSCA service template.
     """
 
     def __init__(self, context, presentation, argument):
@@ -36,7 +36,7 @@ class Concat(Function):
 @dsl_specification('4.3.2', 'tosca-simple-profile-1.0')
 class Token(Function):
     """
-    The token function is used within a TOSCA service template on a string to parse out (tokenize) substrings separated by one or more token characters within a larger string.
+    The :code:`token` function is used within a TOSCA service template on a string to parse out (tokenize) substrings separated by one or more token characters within a larger string.
     """
 
     def __init__(self, context, presentation, argument):
@@ -61,7 +61,7 @@ class Token(Function):
 @dsl_specification('4.4.1', 'tosca-simple-profile-1.0')
 class GetInput(Function):
     """
-    The get\_input function is used to retrieve the values of properties declared within the inputs section of a TOSCA Service Template.
+    The :code:`get_input` function is used to retrieve the values of properties declared within the inputs section of a TOSCA Service Template.
     """
 
     def __init__(self, context, presentation, argument):
@@ -78,54 +78,10 @@ class GetInput(Function):
         inputs = context.presentation.service_template.topology_template._get_input_values(context) if context.presentation.service_template.topology_template is not None else None
         return inputs.get(self.input_property_name) if inputs is not None else None
 
-@dsl_specification('4.1', 'tosca-simple-profile-1.0')
-def get_modelable_entities(context, container, locator, modelable_entity_name):
-    """
-    The following keywords MAY be used in some TOSCA function in place of a TOSCA Node or Relationship Template name.
-    """
-    
-    if modelable_entity_name == 'SELF':
-        return get_self(context, container)
-    elif modelable_entity_name == 'HOST':
-        return get_host(context, container)
-    elif modelable_entity_name == 'SOURCE':
-        return get_source(context, container)
-    elif modelable_entity_name == 'TARGET':
-        return get_target(context, container)
-
-    raise InvalidValueError('function "get_property" could not find modelable entity "%s"' % modelable_entity_name, locator=locator)
-
-def get_self(context, container):
-    """
-    A TOSCA orchestrator will interpret this keyword as the Node or Relationship Template instance that contains the function at the time the function is evaluated.
-    """
-    
-    return [container]
-
-def get_host(context, container):
-    """
-    A TOSCA orchestrator will interpret this keyword to refer to the all nodes that "host" the node using this reference (i.e., as identified by its HostedOn relationship).
-    
-    Specifically, TOSCA orchestrators that encounter this keyword when evaluating the get_attribute or get_property functions SHALL search each node along the "HostedOn" relationship chain starting at the immediate node that hosts the node where the function was evaluated (and then that node's host node, and so forth) until a match is found or the "HostedOn" relationship chain ends.
-    """
-
-    print container.relationships
-    exit()
-
-def get_source(context, container):
-    """
-    A TOSCA orchestrator will interpret this keyword as the Node Template instance that is at the source end of the relationship that contains the referencing function.
-    """
-
-def get_target(context, container):
-    """
-    A TOSCA orchestrator will interpret this keyword as the Node Template instance that is at the target end of the relationship that contains the referencing function.
-    """
-
 @dsl_specification('4.4.2', 'tosca-simple-profile-1.0')
 class GetProperty(Function):
     """
-    The get\_property function is used to retrieve property values between modelable entities defined in the same service template.
+    The :code:`get_property` function is used to retrieve property values between modelable entities defined in the same service template.
     """
 
     def __init__(self, context, presentation, argument):
@@ -178,7 +134,7 @@ class GetProperty(Function):
 @dsl_specification('4.5.1', 'tosca-simple-profile-1.0')
 class GetAttribute(Function):
     """
-    The get\_attribute function is used to retrieve the values of named attributes declared by the referenced node or relationship template name.
+    The :code:`get_attribute` function is used to retrieve the values of named attributes declared by the referenced node or relationship template name.
     """
 
     def __init__(self, context, presentation, argument):
@@ -197,7 +153,7 @@ class GetAttribute(Function):
 @dsl_specification('4.6.1', 'tosca-simple-profile-1.0')
 class GetOperationOutput(Function):
     """
-    The get\_operation\_output function is used to retrieve the values of variables exposed / exported from an interface operation.
+    The :code:`get_operation_output` function is used to retrieve the values of variables exposed / exported from an interface operation.
     """
 
     def __init__(self, context, presentation, argument):
@@ -218,7 +174,7 @@ class GetOperationOutput(Function):
 @dsl_specification('4.7.1', 'tosca-simple-profile-1.0')
 class GetNodesOfType(Function):
     """
-    The get\_nodes\_of\_type function can be used to retrieve a list of all known instances of nodes of the declared Node Type.
+    The :code:`get_nodes_of_type` function can be used to retrieve a list of all known instances of nodes of the declared Node Type.
     """
 
     def __init__(self, context, presentation, argument):
@@ -241,7 +197,7 @@ class GetNodesOfType(Function):
 @dsl_specification('4.8.1', 'tosca-simple-profile-1.0')
 class GetArtifact(Function):
     """
-    The get\_artifact function is used to retrieve artifact location between modelable entities defined in the same service template.
+    The :code:`get_artifact` function is used to retrieve artifact location between modelable entities defined in the same service template.
     """
 
     def __init__(self, context, presentation, argument):
@@ -333,6 +289,51 @@ def parse_self(presentation):
         return presentation, 'relationship_template'
     else:
         return parse_self(presentation._container)
+
+
+@dsl_specification('4.1', 'tosca-simple-profile-1.0')
+def get_modelable_entities(context, container, locator, modelable_entity_name):
+    """
+    The following keywords MAY be used in some TOSCA function in place of a TOSCA Node or Relationship Template name.
+    """
+    
+    if modelable_entity_name == 'SELF':
+        return get_self(context, container)
+    elif modelable_entity_name == 'HOST':
+        return get_host(context, container)
+    elif modelable_entity_name == 'SOURCE':
+        return get_source(context, container)
+    elif modelable_entity_name == 'TARGET':
+        return get_target(context, container)
+
+    raise InvalidValueError('function "get_property" could not find modelable entity "%s"' % modelable_entity_name, locator=locator)
+
+def get_self(context, container):
+    """
+    A TOSCA orchestrator will interpret this keyword as the Node or Relationship Template instance that contains the function at the time the function is evaluated.
+    """
+    
+    return [container]
+
+def get_host(context, container):
+    """
+    A TOSCA orchestrator will interpret this keyword to refer to the all nodes that "host" the node using this reference (i.e., as identified by its HostedOn relationship).
+    
+    Specifically, TOSCA orchestrators that encounter this keyword when evaluating the get_attribute or get_property functions SHALL search each node along the "HostedOn" relationship chain starting at the immediate node that hosts the node where the function was evaluated (and then that node's host node, and so forth) until a match is found or the "HostedOn" relationship chain ends.
+    """
+
+    print container.relationships
+    exit()
+
+def get_source(context, container):
+    """
+    A TOSCA orchestrator will interpret this keyword as the Node Template instance that is at the source end of the relationship that contains the referencing function.
+    """
+
+def get_target(context, container):
+    """
+    A TOSCA orchestrator will interpret this keyword as the Node Template instance that is at the target end of the relationship that contains the referencing function.
+    """
 
 def invalid_modelable_entity_name(name, index, value, locator, contexts):
     return InvalidValueError('function "%s" parameter %d can be "%s" only in %s' % (name, index + 1, value, contexts), locator=locator, level=Issue.FIELD)

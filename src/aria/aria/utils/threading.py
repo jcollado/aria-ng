@@ -3,8 +3,11 @@ from __future__ import absolute_import # so we can import standard 'threading'
 
 from .exceptions import print_exception
 from threading import Thread, Lock
-from Queue import Queue, Empty
+from Queue import Queue, Full, Empty
 import itertools, multiprocessing
+
+class ExecutorException(Exception):
+    pass
 
 # https://gist.github.com/tliron/81dd915166b0bfc64be08b4f8e22c835
 class FixedThreadPoolExecutor(object):
@@ -48,6 +51,7 @@ class FixedThreadPoolExecutor(object):
         :param timeout: Timeout in seconds for all blocking operations. (Defaults to none, meaning no timeout) 
         :param print_exceptions: Set to true in order to print exceptions from tasks. (Defaults to false)
         """
+        
         self.size = size
         self.timeout = timeout
         self.print_exceptions = print_exceptions
@@ -72,8 +76,14 @@ class FixedThreadPoolExecutor(object):
         Submit a task for execution.
         
         The task will be called ASAP on the next available worker thread in the pool.
+        
+        Will raise an :class:`ExecutorException` exception if cannot be submitted.
         """
-        self._tasks.put((self._id_creator.next(), fn, args, kwargs), timeout=self.timeout)
+        
+        try:
+            self._tasks.put((self._id_creator.next(), fn, args, kwargs), timeout=self.timeout)
+        except Full:
+            raise ExecutorException('cannot submit task: queue is full')
 
     def close(self):
         """
@@ -83,15 +93,20 @@ class FixedThreadPoolExecutor(object):
         
         This is called automatically upon exit if you are using the "with" keyword.
         """
+        
         self.drain()
         while self.is_alive:
-            self._tasks.put(self._CYANIDE, timeout=self.timeout)
+            try:
+                self._tasks.put(self._CYANIDE, timeout=self.timeout)
+            except Full:
+                raise ExecutorException('cannot close executor: a thread seems to be hanging')
         self._workers = None
 
     def drain(self):
         """
         Blocks until all current tasks finish execution, but leaves the worker threads alive.
         """
+        
         self._tasks.join() # oddly, the API does not support a timeout parameter
 
     @property
@@ -99,6 +114,7 @@ class FixedThreadPoolExecutor(object):
         """
         True if any of the worker threads are alive.
         """
+        
         for worker in self._workers:
             if worker.is_alive():
                 return True
@@ -109,6 +125,7 @@ class FixedThreadPoolExecutor(object):
         """
         The returned values from all tasks, in order of submission.
         """
+        
         return [self._returns[k] for k in sorted(self._returns)]
 
     @property
@@ -116,6 +133,7 @@ class FixedThreadPoolExecutor(object):
         """
         The raised exceptions from all tasks, in order of submission.
         """
+        
         return [self._exceptions[k] for k in sorted(self._exceptions)]
 
     def raise_first(self):
@@ -126,6 +144,7 @@ class FixedThreadPoolExecutor(object):
         exceptions. However, if you want to use the "raise" mechanism, you are
         limited to raising only one of them.
         """
+        
         exceptions = self.exceptions
         if exceptions:
             raise exceptions[0]
@@ -163,7 +182,6 @@ class FixedThreadPoolExecutor(object):
     def __exit__(self, type, value, traceback):
         self.close()
         return False
-
 
 class LockedList(list):
     """

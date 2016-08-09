@@ -223,10 +223,11 @@ class CapabilityType(ToscaPresentation):
     def properties(self):
         """
         An optional list of property definitions for the Capability Type.
+
+        ARIA NOTE: The spec says 'list', but the examples are all of dicts.
         
         :rtype: dict of str, :class:`PropertyDefinition`
         """
-        # The spec says 'list', but the examples are all of dicts
 
     @object_dict_field(AttributeDefinition)
     def attributes(self):
@@ -497,9 +498,8 @@ class NodeType(ToscaPresentation):
         """
         An optional sequenced list of requirement definitions for the Node Type.
         
-        NOTE: The spec seems wrong to make this a sequenced list. It seems that when you have more than one requirement of the same
-        name, behavior is undefined. The idea is to use the "occurrences" field if you need to limit the number of requirement
-        assignments.
+        ARIA NOTE: The spec seems wrong to make this a sequenced list. It seems that when you have more than one requirement of the same
+        name, behavior is undefined. The idea is to use the "occurrences" field if you need to limit the number of requirement assignments.
         
         :rtype: list of (str, :class:`RequirementDefinition`)
         """

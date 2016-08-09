@@ -81,5 +81,9 @@ class Presenter(Presentation):
         return None
 
     @property
+    def policies(self):
+        return None
+
+    @property
     def workflows(self):
         return None

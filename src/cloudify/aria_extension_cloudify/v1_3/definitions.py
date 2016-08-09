@@ -1,8 +1,10 @@
 
 from .assignments import PropertyAssignment, PolicyAssignment
 from .misc import Operation
+from .utils.data_types import get_data_type
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_dict_field, ReadOnlyDict
+from aria.presentation import Presentation, has_fields, allow_unknown_fields, primitive_field, primitive_list_field, object_dict_field, field_validator, list_type_validator
+from aria.utils import ReadOnlyDict, cachedmethod
 
 @has_fields
 class PropertyDefinition(Presentation):
@@ -35,6 +37,10 @@ class PropertyDefinition(Presentation):
         
         :rtype: bool
         """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return get_data_type(context, self, 'type')
 
 @allow_unknown_fields
 @has_fields
@@ -103,6 +109,7 @@ class PolicyDefinition(Presentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
+    @field_validator(list_type_validator('group', 'groups'))
     @primitive_list_field(str, required=True)
     def targets(self):
         """
@@ -110,3 +117,7 @@ class PolicyDefinition(Presentation):
         
         :rtype: list of str
         """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None

@@ -3,7 +3,7 @@ from .presentation import ToscaPresentation
 from .misc import Description, PropertyAssignment, ConstraintClause
 from .data_types import Range
 from .field_getters import data_type_class_getter
-from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, policy_node_template_or_group_validator
+from .field_validators import data_type_validator, data_value_validator, entry_schema_validator, policy_targets_validator
 from .utils.data_types import get_data_type, get_property_constraints
 from .utils.properties import get_assigned_and_defined_property_values
 from .utils.interfaces import get_and_override_input_definitions_from_type, get_and_override_operation_definitions_from_type, get_template_interfaces
@@ -309,7 +309,7 @@ class InterfaceDefinitionForType(ToscaPresentation):
     @primitive_field(str)
     def type(self):
         """
-        Not mentioned in the spec.
+        ARIA NOTE: This field is not mentioned in the spec, but is implied.
         
         :rtype: str
         """
@@ -523,7 +523,7 @@ class CapabilityDefinition(ToscaPresentation):
 
         Note: the keyword UNBOUNDED is also supported to represent any positive integer.
         
-        Note: The spec seems wrong here: the implied default should be [0,UNBOUNDED], not [1,UNBOUNDED], otherwise it would imply that at 1 least one relationship *must* be formed.
+        ARIA NOTE: The spec seems wrong here: the implied default should be [0,UNBOUNDED], not [1,UNBOUNDED], otherwise it would imply that at 1 least one relationship *must* be formed.
         
         :rtype: :class:`Range`
         """
@@ -592,7 +592,7 @@ class ArtifactDefinition(ToscaPresentation):
     @object_dict_field(PropertyAssignment)
     def properties(self):
         """
-        Not mentioned in spec, but is implied.
+        ARIA NOTE: This field is not mentioned in the spec, but is implied.
         
         :rtype: dict of str, :class:`PropertyAssignment`
         """
@@ -716,7 +716,7 @@ class PolicyDefinition(ToscaPresentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
-    @field_validator(policy_node_template_or_group_validator)
+    @field_validator(policy_targets_validator)
     @primitive_list_field(str)
     def targets(self):
         """

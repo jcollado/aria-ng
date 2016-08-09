@@ -256,19 +256,19 @@ def has_fields(cls):
     """
     Class decorator for validated field support.
     
-    1. Adds a `FIELDS` class property that is a dict of all the fields.
-       Will inherit and merge `FIELDS` properties from base classes if
+    1. Adds a :code:`FIELDS` class property that is a dict of all the fields.
+       Will inherit and merge :code:`FIELDS` properties from base classes if
        they have them.
     
-    2. Generates automatic `@property` implementations for the fields
+    2. Generates automatic :code:`@property` implementations for the fields
        with the help of a set of special function decorators.
 
     The class also works with the Python dict protocol, so that
     fields can be accessed via dict semantics. The functionality is
     identical to that of using attribute access.
 
-    The class will also gain two utility methods, `_iter_field_names`
-    and `_iter_fields`.
+    The class will also gain two utility methods, :code:`_iter_field_names`
+    and :code:`_iter_fields`.
     """
     
     # Make sure we have FIELDS
@@ -331,7 +331,7 @@ def short_form_field(name):
     """
     Class decorator for specifying the short form field.
     
-    The class must be decorated with :func:`has\_fields`.
+    The class must be decorated with :func:`has_fields`.
     """
     def decorator(cls):
         if hasattr(cls, name) and hasattr(cls, 'FIELDS') and (name in cls.FIELDS):
@@ -345,7 +345,7 @@ def allow_unknown_fields(cls):
     """
     Class decorator specifying that the class allows unknown fields.
     
-    The class must be decorated with :func:`has\_fields`.
+    The class must be decorated with :func:`has_fields`.
     """
     if hasattr(cls, 'FIELDS'):
         setattr(cls, 'ALLOW_UNKNOWN_FIELDS', True)
@@ -358,7 +358,7 @@ def primitive_field(cls=None, default=None, allowed=None, required=False):
     """
     Function decorator for primitive fields.
     
-    The function must be a method in a class decorated with :func:`has\_fields`.
+    The function must be a method in a class decorated with :func:`has_fields`.
     """
     def decorator(fn):
         return Field(field_variant='primitive', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
@@ -368,7 +368,7 @@ def primitive_list_field(cls=None, default=None, allowed=None, required=False):
     """
     Function decorator for list of primitive fields.
     
-    The function must be a method in a class decorated with :func:`has\_fields`.
+    The function must be a method in a class decorated with :func:`has_fields`.
     """
     def decorator(fn):
         return Field(field_variant='primitive_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
@@ -378,7 +378,7 @@ def object_field(cls, default=None, allowed=None, required=False):
     """
     Function decorator for object fields.
     
-    The function must be a method in a class decorated with :func:`has\_fields`.
+    The function must be a method in a class decorated with :func:`has_fields`.
     """
     def decorator(fn):
         return Field(field_variant='object', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
@@ -388,7 +388,7 @@ def object_list_field(cls, default=None, allowed=None, required=False):
     """
     Function decorator for list of object fields.
     
-    The function must be a method in a class decorated with :func:`has\_fields`.
+    The function must be a method in a class decorated with :func:`has_fields`.
     """
     def decorator(fn):
         return Field(field_variant='object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
@@ -398,7 +398,7 @@ def object_dict_field(cls, default=None, allowed=None, required=False):
     """
     Function decorator for dict of object fields.
     
-    The function must be a method in a class decorated with :func:`has\_fields`.
+    The function must be a method in a class decorated with :func:`has_fields`.
     """
     def decorator(fn):
         return Field(field_variant='object_dict', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
@@ -408,7 +408,7 @@ def object_sequenced_list_field(cls, default=None, allowed=None, required=False)
     """
     Function decorator for sequenced list of object fields.
     
-    The function must be a method in a class decorated with :func:`has\_fields`.
+    The function must be a method in a class decorated with :func:`has_fields`.
     """
     def decorator(fn):
         return Field(field_variant='sequenced_object_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
@@ -418,7 +418,7 @@ def object_dict_unknown_fields(cls, default=None, allowed=None, required=False):
     """
     Function decorator for dict of object fields, for all the fields that are not already decorated.
     
-    The function must be a method in a class decorated with :func:`has\_fields`.
+    The function must be a method in a class decorated with :func:`has_fields`.
     """
     def decorator(fn):
         return Field(field_variant='object_dict_unknown_fields', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
@@ -428,8 +428,8 @@ def field_getter(getter_fn):
     """
     Function decorator for overriding the getter function of a field.
     
-    The signature of the getter function must be: f(field, presentation).
-    The default getter can be accessed as field.\_get(presentation).
+    The signature of the getter function must be: :code:`f(field, presentation)`.
+    The default getter can be accessed as :code:`field._get(presentation)`.
     
     The function must already be decorated with a field decorator.
     """
@@ -445,8 +445,8 @@ def field_setter(setter_fn):
     """
     Function decorator for overriding the setter function of a field.
     
-    The signature of the setter function must be: f(field, presentation, value).
-    The default setter can be accessed as field.\_set(presentation, value).
+    The signature of the setter function must be: :code:`f(field, presentation, value)`.
+    The default setter can be accessed as :code:`field._set(presentation, value)`.
     
     The function must already be decorated with a field decorator.
     """
@@ -462,8 +462,8 @@ def field_validator(validator_fn):
     """
     Function decorator for overriding the validator function of a field.
     
-    The signature of the validator function must be: f(field, presentation, context).
-    The default validator can be accessed as field.\_validate(presentation, context).
+    The signature of the validator function must be: :code:f(field, presentation, context)`.
+    The default validator can be accessed as :code:`field._validate(presentation, context)`.
     
     The function must already be decorated with a field decorator.
     """

@@ -9,8 +9,10 @@ class Template(Consumer):
     def consume(self):
         self.create_deployment_template()
         if not self.context.validation.has_issues:
-            self.context.deployment.dump_types(self.context)
-            self.context.deployment.template.dump(self.context)
+            if '--types' in self.context.args:
+                self.context.deployment.dump_types(self.context)
+            else:
+                self.context.deployment.template.dump(self.context)
     
     def create_deployment_template(self):
         if hasattr(self.context.presentation, '_get_deployment_template'):

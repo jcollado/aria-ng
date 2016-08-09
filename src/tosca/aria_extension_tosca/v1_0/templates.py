@@ -5,7 +5,7 @@ from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition,
 from .assignments import AttributeAssignment, RequirementAssignment, CapabilityAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
-from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
+from .utils.properties import get_assigned_and_defined_property_values, get_input_values
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
 from .utils.capabilities import get_template_capabilities
@@ -209,7 +209,9 @@ class RelationshipTemplate(ToscaPresentation):
     @object_dict_field(InterfaceDefinitionForTemplate)
     def interfaces(self):
         """
-        An optional list of named interface definitions for the Node Template. (Spec is wrong here, should be Relationship Template.)
+        An optional list of named interface definitions for the Node Template.
+        
+        ARIA NOTE: Spec is wrong here, should be Relationship Template.
         
         :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
         """
@@ -328,7 +330,11 @@ class TopologyTemplate(ToscaPresentation):
 
     @cachedmethod
     def _get_input_values(self, context):
-        return ReadOnlyDict(get_parameter_values(context, self))
+        return ReadOnlyDict(get_input_values(context, self))
+
+    def _validate(self, context):
+        super(TopologyTemplate, self)._validate(context)
+        self._get_input_values(context)
 
     def _dump(self, context):
         self._dump_content(context, (
@@ -355,8 +361,6 @@ class ServiceTemplate(ToscaPresentation):
         Defines the version of the TOSCA Simple Profile specification the template (grammar) complies with. 
         
         See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#_Toc379455047>`__
-        
-        See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-versioning/>`__
         
         :rtype: str
         """

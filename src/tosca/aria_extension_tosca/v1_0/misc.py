@@ -1,10 +1,10 @@
 
 from .presentation import ToscaPresentation
-from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator
-from .utils.data_types import get_data_type_value, apply_constraint_to_value
+from .field_validators import constraint_clause_field_validator, constraint_clause_in_range_validator, constraint_clause_valid_values_validator, constraint_clause_pattern_validator, data_type_validator
+from .utils.data_types import get_data_type, get_data_type_value, get_property_constraints, apply_constraint_to_value
 from aria import dsl_specification
 from aria.utils import cachedmethod
-from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, field_validator
+from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, object_list_field, field_validator
 from clint.textui import puts
 
 @dsl_specification('3.5.1', 'tosca-simple-profile-1.0')
@@ -15,14 +15,6 @@ class Description(AsIsPresentation):
 
     def _dump(self, context):
         puts(context.style.meta(self.value))
-
-@dsl_specification('3.5.9', 'tosca-simple-profile-1.0')
-class PropertyAssignment(AsIsPresentation):
-    """
-    This section defines the grammar for assigning values to named properties within TOSCA Node and Relationship templates that are defined in their corresponding named types.
-    
-    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_VALUE_ASSIGNMENT>`__
-    """
 
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')
@@ -228,3 +220,56 @@ class ConstraintClause(ToscaPresentation):
     
     def _apply_to_value(self, context, presentation, value):
         return apply_constraint_to_value(context, presentation, self, value)
+
+@short_form_field('type')
+@has_fields
+class EntrySchema(ToscaPresentation):
+    """
+    ARIA NOTE: The specification does not properly explain this type, however it is implied by examples.
+    """
+    
+    @field_validator(data_type_validator('entry schema data type'))
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        :rtype: str
+        """
+
+    @object_field(Description)
+    def description(self):
+        """
+        :rtype: :class:`Description`
+        """
+
+    @object_list_field(ConstraintClause)
+    def constraints(self):
+        """
+        :rtype: list of (str, :class:`ConstraintClause`)
+        """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return get_data_type(context, self, 'type')
+
+    @cachedmethod
+    def _get_constraints(self, context):
+        return get_property_constraints(context, self)
+
+@short_form_field('primary')
+@has_fields
+class OperationImplementation(ToscaPresentation):
+    @primitive_field(str)
+    def primary(self):
+        """
+        The optional implementation artifact name (i.e., the primary script file name within a TOSCA CSAR file).  
+        
+        :rtype: str
+        """
+
+    @primitive_list_field(str)
+    def dependencies(self):
+        """
+        The optional ordered list of one or more dependent or secondary implementation artifact name which are referenced by the primary implementation artifact (e.g., a library the script installs or a secondary script).    
+        
+        :rtype: list of str
+        """

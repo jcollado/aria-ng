@@ -20,7 +20,7 @@ def get_inherited_requirement_definitions(context, presentation):
     requirement_definitions = get_inherited_requirement_definitions(context, parent) if parent is not None else []
     
     our_requirement_definitions = presentation.requirements
-    if our_requirement_definitions is not None:
+    if our_requirement_definitions:
         for requirement_name, our_requirement_definition in our_requirement_definitions:
             # Remove existing requirement definitions of this name if they exist
             for n, r in requirement_definitions:
@@ -53,7 +53,7 @@ def get_template_requirements(context, presentation):
     
     # Add our requirement assignments
     our_requirement_assignments = presentation.requirements
-    if our_requirement_assignments is not None:
+    if our_requirement_assignments:
         for requirement_name, our_requirement_assignment in our_requirement_assignments:
             requirement_definition = get_first_requirement(requirement_definitions, requirement_name)
             if requirement_definition is not None:
@@ -65,7 +65,7 @@ def get_template_requirements(context, presentation):
                 context.validation.report('requirement "%s" not declared at node type "%s" in "%s"' % (requirement_name, presentation.type, presentation._fullname), locator=our_requirement_assignment._locator, level=Issue.BETWEEN_TYPES)
 
     # Validate occurrences
-    if requirement_definitions is not None:
+    if requirement_definitions:
         for requirement_name, requirement_definition in requirement_definitions:
             # Allowed occurrences
             allowed_occurrences = requirement_definition.occurrences
@@ -116,7 +116,7 @@ def convert_requirement_from_definition_to_assignment(context, requirement_defin
     relationship_interface_definitions = None
     
     # First try to find the relationship if we declared it
-    our_relationship = our_requirement_assignment.relationship if our_requirement_assignment is not None else None # RequirementAssignmentRelationship
+    our_relationship = our_requirement_assignment.relationship if our_requirement_assignment is not None else None # RelationshipAssignment
     if our_relationship is not None:
         relationship_type, relationship_type_variant = our_relationship._get_type(context)
         if relationship_type_variant == 'relationship_template':
@@ -126,7 +126,7 @@ def convert_requirement_from_definition_to_assignment(context, requirement_defin
     # If not exists, try at the node type
     relationship_definition = None
     if relationship_type is None:
-        relationship_definition = requirement_definition.relationship # RequirementDefinitionRelationship
+        relationship_definition = requirement_definition.relationship # RelationshipDefinition
         if relationship_definition is not None:
             relationship_type = relationship_definition._get_type(context)
 
@@ -151,11 +151,11 @@ def convert_requirement_from_definition_to_assignment(context, requirement_defin
                 raw['properties'] = convert_property_definitions_to_values(relationship_property_definitions)
         
         # These are our interface definitions
-        relationship_interface_definitions = OrderedDict(relationship_type._get_interfaces(context)) # InterfaceDefinitionForType
+        relationship_interface_definitions = OrderedDict(relationship_type._get_interfaces(context)) # InterfaceDefinition
 
         if relationship_definition:
             # Merge extra interface definitions
-            relationship_interface_definitions = relationship_definition.interfaces # InterfaceDefinitionForType
+            relationship_interface_definitions = relationship_definition.interfaces # InterfaceDefinition
             merge_interface_definitions(context, relationship_interface_definitions, relationship_interface_definitions, requirement_definition, container)
 
         if relationship_template is not None:
@@ -184,7 +184,7 @@ def merge_requirement_assignment(context, presentation, relationship_property_de
     if our_node_filter is not None:
         requirement._raw['node_filter'] = deepclone(our_node_filter._raw)
 
-    our_relationship = our_requirement.relationship # RequirementAssignmentRelationship
+    our_relationship = our_requirement.relationship # RelationshipAssignment
     if our_relationship is not None:
         # Make sure we have a dict
         if 'relationship' not in requirement._raw:

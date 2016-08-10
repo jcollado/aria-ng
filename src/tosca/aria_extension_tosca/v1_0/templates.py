@@ -1,19 +1,21 @@
 
 from .presentation import ToscaPresentation
-from .misc import Description, PropertyAssignment, MetaData, Repository, Import
-from .definitions import GroupDefinition, PolicyDefinition, ParameterDefinition, InterfaceDefinitionForTemplate, ArtifactDefinition
-from .assignments import AttributeAssignment, RequirementAssignment, CapabilityAssignment
+from .misc import Description, MetaData, Repository, Import
+from .definitions import ParameterDefinition
+from .assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment, InterfaceAssignment, ArtifactAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
-from .utils.properties import get_assigned_and_defined_property_values, get_input_values
+from .field_validators import policy_targets_validator
+from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
 from .utils.capabilities import get_template_capabilities
 from .utils.artifacts import get_inherited_artifact_definitions
+from .utils.policies import get_policy_targets
 from .utils.copy import get_default_raw_from_copy
 from aria import dsl_specification
 from aria.utils import ReadOnlyDict, ReadOnlyList, cachedmethod
-from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator
+from aria.presentation import has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, field_validator, type_validator, list_type_validator
 
 @has_fields
 @dsl_specification('3.7.3', 'tosca-simple-profile-1.0')
@@ -81,20 +83,20 @@ class NodeTemplate(ToscaPresentation):
         :rtype: dict of str, :class:`CapabilityAssignment`
         """
 
-    @object_dict_field(InterfaceDefinitionForTemplate)
+    @object_dict_field(InterfaceAssignment)
     def interfaces(self):
         """
         An optional list of named interface definitions for the Node Template.
         
-        :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
+        :rtype: dict of str, :class:`InterfaceAssignment`
         """
 
-    @object_dict_field(ArtifactDefinition)
+    @object_dict_field(ArtifactAssignment)
     def artifacts(self):
         """
         An optional list of named artifact definitions for the Node Template.
         
-        :rtype: dict of str, :class:`ArtifactDefinition`
+        :rtype: dict of str, :class:`ArtifactAssignment`
         """
 
     @object_field(NodeFilter)
@@ -206,14 +208,14 @@ class RelationshipTemplate(ToscaPresentation):
         :rtype: dict of str, :class:`AttributeAssignment`
         """
 
-    @object_dict_field(InterfaceDefinitionForTemplate)
+    @object_dict_field(InterfaceAssignment)
     def interfaces(self):
         """
         An optional list of named interface definitions for the Node Template.
         
         ARIA NOTE: Spec is wrong here, should be Relationship Template.
         
-        :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
+        :rtype: dict of str, :class:`InterfaceAssignment`
         """
 
     @field_validator(type_validator('relationship template', 'relationship_templates'))
@@ -254,6 +256,134 @@ class RelationshipTemplate(ToscaPresentation):
             'attributes',
             'interfaces',
             'copy'))
+
+@has_fields
+@dsl_specification('3.7.5', 'tosca-simple-profile-1.0')
+class GroupDefinition(ToscaPresentation):
+    """
+    A group definition defines a logical grouping of node templates, typically for management purposes, but is separate from the application's topology template.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_GROUP_DEF>`__
+    """
+
+    @field_validator(type_validator('group type', 'group_types'))
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        The required name of the group type the group definition is based upon.
+        
+        :rtype: str
+        """
+
+    @object_field(Description)
+    def description(self):
+        """
+        The optional description for the group definition.
+        
+        :rtype: :class:`Description`
+        """
+
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        An optional list of property value assignments for the group definition.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @field_validator(list_type_validator('node template', 'node_templates'))
+    @primitive_list_field(str)
+    def members(self):
+        """
+        The optional list of one or more node template names that are members of this group definition.
+        
+        :rtype: list of str
+        """
+
+    @object_dict_field(InterfaceAssignment)
+    def interfaces(self):
+        """
+        An optional list of named interface definitions for the group definition.
+        
+        :rtype: dict of str, :class:`InterfaceDefinition`
+        """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.group_types.get(self.type) if context.presentation.group_types is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+
+    @cachedmethod
+    def _get_interfaces(self, context):
+        return ReadOnlyDict(get_template_interfaces(context, self, 'group definition'))
+    
+    def _validate(self, context):
+        super(GroupDefinition, self)._validate(context)
+        self._get_property_values(context)
+        self._get_interfaces(context)
+
+@has_fields
+@dsl_specification('3.7.6', 'tosca-simple-profile-1.0')
+class PolicyDefinition(ToscaPresentation):
+    """
+    A policy definition defines a policy that can be associated with a TOSCA topology or top-level entity definition (e.g., group definition, node template, etc.).
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_POLICY_DEF>`__
+    """
+
+    @field_validator(type_validator('policy type', 'policy_types'))
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        The required name of the policy type the policy definition is based upon.
+        
+        :rtype: str
+        """
+
+    @object_field(Description)
+    def description(self):
+        """
+        The optional description for the policy definition.
+        
+        :rtype: :class:`Description`
+        """
+
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        An optional list of property value assignments for the policy definition.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @field_validator(policy_targets_validator)
+    @primitive_list_field(str)
+    def targets(self):
+        """
+        An optional list of valid Node Templates or Groups the Policy can be applied to.
+        
+        :rtype: list of str
+        """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+
+    @cachedmethod
+    def _get_targets(self, context):
+        node_templates, groups = get_policy_targets(context, self)
+        return ReadOnlyList(node_templates), ReadOnlyList(groups)
+
+    def _validate(self, context):
+        super(PolicyDefinition, self)._validate(context)
+        self._get_property_values(context)
 
 @has_fields
 @dsl_specification('3.8', 'tosca-simple-profile-1.0')
@@ -330,11 +460,16 @@ class TopologyTemplate(ToscaPresentation):
 
     @cachedmethod
     def _get_input_values(self, context):
-        return ReadOnlyDict(get_input_values(context, self))
+        return ReadOnlyDict(get_parameter_values(context, self, 'inputs'))
+
+    @cachedmethod
+    def _get_output_values(self, context):
+        return ReadOnlyDict(get_parameter_values(context, self, 'outputs'))
 
     def _validate(self, context):
         super(TopologyTemplate, self)._validate(context)
         self._get_input_values(context)
+        self._get_output_values(context)
 
     def _dump(self, context):
         self._dump_content(context, (

@@ -1,6 +1,7 @@
 
 from .presentation import ToscaPresentation
-from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinitionForType, RequirementDefinition, CapabilityDefinition, ArtifactDefinition, OperationDefinitionForType
+from .definitions import PropertyDefinition, AttributeDefinition, InterfaceDefinition, RequirementDefinition, CapabilityDefinition, OperationDefinition
+from .assignments import ArtifactAssignment
 from .misc import Description, ConstraintClause
 from .data_types import Version
 from .field_getters import data_type_class_getter
@@ -314,9 +315,11 @@ class InterfaceType(ToscaPresentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
-    @object_dict_unknown_fields(OperationDefinitionForType)
+    @object_dict_unknown_fields(OperationDefinition)
     def operations(self):
-        pass
+        """
+        :rtype: dict of str, :class:`OperationDefinition`
+        """
 
     @cachedmethod
     def _get_parent(self, context):
@@ -394,12 +397,12 @@ class RelationshipType(ToscaPresentation):
         :rtype: dict of str, :class:`AttributeDefinition`
         """
 
-    @object_dict_field(InterfaceDefinitionForType)
+    @object_dict_field(InterfaceDefinition)
     def interfaces(self):
         """
         An optional list of interface definitions interfaces supported by the Relationship Type.
         
-        :rtype: dict of str, :class:`InterfaceDefinitionForType`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
     @field_validator(list_type_validator('capability type', 'capability_types'))
@@ -512,20 +515,20 @@ class NodeType(ToscaPresentation):
         :rtype: list of :class:`CapabilityDefinition`
         """
 
-    @object_dict_field(InterfaceDefinitionForType)
+    @object_dict_field(InterfaceDefinition)
     def interfaces(self):
         """
         An optional list of interface definitions supported by the Node Type.
         
-        :rtype: dict of str, :class:`InterfaceDefinitionForType`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
-    @object_dict_field(ArtifactDefinition)
+    @object_dict_field(ArtifactAssignment)
     def artifacts(self):
         """
         An optional list of named artifact definitions for the Node Type.
         
-        :rtype: dict of str, :class:`ArtifactDefinition`
+        :rtype: dict of str, :class:`ArtifactAssignment`
         """
 
     @cachedmethod
@@ -640,12 +643,12 @@ class GroupType(ToscaPresentation):
         :rtype: list of str
         """
 
-    @object_dict_field(InterfaceDefinitionForType)
+    @object_dict_field(InterfaceDefinition)
     def interfaces(self):
         """
         An optional list of interface definitions supported by the Group Type.
         
-        :rtype: dict of str, :class:`InterfaceDefinitionForType`
+        :rtype: dict of str, :class:`InterfaceDefinition`
         """
 
     @cachedmethod

@@ -1,7 +1,7 @@
 
 from ..functions import get_function
 from aria import Issue
-from aria.utils import import_fullname
+from aria.utils import import_fullname, deepclone
 from collections import OrderedDict
 
 #
@@ -51,25 +51,20 @@ def coerce_data_type_value(context, presentation, data_type, value, aspect):
 # PropertyDefinition
 #
 
-def get_data_type(context, presentation, field_name, allow_none=False):
+def get_data_type(context, presentation):
     """
     Returns the type, whether it's a complex data type (a DataType instance) or a primitive (a Python primitive type class).
-    
-    If the type is not specified, defaults to :class:`str`.
     """
     
-    the_type = getattr(presentation, field_name)
+    the_type = presentation.type
     
     if the_type is None:
-        if allow_none:
-            return None
-        else:
-            return str
+        return None
     
     # Try complex data type
     complex = context.presentation.data_types.get(the_type) if context.presentation.data_types is not None else None
     if complex is not None:
-        return complex 
+        return complex
     
     # Try primitive data type
     return get_primitive_data_type(the_type)
@@ -96,6 +91,23 @@ def get_data_type_name(the_type):
         return the_type._name
     return '%s.%s' % (the_type.__module__, the_type.__name__) 
 
+def find_functions(context, presentation, value):
+    if isinstance(value, dict):
+        for k, v in value.iteritems():
+            is_function, fn = get_function(context, presentation, v)
+            if is_function:
+                value[k] = fn
+            else:
+                find_functions(context, presentation, v)
+    elif isinstance(value, list):
+        for index in range(len(value)):
+            v = value[index]
+            is_function, fn = get_function(context, presentation, v)
+            if is_function:
+                value[index] = fn
+            else:
+                find_functions(context, presentation, v)
+
 def coerce_value(context, presentation, the_type, value, aspect=None):
     """
     Returns the value after it's coerced to its type, reporting validation errors if it cannot be coerced.
@@ -111,7 +123,10 @@ def coerce_value(context, presentation, the_type, value, aspect=None):
         return fn
     
     if the_type is None:
-        return None
+        if isinstance(value, dict):
+            value = deepclone(value)
+            find_functions(context, presentation, value)
+        return value
 
     # Delegate to 'coerce_value' extension
     if hasattr(the_type, '_get_extension'):
@@ -152,7 +167,7 @@ def report_issue_for_bad_format(context, presentation, the_type, value, aspect, 
     if aspect == 'default':
         aspect = '"default" value'
     elif aspect is not None:
-        aspect = '"%s" constraint'  
+        aspect = '"%s" aspect'  
     
     if aspect is not None:
         context.validation.report('%s for field "%s" is not a valid "%s": %s' % (aspect, presentation._name or presentation._container._name, get_data_type_name(the_type), repr(value)), locator=presentation._locator, level=Issue.BETWEEN_FIELDS, exception=e)

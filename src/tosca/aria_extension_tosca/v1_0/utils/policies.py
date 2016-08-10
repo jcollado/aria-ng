@@ -13,7 +13,7 @@ def get_inherited_targets(context, presentation):
     node_types, group_types = get_inherited_targets(context, parent) if parent is not None else ([], [])
     
     our_targets = presentation.targets
-    if our_targets is not None:
+    if our_targets:
         all_node_types = context.presentation.node_types or {} 
         all_group_types = context.presentation.group_types or {}
         node_types = []
@@ -40,7 +40,7 @@ def get_policy_targets(context, presentation):
     groups = []
 
     our_targets = presentation.targets
-    if our_targets is not None:
+    if our_targets:
         all_node_templates = context.presentation.node_templates or {} 
         all_groups = context.presentation.groups or {}
         

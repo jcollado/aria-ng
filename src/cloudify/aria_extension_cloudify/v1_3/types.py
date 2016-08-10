@@ -1,6 +1,7 @@
 
 from .definitions import InterfaceDefinition, PropertyDefinition
 from .utils.properties import get_inherited_property_definitions
+from .utils.interfaces import get_inherited_interface_definitions
 from .utils.data_types import coerce_data_type_value
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field, object_dict_field, field_validator, derived_from_validator
@@ -18,7 +19,7 @@ class NodeType(Presentation):
     @primitive_field(str)
     def description(self):
         """
-        Not mentioned in the spec.
+        ARIA NOTE: Not mentioned in the spec.
         
         :rtype: str
         """
@@ -56,9 +57,14 @@ class NodeType(Presentation):
     def _get_properties(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
+    @cachedmethod
+    def _get_interfaces(self, context):
+        return ReadOnlyDict(get_inherited_interface_definitions(context, self, 'node type', 'interfaces'))
+
     def _validate(self, context):
         super(NodeType, self)._validate(context)
         self._get_properties(context)
+        self._get_interfaces(context)
 
 @has_fields
 @dsl_specification('relationships-2', 'cloudify-1.3')
@@ -72,7 +78,7 @@ class RelationshipType(Presentation):
     @primitive_field(str)
     def description(self):
         """
-        Not mentioned in the spec.
+        ARIA NOTE: Not mentioned in the spec.
         
         :rtype: str
         """
@@ -126,9 +132,19 @@ class RelationshipType(Presentation):
     def _get_properties(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
+    @cachedmethod
+    def _get_source_interfaces(self, context):
+        return ReadOnlyDict(get_inherited_interface_definitions(context, self, 'relationship type', 'source_interfaces'))
+
+    @cachedmethod
+    def _get_target_interfaces(self, context):
+        return ReadOnlyDict(get_inherited_interface_definitions(context, self, 'relationship type', 'target_interfaces'))
+
     def _validate(self, context):
         super(RelationshipType, self)._validate(context)
         self._get_properties(context)
+        self._get_source_interfaces(context)
+        self._get_target_interfaces(context)
 
 @has_fields
 @dsl_specification('policy-types', 'cloudify-1.3')
@@ -142,7 +158,7 @@ class PolicyType(Presentation):
     @primitive_field(str)
     def description(self):
         """
-        Not mentioned in the spec.
+        ARIA NOTE: Not mentioned in the spec.
         
         :rtype: str
         """

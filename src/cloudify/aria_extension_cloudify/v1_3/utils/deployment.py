@@ -7,12 +7,22 @@ def get_deployment_template(context, presenter):
     normalize_types(context, context.deployment.node_types, presenter.node_types)
 
     normalize_property_values(r.inputs, presenter.service_template._get_input_values(context))
-    normalize_properties(r.outputs, presenter.outputs)
+    normalize_property_values(r.outputs, presenter.service_template._get_output_values(context))
 
     node_templates = presenter.node_templates
     if node_templates:
         for node_template_name, node_template in node_templates.iteritems():
             r.node_templates[node_template_name] = normalize_node_template(context, node_template)
+
+    groups = presenter.groups
+    if groups:
+        for group_name, group in groups.iteritems():
+            r.group_templates[group_name] = normalize_group(context, group)
+
+    policies = presenter.policies
+    if policies:
+        for policy_name, policy in policies.iteritems():
+            r.policy_templates[policy_name] = normalize_policy(context, policy)
 
     return r
 
@@ -42,14 +52,37 @@ def normalize_node_template(context, node_template):
     r = NodeTemplate(name=node_template._name, type_name=the_type._name)
     
     normalize_property_values(r.properties, node_template._get_property_values(context))
-    #normalize_interfaces(context, r.interfaces, node_template._get_interfaces(context))
+    normalize_interfaces(context, r.interfaces, node_template._get_interfaces(context))
 
     return r
 
+def normalize_group(context, group):
+    group_type = group._get_type(context)
+    r = GroupTemplate(name=group._name, type_name=group_type._name)
 
+    normalize_property_values(r.properties, group._get_property_values(context))
+    normalize_interfaces(context, r.interfaces, group._get_interfaces(context))
+    
+    members = group.members
+    if members:
+        for member in members:
+            r.member_node_template_names.append(member)
+    
+    return r
 
+def normalize_policy(context, policy):
+    policy_type = policy._get_type(context)
+    r = PolicyTemplate(name=policy._name, type_name=policy_type._name)
 
-
+    normalize_property_values(r.properties, policy._get_property_values(context))
+    
+    node_templates, groups = policy._get_targets(context)
+    for node_template in node_templates:
+        r.target_node_template_names.append(node_template._name)
+    for group in groups:
+        r.target_group_template_names.append(group._name)
+    
+    return r
 
 #
 # Utils
@@ -75,11 +108,6 @@ def normalize_interfaces(context, interfaces, source_interfaces):
 def normalize_interface(context, interface):
     r = Interface(name=interface._name)
 
-    inputs = interface.inputs
-    if inputs:
-        for input_name, the_input in inputs.iteritems():
-            r.inputs[input_name] = the_input.value
-
     operations = interface.operations
     if operations:
         for operation_name, operation in operations.iteritems():
@@ -93,10 +121,16 @@ def normalize_operation(context, operation):
 
     implementation = operation.implementation
     if implementation is not None:
-        r.implementation = implementation.primary
-        dependencies = implementation.dependencies
-        if dependencies is not None:
-            r.dependencies = dependencies
+        r.implementation = implementation
+    executor = operation.executor
+    if executor is not None:
+        r.executor = executor
+    max_retries = operation.max_retries
+    if max_retries is not None:
+        r.max_retries = max_retries
+    retry_interval = operation.retry_interval
+    if retry_interval is not None:
+        r.retry_interval = retry_interval
 
     inputs = operation.inputs
     if inputs:

@@ -13,6 +13,9 @@ class Concat(Function):
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
 
+    def _evaluate(self, context, container):
+        return ''
+
 
 @dsl_specification('intrinsic-functions-2', 'cloudify-1.3')
 class GetInput(Function):
@@ -25,6 +28,9 @@ class GetInput(Function):
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
 
+    def _evaluate(self, context, container):
+        return ''
+
 @dsl_specification('intrinsic-functions-3', 'cloudify-1.3')
 class GetProperty(Function):
     """
@@ -36,6 +42,9 @@ class GetProperty(Function):
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
 
+    def _evaluate(self, context, container):
+        return ''
+
 @dsl_specification('intrinsic-functions-4', 'cloudify-1.3')
 class GetAttribute(Function):
     """
@@ -46,6 +55,9 @@ class GetAttribute(Function):
 
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
+
+    def _evaluate(self, context, container):
+        return ''
 
 #
 # Utils

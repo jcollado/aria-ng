@@ -1,12 +1,13 @@
 
 from ..v1_2 import Instances
-from .definitions import PropertyDefinition, InterfaceDefinition, GroupDefinition, PolicyDefinition
-from .assignments import PropertyAssignment
+from .definitions import PropertyDefinition
+from .assignments import PropertyAssignment, InterfaceAssignment, PolicyAssignment
 from .types import NodeType, RelationshipType, PolicyType, DataType
-from .misc import Output, Workflow, Plugin, Scalable, PolicyTrigger
-from .utils.properties import get_assigned_and_defined_property_values, get_input_values
+from .misc import Description, Output, Workflow, Plugin, Scalable, PolicyTrigger
+from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
+from .utils.interfaces import get_template_interfaces
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
+from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator, list_type_validator
 from aria.utils import ReadOnlyDict, cachedmethod
 
 @has_fields
@@ -18,12 +19,12 @@ class RelationshipTemplate(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-relationships/>`__
     """
 
-    @primitive_field(str)
+    @primitive_field(Description)
     def description(self):
         """
-        Not mentioned in the spec.
+        ARIA NOTE: Not mentioned in the spec.
         
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @field_validator(type_validator('relationship', 'relationship_types'))
@@ -59,20 +60,20 @@ class RelationshipTemplate(Presentation):
         :rtype: str
         """
 
-    @object_dict_field(InterfaceDefinition)
+    @object_dict_field(InterfaceAssignment)
     def source_interfaces(self):
         """
         A dict of interfaces.
         
-        :rtype: dict of str, :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceAssignment`
         """
 
-    @object_dict_field(InterfaceDefinition)
+    @object_dict_field(InterfaceAssignment)
     def target_interfaces(self):
         """
         A dict of interfaces.
         
-        :rtype: dict of str, :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceAssignment`
         """
 
     @cachedmethod
@@ -83,9 +84,19 @@ class RelationshipTemplate(Presentation):
     def _get_property_values(self, context):
         return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
 
+    @cachedmethod
+    def _get_source_interfaces(self, context):
+        return ReadOnlyDict(get_template_interfaces(context, self, 'node template', 'source_interfaces', '_get_source_interfaces'))
+
+    @cachedmethod
+    def _get_target_interfaces(self, context):
+        return ReadOnlyDict(get_template_interfaces(context, self, 'node template', 'target_interfaces', '_get_target_interfaces'))
+
     def _validate(self, context):
         super(RelationshipTemplate, self)._validate(context)
         self._get_property_values(context)
+        self._get_source_interfaces(context)
+        self._get_target_interfaces(context)
 
 @has_fields
 @dsl_specification('node-templates', 'cloudify-1.3')
@@ -98,12 +109,12 @@ class NodeTemplate(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-templates/>`__
     """
 
-    @primitive_field(str)
+    @primitive_field(Description)
     def description(self):
         """
-        Not mentioned in the spec.
+        ARIA NOTE: Not mentioned in the spec.
         
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @field_validator(type_validator('node type', 'node_types'))
@@ -131,12 +142,12 @@ class NodeTemplate(Presentation):
         :rtype: :class:`Instances`
         """
 
-    @object_dict_field(InterfaceDefinition)
+    @object_dict_field(InterfaceAssignment)
     def interfaces(self):
         """
         Used for mapping plugins to interfaces operation or for specifying inputs for already mapped node type operations.
         
-        :rtype: dict of str, :class:`InterfaceDefinition`
+        :rtype: dict of str, :class:`InterfaceAssignment`
         """
     
     @object_list_field(RelationshipTemplate)
@@ -163,18 +174,87 @@ class NodeTemplate(Presentation):
     def _get_property_values(self, context):
         return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
 
+    @cachedmethod
+    def _get_interfaces(self, context):
+        return ReadOnlyDict(get_template_interfaces(context, self, 'node template', 'interfaces', '_get_interfaces'))
+
     def _validate(self, context):
         super(NodeTemplate, self)._validate(context)
         self._get_property_values(context)
+        self._get_interfaces(context)
+
+
+@has_fields
+@dsl_specification('groups', 'cloudify-1.3')
+class GroupDefinition(Presentation):
+    """
+    Groups provide a way of configuring shared behavior for different sets of node_templates.
+    
+    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-groups/>`__.
+    """
+
+    @primitive_list_field(str, required=True)
+    def members(self):
+        """
+        A list of group members. Members are node template names or other group names. 
+        
+        :rtype: list of str
+        """
+
+    @object_dict_field(PolicyAssignment)
+    def policies(self):
+        """
+        A dict of policies. 
+        
+        :rtype: dict of str, :class:`PolicyAssignment`
+        """
+
+@has_fields
+@dsl_specification('policies', 'cloudify-1.3')
+class PolicyDefinition(Presentation):
+    """
+    Policies provide a way of configuring reusable behavior by referencing groups for which a policy applies.
+    
+    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policies/>`__.    
+    """
+    
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        The policy type.
+        
+        :rtype: str
+        """
+
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        The specific policy properties. The properties schema is defined by the policy type.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @field_validator(list_type_validator('group', 'groups'))
+    @primitive_list_field(str, required=True)
+    def targets(self):
+        """
+        A list of group names. The policy will be applied on the groups specified in this list. 
+        
+        :rtype: list of str
+        """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
 
 @has_fields
 class ServiceTemplate(Presentation):
-    @primitive_field(str)
+    @primitive_field(Description)
     def description(self):
         """
-        Not mentioned in the spec.
+        ARIA NOTE: Not mentioned in the spec.
         
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @primitive_field(str)
@@ -284,11 +364,16 @@ class ServiceTemplate(Presentation):
 
     @cachedmethod
     def _get_input_values(self, context):
-        return ReadOnlyDict(get_input_values(context, self))
+        return ReadOnlyDict(get_parameter_values(context, self, 'inputs'))
+
+    @cachedmethod
+    def _get_output_values(self, context):
+        return ReadOnlyDict(get_parameter_values(context, self, 'outputs'))
 
     def _validate(self, context):
         super(ServiceTemplate, self)._validate(context)
         self._get_input_values(context)
+        self._get_output_values(context)
 
     def _dump(self, context):
         self._dump_content(context, (

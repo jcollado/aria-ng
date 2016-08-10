@@ -19,7 +19,7 @@ def get_inherited_artifact_definitions(context, presentation, for_presentation=N
     
     # Add/override our artifact definitions
     our_artifacts = presentation.artifacts
-    if our_artifacts is not None:
+    if our_artifacts:
         for artifact_name, artifact in our_artifacts.iteritems():
             artifacts[artifact_name] = artifact._clone(for_presentation)
     

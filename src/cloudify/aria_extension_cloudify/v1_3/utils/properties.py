@@ -1,7 +1,7 @@
 
 from .data_types import coerce_value
 from aria import Issue
-from aria.utils import merge
+from aria.utils import merge, deepclone
 from collections import OrderedDict
 
 #
@@ -21,7 +21,7 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
     
     # Add/merge our definitions
     our_definitions = getattr(presentation, field_name)
-    if our_definitions is not None:
+    if our_definitions:
         our_definitions_clone = OrderedDict()
         for name, our_definition in our_definitions.iteritems():
             our_definitions_clone[name] = our_definition._clone(for_presentation)
@@ -50,21 +50,30 @@ def get_assigned_and_defined_property_values(context, presentation):
     definitions = the_type._get_properties(context) if the_type is not None else None
 
     # Fill in our assignments, but make sure they are defined
-    if assignments is not None:
+    if assignments:
         for name, value in assignments.iteritems():
             if (definitions is not None) and (name in definitions):
                 definition = definitions[name]
                 if value.value is not None:
-                    values[name] = coerce_property_value(context, value, definition, value.value)
+                    v = value.value
+
+                    # For data type values, merge into the default value (note: this is Cloudify behavior; in TOSCA these values are always replaced)
+                    default = definition.default
+                    if (default is not None) and (context.presentation.data_types is not None) and (definition.type in context.presentation.data_types):
+                        t = deepclone(default)
+                        merge(t, v)
+                        v = t
+
+                    values[name] = coerce_property_value(context, value, definition, v)
             else:
                 context.validation.report('assignment to undefined property "%s" in "%s"' % (name, presentation._fullname), locator=value._locator, level=Issue.BETWEEN_TYPES)
-    
-    # Fill in defaults from the definitions
-    if definitions is not None:
-        for name, definition in definitions.iteritems():
-            if (values.get(name) is None) and hasattr(definition, 'default') and (definition.default is not None):
-                values[name] = coerce_property_value(context, presentation, definition, definition.default) 
 
+    # Fill in defaults from the definitions
+    if definitions:
+        for name, definition in definitions.iteritems():
+            if (values.get(name) is None) and (definition.default is not None):
+                values[name] = coerce_property_value(context, presentation, definition, definition.default, 'default') 
+    
     validate_required_values(context, presentation, values, definitions)
     
     return values
@@ -73,16 +82,19 @@ def get_assigned_and_defined_property_values(context, presentation):
 # TopologyTemplate
 #
 
-def get_input_values(context, presentation):
+def get_parameter_values(context, presentation, field_name):
     values = OrderedDict()
     
-    inputs = presentation.inputs
+    parameters = getattr(presentation, field_name)
 
     # Fill in defaults and values
-    for name, definition in inputs.iteritems():
-        if (values.get(name) is None):
-            if hasattr(definition, 'default') and (definition.default is not None):
-                values[name] = coerce_property_value(context, presentation, definition, definition.default)
+    if parameters:
+        for name, parameter in parameters.iteritems():
+            if (values.get(name) is None):
+                if hasattr(parameter, 'value') and (parameter.value is not None):
+                    values[name] = coerce_property_value(context, presentation, parameter, parameter.value) # for parameters only 
+                elif hasattr(parameter, 'default') and (parameter.default is not None):
+                    values[name] = coerce_property_value(context, presentation, parameter, parameter.default)
     
     return values
 
@@ -95,7 +107,7 @@ def validate_required_values(context, presentation, values, definitions):
     Check if required properties have not been assigned.
     """
     
-    if definitions is None:
+    if not definitions:
         return
     for name, definition in definitions.iteritems():
         if getattr(definition, 'required', False) and ((values is None) or (values.get(name) is None)):
@@ -112,7 +124,7 @@ def merge_raw_property_definition(context, presentation, raw_property_definition
     merge(raw_property_definition, our_property_definition._raw)
 
 def merge_property_definitions(context, presentation, property_definitions, our_property_definitions, field_name, for_presentation):
-    if our_property_definitions is None:
+    if not our_property_definitions:
         return
     for property_name, our_property_definition in our_property_definitions.iteritems():
         if property_name in property_definitions:
@@ -121,6 +133,14 @@ def merge_property_definitions(context, presentation, property_definitions, our_
         else:
             property_definitions[property_name] = our_property_definition._clone()
 
-def coerce_property_value(context, presentation, definition, value): # works on properties, inputs, and parameters
-    the_type = definition._get_type(context) if definition is not None else None
-    return coerce_value(context, presentation, the_type, value)
+def coerce_property_value(context, presentation, definition, value, aspect=None): # works on properties, inputs, and parameters
+    the_type = definition._get_type(context) if hasattr(definition, '_get_type') else None
+    return coerce_value(context, presentation, the_type, value, aspect)
+
+def convert_property_definitions_to_values(definitions):
+    values = OrderedDict()
+    for name, definition in definitions.iteritems():
+        default = definition.default
+        if default is not None:
+            values[name] = default
+    return values

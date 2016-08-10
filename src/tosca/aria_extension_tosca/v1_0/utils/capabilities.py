@@ -38,7 +38,7 @@ def get_inherited_capability_definitions(context, presentation, for_presentation
 
     # Add/merge our capability definitions
     our_capability_definitions = presentation.capabilities
-    if our_capability_definitions is not None:
+    if our_capability_definitions:
         for capability_name, our_capability_definition in our_capability_definitions.iteritems():
             if capability_name in capability_definitions:
                 capability_definition = capability_definitions[capability_name]
@@ -79,13 +79,13 @@ def get_template_capabilities(context, presentation):
     capability_definitions = the_type._get_capabilities(context) if the_type is not None else None
 
     # Copy over capability definitions from the type (will initialize properties with default values)
-    if capability_definitions is not None:
+    if capability_definitions:
         for capability_name, capability_definition in capability_definitions.iteritems():
             capability_assignments[capability_name] = convert_capability_from_definition_to_assignment(context, capability_definition, presentation)
 
     # Fill in our capability assignments
     our_capability_assignments = presentation.capabilities
-    if our_capability_assignments is not None:
+    if our_capability_assignments:
         for capability_name, our_capability_assignment in our_capability_assignments.iteritems():
             if capability_name in capability_assignments:
                 capability_assignment = capability_assignments[capability_name]

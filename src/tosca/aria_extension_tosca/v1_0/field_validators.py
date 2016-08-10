@@ -278,14 +278,14 @@ def node_filter_validator(field, presentation, context):
             context.validation.report('requirement "%s" has a node filter even though "node" does not refer to a node type in "%s"' % (presentation._fullname, presentation._container._fullname), locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
 
 #
-# RequirementAssignmentRelationship
+# RelationshipAssignment
 #
 
 def relationship_template_or_type_validator(field, presentation, context):
     """
     Makes sure that the field refers to either a relationship template or a relationship type.
     
-    Used with the :func:`field_validator` decorator for the "type" field in :class:`RequirementAssignmentRelationship`.
+    Used with the :func:`field_validator` decorator for the "type" field in :class:`RelationshipAssignment`.
     """
     
     field._validate(presentation, context)

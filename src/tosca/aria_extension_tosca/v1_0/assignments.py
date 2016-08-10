@@ -1,16 +1,100 @@
 
 from .presentation import ToscaPresentation
 from .filters import NodeFilter
-from .definitions import InterfaceDefinitionForTemplate
-from .misc import PropertyAssignment
+from .misc import Description, OperationImplementation
 from .field_validators import node_template_or_type_validator, relationship_template_or_type_validator, capability_definition_or_type_validator, node_filter_validator
+from .utils.properties import get_assigned_and_defined_property_values
 from aria import dsl_specification
-from aria.utils import cachedmethod
-from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field, field_validator
+from aria.utils import ReadOnlyDict, cachedmethod
+from aria.presentation import AsIsPresentation, has_fields, allow_unknown_fields, short_form_field, primitive_field, object_field, object_dict_field, object_dict_unknown_fields, field_validator, type_validator
+
+@dsl_specification('3.5.9', 'tosca-simple-profile-1.0')
+class PropertyAssignment(AsIsPresentation):
+    """
+    This section defines the grammar for assigning values to named properties within TOSCA Node and Relationship templates that are defined in their corresponding named types.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_PROPERTY_VALUE_ASSIGNMENT>`__
+    """
+
+@short_form_field('implementation')
+@has_fields
+@dsl_specification('3.5.13-2', 'tosca-simple-profile-1.0')
+class OperationAssignment(ToscaPresentation):
+    """
+    An operation definition defines a named function or procedure that can be bound to an implementation artifact (e.g., a script).
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_OPERATION_DEF>`__
+    """
+
+    @object_field(Description)
+    def description(self):
+        """
+        The optional description string for the associated named operation.
+        
+        :rtype: :class:`Description`
+        """
+
+    @object_field(OperationImplementation)
+    def implementation(self):
+        """
+        The optional implementation artifact name (e.g., a script file name within a TOSCA CSAR file).  
+        
+        :rtype: :class:`OperationImplementation`
+        """
+
+    @object_dict_field(PropertyAssignment)
+    def inputs(self):
+        """
+        The optional list of input property assignments (i.e., parameters assignments) for operation definitions that are within TOSCA Node or Relationship Template definitions. This includes when operation definitions are included as part of a Requirement assignment in a Node Template.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+@allow_unknown_fields
+@has_fields
+@dsl_specification('3.5.14-2', 'tosca-simple-profile-1.0')
+class InterfaceAssignment(ToscaPresentation):
+    """
+    An interface definition defines a named interface that can be associated with a Node or Relationship Type.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ELEMENT_INTERFACE_DEF>`__
+    """
+
+    @object_dict_field(PropertyAssignment)
+    def inputs(self):
+        """
+        The optional list of input property assignments (i.e., parameters assignments) for interface definitions that are within TOSCA Node or Relationship Template definitions. This includes when interface definitions are referenced as part of a Requirement assignment in a Node Template.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @object_dict_unknown_fields(OperationAssignment)
+    def operations(self):
+        """
+        :rtype: dict of str, :class:`OperationAssignment`
+        """
+    
+    @cachedmethod
+    def _get_type(self, context):
+        the_type = self._container._get_type(context)
+        
+        if isinstance(the_type, tuple):
+            # In RelationshipAssignment
+            the_type = the_type[0] # This could be a RelationshipTemplate
+
+        interface_definitions = the_type._get_interfaces(context) if the_type is not None else None
+        interface_definition = interface_definitions.get(self._name) if interface_definitions is not None else None
+        return interface_definition._get_type(context) if interface_definition is not None else None
+
+    def _validate(self, context):
+        super(InterfaceAssignment, self)._validate(context)
+        if self.operations:
+            for operation in self.operations.itervalues():
+                operation._validate(context)
 
 @short_form_field('type')
 @has_fields
-class RequirementAssignmentRelationship(ToscaPresentation):
+class RelationshipAssignment(ToscaPresentation):
     @field_validator(relationship_template_or_type_validator)
     @primitive_field(str)
     def type(self):
@@ -28,12 +112,12 @@ class RequirementAssignmentRelationship(ToscaPresentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
-    @object_dict_field(InterfaceDefinitionForTemplate)
+    @object_dict_field(InterfaceAssignment)
     def interfaces(self):
         """
         The optional reserved keyname used to reference declared (named) interface definitions of the corresponding Relationship Type in order to provide Property assignments for these interfaces or operations of these interfaces.
         
-        :rtype: dict of str, :class:`InterfaceDefinitionForTemplate`
+        :rtype: dict of str, :class:`InterfaceAssignment`
         """
 
     @cachedmethod
@@ -84,7 +168,7 @@ class RequirementAssignment(ToscaPresentation):
         :rtype: str
         """
 
-    @object_field(RequirementAssignmentRelationship)
+    @object_field(RelationshipAssignment)
     def relationship(self):
         """
         The optional reserved keyname used to provide the name of either a:
@@ -176,3 +260,79 @@ class CapabilityAssignment(ToscaPresentation):
     def _get_type(self, context):
         capability_definition = self._get_definition(context)
         return capability_definition._get_type(context) if capability_definition is not None else None
+
+@has_fields
+@dsl_specification('3.5.6', 'tosca-simple-profile-1.0')
+class ArtifactAssignment(ToscaPresentation):
+    """
+    An artifact definition defines a named, typed file that can be associated with Node Type or Node Template and used by orchestration engine to facilitate deployment and implementation of interface operations.
+    
+    See the `TOSCA Simple Profile v1.0 specification <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.0/csprd02/TOSCA-Simple-Profile-YAML-v1.0-csprd02.html#DEFN_ENTITY_ARTIFACT_DEF>`__
+    """
+    
+    @field_validator(type_validator('artifact type', 'artifact_types'))
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        The required artifact type for the artifact definition.
+        
+        :rtype: str
+        """
+
+    @primitive_field(str, required=True)
+    def file(self):
+        """
+        The required URI string (relative or absolute) which can be used to locate the artifact's file.
+            
+        :rtype: str
+        """
+    
+    @field_validator(type_validator('repository', 'repositories'))
+    @primitive_field(str)
+    def repository(self):
+        """
+        The optional name of the repository definition which contains the location of the external repository that contains the artifact. The artifact is expected to be referenceable by its file URI within the repository.
+        
+        :rtype: str
+        """
+
+    @object_field(Description)
+    def description(self):
+        """
+        The optional description for the artifact definition.
+        
+        :rtype: :class:`Description`
+        """
+
+    @primitive_field(str)
+    def deploy_path(self):
+        """
+        The file path the associated file would be deployed into within the target node's container.
+        
+        :rtype: str
+        """
+
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        ARIA NOTE: This field is not mentioned in the spec, but is implied.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.artifact_types.get(self.type) if context.presentation.artifact_types is not None else None
+
+    @cachedmethod
+    def _get_repository(self, context):
+        return context.presentation.repositories.get(self.repository) if context.presentation.repositories is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+
+    @cachedmethod
+    def _validate(self, context):
+        super(ArtifactAssignment, self)._validate(context)
+        self._get_property_values(context)

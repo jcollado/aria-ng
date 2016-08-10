@@ -73,12 +73,18 @@ class Operation(Template):
         self.name = name
         self.implementation = None
         self.dependencies = StrictList(str)
+        self.executor = None # Cloudify
+        self.max_retries = None # Cloudify
+        self.retry_interval = None # Cloudify
         self.inputs = StrictDict(str)
 
     def instantiate(self, context, container):
         r = Operation(self.name)
         r.implementation = self.implementation
         r.dependencies = self.dependencies
+        r.executor = self.executor
+        r.max_retries = self.max_retries
+        r.retry_interval = self.retry_interval
         instantiate_properties(context, container, r.inputs, self.inputs)
         return r
 
@@ -91,6 +97,9 @@ class Operation(Template):
             ('name', self.name),
             ('implementation', self.implementation),
             ('dependencies', self.dependencies),
+            ('executor', self.executor),
+            ('max_retries', self.max_retries),
+            ('retry_interval', self.retry_interval),
             ('inputs', self.inputs)))
 
     def dump(self, context):
@@ -100,6 +109,12 @@ class Operation(Template):
                 puts('Implementation: %s' % context.style.literal(self.implementation))
             if self.dependencies:
                 puts('Dependencies: %s' % ', '.join((str(context.style.literal(v)) for v in self.dependencies)))
+            if self.executor is not None:
+                puts('Executor: %s' % context.style.literal(self.executor))
+            if self.max_retries is not None:
+                puts('Max retries: %s' % context.style.literal(self.max_retries))
+            if self.retry_interval is not None:
+                puts('Retry interval: %s' % context.style.literal(self.retry_interval))
             dump_properties(context, self.inputs, 'Inputs')
 
 class Artifact(Template):

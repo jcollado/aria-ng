@@ -81,7 +81,7 @@ def coerce_data_type_value(context, presentation, data_type, entry_schema, const
     return value
 
 #
-# PropertyDefinition, AttributeDefinition, EntrySchema
+# PropertyDefinition, AttributeDefinition, EntrySchema, DataType
 #
 
 def get_data_type(context, presentation, field_name, allow_none=False):
@@ -107,6 +107,10 @@ def get_data_type(context, presentation, field_name, allow_none=False):
     
     # Try primitive data type
     return get_primitive_data_type(the_type)
+
+#
+# PropertyDefinition, EntrySchema
+#
 
 def get_property_constraints(context, presentation):
     """
@@ -297,7 +301,7 @@ def coerce_value(context, presentation, the_type, entry_schema, constraints, val
         return fn
     
     if the_type is None:
-        return None
+        return value
 
     if the_type == None.__class__:
         if value is not None:

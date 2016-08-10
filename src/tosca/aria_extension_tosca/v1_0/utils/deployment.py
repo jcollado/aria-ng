@@ -12,8 +12,7 @@ def get_deployment_template(context, presenter):
     topology_template = presenter.service_template.topology_template
     if topology_template is not None:
         normalize_property_values(r.inputs, topology_template._get_input_values(context))
-        
-    normalize_properties(r.outputs, presenter.outputs)
+        normalize_property_values(r.outputs, topology_template._get_output_values(context))
 
     node_templates = presenter.node_templates
     if node_templates:

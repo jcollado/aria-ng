@@ -2,6 +2,11 @@
 from .assignments import PropertyAssignment
 from aria import dsl_specification
 from aria.presentation import Presentation, AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field 
+from clint.textui import puts
+
+class Description(AsIsPresentation):
+    def _dump(self, context):
+        puts(context.style.meta(self.value))
 
 class Version(AsIsPresentation):
     pass
@@ -15,63 +20,18 @@ class Output(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-outputs/>`__.
     """
     
-    @primitive_field(str)
+    @primitive_field(Description)
     def description(self):
         """
         An optional description for the output.
         
-        :rtype: str
+        :rtype: :class:`Description`
         """
 
     @primitive_field(required=True)
     def value(self):
         """
         The output value. Can be anything from a simple value (e.g. port) to a complex value (e.g. hash with values). Output values can contain hardcoded values, inputs, properties and attributes.
-        """
-
-@short_form_field('implementation')
-@has_fields
-class Operation(Presentation):
-    @primitive_field(str)
-    def implementation(self):
-        """
-        The script or plugin task name to execute.
-        
-        ARIA NOTE: The spec seems to mistakingly mark this as a required field.
-        
-        :rtype: str
-        """
-
-    @object_dict_field(PropertyAssignment)
-    def inputs(self):
-        """
-        Schema of inputs that will be passed to the implementation as kwargs.
-        
-        :rtype: dict of str, :class:`PropertyAssignment`
-        """
-
-    @primitive_field(str)
-    def executor(self):
-        """
-        Valid values: central_deployment_agent, host_agent.
-        
-        :rtype: str
-        """
-
-    @primitive_field(str)
-    def max_retries(self):
-        """
-        Maximum number of retries for a task. -1 means infinite retries (Default: :code:`task_retries` in manager blueprint Cloudify Manager Type for remote workflows and :code:`task_retries` workflow configuration for local workflows).
-        
-        :rtype: int
-        """
-
-    @primitive_field(int)
-    def retry_interval(self):
-        """
-        Minimum wait time (in seconds) in between task retries (Default: :code:`task_retry_interval` in manager blueprint Cloudify Manager Type for remote workflows and :code:`task_retry_interval` workflow configuration for local workflows).
-        
-        :rtype: int
         """
 
 @short_form_field('mapping')

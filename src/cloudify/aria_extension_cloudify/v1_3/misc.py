@@ -73,7 +73,7 @@ class Plugin(Presentation):
     @primitive_field(str, required=True)
     def executor(self):
         """
-        Where to execute the plugin's operations. Valid Values: central\_deployment\_agent, host_agent.
+        Where to execute the plugin's operations. Valid Values: :code:`central_deployment_agent`, :code:`host_agent`.
         
         :rtype: str
         """
@@ -89,7 +89,7 @@ class Plugin(Presentation):
     @primitive_field(str)
     def install_arguments(self):
         """
-        Optional arguments passed to the 'pip install' command created for the plugin installation
+        Optional arguments passed to the :code:`pip install` command created for the plugin installation.
         
         :rtype: str        
         """
@@ -97,7 +97,7 @@ class Plugin(Presentation):
     @primitive_field(bool, default=True)
     def install(self):
         """
-        Whether to install the plugin or not as it might already be installed as part of the agent. Defaults to true. (Supported since: cloudify\_dsl\_1\_1)
+        Whether to install the plugin or not as it might already be installed as part of the agent. Defaults to true. (Supported since: :code:`cloudify_dsl_1_1`)
         
         :rtype: bool
         """
@@ -121,7 +121,7 @@ class Plugin(Presentation):
     @primitive_field(str)
     def supported_platform(self):
         """
-        Managed plugin supported platform (e.g. linux\_x86\_64). (Supported since: :code:`cloudify_dsl_1_2`)
+        Managed plugin supported platform (e.g. :code:`linux_x86_64`). (Supported since: :code:`cloudify_dsl_1_2`)
         
         :rtype: str
         """
@@ -159,7 +159,7 @@ class Scalable(Presentation):
     @primitive_field(int, default=1)
     def default_instances(self):
         """
-        The number of node-instances this node template will have.
+        The number of node instances this node template will have.
         
         :rtype: int
         """
@@ -172,12 +172,12 @@ class Scalable(Presentation):
         :rtype: int
         """
         
-    @primitive_field(int, default=-1)
+    @primitive_field(str, default='UNBOUNDED')
     def max_instances(self):
         """
         The maximum number of allowed node instances. (Not enforced by scale workflow.)
         
-        UNBOUNDED may be used literally as the value for max_instances. Internally, it is stored as -1, which may also be used.
+        UNBOUNDED may be used literally as the value for :code:`max_instances`. Internally, it is stored as -1, which may also be used.
         
         :rtype: int
         """

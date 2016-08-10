@@ -32,7 +32,7 @@ class PropertyDefinition(Presentation):
     @primitive_field(bool, default=True)
     def required(self):
         """
-        Specifies whether the property is required. (Default: true, Supported since: cloudify_dsl_1_2)
+        Specifies whether the property is required. (Default: true, Supported since: :code:`cloudify_dsl_1_2`)
         
         :rtype: bool
         """

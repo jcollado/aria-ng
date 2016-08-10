@@ -344,7 +344,7 @@ autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance']
 
 def on_skip_members(app, what, name, obj, skip, options):
     if not skip:
-        if name == 'FIELDS':
+        if name in ('FIELDS', 'ALLOW_UNKNOWN_FIELDS', 'SHORT_FORM_FIELD'):
             skip = True
     return skip
     

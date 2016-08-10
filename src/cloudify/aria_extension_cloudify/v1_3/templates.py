@@ -261,7 +261,7 @@ class ServiceTemplate(Presentation):
     @dsl_specification('versioning', 'cloudify-1.3')
     def tosca_definitions_version(self):
         """
-        :code:`tosca_definitions_version` is a top level property of the blueprint which is used to specify the DSL version used. For Cloudify 3.4, the versions that are currently defined are :code:`cloudify_dsl_1_0`, :code:`:code:`cloudify\_dsl\_1\_1``, :code:`cloudify_dsl_1_2` and :code:`cloudify_dsl_1_3`.
+        :code:`tosca_definitions_version` is a top level property of the blueprint which is used to specify the DSL version used. For Cloudify 3.4, the versions that are currently defined are :code:`cloudify_dsl_1_0`, :code:`cloudify_dsl_1_1`, :code:`cloudify_dsl_1_2` and :code:`cloudify_dsl_1_3`.
 
         The version declaration must be included in the main blueprint file. It may also be included in YAML files that are imported in it (transitively), in which case, the version specified in the imported YAMLs must match the version specified in the main blueprint file.
 

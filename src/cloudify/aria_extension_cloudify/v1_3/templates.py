@@ -1,11 +1,14 @@
 
 from ..v1_2 import Instances
 from .definitions import PropertyDefinition
-from .assignments import PropertyAssignment, InterfaceAssignment, PolicyAssignment
+from .assignments import PropertyAssignment, InterfaceAssignment, PolicyAssignment, CapabilityAssignment
 from .types import NodeType, RelationshipType, PolicyType, DataType
-from .misc import Description, Output, Workflow, Plugin, Scalable, PolicyTrigger
+from .misc import Description, Output, Workflow, Plugin, PolicyTrigger
+from .field_validators import node_templates_or_groups_validator
 from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
 from .utils.interfaces import get_template_interfaces
+from .utils.node_templates import get_node_template_scalable
+from .utils.relationships import get_relationship_assigned_and_defined_property_values
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator, list_type_validator
 from aria.utils import ReadOnlyDict, cachedmethod
@@ -44,18 +47,11 @@ class RelationshipTemplate(Presentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
     
+    @field_validator(type_validator('node template', 'node_templates'))
     @primitive_field(str, required=True)
     def target(self):
         """
         The node's name to relate the current node to.
-        
-        :rtype: str
-        """
-
-    @primitive_field(str)
-    def connection_type(self):
-        """
-        valid values: :code:`all_to_all` and :code:`all_to_one`
         
         :rtype: str
         """
@@ -82,7 +78,7 @@ class RelationshipTemplate(Presentation):
 
     @cachedmethod
     def _get_property_values(self, context):
-        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+        return ReadOnlyDict(get_relationship_assigned_and_defined_property_values(context, self))
 
     @cachedmethod
     def _get_source_interfaces(self, context):
@@ -158,12 +154,12 @@ class NodeTemplate(Presentation):
         :rtype: list of :class:`RelationshipTemplate`
         """
     
-    @object_dict_field(Scalable)
+    @object_dict_field(CapabilityAssignment)
     def capabilities(self):
         """
         Used for specifying the node template capabilities (Supported since: :code:`cloudify_dsl_1_3`. At the moment only scalable capability is supported)
         
-        :rtype: dict of str, :class:`Scalable`
+        :rtype: dict of str, :class:`CapabilityAssignment`
         """
 
     @cachedmethod
@@ -178,11 +174,15 @@ class NodeTemplate(Presentation):
     def _get_interfaces(self, context):
         return ReadOnlyDict(get_template_interfaces(context, self, 'node template', 'interfaces', '_get_interfaces'))
 
+    @cachedmethod
+    def _get_scalable(self, context):
+        return get_node_template_scalable(context, self)
+
     def _validate(self, context):
         super(NodeTemplate, self)._validate(context)
         self._get_property_values(context)
         self._get_interfaces(context)
-
+        self._get_scalable(context)
 
 @has_fields
 @dsl_specification('groups', 'cloudify-1.3')
@@ -193,6 +193,7 @@ class GroupDefinition(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-groups/>`__.
     """
 
+    @field_validator(node_templates_or_groups_validator)
     @primitive_list_field(str, required=True)
     def members(self):
         """

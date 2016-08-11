@@ -1,5 +1,5 @@
 
-from aria.presentation import Presentation, AsIsPresentation, has_fields, allow_unknown_fields, short_form_field, primitive_field, object_dict_field, object_dict_unknown_fields
+from aria.presentation import Presentation, AsIsPresentation, has_fields, allow_unknown_fields, short_form_field, primitive_field, object_dict_field, object_dict_unknown_fields, field_validator, type_validator
 from aria import dsl_specification
 
 class PropertyAssignment(AsIsPresentation):
@@ -7,6 +7,7 @@ class PropertyAssignment(AsIsPresentation):
 
 @has_fields
 class TriggerAssignment(Presentation):
+    @field_validator(type_validator('policy trigger', 'policy_triggers'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -25,6 +26,7 @@ class TriggerAssignment(Presentation):
 
 @has_fields
 class PolicyAssignment(Presentation):
+    @field_validator(type_validator('policy type', 'policy_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -70,7 +72,7 @@ class OperationAssignment(Presentation):
         :rtype: dict of str, :class:`PropertyAssignment`
         """
 
-    @primitive_field(str)
+    @primitive_field(str, allowed=('central_deployment_agent', 'host_agent'))
     def executor(self):
         """
         Valid values: :code:`central_deployment_agent`, :code:`host_agent`.
@@ -108,4 +110,12 @@ class InterfaceAssignment(Presentation):
     def operations(self):
         """
         :rtype: dict of str, :class:`OperationAssignment`
+        """
+
+@has_fields
+class CapabilityAssignment(Presentation):
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        :rtype: dict of str, :class:`PropertyAssignment`
         """

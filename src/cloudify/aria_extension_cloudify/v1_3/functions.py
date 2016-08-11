@@ -64,8 +64,10 @@ class GetAttribute(Function):
 #
 
 FUNCTIONS = {
+    'concat': Concat,
     'get_input': GetInput,
-    'get_property': GetProperty}
+    'get_property': GetProperty,
+    'get_attribute': GetProperty}
 
 def get_function(context, presentation, value):
     if isinstance(value, dict) and (len(value) == 1):

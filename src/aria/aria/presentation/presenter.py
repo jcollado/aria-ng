@@ -85,5 +85,9 @@ class Presenter(Presentation):
         return None
 
     @property
+    def policy_triggers(self):
+        return None
+
+    @property
     def workflows(self):
         return None

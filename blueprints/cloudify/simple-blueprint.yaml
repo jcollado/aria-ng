@@ -91,6 +91,14 @@ node_templates:
       agent_config:
         user: { get_input: agent_user }
         key: { get_input: agent_private_key_path }
+    capabilities: # ARIA
+      scalable:
+        properties:
+          default_instances: 2
+          min_instances: 1
+          max_instances: 4
+    instances:
+      deploy: 3
 
   mongod_host:
     type: nodecellar.nodes.MonitoredServer

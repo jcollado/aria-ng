@@ -70,7 +70,7 @@ class Plugin(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-plugins/>`__.
     """
 
-    @primitive_field(str, required=True)
+    @primitive_field(str, required=True, allowed=('central_deployment_agent', 'host_agent'))
     def executor(self):
         """
         Where to execute the plugin's operations. Valid Values: :code:`central_deployment_agent`, :code:`host_agent`.
@@ -148,38 +148,6 @@ class Plugin(Presentation):
         Managed plugin distribution release. (Supported since: :code:`cloudify_dsl_1_2`)
         
         :rtype: str
-        """
-
-@has_fields
-class Scalable(Presentation):
-    """
-    The :code:`capabilities.scalable.properties` key is used for configuring the deployment characteristics of the node template.
-    """
-    
-    @primitive_field(int, default=1)
-    def default_instances(self):
-        """
-        The number of node instances this node template will have.
-        
-        :rtype: int
-        """
-    
-    @primitive_field(int, default=0)
-    def min_instances(self):
-        """
-        The minimum number of allowed node instances. (Not enforced by scale workflow.)
-        
-        :rtype: int
-        """
-        
-    @primitive_field(str, default='UNBOUNDED')
-    def max_instances(self):
-        """
-        The maximum number of allowed node instances. (Not enforced by scale workflow.)
-        
-        UNBOUNDED may be used literally as the value for :code:`max_instances`. Internally, it is stored as -1, which may also be used.
-        
-        :rtype: int
         """
 
 @has_fields

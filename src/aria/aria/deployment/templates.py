@@ -58,6 +58,9 @@ class NodeTemplate(Template):
         
         self.name = name
         self.type_name = type_name
+        self.default_instances = 1
+        self.min_instances = 0
+        self.max_instances = None
         self.properties = StrictDict(str)
         self.interfaces = StrictDict(str, Interface)
         self.artifacts = StrictDict(str, Artifact)
@@ -99,6 +102,7 @@ class NodeTemplate(Template):
         puts('Node template: %s' % context.style.node(self.name))
         with context.style.indent:
             puts('Type: %s' % context.style.type(self.type_name))
+            puts('Instances: %d (%d%s)' % (self.default_instances, self.min_instances, (' to %d' % self.max_instances) if self.max_instances is not None else ' or more'))
             dump_properties(context, self.properties)
             dump_interfaces(context, self.interfaces)
             dump_dict_values(context, self.artifacts, 'Artifacts')
@@ -106,9 +110,9 @@ class NodeTemplate(Template):
             dump_list_values(context, self.requirements, 'Requirements')
 
 class Requirement(Element):
-    def __init__(self, name, target_node_type_name=None, target_node_template_name=None, target_capability_type_name=None, target_capability_name=None):
-        if not isinstance(name, basestring):
-            raise ValueError('must set name (string)')
+    def __init__(self, name=None, target_node_type_name=None, target_node_template_name=None, target_capability_type_name=None, target_capability_name=None):
+        if name and not isinstance(name, basestring):
+            raise ValueError('name must be a string)')
         if target_node_type_name and not isinstance(target_node_type_name, basestring):
             raise ValueError('target_node_type_name must be string')
         if target_node_template_name and not isinstance(target_node_template_name, basestring):
@@ -132,18 +136,21 @@ class Requirement(Element):
 
     def find_target(self, context, source_node_template):
         # We might already have a specific node template, so we'll just verify it
-        if self.target_node_template_name:
+        if self.target_node_template_name is not None:
             target_node_template = context.deployment.template.node_templates.get(self.target_node_template_name)
             
             if not source_node_template.is_target_node_valid(target_node_template):
                 context.validation.report('requirement "%s" of node template "%s" is for node template "%s" but it does not match constraints' % (self.name, self.target_node_template_name, source_node_template.name), level=Issue.BETWEEN_TYPES)
                 return None, None
             
-            target_capability = self.find_target_capability(context, source_node_template, target_node_template)
-            if target_capability is None:
-                return None, None
+            if (self.target_capability_type_name is not None) or (self.target_capability_name is not None): 
+                target_node_capability = self.find_target_capability(context, source_node_template, target_node_template)
+                if target_node_capability is None:
+                    return None, None
+            else:
+                target_node_capability = None
             
-            return target_node_template, target_capability
+            return target_node_template, target_node_capability
 
         # Find first node that matches the type
         elif self.target_node_type_name is not None:
@@ -154,11 +161,11 @@ class Requirement(Element):
                 if not source_node_template.is_target_node_valid(target_node_template):
                     continue
     
-                target_capability = self.find_target_capability(context, source_node_template, target_node_template)
-                if target_capability is None:
+                target_node_capability = self.find_target_capability(context, source_node_template, target_node_template)
+                if target_node_capability is None:
                     continue
                 
-                return target_node_template, target_capability
+                return target_node_template, target_node_capability
         
         return None, None
 
@@ -177,7 +184,10 @@ class Requirement(Element):
             self.relationship_template.validate(context)
 
     def dump(self, context):
-        puts(context.style.node(self.name))
+        if self.name:
+            puts(context.style.node(self.name))
+        else:
+            puts('Requirement:')
         with context.style.indent:
             if self.target_node_type_name is not None:
                 puts('Target node type: %s' % context.style.type(self.target_node_type_name))
@@ -238,7 +248,7 @@ class CapabilityTemplate(Template):
         puts(context.style.node(self.name))
         with context.style.indent:
             puts('Type: %s' % context.style.type(self.type_name))
-            puts('Occurrences: %s%s' % (self.min_occurrences or 0, (' to %d' % self.max_occurrences) if self.max_occurrences is not None else ' or more'))
+            puts('Occurrences: %d%s' % (self.min_occurrences or 0, (' to %d' % self.max_occurrences) if self.max_occurrences is not None else ' or more'))
             if self.valid_source_node_type_names:
                 puts('Valid source node types: %s' % ', '.join((str(context.style.type(v)) for v in self.valid_source_node_type_names)))
             dump_properties(context, self.properties)

@@ -3,6 +3,7 @@ from .definitions import InterfaceDefinition, PropertyDefinition
 from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions
 from .utils.data_types import coerce_data_type_value
+from .utils.relationships import get_relationship_inherited_property_definitions
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field, object_dict_field, field_validator, derived_from_validator
 from aria.utils import ReadOnlyDict, cachedmethod
@@ -108,14 +109,6 @@ class RelationshipType(Presentation):
         :rtype: dict of str, :class:`InterfaceDefinition`
         """
     
-    @primitive_field(str, allowed=('all_to_all', 'all_to_one'))
-    def connection_type(self):
-        """
-        valid values: :code:`all_to_all` and :code:`all_to_one`
-        
-        :rtype: str
-        """
-    
     @object_dict_field(PropertyDefinition)
     def properties(self):
         """
@@ -130,7 +123,7 @@ class RelationshipType(Presentation):
 
     @cachedmethod
     def _get_properties(self, context):
-        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
+        return ReadOnlyDict(get_relationship_inherited_property_definitions(context, self))
 
     @cachedmethod
     def _get_source_interfaces(self, context):

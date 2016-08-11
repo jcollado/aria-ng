@@ -62,7 +62,7 @@ class OperationDefinition(Presentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
-    @primitive_field(str)
+    @primitive_field(str, allowed=('central_deployment_agent', 'host_agent'))
     def executor(self):
         """
         Valid values: :code:`central_deployment_agent`, :code:`host_agent`.

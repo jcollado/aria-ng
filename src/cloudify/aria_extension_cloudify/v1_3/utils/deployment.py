@@ -1,5 +1,5 @@
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, PolicyTemplate, Interface, Operation, Artifact, Requirement
+from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, Interface, Operation, Requirement
 
 def get_deployment_template(context, presenter):
     r = DeploymentTemplate()
@@ -53,7 +53,69 @@ def normalize_node_template(context, node_template):
     
     normalize_property_values(r.properties, node_template._get_property_values(context))
     normalize_interfaces(context, r.interfaces, node_template._get_interfaces(context))
+    
+    relationships = node_template.relationships
+    if relationships:
+        for relationship in relationships:
+            r.requirements.append(normalize_requirement(context, relationship))
 
+    scalable = node_template._get_scalable(context)
+    if scalable is not None:
+        node_template.default_instances = scalable.default_instances
+        node_template.min_instances = scalable.min_instances
+        if scalable.max_instances != -1:
+            node_template.max_instances = scalable.max_instances
+
+    return r
+
+def normalize_interface(context, interface):
+    r = Interface(name=interface._name)
+
+    operations = interface.operations
+    if operations:
+        for operation_name, operation in operations.iteritems():
+            #if operation.implementation is not None:
+            r.operations[operation_name] = normalize_operation(context, operation)
+    
+    return r #if r.operations else None
+
+def normalize_operation(context, operation):
+    r = Operation(name=operation._name)
+
+    implementation = operation.implementation
+    if implementation is not None:
+        r.implementation = implementation
+    executor = operation.executor
+    if executor is not None:
+        r.executor = executor
+    max_retries = operation.max_retries
+    if max_retries is not None:
+        r.max_retries = max_retries
+    retry_interval = operation.retry_interval
+    if retry_interval is not None:
+        r.retry_interval = retry_interval
+
+    inputs = operation.inputs
+    if inputs:
+        for input_name, the_input in inputs.iteritems():
+            r.inputs[input_name] = the_input.value
+    
+    return r
+
+def normalize_requirement(context, relationship):
+    r = {'name': relationship._name}
+    r['target_node_template_name'] = relationship.target
+    r = Requirement(**r)
+    r.relationship_template = normalize_relationship(context, relationship)
+    return r
+
+def normalize_relationship(context, relationship):
+    relationship_type = relationship._get_type(context)
+    r = RelationshipTemplate(template_name=relationship_type._name)
+
+    normalize_property_values(r.properties, relationship._get_property_values(context))
+    normalize_interfaces(context, r.interfaces, relationship._get_target_interfaces(context))
+    
     return r
 
 def normalize_group(context, group):
@@ -104,37 +166,3 @@ def normalize_interfaces(context, interfaces, source_interfaces):
             interface = normalize_interface(context, interface)
             if interface is not None:
                 interfaces[interface_name] = interface
-
-def normalize_interface(context, interface):
-    r = Interface(name=interface._name)
-
-    operations = interface.operations
-    if operations:
-        for operation_name, operation in operations.iteritems():
-            #if operation.implementation is not None:
-            r.operations[operation_name] = normalize_operation(context, operation)
-    
-    return r #if r.operations else None
-
-def normalize_operation(context, operation):
-    r = Operation(name=operation._name)
-
-    implementation = operation.implementation
-    if implementation is not None:
-        r.implementation = implementation
-    executor = operation.executor
-    if executor is not None:
-        r.executor = executor
-    max_retries = operation.max_retries
-    if max_retries is not None:
-        r.max_retries = max_retries
-    retry_interval = operation.retry_interval
-    if retry_interval is not None:
-        r.retry_interval = retry_interval
-
-    inputs = operation.inputs
-    if inputs:
-        for input_name, the_input in inputs.iteritems():
-            r.inputs[input_name] = the_input.value
-    
-    return r

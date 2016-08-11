@@ -113,5 +113,10 @@ class CloudifyPresenter1_3(Presenter):
 
     @property
     @cachedmethod
+    def policy_triggers(self):
+        return self.service_template.policy_triggers
+
+    @property
+    @cachedmethod
     def workflows(self):
         return self.service_template.workflows

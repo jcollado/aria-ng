@@ -130,24 +130,33 @@ class Node(Element):
         satisfied = True
         for requirement in node_template.requirements:
             # Find target template
-            target_node_template, target_capability = requirement.find_target(context, node_template)
+            target_node_template, target_node_capability = requirement.find_target(context, node_template)
             if target_node_template is not None:
                 # Find target nodes
                 target_nodes = context.deployment.plan.find_nodes(target_node_template.name)
                 if target_nodes:
-                    related = False
-                    for target_node in target_nodes:
+                    target_node = None
+                    target_capability = None
+                    
+                    if target_node_capability is not None:
                         # Relate to the first target node that has capacity
-                        target_capability = target_node.capabilities.get(target_capability.name)
-                        if target_capability.relate():
-                            if requirement.relationship_template is not None:
-                                relationship = requirement.relationship_template.instantiate(context, self)
-                                relationship.target_node_id = target_node.id
+                        for node in target_nodes:
+                            target_capability = node.capabilities.get(target_node_capability.name)
+                            if target_capability.relate():
+                                target_node = node
+                                break
+                    else:
+                        # Use first target node
+                        target_node = target_nodes[0]
+                        
+                    if target_node is not None:
+                        if requirement.relationship_template is not None:
+                            relationship = requirement.relationship_template.instantiate(context, self)
+                            relationship.target_node_id = target_node.id
+                            if target_capability is not None:
                                 relationship.target_capability_name = target_capability.name
-                                self.relationships.append(relationship)
-                            related = True
-                            break
-                    if not related:
+                            self.relationships.append(relationship)
+                    else:
                         context.validation.report('requirement "%s" of node "%s" targets node template "%s" but its instantiated nodes do not have enough capacity' % (requirement.name, self.id, target_node_template.name), level=Issue.BETWEEN_INSTANCES)
                         satisfied = False
                 else:
@@ -283,13 +292,15 @@ class Relationship(Element):
             ('target_node_id', self.target_node_id),
             ('target_capability_name', self.target_capability_name),
             ('type_name', self.type_name),
+            ('template_name', self.template_name),
             ('properties', self.properties),
             ('interfaces', [v.as_raw for v in self.interfaces.itervalues()])))            
 
     def dump(self, context):
         puts('Target node: %s' % context.style.node(self.target_node_id))
         with context.style.indent:
-            puts('Target capability: %s' % context.style.node(self.target_capability_name))
+            if self.target_capability_name is not None:
+                puts('Target capability: %s' % context.style.node(self.target_capability_name))
             if self.type_name is not None:
                 puts('Relationship type: %s' % context.style.type(self.type_name))
             else:

@@ -21,8 +21,19 @@ from clint.textui import puts, colored
 reload(sys)
 sys.setdefaultencoding('utf8') # @UndefinedVariable
 
+class Config(object):
+    def __init__(self):
+        self.port = 8080
+        self.routes = {}
+        self.static_root = '.'
+        self.json_encoder = json.JSONEncoder
+        self.json_decoder = json.JSONDecoder
+
 def rest_call_json(url, payload=None, with_payload_method='PUT'):
-    'REST call with JSON decoding of the response and JSON payloads'
+    """
+    REST call with JSON decoding of the response and JSON payloads.
+    """
+    
     if payload:
         if not isinstance(payload, basestring):
             payload = json.dumps(payload)
@@ -35,7 +46,10 @@ def rest_call_json(url, payload=None, with_payload_method='PUT'):
     return json.loads(response)
 
 class MethodRequest(urllib2.Request):
-    'See: https://gist.github.com/logic/2715756'
+    """
+    See: https://gist.github.com/logic/2715756
+    """
+    
     def __init__(self, *args, **kwargs):
         if 'method' in kwargs:
             self._method = kwargs['method']
@@ -48,9 +62,8 @@ class MethodRequest(urllib2.Request):
         return self._method if self._method is not None else urllib2.Request.get_method(self, *args, **kwargs)
 
 class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    def __init__(self, routes, static_root, *args, **kwargs):
-        self.routes = routes
-        self.static_root = static_root
+    def __init__(self, config, *args, **kwargs):
+        self.config = config
         return BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, *args, **kwargs)
     
     def do_HEAD(self):
@@ -74,7 +87,7 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return payload
  
     def get_json_payload(self):
-        return json.loads(self.get_payload())
+        return json.loads(self.get_payload(), cls=self.config.json_decoder)
         
     def handle_method(self, method):
         route = self.get_route()
@@ -92,7 +105,7 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 if 'file' in route:
                     if method == 'GET':
                         try:
-                            f = open(os.path.join(self.static_root, route['file']))
+                            f = open(os.path.join(self.config.static_root, route['file']))
                             try:
                                 self.send_response(200)
                                 if 'media_type' in route:
@@ -118,7 +131,7 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 self.send_header('Content-type', route['media_type'])
                             self.end_headers()
                             if method != 'DELETE':
-                                self.wfile.write(json.dumps(content))
+                                self.wfile.write(json.dumps(content, cls=self.config.json_encoder))
                         else:
                             self.send_response(404)
                             self.end_headers()
@@ -127,23 +140,23 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         self.send_response(405)
                         self.end_headers()
                         self.wfile.write(method + ' is not supported\n')
-                    
     
     def get_route(self):
-        for path, route in self.routes.iteritems():
+        for path, route in self.config.routes.iteritems():
             if re.match(path, self.path):
                 return route
         return None
 
-def rest_request_handler(routes, static_root):
-    return lambda *args: RESTRequestHandler(routes, static_root, *args)
+def rest_request_handler(config):
+    return lambda *args: RESTRequestHandler(config, *args)
 
-def start_server(routes, port, static_root):
+def start_server(config):
     """
     Starts the REST server.
     """
-    http_server = BaseHTTPServer.HTTPServer(('', port), rest_request_handler(routes, static_root))
-    puts(colored.red('Running HTTP server at port %d, use CTRL-C to exit' % port))
+    
+    http_server = BaseHTTPServer.HTTPServer(('', config.port), rest_request_handler(config))
+    puts(colored.red('Running HTTP server at port %d, use CTRL-C to exit' % config.port))
     try:
         http_server.serve_forever()
     except KeyboardInterrupt:

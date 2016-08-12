@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, PolicyTemplate, Interface, Operation, Artifact, Requirement
 from .data_types import coerce_value
@@ -260,7 +275,7 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
     constraint_key = constraint_clause._raw.keys()[0]
     the_type = constraint_clause._get_type(context)
 
-    def coerce(constraint, container):
+    def coerce_constraint(constraint, container):
         constraint = coerce_value(context, node_filter, the_type, None, None, constraint, constraint_key) if the_type is not None else constraint
         if hasattr(constraint, '_evaluate'):
             constraint = constraint._evaluate(context, container)
@@ -274,7 +289,7 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
 
     if constraint_key == 'equal':
         def equal(node_type, container):
-            constraint = coerce(constraint_clause.equal, container)
+            constraint = coerce_constraint(constraint_clause.equal, container)
             value = get_value(node_type)
             return value == constraint
         
@@ -282,7 +297,7 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
 
     elif constraint_key == 'greater_than':
         def greater_than(node_type, container):
-            constraint = coerce(constraint_clause.greater_than, container)
+            constraint = coerce_constraint(constraint_clause.greater_than, container)
             value = get_value(node_type)
             return value > constraint
         
@@ -290,7 +305,7 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
 
     elif constraint_key == 'greater_or_equal':
         def greater_or_equal(node_type, container):
-            constraint = coerce(constraint_clause.greater_or_equal, container)
+            constraint = coerce_constraint(constraint_clause.greater_or_equal, container)
             value = get_value(node_type)
             return value >= constraint
         
@@ -298,7 +313,7 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
 
     elif constraint_key == 'less_than':
         def less_than(node_type, container):
-            constraint = coerce(constraint_clause.less_than, container)
+            constraint = coerce_constraint(constraint_clause.less_than, container)
             value = get_value(node_type)
             return value < constraint
         
@@ -306,7 +321,7 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
 
     elif constraint_key == 'less_or_equal':
         def less_or_equal(node_type, container):
-            constraint = coerce(constraint_clause.less_or_equal, container)
+            constraint = coerce_constraint(constraint_clause.less_or_equal, container)
             value = get_value(node_type)
             return value <= constraint
         
@@ -315,7 +330,7 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
     elif constraint_key == 'in_range':
         def in_range(node_type, container):
             lower, upper = constraint_clause.in_range
-            lower, upper = coerce(lower, container), coerce(upper, container)
+            lower, upper = coerce_constraint(lower, container), coerce_constraint(upper, container)
             value = get_value(node_type)
             if value < lower:
                 return False
@@ -327,7 +342,7 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
 
     elif constraint_key == 'valid_values':
         def valid_values(node_type, container):
-            constraint = tuple(coerce(v, container) for v in constraint_clause.valid_values)
+            constraint = tuple(coerce_constraint(v, container) for v in constraint_clause.valid_values)
             value = get_value(node_type)
             return value in constraint
 

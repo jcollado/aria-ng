@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 from clint.textui import puts, colored, indent
 import sys, linecache 
@@ -6,10 +21,10 @@ def print_exception(e, full=True, cause=False, tb=None):
     """
     Prints the exception with nice colors and such.
     """
-    def format(e):
+    def format_heading(e):
         return '%s%s: %s' % (colored.red('Caused by ') if cause else '', colored.red(e.__class__.__name__, bold=True), colored.red(str(e)))
 
-    puts(format(e))
+    puts(format_heading(e))
     if full:
         if cause:
             if tb:

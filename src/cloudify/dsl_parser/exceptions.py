@@ -1,18 +1,18 @@
-########
-# Copyright (c) 2014 GigaSpaces Technologies Ltd. All rights reserved
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#        http://www.apache.org/licenses/LICENSE-2.0
-#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-#    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    * See the License for the specific language governing permissions and
-#    * limitations under the License.
-
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 class MissingRequiredInputError(Exception):
     """
@@ -36,9 +36,9 @@ class FunctionEvaluationError(Exception):
     An error raised when an intrinsic function was unable to get evaluated.
     """
     def __init__(self, func_name, message=None):
-        msg = 'Unable to evaluate {0} function'.format(func_name)
+        msg = 'Unable to evaluate {0} function'.format_heading(func_name)
         if message:
-            msg = '{0}: {1}'.format(msg, message)
+            msg = '{0}: {1}'.format_heading(msg, message)
         super(FunctionEvaluationError, self).__init__(msg)
 
 
@@ -52,7 +52,7 @@ class DSLParsingException(Exception):
         message = super(DSLParsingException, self).__str__()
         if not self.element:
             return message
-        return '{0} {1}'.format(message, self.element)
+        return '{0} {1}'.format_heading(message, self.element)
 
 
 class DSLParsingLogicException(DSLParsingException):

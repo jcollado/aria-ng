@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 from .module import CodeModule
 from .writer import Writer, create_header, repr_assignment
@@ -41,23 +56,23 @@ class CodeGenerator(object):
                 root.classes[c.name] = c
                 self.translate_classes[c.name] = c
     
-    def write_file(self, file, content):
+    def write_file(self, the_file, content):
         try:
-            os.makedirs(os.path.dirname(file))
+            os.makedirs(os.path.dirname(the_file))
         except OSError as e:
             if e.errno != 17:
                 raise e
-        with open(file, 'w') as f:
+        with open(the_file, 'w') as f:
             f.write(str(content))
     
     def write(self, root):
         self.link_classes()
         for m in self.module.all_modules:
             if m.name:
-                file = os.path.join(root, m.file)
-                self.write_file(file, m)
-        file = os.path.join(root, 'service.py')
-        self.write_file(file, self.service)
+                the_file = os.path.join(root, m.file)
+                self.write_file(the_file, m)
+        the_file = os.path.join(root, 'service.py')
+        self.write_file(the_file, self.service)
 
     @property
     def service(self):

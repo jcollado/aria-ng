@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 from ..functions import get_function
 from aria import Issue, dsl_specification
@@ -101,9 +116,9 @@ def get_data_type(context, presentation, field_name, allow_none=False):
             return str
     
     # Try complex data type
-    complex = context.presentation.data_types.get(the_type) if context.presentation.data_types is not None else None
-    if complex is not None:
-        return complex 
+    data_type = context.presentation.data_types.get(the_type) if context.presentation.data_types is not None else None
+    if data_type is not None:
+        return data_type 
     
     # Try primitive data type
     return get_primitive_data_type(the_type)
@@ -143,45 +158,45 @@ def apply_constraint_to_value(context, presentation, constraint_clause, value):
     the_type = constraint_clause._get_type(context)
     entry_schema = getattr(presentation, 'entry_schema', None) # PropertyAssignment does not have this
     
-    def coerce(constraint):
+    def coerce_constraint(constraint):
         return coerce_value(context, presentation, the_type, entry_schema, None, constraint, constraint_key)
     
     def report(message, constraint):
         context.validation.report('value %s %s per constraint in "%s": %s' % (message, repr(constraint), presentation._name or presentation._container._name, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_FIELDS)
 
     if constraint_key == 'equal':
-        constraint = coerce(constraint_clause.equal)
+        constraint = coerce_constraint(constraint_clause.equal)
         if value != constraint:
             report('is not equal to', constraint)
             return False
 
     elif constraint_key == 'greater_than':
-        constraint = coerce(constraint_clause.greater_than)
+        constraint = coerce_constraint(constraint_clause.greater_than)
         if value <= constraint:
             report('is not greater than', constraint)
             return False
 
     elif constraint_key == 'greater_or_equal':
-        constraint = coerce(constraint_clause.greater_or_equal)
+        constraint = coerce_constraint(constraint_clause.greater_or_equal)
         if value < constraint:
             report('is not greater than or equal to', constraint)
             return False
 
     elif constraint_key == 'less_than':
-        constraint = coerce(constraint_clause.less_than)
+        constraint = coerce_constraint(constraint_clause.less_than)
         if value >= constraint:
             report('is not less than', constraint)
             return False
 
     elif constraint_key == 'less_or_equal':
-        constraint = coerce(constraint_clause.less_or_equal)
+        constraint = coerce_constraint(constraint_clause.less_or_equal)
         if value > constraint:
             report('is not less than or equal to', constraint)
             return False
 
     elif constraint_key == 'in_range':
         lower, upper = constraint_clause.in_range
-        lower, upper = coerce(lower), coerce(upper)
+        lower, upper = coerce_constraint(lower), coerce_constraint(upper)
         if value < lower:
             report('is not greater than or equal to lower bound', lower)
             return False
@@ -190,7 +205,7 @@ def apply_constraint_to_value(context, presentation, constraint_clause, value):
             return False
 
     elif constraint_key == 'valid_values':
-        constraint = tuple(coerce(v) for v in constraint_clause.valid_values)
+        constraint = tuple(coerce_constraint(v) for v in constraint_clause.valid_values)
         if value not in constraint:
             report('is not one of', constraint)
             return False

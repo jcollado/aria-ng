@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 from aria.deployment import DeploymentPlan
 
@@ -30,10 +45,10 @@ class CloudifyDeploymentPlan(DeploymentPlan):
     def get_relationship(self, name):
         return self.presentation.service_template.relationships[name]
     
-    def is_contained_relationship(self, type):
-        if type == 'cloudify.relationships.contained_in':
+    def is_contained_relationship(self, the_type):
+        if the_type == 'cloudify.relationships.contained_in':
             return True
-        relationship = self.get_relationship(type)
+        relationship = self.get_relationship(the_type)
         if relationship.derived_from:
             return self.is_contained_relationship(relationship.derived_from)
         return False
@@ -124,9 +139,9 @@ class CloudifyDeploymentPlan(DeploymentPlan):
                     r[interface_name][operation_name]['retry_interval'] = o.retry_interval
                     r[interface_name][operation_name]['executor'] = o.executor
 
-    def append_from_relationship_type(self, r, type):
-        r['type_hierarchy'].insert(0, type)
-        relationship_type = self.get_relationship(type)
+    def append_from_relationship_type(self, r, the_type):
+        r['type_hierarchy'].insert(0, the_type)
+        relationship_type = self.get_relationship(the_type)
         if relationship_type.properties:
             for property_name, p in relationship_type.properties.iteritems():
                 if p.default is not None:

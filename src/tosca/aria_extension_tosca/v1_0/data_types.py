@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 from .utils.data_types import coerce_to_data_type_class, report_issue_for_bad_format, coerce_value
 from aria import dsl_specification
@@ -104,7 +119,7 @@ class Timestamp(object):
     
     @staticmethod
     def _fraction_as_str(dt):
-        return '{0:g}'.format(dt.microsecond / 1000000.0).lstrip('0')
+        return '{0:g}'.format_heading(dt.microsecond / 1000000.0).lstrip('0')
     
 @total_ordering
 @dsl_specification('3.2.2', 'tosca-simple-profile-1.0')

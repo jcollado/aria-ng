@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 from .cls import CodeClass
 from .writer import Writer, create_header
@@ -123,7 +138,7 @@ class CodeModule(object):
             for c in self.classes.itervalues():
                 w.write(str(c))
             if self.children:
-                all = [m.name for m in self.children.itervalues()]
-                all += [c.name for c in self.classes.itervalues()]
-                w.write('__all__ = %s' % repr(all))
+                all_value = [m.name for m in self.children.itervalues()]
+                all_value += [c.name for c in self.classes.itervalues()]
+                w.write('__all__ = %s' % repr(all_value))
             return str(w)

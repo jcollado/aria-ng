@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ARIA'
-copyright = u'2016, GigaSpaces'
+copyright = u'2016, GigaSpaces' # @ReservedAssignment
 author = u'GigaSpaces'
 
 # The version info for the project you're documenting, acts as replacement for

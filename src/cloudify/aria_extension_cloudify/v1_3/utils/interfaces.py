@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
 
 from .properties import coerce_property_value, convert_property_definitions_to_values
 from aria import Issue
@@ -148,10 +163,10 @@ def merge_interface(context, presentation, interface_assignment, our_interface_a
             input_definitions = operation_definition.inputs if operation_definition is not None else None
             assign_raw_inputs(context, interface_assignment._raw[operation_name], our_input_assignments, input_definitions, our_operation_template, interface_name, operation_name, presentation)
 
-def merge_raw_input_definition(context, raw_input, our_input, interface_name, operation_name, presentation, type_name):
+def merge_raw_input_definition(context, the_raw_input, our_input, interface_name, operation_name, presentation, type_name):
     # Check if we changed the type
     # TODO: allow a sub-type?
-    input_type1 = raw_input.get('type')
+    input_type1 = the_raw_input.get('type')
     input_type2 = our_input.type
     if input_type1 != input_type2:
         if operation_name is not None:
@@ -160,7 +175,7 @@ def merge_raw_input_definition(context, raw_input, our_input, interface_name, op
             context.validation.report('interface %s "%s" changes input "%s" type from "%s" to "%s" in "%s"' % (type_name, interface_name, our_input._name, input_type1, input_type2, presentation._fullname), locator=input_type2._locator, level=Issue.BETWEEN_TYPES)
 
     # Merge    
-    merge(raw_input, our_input._raw)
+    merge(the_raw_input, our_input._raw)
 
 def merge_raw_input_definitions(context, raw_inputs, our_inputs, interface_name, operation_name, presentation, type_name):
     for input_name, our_input in our_inputs.iteritems():

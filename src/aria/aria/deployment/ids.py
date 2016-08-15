@@ -18,10 +18,19 @@ from shortuuid import ShortUUID
 from random import randrange
 
 # See: https://github.com/stochastic-technologies/shortuuid
-UUID = ShortUUID(alphabet='01234567890ABCDEF')
+UUID = ShortUUID() # default alphabet is base57, which is alphanumeric without visually ambiguous characters; ID length is 22
+#UUID = ShortUUID(alphabet='01234567890ABCDEF') # hex characters; ID length is 32
 
 def generate_long_id():
+    """
+    An ID with a strong guarantee of universal uniqueness.
+    """
+    
     return UUID.uuid()
 
 def generate_short_id():
+    """
+    An ID with a weak guarantee of universal uniqueness.
+    """
+
     return '%05x' % randrange(16 ** 5)

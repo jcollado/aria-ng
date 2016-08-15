@@ -21,25 +21,25 @@ from clint.textui import puts
 import json, itertools
 
 class IdType(object):
-    SERIAL = 0
+    LOCAL_SERIAL = 0
     """
-    Serial ID: an integer.
+    Locally unique serial ID: a running integer.
     """
 
-    LOCALLY_UNIQUE = 1
+    LOCAL_RANDOM = 1
     """
-    Locally unique ID: 5 hex digits long.
+    Locally unique ID: 5 weakly random hex digits.
     """
     
-    UNIVERSALLY_UNIQUE = 2
+    UNIVERSAL_RANDOM = 2
     """
-    Universally unique ID (UUID): 32 hex digits long.
+    Universally unique ID (UUID): 22 strongly random base57 characters.
     """
 
 class DeploymentContext(object):
     def __init__(self):
-        #self.id_type = IdType.SERIAL
-        self.id_type = IdType.UNIVERSALLY_UNIQUE
+        #self.id_type = IdType.LOCAL_SERIAL
+        self.id_type = IdType.UNIVERSAL_RANDOM
         self.template = None
         self.plan = None
         self.node_types = TypeHierarchy()
@@ -49,9 +49,9 @@ class DeploymentContext(object):
         self._locally_unique_ids = set()
     
     def generate_id(self):
-        if self.id_type == IdType.SERIAL:
+        if self.id_type == IdType.LOCAL_SERIAL:
             return self._serial_id_counter.next()
-        elif self.id_type == IdType.LOCALLY_UNIQUE:
+        elif self.id_type == IdType.LOCAL_RANDOM:
             the_id = generate_short_id()
             while the_id in self._locally_unique_ids:
                 the_id = generate_short_id()

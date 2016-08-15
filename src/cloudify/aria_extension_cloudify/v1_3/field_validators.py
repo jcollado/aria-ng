@@ -35,4 +35,4 @@ def node_templates_or_groups_validator(field, presentation, context):
             node_templates = context.presentation.node_templates or {}
             groups = context.presentation.groups or {}
             if (value not in node_templates) and (value not in groups):
-                report_issue_for_unknown_type(context, presentation, 'node template or group', field.name, value)
+                report_issue_for_unknown_type(context, presentation, 'node template or group', field.name)

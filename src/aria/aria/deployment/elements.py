@@ -183,3 +183,69 @@ class Artifact(Template):
             if self.repository_credential:
                 puts('Repository credential: %s' % context.style.literal(self.repository_credential))
             dump_properties(context, self.properties)
+
+class GroupPolicy(Template):
+    def __init__(self, name):
+        if not isinstance(name, basestring):
+            raise ValueError('must set name (string)')
+
+        self.name = name
+        self.properties = StrictDict(str)
+        self.triggers = StrictDict(str, GroupPolicyTrigger)
+
+    def instantiate(self, context, container):
+        r = GroupPolicy(self.name)
+        instantiate_properties(context, container, r.properties, self.properties)
+        for trigger_name, trigger in self.triggers.iteritems():
+            r.triggers[trigger_name] = trigger.instantiate(context, container)
+        return r
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
+        for policy in self.policies.itervalues():
+            policy.coerce_values(context, container, report_issues)
+
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('name', self.name),
+            ('properties', self.properties),
+            ('triggers', [v.as_raw for v in self.triggers.itervalues()])))
+
+    def dump(self, context):
+        puts(context.style.node(self.name))
+        with context.style.indent:
+            dump_properties(context, self.properties)
+            dump_dict_values(context, self.triggers, 'Triggers')
+
+class GroupPolicyTrigger(Template):
+    def __init__(self, name, source):
+        if not isinstance(name, basestring):
+            raise ValueError('must set name (string)')
+        if not isinstance(source, basestring):
+            raise ValueError('must set source (string)')
+    
+        self.name = name
+        self.source = source
+        self.properties = StrictDict(str)
+
+    def instantiate(self, context, container):
+        r = GroupPolicyTrigger(self.name, self.source)
+        instantiate_properties(context, container, r.properties, self.properties)
+        return r
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
+
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('name', self.name),
+            ('source', self.source),
+            ('properties', self.properties)))
+
+    def dump(self, context):
+        puts(context.style.node(self.name))
+        with context.style.indent:
+            puts('Source: %s' % context.style.literal(self.source))
+            dump_properties(context, self.properties)

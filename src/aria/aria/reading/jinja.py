@@ -44,10 +44,10 @@ class JinjaReader(Reader):
             if isinstance(location, basestring) and location.endswith('.jinja'):
                 # Use reader based on the location with the ".jinja" prefix stripped off
                 location =  '<literal> ' + location[:-6]
-                next_reader = self.source.get_reader(location, LiteralLoader(literal, location=location))
+                next_reader = self.source.get_reader(self.context, location, LiteralLoader(literal, location=location))
             else:
                 # Use reader for literal loader
-                next_reader = self.source.get_reader(LiteralLocation(literal), LiteralLoader(literal))
+                next_reader = self.source.get_reader(self.context, LiteralLocation(literal), LiteralLoader(literal))
             return next_reader.read()
         except Exception as e:
             raise ReaderSyntaxError('Jinja: %s' % e, cause=e)

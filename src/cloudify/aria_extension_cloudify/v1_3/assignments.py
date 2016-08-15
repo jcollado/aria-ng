@@ -14,7 +14,9 @@
 # under the License.
 #
 
+from .utils.properties import get_assigned_and_defined_property_values
 from aria.presentation import Presentation, AsIsPresentation, has_fields, allow_unknown_fields, short_form_field, primitive_field, object_dict_field, object_dict_unknown_fields, field_validator, type_validator
+from aria.utils import ReadOnlyDict, cachedmethod
 from aria import dsl_specification
 
 class PropertyAssignment(AsIsPresentation):
@@ -32,12 +34,24 @@ class TriggerAssignment(Presentation):
         """
 
     @object_dict_field(PropertyAssignment)
-    def properties(self):
+    def parameters(self):
         """
         Optional parameters that will be passed to the trigger.
         
         :rtype: dict of str, :class:`PropertyAssignment`
         """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.policy_triggers.get(self.type) if context.presentation.policy_triggers is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self, 'parameters'))
+
+    def _validate(self, context):
+        super(TriggerAssignment, self)._validate(context)
+        self._get_property_values(context)
 
 @has_fields
 class PolicyAssignment(Presentation):
@@ -65,6 +79,18 @@ class PolicyAssignment(Presentation):
         
         :rtype: dict of str, :class:`TriggerAssignment`
         """
+
+    @cachedmethod
+    def _get_type(self, context):
+        return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+
+    def _validate(self, context):
+        super(PolicyAssignment, self)._validate(context)
+        self._get_property_values(context)
 
 @short_form_field('implementation')
 @has_fields

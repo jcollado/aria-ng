@@ -15,9 +15,38 @@
 #
 
 from .utils.data_types import get_primitive_data_type, get_data_type_name, coerce_value
-from aria import Issue
+from aria import Issue, dsl_specification
 from aria.presentation import report_issue_for_unknown_type, derived_from_validator
 import re
+
+#
+# NodeTemplate, RelationshipTemplate
+#
+
+@dsl_specification('3.7.3.3', 'tosca-simple-profile-1.0')
+@dsl_specification('3.7.4.3', 'tosca-simple-profile-1.0')
+def copy_validator(template_type_name, templates_dict_name):
+    """
+    Makes sure that the field refers to an existing template defined in the root presenter.
+    
+    Use with the :func:`field_validator` decorator for the "copy" field in :class:`NodeTemplate` and :class:`RelationshipTemplate`.
+    """
+    
+    def validator_fn(field, presentation, context):
+        field._validate(presentation, context)
+        
+        # Make sure type exists
+        value = getattr(presentation, field.name)
+        if value is not None:
+            types_dict = getattr(context.presentation, templates_dict_name) or {}
+            copy = types_dict.get(value)
+            if copy is None:
+                report_issue_for_unknown_type(context, presentation, template_type_name, field.name)
+            else:
+                if copy.copy is not None:
+                    context.validation.report('"copy" field refers to a %s that itself is a copy in "%s": %s' % (template_type_name, presentation._fullname, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+    
+    return validator_fn     
 
 #
 # PropertyDefinition, AttributeDefinition, ParameterDefinition, EntrySchema
@@ -42,7 +71,7 @@ def data_type_validator(type_name='data type'):
                 return True
             # Can be a primitive data type
             if get_primitive_data_type(value) is None:
-                report_issue_for_unknown_type(context, presentation, type_name, field.name, value)
+                report_issue_for_unknown_type(context, presentation, type_name, field.name)
     
         return False
 
@@ -244,7 +273,7 @@ def node_template_or_type_validator(field, presentation, context):
         node_templates = context.presentation.node_templates or {}
         node_types = context.presentation.node_types or {}
         if (value not in node_templates) and (value not in node_types):
-            report_issue_for_unknown_type(context, presentation, 'node template or node type', field.name, value)
+            report_issue_for_unknown_type(context, presentation, 'node template or node type', field.name)
 
 def capability_definition_or_type_validator(field, presentation, context):
     """
@@ -310,7 +339,7 @@ def relationship_template_or_type_validator(field, presentation, context):
         relationship_templates = context.presentation.relationship_templates or {}
         relationship_types = context.presentation.relationship_types or {}
         if (value not in relationship_templates) and (value not in relationship_types):
-            report_issue_for_unknown_type(context, presentation, 'relationship template or relationship type', field.name, value)
+            report_issue_for_unknown_type(context, presentation, 'relationship template or relationship type', field.name)
 
 #
 # PolicyType

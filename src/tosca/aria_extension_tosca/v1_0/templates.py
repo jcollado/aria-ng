@@ -20,7 +20,7 @@ from .definitions import ParameterDefinition
 from .assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment, InterfaceAssignment, ArtifactAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
 from .filters import NodeFilter
-from .field_validators import policy_targets_validator
+from .field_validators import copy_validator, policy_targets_validator
 from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
 from .utils.interfaces import get_template_interfaces
 from .utils.requirements import get_template_requirements
@@ -122,7 +122,7 @@ class NodeTemplate(ToscaPresentation):
         :rtype: :class:`NodeFilter`
         """
 
-    @field_validator(type_validator('node template', 'node_templates'))
+    @field_validator(copy_validator('node template', 'node_templates'))
     @primitive_field(str)
     def copy(self):
         """
@@ -233,7 +233,7 @@ class RelationshipTemplate(ToscaPresentation):
         :rtype: dict of str, :class:`InterfaceAssignment`
         """
 
-    @field_validator(type_validator('relationship template', 'relationship_templates'))
+    @field_validator(copy_validator('relationship template', 'relationship_templates'))
     @primitive_field(str)
     def copy(self):
         """

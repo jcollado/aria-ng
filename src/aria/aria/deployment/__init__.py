@@ -15,14 +15,23 @@
 #
 
 from .context import *
-from .plan import *
-from .templates import *
 from .elements import *
+from .plan_elements import *
+from .template_elements import *
 from .hierarchy import *
 from .ids import *
 
 __all__ = (
+    'IdType',
     'DeploymentContext',
+    'Element',
+    'Template',
+    'Function',
+    'Interface',
+    'Operation',
+    'Artifact',
+    'GroupPolicy',
+    'GroupPolicyTrigger',
     'DeploymentPlan',
     'Node',
     'Capability',
@@ -36,11 +45,7 @@ __all__ = (
     'RelationshipTemplate',
     'GroupTemplate',
     'PolicyTemplate',
-    'Element',
-    'Template',
-    'Function',
-    'Interface',
-    'Operation',
     'TypeHierarchy',
     'Type',
-    'generate_id')
+    'generate_long_id',
+    'generate_short_id')

@@ -70,10 +70,10 @@ def dump_properties(context, properties, name='Properties'):
         for property_name, value in properties.iteritems():
             puts('%s = %s' % (context.style.property(property_name), context.style.literal(value)))
 
-def dump_interfaces(context, interfaces):
+def dump_interfaces(context, interfaces, name='Interfaces'):
     if not interfaces:
         return
-    puts('Interfaces:')
+    puts('%s:' % name)
     with context.style.indent:
         for interface in interfaces.itervalues():
             interface.dump(context)

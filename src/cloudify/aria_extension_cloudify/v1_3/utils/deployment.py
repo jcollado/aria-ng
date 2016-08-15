@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, Interface, Operation, Requirement
+from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, GroupPolicy, GroupPolicyTrigger, Interface, Operation, Requirement
 
 def get_deployment_template(context, presenter):
     r = DeploymentTemplate()
@@ -76,10 +76,10 @@ def normalize_node_template(context, node_template):
 
     scalable = node_template._get_scalable(context)
     if scalable is not None:
-        node_template.default_instances = scalable.default_instances
-        node_template.min_instances = scalable.min_instances
+        r.default_instances = scalable.default_instances
+        r.min_instances = scalable.min_instances
         if scalable.max_instances != -1:
-            node_template.max_instances = scalable.max_instances
+            r.max_instances = scalable.max_instances
 
     return r
 
@@ -129,22 +129,41 @@ def normalize_relationship(context, relationship):
     r = RelationshipTemplate(template_name=relationship_type._name)
 
     normalize_property_values(r.properties, relationship._get_property_values(context))
-    normalize_interfaces(context, r.interfaces, relationship._get_target_interfaces(context))
+    normalize_interfaces(context, r.source_interfaces, relationship._get_source_interfaces(context))
+    normalize_interfaces(context, r.target_interfaces, relationship._get_target_interfaces(context))
     
     return r
 
 def normalize_group(context, group):
-    group_type = group._get_type(context)
-    r = GroupTemplate(name=group._name, type_name=group_type._name)
-
-    normalize_property_values(r.properties, group._get_property_values(context))
-    normalize_interfaces(context, r.interfaces, group._get_interfaces(context))
+    r = GroupTemplate(name=group._name)
     
     members = group.members
     if members:
         for member in members:
             r.member_node_template_names.append(member)
+            
+    policies = group.policies
+    if policies:
+        for policy_name, policy in policies.iteritems():
+            r.policies[policy_name] = normalize_group_policy(context, policy)
     
+    return r
+
+def normalize_group_policy(context, policy):
+    r = GroupPolicy(name=policy._name)
+    normalize_property_values(r.properties, policy._get_property_values(context))
+    
+    triggers = policy.triggers
+    if triggers:
+        for trigger_name, trigger in triggers.iteritems():
+            r.triggers[trigger_name] = normalize_group_policy_trigger(context, trigger)
+    
+    return r
+
+def normalize_group_policy_trigger(context, trigger):
+    trigger_type = trigger._get_type(context)
+    r = GroupPolicyTrigger(name=trigger._name, source=trigger_type.source)
+    normalize_property_values(r.properties, trigger._get_property_values(context))
     return r
 
 def normalize_policy(context, policy):
@@ -153,9 +172,7 @@ def normalize_policy(context, policy):
 
     normalize_property_values(r.properties, policy._get_property_values(context))
     
-    node_templates, groups = policy._get_targets(context)
-    for node_template in node_templates:
-        r.target_node_template_names.append(node_template._name)
+    groups = policy._get_targets(context)
     for group in groups:
         r.target_group_template_names.append(group._name)
     

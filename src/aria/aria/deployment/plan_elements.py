@@ -14,8 +14,7 @@
 # under the License.
 #
 
-from .elements import Element, Interface, Artifact
-from .ids import generate_id
+from .elements import Element, Interface, Artifact, GroupPolicy
 from .utils import dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from .. import Issue
 from ..utils import StrictList, StrictDict, ReadOnlyList
@@ -72,7 +71,9 @@ class DeploymentPlan(Element):
                     return True
                 else:
                     node = context.deployment.plan.nodes.get(relationship.target_node_id)
-                    return self._is_node_a_target(context, node, target_node)
+                    if node is not None:
+                        if self._is_node_a_target(context, node, target_node):
+                            return True
         return False
     
     def validate(self, context):
@@ -122,17 +123,22 @@ class DeploymentPlan(Element):
         if node.relationships:
             with context.style.indent:
                 for relationship in node.relationships:
-                    puts('-> %s %s' % (context.style.type(relationship.type_name), context.style.node(relationship.target_capability_name)))
+                    relationship_name = context.style.node(relationship.template_name) if relationship.template_name is not None else context.style.type(relationship.type_name)
+                    capability_name = context.style.node(relationship.target_capability_name) if relationship.target_capability_name is not None else None
+                    if capability_name is not None:
+                        puts('-> %s %s' % (relationship_name, capability_name))
+                    else:
+                        puts('-> %s' % relationship_name)
                     target_node = self.nodes.get(relationship.target_node_id)
                     with indent(3):
                         self._dump_graph_node(context, target_node)
 
 class Node(Element):
-    def __init__(self, template_name):
+    def __init__(self, context, template_name):
         if not isinstance(template_name, basestring):
             raise ValueError('must set template_name (string)')
 
-        self.id = '%s_%s' % (template_name, generate_id())
+        self.id = '%s_%s' % (template_name, context.deployment.generate_id())
         self.template_name = template_name
         self.properties = StrictDict(str)
         self.interfaces = StrictDict(str, Interface)
@@ -290,15 +296,20 @@ class Relationship(Element):
         self.type_name = type_name
         self.template_name = template_name
         self.properties = StrictDict(str)
-        self.interfaces = StrictDict(str, Interface)
+        self.source_interfaces = StrictDict(str, Interface)
+        self.target_interfaces = StrictDict(str, Interface)
 
     def validate(self, context):
-        for interface in self.interfaces.itervalues():
+        for interface in self.source_interfaces.itervalues():
+            interface.validate(context)
+        for interface in self.target_interfaces.itervalues():
             interface.validate(context)
 
     def coerce_values(self, context, container, report_issues):
         coerce_dict_values(context, container, self.properties, report_issues)
-        for interface in self.interfaces.itervalues():
+        for interface in self.source_interfaces.itervalues():
+            interface.coerce_values(context, container, report_issues)
+        for interface in self.target_interfaces.itervalues():
             interface.coerce_values(context, container, report_issues)
 
     @property
@@ -309,7 +320,8 @@ class Relationship(Element):
             ('type_name', self.type_name),
             ('template_name', self.template_name),
             ('properties', self.properties),
-            ('interfaces', [v.as_raw for v in self.interfaces.itervalues()])))            
+            ('source_interfaces', [v.as_raw for v in self.source_interfaces.itervalues()]),            
+            ('target_interfaces', [v.as_raw for v in self.target_interfaces.itervalues()])))            
 
     def dump(self, context):
         puts('Target node: %s' % context.style.node(self.target_node_id))
@@ -321,17 +333,19 @@ class Relationship(Element):
             else:
                 puts('Relationship template: %s' % context.style.node(self.template_name))
             dump_properties(context, self.properties)
-            dump_interfaces(context, self.interfaces)
+            dump_interfaces(context, self.source_interfaces, 'Source interfaces')
+            dump_interfaces(context, self.target_interfaces, 'Target interfaces')
 
 class Group(Element):
-    def __init__(self, template_name):
+    def __init__(self, context, template_name):
         if not isinstance(template_name, basestring):
             raise ValueError('must set template_name (string)')
 
-        self.id = '%s_%s' % (template_name, generate_id())
+        self.id = '%s_%s' % (template_name, context.deployment.generate_id())
         self.template_name = template_name
         self.properties = StrictDict(str)
         self.interfaces = StrictDict(str, Interface)
+        self.policies = StrictDict(str, GroupPolicy)
         self.member_node_ids = StrictList(str)
 
     @property
@@ -341,16 +355,21 @@ class Group(Element):
             ('template_name', self.template_name),
             ('properties', self.properties),
             ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
+            ('policies', [v.as_raw for v in self.policies.itervalues()]),
             ('member_node_ids', self.member_node_ids)))
 
     def validate(self, context):
         for interface in self.interfaces.itervalues():
             interface.validate(context)
+        for policy in self.policies.itervalues():
+            policy.validate(context)
 
     def coerce_values(self, context, container, report_issues):
         coerce_dict_values(context, container, self.properties, report_issues)
         for interface in self.interfaces.itervalues():
             interface.coerce_values(context, container, report_issues)
+        for policy in self.policies.itervalues():
+            policy.coerce_values(context, container, report_issues)
 
     def dump(self, context):
         puts('Group: %s' % context.style.node(self.id))
@@ -358,6 +377,7 @@ class Group(Element):
             puts('Template: %s' % context.style.type(self.template_name))
             dump_properties(context, self.properties)
             dump_interfaces(context, self.interfaces)
+            dump_dict_values(context, self.policies, 'Policies')
             if self.member_node_ids:
                 puts('Member nodes:')
                 with context.style.indent:

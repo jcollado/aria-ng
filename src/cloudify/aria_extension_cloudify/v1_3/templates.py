@@ -17,8 +17,8 @@
 from ..v1_2 import Instances
 from .definitions import PropertyDefinition
 from .assignments import PropertyAssignment, InterfaceAssignment, PolicyAssignment, CapabilityAssignment
-from .types import NodeType, RelationshipType, PolicyType, DataType
-from .misc import Description, Output, Workflow, Plugin, PolicyTrigger
+from .types import NodeType, RelationshipType, PolicyType, DataType, PolicyTrigger
+from .misc import Description, Output, Workflow, Plugin
 from .field_validators import node_templates_or_groups_validator
 from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
 from .utils.interfaces import get_template_interfaces
@@ -26,7 +26,7 @@ from .utils.node_templates import get_node_template_scalable
 from .utils.relationships import get_relationship_assigned_and_defined_property_values
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator, list_type_validator
-from aria.utils import ReadOnlyDict, cachedmethod
+from aria.utils import ReadOnlyList, ReadOnlyDict, cachedmethod
 
 @has_fields
 @dsl_specification('relationships-1', 'cloudify-1.3')
@@ -234,6 +234,7 @@ class PolicyDefinition(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policies/>`__.    
     """
     
+    @field_validator(type_validator('policy type', 'policy_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -262,6 +263,25 @@ class PolicyDefinition(Presentation):
     @cachedmethod
     def _get_type(self, context):
         return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
+
+    @cachedmethod
+    def _get_property_values(self, context):
+        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
+
+    @cachedmethod
+    def _get_targets(self, context):
+        r = []
+        targets = self.targets
+        if targets:
+            for target in targets:
+                target = context.presentation.groups.get(target)
+                if target is not None:
+                    r.append(target)
+        return ReadOnlyList(r)
+
+    def _validate(self, context):
+        super(PolicyDefinition, self)._validate(context)
+        self._get_property_values(context)
 
 @has_fields
 class ServiceTemplate(Presentation):

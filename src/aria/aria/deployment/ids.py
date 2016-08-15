@@ -14,26 +14,14 @@
 # under the License.
 #
 
-import random
 from shortuuid import ShortUUID
+from random import randrange
 
 # See: https://github.com/stochastic-technologies/shortuuid
 UUID = ShortUUID(alphabet='01234567890ABCDEF')
 
-def generate_id():
+def generate_long_id():
     return UUID.uuid()
 
-GENERATED_IDS = set()
-
-def generate_classic_id():
-    def gen():
-        return '%05x' % random.randrange(16 ** 5)
-    the_id = gen()
-    
-    # TODO: a bad way to make sure our IDs are unique (they won't be unique across
-    # multiple running instances of ARIA), but better than nothing
-    while the_id in GENERATED_IDS:
-        the_id = gen()
-    GENERATED_IDS.add(the_id)
-
-    return the_id
+def generate_short_id():
+    return '%05x' % randrange(16 ** 5)

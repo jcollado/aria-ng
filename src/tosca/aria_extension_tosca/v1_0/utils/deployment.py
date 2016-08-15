@@ -178,7 +178,7 @@ def normalize_relationship(context, relationship):
         r = RelationshipTemplate(template_name=relationship_type._name)
 
     normalize_properties(r.properties, relationship.properties)
-    normalize_interfaces(context, r.interfaces, relationship.interfaces)
+    normalize_interfaces(context, r.source_interfaces, relationship.interfaces)
     
     return r
 

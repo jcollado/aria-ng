@@ -49,7 +49,7 @@ def get_inherited_property_definitions(context, presentation, field_name, for_pr
 # NodeTemplate, RelationshipTemplate
 #
 
-def get_assigned_and_defined_property_values(context, presentation):
+def get_assigned_and_defined_property_values(context, presentation, field_name='properties'):
     """
     Returns the assigned property values while making sure they are defined in our type.
     
@@ -61,7 +61,7 @@ def get_assigned_and_defined_property_values(context, presentation):
     values = OrderedDict()
     
     the_type = presentation._get_type(context)
-    assignments = presentation.properties
+    assignments = getattr(presentation, field_name)
     definitions = the_type._get_properties(context) if the_type is not None else None
 
     # Fill in our assignments, but make sure they are defined

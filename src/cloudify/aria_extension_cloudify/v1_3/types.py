@@ -187,6 +187,40 @@ class PolicyType(Presentation):
         :rtype: dict of str, :class:`PropertyDefinition`
         """
 
+    @cachedmethod
+    def _get_properties(self, context):
+        return self.properties
+
+
+@has_fields
+@dsl_specification('policy-triggers', 'cloudify-1.3')
+class PolicyTrigger(Presentation):
+    """
+    :code:`policy_triggers` specify the implementation of actions invoked by policies and declare the properties that define the trigger's behavior.
+    
+    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policy-triggers/>`__.
+    """
+
+    @primitive_field(str, required=True)
+    def source(self):
+        """
+        The policy trigger implementation source (URL or a path relative to the blueprint root directory).
+        
+        :rtype: str
+        """
+
+    @object_dict_field(PropertyDefinition)
+    def parameters(self):
+        """
+        Optional parameters schema for the policy trigger.
+        
+        :rtype: dict of str, :class:`PropertyDefinition`
+        """
+
+    @cachedmethod
+    def _get_properties(self, context):
+        return self.parameters
+
 @has_fields
 @dsl_specification('data-types', 'cloudify-1.3')
 class DataType(Presentation):

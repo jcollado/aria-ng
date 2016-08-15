@@ -104,7 +104,7 @@ class CloudifyPresenter1_3(Presenter):
     @property
     @cachedmethod
     def policy_types(self):
-        return None
+        return self.service_template.policy_types
     
     @property
     @cachedmethod

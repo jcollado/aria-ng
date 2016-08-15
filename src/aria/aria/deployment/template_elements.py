@@ -14,9 +14,9 @@
 # under the License.
 #
 
-from .elements import Element, Template, Interface, Artifact
+from .elements import Element, Template, Interface, Artifact, GroupPolicy
+from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy
 from .utils import instantiate_properties, instantiate_interfaces, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
-from .plan import DeploymentPlan, Node, Capability, Relationship, Group, Policy
 from .. import Issue
 from ..utils import StrictList, StrictDict
 from clint.textui import puts
@@ -33,17 +33,23 @@ class DeploymentTemplate(Template):
     def instantiate(self, context, container):
         r = DeploymentPlan()
         context.deployment.plan = r
+        
         for node_template in self.node_templates.itervalues():
-            node = node_template.instantiate(context, container)
-            r.nodes[node.id] = node
+            for _ in range(node_template.default_instances):
+                node = node_template.instantiate(context, container)
+                r.nodes[node.id] = node
+            
         for group_template in self.group_templates.itervalues():
             group = group_template.instantiate(context, container)
             r.groups[group.id] = group
+            
         for policy_template in self.policy_templates.itervalues():
             policy = policy_template.instantiate(context, container)
             r.policies[policy.name] = policy
+
         instantiate_properties(context, self, r.inputs, self.inputs)
         instantiate_properties(context, self, r.outputs, self.outputs)
+        
         return r
 
     def validate(self, context):
@@ -91,7 +97,7 @@ class NodeTemplate(Template):
         return True
     
     def instantiate(self, context, container):
-        r = Node(self.name)
+        r = Node(context, self.name)
         instantiate_properties(context, r, r.properties, self.properties)
         instantiate_interfaces(context, r, r.interfaces, self.interfaces)
         for artifact_name, artifact in self.artifacts.iteritems():
@@ -257,7 +263,7 @@ class CapabilityTemplate(Template):
 
     def validate(self, context):
         if context.deployment.capability_types.get_descendant(self.type_name) is None:
-            context.validation.report('capability "%s" has an unknown type: %s' % (self.name, repr(self.type)), level=Issue.BETWEEN_TYPES)        
+            context.validation.report('capability "%s" refers to an unknown type: %s' % (self.name, repr(self.type)), level=Issue.BETWEEN_TYPES)        
 
     def dump(self, context):
         puts(context.style.node(self.name))
@@ -280,16 +286,20 @@ class RelationshipTemplate(Template):
         self.type_name = type_name
         self.template_name = template_name
         self.properties = StrictDict(str)
-        self.interfaces = StrictDict(str, Interface)
+        self.source_interfaces = StrictDict(str, Interface)
+        self.target_interfaces = StrictDict(str, Interface)
 
     def instantiate(self, context, container):
         r = Relationship(self.type_name, self.template_name)
         instantiate_properties(context, container, r.properties, self.properties)
-        instantiate_interfaces(context, container, r.interfaces, self.interfaces)
+        instantiate_interfaces(context, container, r.source_interfaces, self.source_interfaces)
+        instantiate_interfaces(context, container, r.target_interfaces, self.target_interfaces)
         return r
 
     def validate(self, context):
-        for interface in self.interfaces.itervalues():
+        for interface in self.source_interfaces.itervalues():
+            interface.validate(context)
+        for interface in self.target_interfaces.itervalues():
             interface.validate(context)
 
     def dump(self, context):
@@ -299,25 +309,29 @@ class RelationshipTemplate(Template):
             puts('Relationship template: %s' % context.style.node(self.template_name))
         with context.style.indent:
             dump_properties(context, self.properties)
-            dump_interfaces(context, self.interfaces)
+            dump_interfaces(context, self.source_interfaces, 'Source interfaces')
+            dump_interfaces(context, self.target_interfaces, 'Target interfaces')
 
 class GroupTemplate(Template):
-    def __init__(self, name, type_name):
+    def __init__(self, name, type_name=None):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
-        if not isinstance(type_name, basestring):
-            raise ValueError('must set type_name (string)')
+        if type_name and not isinstance(type_name, basestring):
+            raise ValueError('type_name must be string')
         
         self.name = name
         self.type_name = type_name
         self.properties = StrictDict(str)
         self.interfaces = StrictDict(str, Interface)
+        self.policies = StrictDict(str, GroupPolicy)
         self.member_node_template_names = StrictList(str)
 
     def instantiate(self, context, container):
-        r = Group(self.name)
+        r = Group(context, self.name)
         instantiate_properties(context, self, r.properties, self.properties)
         instantiate_interfaces(context, self, r.interfaces, self.interfaces)
+        for policy_name, policy in self.policies.iteritems():
+            r.policies[policy_name] = policy.instantiate(context, container)
         for member_node_template_name in self.member_node_template_names:
             for node in context.deployment.plan.nodes.itervalues():
                 if node.template_name == member_node_template_name:
@@ -327,9 +341,11 @@ class GroupTemplate(Template):
     def dump(self, context):
         puts('Group template: %s' % context.style.node(self.name))
         with context.style.indent:
-            puts('Type: %s' % context.style.type(self.type_name))
+            if self.type_name:
+                puts('Type: %s' % context.style.type(self.type_name))
             dump_properties(context, self.properties)
             dump_interfaces(context, self.interfaces)
+            dump_dict_values(context, self.policies, 'Policies')
             if self.member_node_template_names:
                 puts('Member node templates: %s' % ', '.join((str(context.style.node(v)) for v in self.member_node_template_names)))
 

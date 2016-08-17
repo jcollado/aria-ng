@@ -19,7 +19,6 @@ from .elements import *
 from .plan_elements import *
 from .template_elements import *
 from .hierarchy import *
-from .ids import *
 
 __all__ = (
     'IdType',
@@ -46,6 +45,4 @@ __all__ = (
     'GroupTemplate',
     'PolicyTemplate',
     'TypeHierarchy',
-    'Type',
-    'generate_long_id',
-    'generate_short_id')
+    'Type')

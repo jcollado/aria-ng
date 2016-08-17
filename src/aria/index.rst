@@ -14,7 +14,6 @@ Packages
 
    aria
    tosca_extension
-   cloudify_extension
 
 
 Indices and Tables

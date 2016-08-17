@@ -23,6 +23,7 @@ from .templates import *
 from .types import *
 from .misc import *
 from .data_types import *
+from .functions import *
 
 MODULES = (
     'utils',)
@@ -77,4 +78,12 @@ __all__ = (
     'Map',
     'ScalarSize',
     'ScalarTime',
-    'ScalarFrequency')
+    'ScalarFrequency',
+    'Concat',
+    'Token',
+    'GetInput',
+    'GetProperty',
+    'GetAttribute',
+    'GetOperationOutput',
+    'GetNodesOfType',
+    'GetArtifact')

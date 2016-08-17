@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from .ids import generate_long_id, generate_short_id
+from .utils import generate_id_string 
 from ..utils import JSONValueEncoder, prune
 from .hierarchy import TypeHierarchy
 from clint.textui import puts
@@ -28,17 +28,18 @@ class IdType(object):
 
     LOCAL_RANDOM = 1
     """
-    Locally unique ID: 5 weakly random hex digits.
+    Locally unique ID: 6 random safe characters.
     """
     
     UNIVERSAL_RANDOM = 2
     """
-    Universally unique ID (UUID): 22 strongly random base57 characters.
+    Universally unique ID (UUID): 25 random safe characters.
     """
 
 class DeploymentContext(object):
     def __init__(self):
         #self.id_type = IdType.LOCAL_SERIAL
+        #self.id_type = IdType.LOCAL_RANDOM
         self.id_type = IdType.UNIVERSAL_RANDOM
         self.template = None
         self.plan = None
@@ -51,13 +52,15 @@ class DeploymentContext(object):
     def generate_id(self):
         if self.id_type == IdType.LOCAL_SERIAL:
             return self._serial_id_counter.next()
+        
         elif self.id_type == IdType.LOCAL_RANDOM:
-            the_id = generate_short_id()
+            the_id = generate_id_string(6)
             while the_id in self._locally_unique_ids:
-                the_id = generate_short_id()
+                the_id = generate_id_string(6)
             self._locally_unique_ids.add(the_id)
             return the_id
-        return generate_long_id()
+        
+        return generate_id_string()
 
     @property
     def plan_as_raw(self):

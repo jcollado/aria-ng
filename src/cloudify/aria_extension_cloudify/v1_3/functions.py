@@ -14,8 +14,10 @@
 # under the License.
 #
 
-from aria import dsl_specification, InvalidValueError
+from aria import Issue, InvalidValueError, dsl_specification
 from aria.deployment import Function
+from aria.utils import ReadOnlyList
+from cStringIO import StringIO
 
 @dsl_specification('intrinsic-functions-1', 'cloudify-1.3')
 class Concat(Function):
@@ -27,10 +29,22 @@ class Concat(Function):
 
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
+        
+        if not isinstance(argument, list):
+            raise InvalidValueError('function "concat" argument must be a list of string expressions: %s' % repr(argument), locator=self.locator)
+        
+        string_expressions = []
+        for index in range(len(argument)):
+            string_expressions.append(parse_string_expression(context, presentation, 'concat', index, None, argument[index]))
+        self.string_expressions = ReadOnlyList(string_expressions)    
 
     def _evaluate(self, context, container):
-        return ''
-
+        r = StringIO()
+        for e in self.string_expressions:
+            if hasattr(e, '_evaluate'):
+                e = e._evaluate(context, container)
+            r.write(str(e))
+        return r.getvalue()
 
 @dsl_specification('intrinsic-functions-2', 'cloudify-1.3')
 class GetInput(Function):
@@ -43,8 +57,16 @@ class GetInput(Function):
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
 
+        self.input_property_name = parse_string_expression(context, presentation, 'get_input', None, 'the input property name', argument)
+
+        if isinstance(self.input_property_name, basestring):
+            inputs = context.presentation.inputs
+            if (inputs is None) or (self.input_property_name not in inputs):
+                raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
+    
     def _evaluate(self, context, container):
-        return ''
+        inputs = context.presentation.service_template._get_input_values(context)
+        return inputs.get(self.input_property_name)
 
 @dsl_specification('intrinsic-functions-3', 'cloudify-1.3')
 class GetProperty(Function):
@@ -56,6 +78,12 @@ class GetProperty(Function):
 
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
+        
+        if (not isinstance(argument, list)) or (len(argument) < 2):
+            raise InvalidValueError('function "get_property" argument must be a list of at least 2 string expressions: %s' % repr(argument), locator=self.locator)
+
+        self.modelable_entity_name = parse_modelable_entity_name(context, presentation, 'get_property', 0, argument[0])
+        self.nested_property_name_or_index = argument[1:] # the first of these will be tried as a req-or-cap name
 
     def _evaluate(self, context, container):
         return ''
@@ -94,3 +122,47 @@ def get_function(context, presentation, value):
                 context.validation.report(issue=e.issue)
                 return True, None
     return False, None
+
+def parse_string_expression(context, presentation, name, index, explanation, value):
+    is_function, fn = get_function(context, presentation, value)
+    if is_function:
+        return fn
+    else:
+        value = str(value)
+    return value
+
+def parse_modelable_entity_name(context, presentation, name, index, value):
+    value = parse_string_expression(context, presentation, name, index, 'the modelable entity name', value)
+    if value == 'SELF':
+        the_self, _ = parse_self(presentation)
+        if the_self is None:
+            raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a node template or a relationship template')
+    elif value == 'HOST':
+        _, self_variant = parse_self(presentation)
+        if self_variant != 'node_template':
+            raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a node template')
+    elif (value == 'SOURCE') or (value == 'TARGET'):
+        _, self_variant = parse_self(presentation)
+        if self_variant != 'relationship_template':
+            raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a relationship template')
+    elif isinstance(value, basestring):
+        node_templates = context.presentation.node_templates or {}
+        relationship_templates = context.presentation.relationship_templates or {}
+        if (value not in node_templates) and (value not in relationship_templates):
+            raise InvalidValueError('function "%s" parameter %d is not a valid modelable entity name: %s' % (name, index + 1, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+    return value
+
+def parse_self(presentation):
+    from .templates import NodeTemplate, RelationshipTemplate
+    
+    if presentation is None:
+        return None, None    
+    elif isinstance(presentation, NodeTemplate):
+        return presentation, 'node_template'
+    elif isinstance(presentation, RelationshipTemplate):
+        return presentation, 'relationship_template'
+    else:
+        return parse_self(presentation._container)
+
+def invalid_modelable_entity_name(name, index, value, locator, contexts):
+    return InvalidValueError('function "%s" parameter %d can be "%s" only in %s' % (name, index + 1, value, contexts), locator=locator, level=Issue.FIELD)

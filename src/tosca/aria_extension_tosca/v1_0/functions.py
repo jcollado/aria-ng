@@ -305,7 +305,6 @@ def parse_self(presentation):
     else:
         return parse_self(presentation._container)
 
-
 @dsl_specification('4.1', 'tosca-simple-profile-1.0')
 def get_modelable_entities(context, container, locator, modelable_entity_name):
     """

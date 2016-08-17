@@ -14,8 +14,6 @@
 # under the License.
 #
 
-from aria.deployment import generate_id
-
 class ClassicDeploymentPlan(object):
     """
     

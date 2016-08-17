@@ -17,6 +17,30 @@
 from .. import InvalidValueError
 from clint.textui import puts
 from collections import OrderedDict
+from shortuuid import ShortUUID
+from random import randrange
+
+#UUID = ShortUUID() # default alphabet is base57, which is alphanumeric without visually ambiguous characters; ID length is 22
+UUID = ShortUUID(alphabet='abcdefghijklmnopqrstuvwxyz0123456789') # alphanumeric; ID length is 25
+
+def generate_id_string(length=None):
+    """
+    A random string with a strong guarantee of universal uniqueness (uses UUID).
+    
+    The default length is 25 characters.
+    """
+    
+    the_id = UUID.uuid()
+    if length is not None:
+        the_id = the_id[:length]
+    return the_id
+
+def generate_hex_string():
+    """
+    A random string of 5 hex digits with no guarantee of universal uniqueness.
+    """
+
+    return '%05x' % randrange(16 ** 5)
 
 def coerce_value(context, container, value, report_issues=False):
     if isinstance(value, list):

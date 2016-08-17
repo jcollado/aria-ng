@@ -17,6 +17,7 @@
 from aria import DSL_SPECIFICATION_PACKAGES
 from aria.presentation import PRESENTER_CLASSES
 from .v1_3 import CloudifyPresenter1_3
+from .plan import Plan
 
 def install_aria_extension():
     # v1.3 presenter
@@ -31,4 +32,5 @@ MODULES = (
 
 __all__ = (
     'MODULES',
-    'install_aria_extension')
+    'install_aria_extension',
+    'Plan')

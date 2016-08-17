@@ -15,12 +15,11 @@
 #
 
 from .elements import Element, Interface, Artifact, GroupPolicy
-from .utils import dump_list_values, dump_dict_values, dump_properties, dump_interfaces
+from .utils import coerce_dict_values, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from .. import Issue
-from ..utils import StrictList, StrictDict, ReadOnlyList
+from ..utils import StrictList, StrictDict, ReadOnlyList 
 from collections import OrderedDict
 from clint.textui import puts, indent
-from aria.deployment.utils import coerce_dict_values
 
 class DeploymentPlan(Element):
     def __init__(self):

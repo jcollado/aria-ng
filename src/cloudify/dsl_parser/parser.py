@@ -14,7 +14,11 @@
 # under the License.
 #
 
+from aria import install_aria_extensions
+from aria.consumption import ConsumptionContext
 from aria.parsing import DefaultParser
+
+install_aria_extensions()
 
 def parse_from_path(dsl_file_path,
                     resources_base_url=None,
@@ -29,13 +33,10 @@ def parse_from_path(dsl_file_path,
     #print additional_resource_sources
     
     parser = DefaultParser(dsl_file_path)
-    #presentation = parser.parse()
-    presentation, issues = parser.validate()
-    if issues:
-        print 'Validation issues:'
-        for i in issues:
-            print ' ', str(i)
-    return presentation
+    context = ConsumptionContext()
+    parser.parse_and_validate(context)
+    context.validation.dump_issues()
+    return context
     
 def parse(dsl_string,
           resources_base_url=None,

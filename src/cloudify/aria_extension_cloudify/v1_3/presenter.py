@@ -42,7 +42,7 @@ class CloudifyPresenter1_3(Presenter):
     @staticmethod
     def can_present(raw):
         dsl = raw.get('tosca_definitions_version')
-        return (dsl == 'cloudify_dsl_1_3') or (dsl == 'cloudify_dsl_1_2') or (dsl == 'cloudify_dsl_1_1`') or (dsl == 'cloudify_dsl_1_0')
+        return dsl in ('cloudify_dsl_1_3', 'cloudify_dsl_1_2', 'cloudify_dsl_1_1', 'cloudify_dsl_1_0')
 
     def _get_import_locations(self):
         return self.service_template.imports if (self.service_template and self.service_template.imports) else EMPTY_READ_ONLY_LIST

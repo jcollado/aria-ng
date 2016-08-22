@@ -15,7 +15,7 @@
 #
 
 from aria.consumption import Plan as BasicPlan
-from aria.utils import JSONValueEncoder
+from aria.utils import JSONValueEncoder, deepclone
 from collections import OrderedDict
 import json
 
@@ -39,7 +39,7 @@ def convert_plan(context, plan, template):
     return OrderedDict((
         ('nodes', [convert_node_template(context, v, plan) for v in template.node_templates.itervalues()]),
         ('node_instances', [convert_node(context, v) for v in plan.nodes.itervalues()]),
-        ('workflows', [])))
+        ('workflows', {})))
 
 def convert_node_template(context, node_template, plan):
     node_type = context.deployment.node_types.get_descendant(node_template.type_name)
@@ -56,7 +56,7 @@ def convert_node_template(context, node_template, plan):
     
     return OrderedDict((
         ('id', node_template.name),
-        ('properties', OrderedDict()),
+        ('properties', deepclone(node_template.properties)),
         ('operations', convert_interfaces(context, node_template.interfaces)),
         ('type_hierarchy', []), # strings
         ('relationships', relationships),
@@ -78,7 +78,7 @@ def convert_relationship_template(context, relationship_template):
         ('source_interfaces', OrderedDict()),
         ('target_interfaces', OrderedDict()),
         ('type_hierarchy', []), # strings
-        ('properties', OrderedDict())))
+        ('properties', deepclone(relationship_template.properties))))
 
 def convert_node(context, node):
     return OrderedDict((
@@ -108,6 +108,6 @@ def convert_operation(context, operation):
         ('parameters', OrderedDict()),
         ('has_intrinsic_functions', False),
         ('executor', None),
-        ('inputs', OrderedDict()),
+        ('inputs', deepclone(operation.inputs)),
         ('max_retries', 1),
         ('retry_interval', 1)))

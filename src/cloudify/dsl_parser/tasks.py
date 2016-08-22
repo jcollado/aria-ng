@@ -14,12 +14,13 @@
 # under the License.
 #
 
-#from aria.consumption import Implementer
+from aria_extension_cloudify import Plan
 
-def prepare_deployment_plan(plan, inputs=None, **kwargs):
+def prepare_deployment_plan(context, inputs=None, **kwargs):
     """
     Prepare a plan for deployment
     """
+
     #print '!!! prepare_deployment_plan'
     #print plan
     #print inputs
@@ -30,4 +31,6 @@ def prepare_deployment_plan(plan, inputs=None, **kwargs):
     #service = implementer.service
     #node_instances = [create_node_instance(name, getattr(service, name)) for name in service.context.nodes]
     
-    return plan.deployment_plan.as_dict
+    plan = Plan(context).create_classic_plan()
+    context.validation.dump_issues()
+    return plan

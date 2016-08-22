@@ -23,9 +23,11 @@ from clint.textui import puts, indent
 
 class DeploymentPlan(Element):
     def __init__(self):
+        self.metadata = None
         self.nodes = StrictDict(str, Node) 
         self.groups = StrictDict(str, Group) 
         self.policies = StrictDict(str, Policy)
+        self.substitution = None
         self.inputs = StrictDict(str)
         self.outputs = StrictDict(str)
 
@@ -76,12 +78,16 @@ class DeploymentPlan(Element):
         return False
     
     def validate(self, context):
+        if self.metadata is not None:
+            self.metadata.validate(context)
         for node in self.nodes.itervalues():
             node.validate(context)
         for group in self.groups.itervalues():
             group.validate(context)
         for policy in self.policies.itervalues():
             policy.validate(context)
+        if self.substitution is not None:
+            self.substitution.validate(context)
 
     def coerce_values(self, context, container, report_issues):
         for node in self.nodes.itervalues():
@@ -96,19 +102,25 @@ class DeploymentPlan(Element):
     @property
     def as_raw(self):
         return OrderedDict((
+            ('metadata', self.metadata.as_raw if self.metadata is not None else None),
             ('nodes', [v.as_raw for v in self.nodes.itervalues()]),
             ('groups', [v.as_raw for v in self.groups.itervalues()]),
             ('policies', [v.as_raw for v in self.policies.itervalues()]),
+            ('substitution', self.substitution.as_raw if self.substitution is not None else None),
             ('inputs', self.inputs),
             ('outputs', self.outputs)))
 
     def dump(self, context):
+        if self.metadata is not None:
+            self.metadata.dump(context)
         for node in self.nodes.itervalues():
             node.dump(context)
         for group in self.groups.itervalues():
             group.dump(context)
         for policy in self.policies.itervalues():
             policy.dump(context)
+        if self.substitution is not None:
+            self.substitution.dump(context)
         dump_properties(context, self.inputs, 'Inputs')
         dump_properties(context, self.outputs, 'Outputs')
 
@@ -196,6 +208,9 @@ class Node(Element):
         return satisfied
 
     def validate(self, context):
+        if len(self.id) > context.deployment.id_max_length:
+            context.validation.report('"%s" has an ID longer than the limit of %d characters: %d' % (self.id, context.deployment.id_max_length, len(self.id)), level=Issue.BETWEEN_INSTANCES)
+        
         for interface in self.interfaces.itervalues():
             interface.validate(context)
         for artifact in self.artifacts.itervalues():
@@ -420,3 +435,49 @@ class Policy(Element):
                 with context.style.indent:
                     for group_id in self.target_group_ids:
                         puts(context.style.node(group_id))
+
+class Mapping(Element):
+    def __init__(self, mapped_name, node_id, name):
+        if not isinstance(mapped_name, basestring):
+            raise ValueError('must set mapped_name (string)')
+        if not isinstance(node_id, basestring):
+            raise ValueError('must set node_id (string)')
+        if not isinstance(name, basestring):
+            raise ValueError('must set name (string)')
+
+        self.mapped_name = mapped_name
+        self.node_id = node_id
+        self.name = name
+
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('mapped_name', self.mapped_name),
+            ('node_id', self.node_id),
+            ('name', self.name)))
+
+    def dump(self, context):
+        puts('%s -> %s.%s' % (context.style.node(self.mapped_name), context.style.node(self.node_id), context.style.node(self.name)))
+
+class Substitution(Element):
+    def __init__(self, node_type_name):
+        if not isinstance(node_type_name, basestring):
+            raise ValueError('must set node_type_name (string)')
+    
+        self.node_type_name = node_type_name
+        self.capabilities = StrictDict(str, Mapping)
+        self.requirements = StrictDict(str, Mapping)
+
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('node_type_name', self.node_type_name),
+            ('capabilities', [v.as_raw for v in self.capabilities.itervalues()]),
+            ('requirements', [v.as_raw for v in self.requirements.itervalues()])))
+
+    def dump(self, context):
+        puts('Substitution:')
+        with context.style.indent:
+            puts('Node type: %s' % context.style.type(self.node_type_name))
+            dump_dict_values(context, self.capabilities, 'Capability mappings')
+            dump_dict_values(context, self.requirements, 'Requirement mappings')

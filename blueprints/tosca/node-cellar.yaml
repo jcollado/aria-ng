@@ -229,3 +229,12 @@ topology_template:
         bandwidth_threshold: 2 GB
       targets: # node templates or groups
         - node_cellar_group
+
+  substitution_mappings:
+
+    node_type: tosca.nodes.WebApplication
+    requirements:
+      host: [ node_cellar, host ] # doesn't really make sense; just for testing
+    capabilities:
+      app_endpoint: [ loadbalancer, client ]
+      

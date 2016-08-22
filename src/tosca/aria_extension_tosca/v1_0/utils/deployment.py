@@ -14,12 +14,20 @@
 # under the License.
 #
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, PolicyTemplate, Interface, Operation, Artifact, Requirement
+from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, PolicyTemplate, SubstitutionTemplate, MappingTemplate, Interface, Operation, Artifact, Requirement, Metadata
 from .data_types import coerce_value
 import re
 
 def get_deployment_template(context, presenter):
     r = DeploymentTemplate()
+
+    metadata = presenter.service_template.metadata
+    if metadata is not None:
+        rr = Metadata()
+        rr.template_name = metadata.template_name
+        rr.template_author = metadata.template_author
+        rr.template_version = metadata.template_version
+        r.metadata = rr
 
     normalize_types(context, context.deployment.node_types, presenter.node_types)
     normalize_types(context, context.deployment.capability_types, presenter.capability_types)
@@ -43,6 +51,19 @@ def get_deployment_template(context, presenter):
     if policies:
         for policy_name, policy in policies.iteritems():
             r.policy_templates[policy_name] = normalize_policy(context, policy)
+
+    substitution_mappings = topology_template.substitution_mappings if topology_template is not None else None
+    if substitution_mappings is not None:
+        rr = SubstitutionTemplate(substitution_mappings.node_type)
+        capabilities = substitution_mappings.capabilities
+        if capabilities:
+            for mapped_capability_name, capability in capabilities.iteritems():
+                rr.capabilities[mapped_capability_name] = MappingTemplate(mapped_capability_name, capability.node_template, capability.capability)
+        requirements = substitution_mappings.requirements
+        if requirements:
+            for mapped_requirement_name, requirement in requirements.iteritems():
+                rr.requirements[mapped_requirement_name] = MappingTemplate(mapped_requirement_name, requirement.node_template, requirement.requirement)
+        r.substitution_template = rr
 
     return r
 

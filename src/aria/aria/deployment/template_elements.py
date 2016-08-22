@@ -15,7 +15,7 @@
 #
 
 from .elements import Element, Template, Interface, Artifact, GroupPolicy
-from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy
+from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
 from .utils import instantiate_properties, instantiate_interfaces, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from .. import Issue
 from ..utils import StrictList, StrictDict
@@ -24,15 +24,20 @@ from types import FunctionType
 
 class DeploymentTemplate(Template):
     def __init__(self):
+        self.metadata = None
         self.node_templates = StrictDict(str, NodeTemplate)
         self.group_templates = StrictDict(str, GroupTemplate)
         self.policy_templates = StrictDict(str, PolicyTemplate)
+        self.substitution_template = None
         self.inputs = StrictDict(str)
         self.outputs = StrictDict(str)
 
     def instantiate(self, context, container):
         r = DeploymentPlan()
         context.deployment.plan = r
+        
+        if self.metadata is not None:
+            r.metadata = self.metadata.instantiate(context, container)
         
         for node_template in self.node_templates.itervalues():
             for _ in range(node_template.default_instances):
@@ -46,6 +51,9 @@ class DeploymentTemplate(Template):
         for policy_template in self.policy_templates.itervalues():
             policy = policy_template.instantiate(context, container)
             r.policies[policy.name] = policy
+        
+        if self.substitution_template is not None:
+            r.substitution = self.substitution_template.instantiate(context, container)
 
         instantiate_properties(context, self, r.inputs, self.inputs)
         instantiate_properties(context, self, r.outputs, self.outputs)
@@ -53,20 +61,28 @@ class DeploymentTemplate(Template):
         return r
 
     def validate(self, context):
+        if self.metadata is not None:
+            self.metadata.validate(context)
         for node_template in self.node_templates.itervalues():
             node_template.validate(context)
         for group_template in self.group_templates.itervalues():
             group_template.validate(context)
         for policy_template in self.policy_templates.itervalues():
             policy_template.validate(context)
+        if self.substitution_template is not None:
+            self.substitution_template.validate(context)
 
     def dump(self, context):
+        if self.metadata is not None:
+            self.metadata.dump(context)
         for node_template in self.node_templates.itervalues():
             node_template.dump(context)
         for group_template in self.group_templates.itervalues():
             group_template.dump(context)
         for policy_template in self.policy_templates.itervalues():
             policy_template.dump(context)
+        if self.substitution_template is not None:
+            self.substitution_template.dump(context)
         dump_properties(context, self.inputs, 'Inputs')
         dump_properties(context, self.outputs, 'Outputs')
 
@@ -384,3 +400,64 @@ class PolicyTemplate(Template):
                 puts('Target node templates: %s' % ', '.join((str(context.style.node(v)) for v in self.target_node_template_names)))
             if self.target_group_template_names:
                 puts('Target group templates: %s' % ', '.join((str(context.style.node(v)) for v in self.target_group_template_names)))
+
+class MappingTemplate(Template):
+    def __init__(self, mapped_name, node_template_name, name):
+        if not isinstance(mapped_name, basestring):
+            raise ValueError('must set mapped_name (string)')
+        if not isinstance(node_template_name, basestring):
+            raise ValueError('must set node_template_name (string)')
+        if not isinstance(name, basestring):
+            raise ValueError('must set name (string)')
+
+        self.mapped_name = mapped_name
+        self.node_template_name = node_template_name
+        self.name = name
+
+    def validate(self, context):
+        if self.node_template_name not in context.deployment.template.node_templates:
+            context.validation.report('mapping "%s" refers to an unknown node template: %s' % (self.mapped_name, repr(self.node_template_name)), level=Issue.BETWEEN_TYPES)        
+
+    def instantiate(self, context, container):
+        nodes = context.deployment.plan.find_nodes(self.node_template_name)
+        if len(nodes) == 0:
+            context.validation.report('mapping "%s" refer to node template "%s" but there are no node instances' % (self.mapped_name, self.node_template_name), level=Issue.BETWEEN_INSTANCES)
+            return None        
+        return Mapping(self.mapped_name, nodes[0].id, self.name)
+
+    def dump(self, context):
+        puts('%s -> %s.%s' % (context.style.node(self.mapped_name), context.style.node(self.node_template_name), context.style.node(self.name)))
+
+class SubstitutionTemplate(Template):
+    def __init__(self, node_type_name):
+        if not isinstance(node_type_name, basestring):
+            raise ValueError('must set node_type_name (string)')
+    
+        self.node_type_name = node_type_name
+        self.capabilities = StrictDict(str, MappingTemplate)
+        self.requirements = StrictDict(str, MappingTemplate)
+
+    def instantiate(self, context, container):
+        r = Substitution(self.node_type_name)
+        for mapped_capability_name, capability in self.capabilities.iteritems():
+            capability = capability.instantiate(context, container)
+            if capability is not None:
+                r.capabilities[mapped_capability_name] = capability
+        for mapped_requirement_name, requirement in self.requirements.iteritems():
+            requirement = requirement.instantiate(context, container)
+            if requirement is not None:
+                r.requirements[mapped_requirement_name] = requirement
+        return r
+
+    def validate(self, context):
+        for capability in self.capabilities.itervalues():
+            capability.validate(context)
+        for requirement in self.requirements.itervalues():
+            requirement.validate(context)
+
+    def dump(self, context):
+        puts('Substitution:')
+        with context.style.indent:
+            puts('Node type: %s' % context.style.type(self.node_type_name))
+            dump_dict_values(context, self.capabilities, 'Capability mappings')
+            dump_dict_values(context, self.requirements, 'Requirement mappings')

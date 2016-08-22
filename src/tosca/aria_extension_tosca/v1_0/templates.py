@@ -15,7 +15,7 @@
 #
 
 from .presentation import ToscaPresentation
-from .misc import Description, MetaData, Repository, Import
+from .misc import Description, MetaData, Repository, Import, SubstitutionMappings
 from .definitions import ParameterDefinition
 from .assignments import PropertyAssignment, AttributeAssignment, RequirementAssignment, CapabilityAssignment, InterfaceAssignment, ArtifactAssignment
 from .types import ArtifactType, DataType, CapabilityType, InterfaceType, RelationshipType, NodeType, GroupType, PolicyType
@@ -465,7 +465,7 @@ class TopologyTemplate(ToscaPresentation):
         :rtype: dict of str, :class:`ParameterDefinition`
         """
     
-    @primitive_field()
+    @object_field(SubstitutionMappings)
     def substitution_mappings(self):
         """
         An optional declaration that exports the topology template as an implementation of a Node type.

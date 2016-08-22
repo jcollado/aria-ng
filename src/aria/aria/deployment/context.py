@@ -41,6 +41,7 @@ class DeploymentContext(object):
         #self.id_type = IdType.LOCAL_SERIAL
         #self.id_type = IdType.LOCAL_RANDOM
         self.id_type = IdType.UNIVERSAL_RANDOM
+        self.id_max_length = 63 # See: http://www.faqs.org/rfcs/rfc1035.html
         self.template = None
         self.plan = None
         self.node_types = TypeHierarchy()

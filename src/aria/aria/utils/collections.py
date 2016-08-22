@@ -206,7 +206,7 @@ def deepclone(value):
     
     If the value uses dict or list subclasses, they are used for the clone.
     
-    Makes sure to copy over "\_locator" for all elements.
+    Makes sure to copy over :code:`_locator` for all elements.
     """
     
     if isinstance(value, dict):

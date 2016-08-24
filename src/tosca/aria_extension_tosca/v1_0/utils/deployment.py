@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, PolicyTemplate, SubstitutionTemplate, MappingTemplate, Interface, Operation, Artifact, Requirement, Metadata
+from aria.deployment import Type, DeploymentTemplate, NodeTemplate, RelationshipTemplate, CapabilityTemplate, GroupTemplate, PolicyTemplate, SubstitutionTemplate, MappingTemplate, Interface, Operation, Artifact, Requirement, Metadata, Parameter
 from .data_types import coerce_value
 import re
 
@@ -110,7 +110,7 @@ def normalize_node_template(context, node_template):
         for capability_name, capability in capabilities.iteritems():
             r.capabilities[capability_name] = normalize_capability(context, capability)
 
-    normalize_node_filter(context, node_template.node_filter, r.target_node_type_constraints)
+    normalize_node_filter(context, node_template.node_filter, r.target_node_template_constraints)
     
     return r
 
@@ -120,7 +120,7 @@ def normalize_interface(context, interface):
     inputs = interface.inputs
     if inputs:
         for input_name, the_input in inputs.iteritems():
-            r.inputs[input_name] = the_input.value
+            r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value)
 
     operations = interface.operations
     if operations:
@@ -143,7 +143,7 @@ def normalize_operation(context, operation):
     inputs = operation.inputs
     if inputs:
         for input_name, the_input in inputs.iteritems():
-            r.inputs[input_name] = the_input.value
+            r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value)
     
     return r
 
@@ -183,7 +183,7 @@ def normalize_requirement(context, requirement):
 
     r = Requirement(**r)
 
-    normalize_node_filter(context, requirement.node_filter, r.target_node_type_constraints)
+    normalize_node_filter(context, requirement.node_filter, r.target_node_template_constraints)
 
     relationship = requirement.relationship
     if relationship is not None:
@@ -257,12 +257,12 @@ def normalize_policy(context, policy):
 def normalize_property_values(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
-            properties[property_name] = prop
+            properties[property_name] = Parameter(prop.type, prop.value)
 
 def normalize_properties(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
-            properties[property_name] = prop.value
+            properties[property_name] = Parameter(prop.value.type, prop.value.value)
 
 def normalize_interfaces(context, interfaces, source_interfaces):
     if source_interfaces:
@@ -306,7 +306,8 @@ def normalize_constraint_clause(context, node_filter, constraint_clause, propert
         if capability_name is not None:
             capability = node_type.capabilities.get(capability_name)
             return capability.properties.get(property_name) if capability is not None else None
-        return node_type.properties.get(property_name)
+        value = node_type.properties.get(property_name)
+        return value.value if value is not None else None
 
     if constraint_key == 'equal':
         def equal(node_type, container):

@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from aria.deployment import DeploymentTemplate, Type, NodeTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, GroupPolicy, GroupPolicyTrigger, Interface, Operation, Requirement
+from aria.deployment import Type, DeploymentTemplate, NodeTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, GroupPolicy, GroupPolicyTrigger, Interface, Operation, Requirement, Parameter
 
 def get_deployment_template(context, presenter):
     r = DeploymentTemplate()
@@ -38,6 +38,11 @@ def get_deployment_template(context, presenter):
     if policies:
         for policy_name, policy in policies.iteritems():
             r.policy_templates[policy_name] = normalize_policy(context, policy)
+            
+    workflows = presenter.workflows
+    if workflows:
+        for workflow_name, workflow in workflows.iteritems():
+            r.operations[workflow_name] = normalize_workflow(context, workflow)
 
     return r
 
@@ -113,7 +118,7 @@ def normalize_operation(context, operation):
     inputs = operation.inputs
     if inputs:
         for input_name, the_input in inputs.iteritems():
-            r.inputs[input_name] = the_input.value
+            r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value)
     
     return r
 
@@ -178,6 +183,18 @@ def normalize_policy(context, policy):
     
     return r
 
+def normalize_workflow(context, workflow):
+    r = Operation(name=workflow._name)
+
+    r.implementation = workflow.mapping
+
+    parameters = workflow.parameters
+    if parameters:
+        for parameter_name, parameter in parameters.iteritems():
+            r.inputs[parameter_name] = Parameter(parameter.type, parameter.default)
+    
+    return r
+
 #
 # Utils
 #
@@ -185,12 +202,7 @@ def normalize_policy(context, policy):
 def normalize_property_values(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
-            properties[property_name] = prop
-
-def normalize_properties(properties, source_properties):
-    if source_properties:
-        for property_name, prop in source_properties.iteritems():
-            properties[property_name] = prop.value
+            properties[property_name] = Parameter(prop.type, prop.value)
 
 def normalize_interfaces(context, interfaces, source_interfaces):
     if source_interfaces:

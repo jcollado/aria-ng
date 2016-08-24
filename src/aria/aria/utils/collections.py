@@ -46,6 +46,9 @@ class ReadOnlyList(list):
         if self.locked:
             raise TypeError('read-only list')
         return super(ReadOnlyList, self).__iadd__(values)
+    
+    def __deepcopy__(self, memo):
+        return ReadOnlyList(self)
 
     def append(self, value):
         if self.locked:
@@ -86,6 +89,9 @@ class ReadOnlyDict(OrderedDict):
         if self.locked:
             raise TypeError('read-only dict')
         return super(ReadOnlyDict, self).__delitem__(key)
+    
+    def __deepcopy__(self, memo):
+        return ReadOnlyDict(self)
 
 EMPTY_READ_ONLY_DICT = ReadOnlyDict()
 
@@ -94,8 +100,12 @@ class StrictList(list):
     A list that raises TypeError exceptions when objects of the wrong type are inserted.
     """
     
-    def __init__(self, value_class, items=None, wrapper_fn=None, unwrapper_fn=None):
+    def __init__(self, items=None, value_class=None, wrapper_fn=None, unwrapper_fn=None):
         super(StrictList, self).__init__()
+        if isinstance(items, StrictList):
+            self.value_class = items.value_class
+            self.wrapper_fn = items.wrapper_fn
+            self.unwrapper_fn = items.unwrapper_fn
         self.value_class = value_class
         self.wrapper_fn = wrapper_fn
         self.unwrapper_fn = unwrapper_fn
@@ -104,16 +114,20 @@ class StrictList(list):
                 self.append(item)
     
     def _wrap(self, value):
-        if not isinstance(value, self.value_class):
-            raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
-        if self.wrapper_fn:
+        if (self.value_class is not None) and (not isinstance(value, self.value_class)):
+            raise TypeError('value must be a "%s.%s": %s' % (self.value_class.__module__, self.value_class.__name__, repr(value)))
+        if self.wrapper_fn is not None:
             value = self.wrapper_fn(value)
+        return value
+
+    def _unwrap(self, value):
+        if self.unwrapper_fn is not None:
+            value = self.unwrapper_fn(value)
         return value
 
     def __getitem__(self, index):
         value = super(StrictList, self).__getitem__(index)
-        if self.unwrapper_fn:
-            value = self.unwrapper_fn(value)
+        value = self._unwrap(value)
         return value
         
     def __setitem__(self, index, value):
@@ -141,8 +155,13 @@ class StrictDict(OrderedDict):
     An ordered dict that raises TypeError exceptions when keys or values of the wrong type are used.
     """
     
-    def __init__(self, key_class, value_class=None, items=None, wrapper_fn=None, unwrapper_fn=None):
+    def __init__(self, items=None, key_class=None, value_class=None, wrapper_fn=None, unwrapper_fn=None):
         super(StrictDict, self).__init__()
+        if isinstance(items, StrictDict):
+            self.key_class = items.key_class
+            self.value_class = items.value_class
+            self.wrapper_fn = items.wrapper_fn
+            self.unwrapper_fn = items.unwrapper_fn
         self.key_class = key_class
         self.value_class = value_class
         self.wrapper_fn = wrapper_fn
@@ -152,20 +171,19 @@ class StrictDict(OrderedDict):
                 self[k] = v
     
     def __getitem__(self, key):
-        if not isinstance(key, self.key_class):
-            raise TypeError('key must be a %s.%s' % (self.key_class.__module__, self.key_class.__name__))
+        if (self.key_class is not None) and (not isinstance(key, self.key_class)):
+            raise TypeError('key must be a "%s.%s"' % (self.key_class.__module__, self.key_class.__name__))
         value = super(StrictDict, self).__getitem__(key)
-        if self.unwrapper_fn:
+        if self.unwrapper_fn is not None:
             value = self.unwrapper_fn(value)
         return value
         
     def __setitem__(self, key, value):
-        if not isinstance(key, self.key_class):
-            raise TypeError('key must be a %s.%s' % (self.key_class.__module__, self.key_class.__name__))
-        if self.value_class is not None:
-            if not isinstance(value, self.value_class):
-                raise TypeError('value must be a %s.%s' % (self.value_class.__module__, self.value_class.__name__))
-        if self.wrapper_fn:
+        if (self.key_class is not None) and (not isinstance(key, self.key_class)):
+            raise TypeError('key must be a "%s.%s": %s' % (self.key_class.__module__, self.key_class.__name__, repr(key)))
+        if (self.value_class is not None) and (not isinstance(value, self.value_class)):
+            raise TypeError('value must be a "%s.%s": %s' % (self.value_class.__module__, self.value_class.__name__, repr(value)))
+        if self.wrapper_fn is not None:
             value = self.wrapper_fn(value)
         return super(StrictDict, self).__setitem__(key, value)
 

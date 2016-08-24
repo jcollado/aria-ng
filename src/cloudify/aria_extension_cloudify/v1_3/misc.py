@@ -14,9 +14,8 @@
 # under the License.
 #
 
-from .assignments import PropertyAssignment
 from aria import dsl_specification
-from aria.presentation import Presentation, AsIsPresentation, has_fields, short_form_field, primitive_field, object_field, object_dict_field 
+from aria.presentation import Presentation, AsIsPresentation, has_fields, primitive_field, object_field 
 from clint.textui import puts
 
 class Description(AsIsPresentation):
@@ -35,7 +34,7 @@ class Output(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-outputs/>`__.
     """
     
-    @primitive_field(Description)
+    @object_field(Description)
     def description(self):
         """
         An optional description for the output.
@@ -48,33 +47,6 @@ class Output(Presentation):
         """
         The output value. Can be anything from a simple value (e.g. port) to a complex value (e.g. hash with values). Output values can contain hardcoded values, inputs, properties and attributes.
         """
-
-@short_form_field('mapping')
-@has_fields
-@dsl_specification('workflows', 'cloudify-1.3')
-class Workflow(Presentation):
-    """
-    :code:`workflows` define a set of tasks that can be executed on a node or a group of nodes, and the execution order of these tasks, serially or in parallel. A task may be an operation (implemented by a plugin), but it may also be other actions, including arbitrary code.
-    
-    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-workflows/>`__.
-    """
-
-    @primitive_field(str, required=True)
-    def mapping(self):
-        """
-        A path to the method implementing this workflow (In the "Simple mapping" format this value is set without explicitly using the "mapping" key)
-        
-        :rtype: str
-        """
-
-    @object_dict_field(PropertyAssignment)
-    def parameters(self):
-        """
-        A map of parameters to be passed to the workflow implementation
-        
-        :rtype: dict of str, :class:`PropertyAssignment`
-        """
-    
 
 @has_fields
 @dsl_specification('plugins', 'cloudify-1.3')

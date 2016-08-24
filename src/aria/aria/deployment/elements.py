@@ -14,11 +14,15 @@
 # under the License.
 #
 
-from .utils import instantiate_properties, coerce_dict_values, dump_dict_values, dump_properties
+from .utils import instantiate_dict, coerce_value, coerce_dict_values, dump_dict_values, dump_properties
 from .. import UnimplementedFunctionalityError, classname
 from ..utils import StrictList, StrictDict, make_agnostic
 from collections import OrderedDict
 from clint.textui import puts
+
+class Function(object):
+    def _evaluate(self, context, container):
+        raise UnimplementedFunctionalityError(classname(self) + '._evaluate')
 
 class Element(object):
     def validate(self, context):
@@ -38,9 +42,20 @@ class Template(Element):
     def instantiate(self, context, container):
         pass
 
-class Function(object):
-    def _evaluate(self, context, container):
-        raise UnimplementedFunctionalityError(classname(self) + '._evaluate')
+class Parameter(Template):
+    def __init__(self, type_name, value):
+        self.type_name = type_name
+        self.value = value
+
+    def instantiate(self, context, container):
+        value = coerce_value(context, container, self.value) if self.value is not None else None
+        return Parameter(self.type_name, value)
+
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('type_name', self.type_name),
+            ('value', self.value)))
 
 class Metadata(Template):
     def __init__(self):
@@ -78,14 +93,13 @@ class Interface(Template):
             raise ValueError('must set name (string)')
         
         self.name = name
-        self.inputs = StrictDict(str)
-        self.operations = StrictDict(str, Operation)
+        self.inputs = StrictDict(key_class=str, value_class=Parameter)
+        self.operations = StrictDict(key_class=str, value_class=Operation)
 
     def instantiate(self, context, container):
         r = Interface(self.name)
-        instantiate_properties(context, container, r.inputs, self.inputs)
-        for operation_name, operation in self.operations.iteritems():
-            r.operations[operation_name] = operation.instantiate(context, container)
+        instantiate_dict(context, container, r.inputs, self.inputs)
+        instantiate_dict(context, container, r.operations, self.operations)
         return r
                 
     def validate(self, context):
@@ -101,7 +115,7 @@ class Interface(Template):
     def as_raw(self):
         return OrderedDict((
             ('name', self.name),
-            ('inputs', self.inputs),
+            ('inputs', {k: v.as_raw for k, v in self.inputs.iteritems()}),
             ('operations', [v.as_raw for v in self.operations.itervalues()])))
 
     def dump(self, context):
@@ -117,11 +131,11 @@ class Operation(Template):
         
         self.name = name
         self.implementation = None
-        self.dependencies = StrictList(str)
+        self.dependencies = StrictList(value_class=str)
         self.executor = None # Cloudify
         self.max_retries = None # Cloudify
         self.retry_interval = None # Cloudify
-        self.inputs = StrictDict(str)
+        self.inputs = StrictDict(key_class=str, value_class=Parameter)
 
     def instantiate(self, context, container):
         r = Operation(self.name)
@@ -130,7 +144,7 @@ class Operation(Template):
         r.executor = self.executor
         r.max_retries = self.max_retries
         r.retry_interval = self.retry_interval
-        instantiate_properties(context, container, r.inputs, self.inputs)
+        instantiate_dict(context, container, r.inputs, self.inputs)
         return r
 
     def coerce_values(self, context, container, report_issues):
@@ -145,7 +159,7 @@ class Operation(Template):
             ('executor', self.executor),
             ('max_retries', self.max_retries),
             ('retry_interval', self.retry_interval),
-            ('inputs', self.inputs)))
+            ('inputs', {k: v.as_raw for k, v in self.inputs.iteritems()})))
 
     def dump(self, context):
         puts(context.style.node(self.name))
@@ -176,15 +190,15 @@ class Artifact(Template):
         self.source_path = source_path
         self.target_path = None
         self.repository_url = None
-        self.repository_credential = StrictDict(str, str)
-        self.properties = StrictDict(str)
+        self.repository_credential = StrictDict(key_class=str, value_class=str)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
 
     def instantiate(self, context, container):
         r = Artifact(self.name, self.type_name, self.source_path)
         r.target_path = self.target_path
         r.repository_url = self.repository_url
         r.repository_credential = self.repository_credential
-        instantiate_properties(context, container, r.properties, self.properties)
+        instantiate_dict(context, container, r.properties, self.properties)
         return r
 
     def coerce_values(self, context, container, report_issues):
@@ -199,7 +213,7 @@ class Artifact(Template):
             ('target_path', self.target_path),
             ('repository_url', self.repository_url),
             ('repository_credential', make_agnostic(self.repository_credential)),
-            ('properties', self.properties)))
+            ('properties', {k: v.as_raw for k, v in self.properties.iteritems()})))
 
     def dump(self, context):
         puts(context.style.node(self.name))
@@ -220,14 +234,13 @@ class GroupPolicy(Template):
             raise ValueError('must set name (string)')
 
         self.name = name
-        self.properties = StrictDict(str)
-        self.triggers = StrictDict(str, GroupPolicyTrigger)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.triggers = StrictDict(key_class=str, value_class=GroupPolicyTrigger)
 
     def instantiate(self, context, container):
         r = GroupPolicy(self.name)
-        instantiate_properties(context, container, r.properties, self.properties)
-        for trigger_name, trigger in self.triggers.iteritems():
-            r.triggers[trigger_name] = trigger.instantiate(context, container)
+        instantiate_dict(context, container, r.properties, self.properties)
+        instantiate_dict(context, container, r.triggers, self.triggers)
         return r
 
     def coerce_values(self, context, container, report_issues):
@@ -239,7 +252,7 @@ class GroupPolicy(Template):
     def as_raw(self):
         return OrderedDict((
             ('name', self.name),
-            ('properties', self.properties),
+            ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('triggers', [v.as_raw for v in self.triggers.itervalues()])))
 
     def dump(self, context):
@@ -257,11 +270,11 @@ class GroupPolicyTrigger(Template):
     
         self.name = name
         self.source = source
-        self.properties = StrictDict(str)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
 
     def instantiate(self, context, container):
         r = GroupPolicyTrigger(self.name, self.source)
-        instantiate_properties(context, container, r.properties, self.properties)
+        instantiate_dict(context, container, r.properties, self.properties)
         return r
 
     def coerce_values(self, context, container, report_issues):
@@ -272,7 +285,7 @@ class GroupPolicyTrigger(Template):
         return OrderedDict((
             ('name', self.name),
             ('source', self.source),
-            ('properties', self.properties)))
+            ('properties', {k: v.as_raw for k, v in self.properties.iteritems()})))
 
     def dump(self, context):
         puts(context.style.node(self.name))

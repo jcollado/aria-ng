@@ -15,10 +15,10 @@
 #
 
 from ..v1_2 import Instances
-from .definitions import PropertyDefinition
+from .definitions import PropertyDefinition, WorkflowDefinition
 from .assignments import PropertyAssignment, InterfaceAssignment, PolicyAssignment, CapabilityAssignment
 from .types import NodeType, RelationshipType, PolicyType, DataType, PolicyTrigger
-from .misc import Description, Output, Workflow, Plugin
+from .misc import Description, Output, Plugin
 from .field_validators import node_templates_or_groups_validator
 from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
 from .utils.interfaces import get_template_interfaces
@@ -37,7 +37,7 @@ class RelationshipTemplate(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-relationships/>`__
     """
 
-    @primitive_field(Description)
+    @object_field(Description)
     def description(self):
         """
         ARIA NOTE: Not mentioned in the spec.
@@ -120,7 +120,7 @@ class NodeTemplate(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-templates/>`__
     """
 
-    @primitive_field(Description)
+    @object_field(Description)
     def description(self):
         """
         ARIA NOTE: Not mentioned in the spec.
@@ -285,7 +285,7 @@ class PolicyDefinition(Presentation):
 
 @has_fields
 class ServiceTemplate(Presentation):
-    @primitive_field(Description)
+    @object_field(Description)
     def description(self):
         """
         ARIA NOTE: Not mentioned in the spec.
@@ -362,10 +362,10 @@ class ServiceTemplate(Presentation):
         :rtype: dict of str, :class:`Plugin`
         """
     
-    @object_dict_field(Workflow)
+    @object_dict_field(WorkflowDefinition)
     def workflows(self):
         """
-        :rtype: dict of str, :class:`Workflow`
+        :rtype: dict of str, :class:`WorkflowDefinition`
         """
 
     @object_dict_field(GroupDefinition)

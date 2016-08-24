@@ -31,11 +31,6 @@ class DefaultPresenterSource(PresenterSource):
     
     def __init__(self, classes=PRESENTER_CLASSES):
         self.classes = classes
-        #from tosca_dsl.v1_0 import ToscaSimplePresenter1_0
-        #from cloudify_dsl.v1_3 import CloudifyPresenter1_3
-        #self.classes = classes or [
-        #    ToscaSimplePresenter1_0,
-        #    CloudifyPresenter1_3]
 
     def get_presenter(self, raw):
         for cls in self.classes:
@@ -48,6 +43,7 @@ __all__ = (
     'PresenterError',
     'PresenterNotFoundError',
     'Presenter',
+    'Value',
     'PresentationBase',
     'Presentation',
     'AsIsPresentation',

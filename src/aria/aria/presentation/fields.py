@@ -165,7 +165,7 @@ class Field(object):
                     if hasattr(v, '_validate'):
                         v._validate(context)
         elif isinstance(value, dict):
-            if (self.field_variant == 'object_dict') or (self.field_variant == 'object_dict_unknown_fields'):
+            if self.field_variant in ('object_dict', 'object_dict_unknown_fields'):
                 for v in value.itervalues():
                     if hasattr(v, '_validate'):
                         v._validate(context)
@@ -193,22 +193,22 @@ class Field(object):
         if value is None:
             return
 
-        if self.field_variant == 'primitive':
+        elif self.field_variant == 'primitive':
             puts('%s: %s' % (self.name, context.style.literal(value)))
 
-        if self.field_variant == 'primitive_list':
+        elif self.field_variant == 'primitive_list':
             puts('%s:' % self.name)
             with context.style.indent:
                 for v in value:
                     puts(context.style.literal(v))
 
-        if self.field_variant == 'object':
+        elif self.field_variant == 'object':
             puts('%s:' % self.name)
             with context.style.indent:
                 if hasattr(value, '_dump'):
                     value._dump(context)
     
-        if self.field_variant == 'object_list':
+        elif self.field_variant == 'object_list':
             puts('%s:' % self.name)
             with context.style.indent:
                 for v in value:
@@ -221,7 +221,7 @@ class Field(object):
                 if hasattr(v, '_dump'):
                     v._dump(context)
         
-        elif (self.field_variant == 'object_dict') or (self.field_variant == 'object_dict_unknown_fields'):
+        elif self.field_variant in ('object_dict', 'object_dict_unknown_fields'):
             puts('%s:' % self.name)
             with context.style.indent:
                 for v in value.itervalues():

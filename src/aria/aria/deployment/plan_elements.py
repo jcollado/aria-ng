@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from .elements import Element, Interface, Artifact, GroupPolicy
+from .elements import Element, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .utils import coerce_dict_values, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from .. import Issue
 from ..utils import StrictList, StrictDict, ReadOnlyList 
@@ -24,12 +24,13 @@ from clint.textui import puts, indent
 class DeploymentPlan(Element):
     def __init__(self):
         self.metadata = None
-        self.nodes = StrictDict(str, Node) 
-        self.groups = StrictDict(str, Group) 
-        self.policies = StrictDict(str, Policy)
+        self.nodes = StrictDict(key_class=str, value_class=Node) 
+        self.groups = StrictDict(key_class=str, value_class=Group) 
+        self.policies = StrictDict(key_class=str, value_class=Policy)
         self.substitution = None
-        self.inputs = StrictDict(str)
-        self.outputs = StrictDict(str)
+        self.inputs = StrictDict(key_class=str, value_class=Parameter)
+        self.outputs = StrictDict(key_class=str, value_class=Parameter)
+        self.operations = StrictDict(key_class=str, value_class=Operation)
 
     def satisfy_requirements(self, context):
         satisfied = True
@@ -51,6 +52,9 @@ class DeploymentPlan(Element):
             if node.template_name == node_template_name:
                 nodes.append(node)
         return ReadOnlyList(nodes)
+
+    def get_node_ids(self, node_template_name):
+        return ReadOnlyList((node.id for node in self.find_nodes(node_template_name)))
     
     def find_groups(self, group_template_name):
         groups = []
@@ -58,6 +62,9 @@ class DeploymentPlan(Element):
             if group.template_name == group_template_name:
                 groups.append(group)
         return ReadOnlyList(groups)
+
+    def get_group_ids(self, group_template_name):
+        return ReadOnlyList((group.id for group in self.find_groups(group_template_name)))
     
     def is_node_a_target(self, context, target_node):
         for node in self.nodes.itervalues():
@@ -88,6 +95,8 @@ class DeploymentPlan(Element):
             policy.validate(context)
         if self.substitution is not None:
             self.substitution.validate(context)
+        for operation in self.operations.itervalues():
+            operation.validate(context)
 
     def coerce_values(self, context, container, report_issues):
         for node in self.nodes.itervalues():
@@ -98,6 +107,8 @@ class DeploymentPlan(Element):
             policy.coerce_values(context, self, report_issues)
         coerce_dict_values(context, container, self.inputs, report_issues)
         coerce_dict_values(context, container, self.outputs, report_issues)
+        for operation in self.operations.itervalues():
+            operation.coerce_values(context, container, report_issues)
 
     @property
     def as_raw(self):
@@ -107,8 +118,9 @@ class DeploymentPlan(Element):
             ('groups', [v.as_raw for v in self.groups.itervalues()]),
             ('policies', [v.as_raw for v in self.policies.itervalues()]),
             ('substitution', self.substitution.as_raw if self.substitution is not None else None),
-            ('inputs', self.inputs),
-            ('outputs', self.outputs)))
+            ('inputs', {k: v.as_raw for k, v in self.inputs.iteritems()}),
+            ('outputs', {k: v.as_raw for k, v in self.outputs.iteritems()}),
+            ('operations', [v.as_raw for v in self.operations.itervalues()])))
 
     def dump(self, context):
         if self.metadata is not None:
@@ -123,6 +135,7 @@ class DeploymentPlan(Element):
             self.substitution.dump(context)
         dump_properties(context, self.inputs, 'Inputs')
         dump_properties(context, self.outputs, 'Outputs')
+        dump_dict_values(context, self.operations, 'Operations')
 
     def dump_graph(self, context):
         for node in self.nodes.itervalues():
@@ -151,11 +164,11 @@ class Node(Element):
 
         self.id = '%s_%s' % (template_name, context.deployment.generate_id())
         self.template_name = template_name
-        self.properties = StrictDict(str)
-        self.interfaces = StrictDict(str, Interface)
-        self.artifacts = StrictDict(str, Artifact)
-        self.capabilities = StrictDict(str, Capability)
-        self.relationships = StrictList(Relationship)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.interfaces = StrictDict(key_class=str, value_class=Interface)
+        self.artifacts = StrictDict(key_class=str, value_class=Artifact)
+        self.capabilities = StrictDict(key_class=str, value_class=Capability)
+        self.relationships = StrictList(value_class=Relationship)
     
     def satisfy_requirements(self, context):
         node_template = context.deployment.template.node_templates.get(self.template_name)
@@ -236,7 +249,7 @@ class Node(Element):
         return OrderedDict((
             ('id', self.id),
             ('template_name', self.template_name),
-            ('properties', self.properties),
+            ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
             ('artifacts', [v.as_raw for v in self.artifacts.itervalues()]),
             ('capabilities', [v.as_raw for v in self.capabilities.itervalues()]),
@@ -263,7 +276,7 @@ class Capability(Element):
         self.type_name = type_name
         self.min_occurrences = None # optional
         self.max_occurrences = None # optional
-        self.properties = StrictDict(str)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
         self.occurrences = 0
     
     @property
@@ -284,7 +297,7 @@ class Capability(Element):
         return OrderedDict((
             ('name', self.name),
             ('type_name', self.type_name),
-            ('properties', self.properties)))
+            ('properties', {k: v.as_raw for k, v in self.properties.iteritems()})))
 
     def coerce_values(self, context, container, report_issues):
         coerce_dict_values(context, container, self.properties, report_issues)
@@ -309,9 +322,9 @@ class Relationship(Element):
         self.target_capability_name = None
         self.type_name = type_name
         self.template_name = template_name
-        self.properties = StrictDict(str)
-        self.source_interfaces = StrictDict(str, Interface)
-        self.target_interfaces = StrictDict(str, Interface)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.source_interfaces = StrictDict(key_class=str, value_class=Interface)
+        self.target_interfaces = StrictDict(key_class=str, value_class=Interface)
 
     def validate(self, context):
         for interface in self.source_interfaces.itervalues():
@@ -333,7 +346,7 @@ class Relationship(Element):
             ('target_capability_name', self.target_capability_name),
             ('type_name', self.type_name),
             ('template_name', self.template_name),
-            ('properties', self.properties),
+            ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('source_interfaces', [v.as_raw for v in self.source_interfaces.itervalues()]),            
             ('target_interfaces', [v.as_raw for v in self.target_interfaces.itervalues()])))            
 
@@ -357,17 +370,17 @@ class Group(Element):
 
         self.id = '%s_%s' % (template_name, context.deployment.generate_id())
         self.template_name = template_name
-        self.properties = StrictDict(str)
-        self.interfaces = StrictDict(str, Interface)
-        self.policies = StrictDict(str, GroupPolicy)
-        self.member_node_ids = StrictList(str)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.interfaces = StrictDict(key_class=str, value_class=Interface)
+        self.policies = StrictDict(key_class=str, value_class=GroupPolicy)
+        self.member_node_ids = StrictList(value_class=str)
 
     @property
     def as_raw(self):
         return OrderedDict((
             ('id', self.id),
             ('template_name', self.template_name),
-            ('properties', self.properties),
+            ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
             ('policies', [v.as_raw for v in self.policies.itervalues()]),
             ('member_node_ids', self.member_node_ids)))
@@ -407,16 +420,16 @@ class Policy(Element):
         
         self.name = name
         self.type_name = type_name
-        self.properties = StrictDict(str)
-        self.target_node_ids = StrictList(str)
-        self.target_group_ids = StrictList(str)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.target_node_ids = StrictList(value_class=str)
+        self.target_group_ids = StrictList(value_class=str)
 
     @property
     def as_raw(self):
         return OrderedDict((
             ('name', self.name),
             ('type_name', self.type_name),
-            ('properties', self.properties),
+            ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('target_node_ids', self.target_node_ids),
             ('target_group_ids', self.target_group_ids)))
 
@@ -465,8 +478,8 @@ class Substitution(Element):
             raise ValueError('must set node_type_name (string)')
     
         self.node_type_name = node_type_name
-        self.capabilities = StrictDict(str, Mapping)
-        self.requirements = StrictDict(str, Mapping)
+        self.capabilities = StrictDict(key_class=str, value_class=Mapping)
+        self.requirements = StrictDict(key_class=str, value_class=Mapping)
 
     @property
     def as_raw(self):

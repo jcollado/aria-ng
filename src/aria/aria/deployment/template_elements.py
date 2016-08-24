@@ -14,9 +14,9 @@
 # under the License.
 #
 
-from .elements import Element, Template, Interface, Artifact, GroupPolicy
+from .elements import Element, Template, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
-from .utils import instantiate_properties, instantiate_interfaces, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
+from .utils import instantiate_dict, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from .. import Issue
 from ..utils import StrictList, StrictDict
 from clint.textui import puts
@@ -25,12 +25,13 @@ from types import FunctionType
 class DeploymentTemplate(Template):
     def __init__(self):
         self.metadata = None
-        self.node_templates = StrictDict(str, NodeTemplate)
-        self.group_templates = StrictDict(str, GroupTemplate)
-        self.policy_templates = StrictDict(str, PolicyTemplate)
+        self.node_templates = StrictDict(key_class=str, value_class=NodeTemplate)
+        self.group_templates = StrictDict(key_class=str, value_class=GroupTemplate)
+        self.policy_templates = StrictDict(key_class=str, value_class=PolicyTemplate)
         self.substitution_template = None
-        self.inputs = StrictDict(str)
-        self.outputs = StrictDict(str)
+        self.inputs = StrictDict(key_class=str, value_class=Parameter)
+        self.outputs = StrictDict(key_class=str, value_class=Parameter)
+        self.operations = StrictDict(key_class=str, value_class=Operation)
 
     def instantiate(self, context, container):
         r = DeploymentPlan()
@@ -43,20 +44,16 @@ class DeploymentTemplate(Template):
             for _ in range(node_template.default_instances):
                 node = node_template.instantiate(context, container)
                 r.nodes[node.id] = node
-            
-        for group_template in self.group_templates.itervalues():
-            group = group_template.instantiate(context, container)
-            r.groups[group.id] = group
-            
-        for policy_template in self.policy_templates.itervalues():
-            policy = policy_template.instantiate(context, container)
-            r.policies[policy.name] = policy
+
+        instantiate_dict(context, self, r.groups, self.group_templates)
+        instantiate_dict(context, self, r.policies, self.policy_templates)
+        instantiate_dict(context, self, r.operations, self.operations)
         
         if self.substitution_template is not None:
             r.substitution = self.substitution_template.instantiate(context, container)
 
-        instantiate_properties(context, self, r.inputs, self.inputs)
-        instantiate_properties(context, self, r.outputs, self.outputs)
+        instantiate_dict(context, self, r.inputs, self.inputs)
+        instantiate_dict(context, self, r.outputs, self.outputs)
         
         return r
 
@@ -71,6 +68,8 @@ class DeploymentTemplate(Template):
             policy_template.validate(context)
         if self.substitution_template is not None:
             self.substitution_template.validate(context)
+        for operation in self.operations.itervalues():
+            operation.validate(context)
 
     def dump(self, context):
         if self.metadata is not None:
@@ -85,6 +84,7 @@ class DeploymentTemplate(Template):
             self.substitution_template.dump(context)
         dump_properties(context, self.inputs, 'Inputs')
         dump_properties(context, self.outputs, 'Outputs')
+        dump_dict_values(context, self.operations, 'Operations')
 
 class NodeTemplate(Template):
     def __init__(self, name, type_name):
@@ -98,28 +98,26 @@ class NodeTemplate(Template):
         self.default_instances = 1
         self.min_instances = 0
         self.max_instances = None
-        self.properties = StrictDict(str)
-        self.interfaces = StrictDict(str, Interface)
-        self.artifacts = StrictDict(str, Artifact)
-        self.capabilities = StrictDict(str, CapabilityTemplate)
-        self.requirements = StrictList(Requirement)
-        self.target_node_type_constraints = StrictList(FunctionType)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.interfaces = StrictDict(key_class=str, value_class=Interface)
+        self.artifacts = StrictDict(key_class=str, value_class=Artifact)
+        self.capabilities = StrictDict(key_class=str, value_class=CapabilityTemplate)
+        self.requirements = StrictList(value_class=Requirement)
+        self.target_node_template_constraints = StrictList(value_class=FunctionType)
     
     def is_target_node_valid(self, target_node_template):
-        if self.target_node_type_constraints:
-            for node_type_constraint in self.target_node_type_constraints:
+        if self.target_node_template_constraints:
+            for node_type_constraint in self.target_node_template_constraints:
                 if not node_type_constraint(target_node_template, self):
                     return False
         return True
     
     def instantiate(self, context, container):
         r = Node(context, self.name)
-        instantiate_properties(context, r, r.properties, self.properties)
-        instantiate_interfaces(context, r, r.interfaces, self.interfaces)
-        for artifact_name, artifact in self.artifacts.iteritems():
-            r.artifacts[artifact_name] = artifact.instantiate(context, r)
-        for capability_name, capability in self.capabilities.iteritems():
-            r.capabilities[capability_name] = capability.instantiate(context, r)
+        instantiate_dict(context, r, r.properties, self.properties)
+        instantiate_dict(context, r, r.interfaces, self.interfaces)
+        instantiate_dict(context, r, r.artifacts, self.artifacts)
+        instantiate_dict(context, r, r.capabilities, self.capabilities)
         r.coerce_values(context, r, False)
         return r
     
@@ -166,7 +164,7 @@ class Requirement(Element):
         self.name = name
         self.target_node_type_name = target_node_type_name
         self.target_node_template_name = target_node_template_name
-        self.target_node_type_constraints = StrictList(FunctionType)
+        self.target_node_template_constraints = StrictList(value_class=FunctionType)
         self.target_capability_type_name = target_capability_type_name
         self.target_capability_name = target_capability_name
         self.relationship_template = None # optional
@@ -234,6 +232,11 @@ class Requirement(Element):
                 puts('Target capability type: %s' % context.style.type(self.target_capability_type_name))
             elif self.target_capability_name is not None:
                 puts('Target capability name: %s' % context.style.node(self.target_capability_name))
+            if self.target_node_template_constraints:
+                puts('Target node template constraints:')
+                with context.style.indent:
+                    for c in self.target_node_template_constraints:
+                        puts(context.style.literal(c))
             if self.relationship_template:
                 self.relationship_template.dump(context)
 
@@ -249,7 +252,7 @@ class CapabilityTemplate(Template):
         self.min_occurrences = None # optional
         self.max_occurrences = None # optional
         self.valid_source_node_type_names = None
-        self.properties = StrictDict(str)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
         
     def satisfies_requirement(self, context, source_node_template, requirement, target_node_template):
         # Do we match the required capability type?
@@ -263,8 +266,8 @@ class CapabilityTemplate(Template):
                     return False
         
         # Apply requirement constraints
-        if requirement.target_node_type_constraints:
-            for node_type_constraint in requirement.target_node_type_constraints:
+        if requirement.target_node_template_constraints:
+            for node_type_constraint in requirement.target_node_template_constraints:
                 if not node_type_constraint(target_node_template, source_node_template):
                     return False
         
@@ -274,7 +277,7 @@ class CapabilityTemplate(Template):
         r = Capability(self.name, self.type_name)
         r.min_occurrences = self.min_occurrences
         r.max_occurrences = self.max_occurrences
-        instantiate_properties(context, container, r.properties, self.properties)
+        instantiate_dict(context, container, r.properties, self.properties)
         return r
 
     def validate(self, context):
@@ -301,15 +304,15 @@ class RelationshipTemplate(Template):
         
         self.type_name = type_name
         self.template_name = template_name
-        self.properties = StrictDict(str)
-        self.source_interfaces = StrictDict(str, Interface)
-        self.target_interfaces = StrictDict(str, Interface)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.source_interfaces = StrictDict(key_class=str, value_class=Interface)
+        self.target_interfaces = StrictDict(key_class=str, value_class=Interface)
 
     def instantiate(self, context, container):
         r = Relationship(self.type_name, self.template_name)
-        instantiate_properties(context, container, r.properties, self.properties)
-        instantiate_interfaces(context, container, r.source_interfaces, self.source_interfaces)
-        instantiate_interfaces(context, container, r.target_interfaces, self.target_interfaces)
+        instantiate_dict(context, container, r.properties, self.properties)
+        instantiate_dict(context, container, r.source_interfaces, self.source_interfaces)
+        instantiate_dict(context, container, r.target_interfaces, self.target_interfaces)
         return r
 
     def validate(self, context):
@@ -337,21 +340,18 @@ class GroupTemplate(Template):
         
         self.name = name
         self.type_name = type_name
-        self.properties = StrictDict(str)
-        self.interfaces = StrictDict(str, Interface)
-        self.policies = StrictDict(str, GroupPolicy)
-        self.member_node_template_names = StrictList(str)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.interfaces = StrictDict(key_class=str, value_class=Interface)
+        self.policies = StrictDict(key_class=str, value_class=GroupPolicy)
+        self.member_node_template_names = StrictList(value_class=str)
 
     def instantiate(self, context, container):
         r = Group(context, self.name)
-        instantiate_properties(context, self, r.properties, self.properties)
-        instantiate_interfaces(context, self, r.interfaces, self.interfaces)
-        for policy_name, policy in self.policies.iteritems():
-            r.policies[policy_name] = policy.instantiate(context, container)
+        instantiate_dict(context, self, r.properties, self.properties)
+        instantiate_dict(context, self, r.interfaces, self.interfaces)
+        instantiate_dict(context, self, r.policies, self.policies)
         for member_node_template_name in self.member_node_template_names:
-            for node in context.deployment.plan.nodes.itervalues():
-                if node.template_name == member_node_template_name:
-                    r.member_node_ids.append(node.id)
+            r.member_node_ids.extend(context.deployment.plan.get_node_ids(member_node_template_name))
         return r
 
     def dump(self, context):
@@ -374,21 +374,17 @@ class PolicyTemplate(Template):
         
         self.name = name
         self.type_name = type_name
-        self.properties = StrictDict(str)
-        self.target_node_template_names = StrictList(str)
-        self.target_group_template_names = StrictList(str)
+        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.target_node_template_names = StrictList(value_class=str)
+        self.target_group_template_names = StrictList(value_class=str)
 
     def instantiate(self, context, container):
         r = Policy(self.name, self.type_name)
-        instantiate_properties(context, self, r.properties, self.properties)
+        instantiate_dict(context, self, r.properties, self.properties)
         for node_template_name in self.target_node_template_names:
-            for node in context.deployment.plan.find_nodes(node_template_name):
-                if node not in r.target_node_ids:
-                    r.target_node_ids.append(node.id)
+            r.target_node_ids.extend(context.deployment.plan.get_node_ids(node_template_name))
         for group_template_name in self.target_group_template_names:
-            for group in context.deployment.plan.find_groups(group_template_name):
-                if group not in r.target_group_ids:
-                    r.target_group_ids.append(group.id)
+            r.target_group_ids.extend(context.deployment.plan.get_group_ids(group_template_name))
         return r
 
     def dump(self, context):
@@ -434,19 +430,13 @@ class SubstitutionTemplate(Template):
             raise ValueError('must set node_type_name (string)')
     
         self.node_type_name = node_type_name
-        self.capabilities = StrictDict(str, MappingTemplate)
-        self.requirements = StrictDict(str, MappingTemplate)
+        self.capabilities = StrictDict(key_class=str, value_class=MappingTemplate)
+        self.requirements = StrictDict(key_class=str, value_class=MappingTemplate)
 
     def instantiate(self, context, container):
         r = Substitution(self.node_type_name)
-        for mapped_capability_name, capability in self.capabilities.iteritems():
-            capability = capability.instantiate(context, container)
-            if capability is not None:
-                r.capabilities[mapped_capability_name] = capability
-        for mapped_requirement_name, requirement in self.requirements.iteritems():
-            requirement = requirement.instantiate(context, container)
-            if requirement is not None:
-                r.requirements[mapped_requirement_name] = requirement
+        instantiate_dict(context, container, r.capabilities, self.capabilities)
+        instantiate_dict(context, container, r.requirements, self.requirements)
         return r
 
     def validate(self, context):

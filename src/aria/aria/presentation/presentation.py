@@ -18,6 +18,11 @@ from ..utils import classname, deepclone, HasCachedMethods
 from .utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
 from clint.textui import puts
 
+class Value(object):
+    def __init__(self, the_type, value):
+        self.type = deepclone(the_type)
+        self.value = deepclone(value)
+
 class PresentationBase(HasCachedMethods):
     """
     Base class for ARIA presentation classes.

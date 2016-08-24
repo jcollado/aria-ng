@@ -61,17 +61,13 @@ def coerce_dict_values(context, container, the_dict, report_issues=False):
     for k, value in the_dict.iteritems():
         the_dict[k] = coerce_value(context, container, value, report_issues)
 
-def instantiate_properties(context, container, properties, from_properties):
-    if not from_properties:
+def instantiate_dict(context, container, the_dict, from_dict):
+    if not from_dict:
         return
-    for property_name, value in from_properties.iteritems():
-        properties[property_name] = coerce_value(context, container, value)
-
-def instantiate_interfaces(context, container, interfaces, from_interfaces):
-    if not from_interfaces:
-        return
-    for interface_name, interface in from_interfaces.iteritems():
-        interfaces[interface_name] = interface.instantiate(context, container)
+    for name, value in from_dict.iteritems():
+        value = value.instantiate(context, container)
+        if value is not None:
+            the_dict[name] = value
 
 def dump_list_values(context, the_list, name):
     if not the_list:
@@ -91,8 +87,11 @@ def dump_properties(context, properties, name='Properties'):
         return
     puts('%s:' % name)
     with context.style.indent:
-        for property_name, value in properties.iteritems():
-            puts('%s = %s' % (context.style.property(property_name), context.style.literal(value)))
+        for property_name, prop in properties.iteritems():
+            if prop.type is not None:
+                puts('%s = %s (%s)' % (context.style.property(property_name), context.style.literal(prop.value), context.style.type(prop.type)))
+            else:
+                puts('%s = %s' % (context.style.property(property_name), context.style.literal(prop.value)))
 
 def dump_interfaces(context, interfaces, name='Interfaces'):
     if not interfaces:

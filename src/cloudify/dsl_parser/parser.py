@@ -17,6 +17,7 @@
 from aria import install_aria_extensions
 from aria.consumption import ConsumptionContext
 from aria.parsing import DefaultParser
+from aria_extension_cloudify import Plan
 
 install_aria_extensions()
 
@@ -25,8 +26,9 @@ def parse_from_path(dsl_file_path,
                     resolver=None,
                     validate_version=True,
                     additional_resource_sources=()):
-    print '!!! parse_from_path'
-    print dsl_file_path
+    
+    #print '!!! parse_from_path'
+    #print dsl_file_path
     #print resources_base_url
     #print resolver
     #print validate_version
@@ -35,6 +37,8 @@ def parse_from_path(dsl_file_path,
     parser = DefaultParser(dsl_file_path)
     context = ConsumptionContext()
     parser.parse_and_validate(context)
+    if not context.validation.has_issues:
+        context.deployment.plan = Plan(context).create_classic_plan()
     context.validation.dump_issues()
     return context
     

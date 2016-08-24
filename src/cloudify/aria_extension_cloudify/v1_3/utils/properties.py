@@ -16,6 +16,7 @@
 
 from .data_types import coerce_value
 from aria import Issue
+from aria.presentation import Value
 from aria.utils import merge, deepclone
 from collections import OrderedDict
 
@@ -150,12 +151,13 @@ def merge_property_definitions(context, presentation, property_definitions, our_
 
 def coerce_property_value(context, presentation, definition, value, aspect=None): # works on properties, inputs, and parameters
     the_type = definition._get_type(context) if hasattr(definition, '_get_type') else None
-    return coerce_value(context, presentation, the_type, value, aspect)
+    value = coerce_value(context, presentation, the_type, value, aspect)
+    return Value(getattr(definition, 'type', None), value) if value is not None else None
 
 def convert_property_definitions_to_values(definitions):
     values = OrderedDict()
     for name, definition in definitions.iteritems():
         default = definition.default
         if default is not None:
-            values[name] = default
+            values[name] = Value(definition.type, default)
     return values

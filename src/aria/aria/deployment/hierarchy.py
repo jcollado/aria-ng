@@ -23,7 +23,16 @@ class Type(object):
             raise ValueError('must set name (string)')
         
         self.name = name
-        self.children = StrictList(Type)
+        self.children = StrictList(value_class=Type)
+        
+    def get_parent(self, name):
+        for child in self.children:
+            if child.name == name:
+                return self
+            parent = child.get_parent(name)
+            if parent is not None:
+                return parent
+        return None
     
     def get_descendant(self, name):
         if self.name == name:
@@ -51,4 +60,4 @@ class Type(object):
 class TypeHierarchy(Type):
     def __init__(self):
         self.name = None
-        self.children = StrictList(Type)
+        self.children = StrictList(value_class=Type)

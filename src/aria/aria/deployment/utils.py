@@ -88,8 +88,8 @@ def dump_properties(context, properties, name='Properties'):
     puts('%s:' % name)
     with context.style.indent:
         for property_name, prop in properties.iteritems():
-            if prop.type is not None:
-                puts('%s = %s (%s)' % (context.style.property(property_name), context.style.literal(prop.value), context.style.type(prop.type)))
+            if prop.type_name is not None:
+                puts('%s = %s (%s)' % (context.style.property(property_name), context.style.literal(prop.value), context.style.type(prop.type_name)))
             else:
                 puts('%s = %s' % (context.style.property(property_name), context.style.literal(prop.value)))
 

@@ -15,10 +15,11 @@
 #
 
 from .exceptions import LoaderNotFoundError
-from .literal import LiteralLocation, LiteralLoader
+from .location import LiteralLocation, UriLocation
+from .literal import LiteralLoader
 from .file import FileTextLoader
 from .uri import UriTextLoader
-import urlparse, os.path
+import os.path
 
 class LoaderSource(object):
     """
@@ -32,7 +33,8 @@ class LoaderSource(object):
     
     def get_loader(self, location, origin_location):
         if isinstance(location, LiteralLocation):
-            return LiteralLoader(location.value)
+            return LiteralLoader(location)
+        
         raise LoaderNotFoundError('location: %s' % location)
 
 class DefaultLoaderSource(LoaderSource):
@@ -42,29 +44,27 @@ class DefaultLoaderSource(LoaderSource):
     URIs and other strings.
     
     If :class:`FileTextLoader` is used, a base path will be extracted from
-    origin_location.
+    :code:`origin_location`.
     """
     
     def get_loader(self, location, origin_location):
-        if isinstance(location, basestring):
-            url = urlparse.urlparse(location)
-            if (not url.scheme) or (url.scheme == 'file'):
-                # It's a file
-                if url.scheme == 'file':
-                    location = url.path
-                paths = []
+        if origin_location is not None:
+            if isinstance(origin_location, UriLocation):
+                origin_file = origin_location.as_file
+                if origin_file is not None:
+                    # It's a file, so include its base path
+                    path = os.path.dirname(origin_file)
+                    if path not in location.paths:
+                        location.paths.insert(0, path)
 
-                # Check origin_location
-                if isinstance(origin_location, basestring):
-                    url = urlparse.urlparse(origin_location)
-                    if (not url.scheme) or (url.scheme == 'file'):
-                        # It's a file, so include its base path
-                        base_path = os.path.dirname(url.path)
-                        paths = [base_path]
-                
-                return FileTextLoader(self, location, paths=paths)
+            for path in origin_location.paths:
+                if path not in location.paths:
+                    location.paths.append(path)
+            
+        if isinstance(location, UriLocation):
+            if location.as_file is not None:
+                return FileTextLoader(self, location)
             else:
-                # It's a URL
                 return UriTextLoader(self, location)
             
         return super(DefaultLoaderSource, self).get_loader(location, origin_location)

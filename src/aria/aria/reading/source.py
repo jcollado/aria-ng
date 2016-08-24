@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from ..loading import LiteralLocation
+from ..loading import LiteralLocation, UriLocation
 from .exceptions import ReaderNotFoundError
 from .yaml import YamlReader
 from .jinja import JinjaReader
@@ -47,8 +47,10 @@ class DefaultReaderSource(ReaderSource):
     def get_reader(self, context, location, loader):
         if isinstance(location, LiteralLocation):
             return self.literal_reader_class(context, self, location, loader)
-        elif isinstance(location, basestring):
+        
+        elif isinstance(location, UriLocation):
             for extension, reader_class in EXTENSIONS.iteritems():
-                if location.endswith(extension):
+                if location.uri.endswith(extension):
                     return reader_class(context, self, location, loader)
+                
         return super(DefaultReaderSource, self).get_reader(context, location, loader)

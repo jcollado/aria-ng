@@ -30,24 +30,28 @@ class FileTextLoader(Loader):
     Supports a list of base paths that are tried in order if the file cannot be found.
     """
 
-    def __init__(self, source, path, paths=[], encoding='utf-8'):
+    def __init__(self, source, location, encoding='utf-8'):
         self.source = source
-        self.location = path
-        self.paths = FILE_LOADER_PATHS + paths
+        self.location = location
         self.encoding = encoding
+        self.path = location.as_file
+        self.paths = FILE_LOADER_PATHS + location.paths
         self.file = None
     
     def open(self):
+        def _open(path):
+            self.file = codecs.open(path, mode='r', encoding=self.encoding, buffering=1)
+            self.location.uri = path
+        
         try:
-            self.file = codecs.open(self.location, mode='r', encoding=self.encoding, buffering=1)
+            _open(os.path.abspath(self.path))
         except IOError as e:
             if e.errno == 2:
                 # Not found, so try in paths
                 for p in self.paths:
-                    path = os.path.join(p, self.location)
+                    path = os.path.join(p, self.path)
                     try:
-                        self.file = codecs.open(path, mode='r', encoding=self.encoding, buffering=1)
-                        self.location = path
+                        _open(path)
                         return
                     except IOError as e:
                         if e.errno != 2:

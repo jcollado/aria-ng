@@ -37,10 +37,10 @@ def main():
 
         consumer_class = import_fullname(consumer_class_name, ['aria.consumption'])
         parser = create_parser_ns(args)
-
+        
         context = ConsumptionContext()
         context.args = unknown_args
-        
+
         parser.parse_and_validate(context)
         
         if context.validation.dump_issues():

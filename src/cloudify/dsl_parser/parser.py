@@ -17,9 +17,19 @@
 from aria import install_aria_extensions
 from aria.consumption import ConsumptionContext
 from aria.parsing import DefaultParser
+from aria.loading import UriLocation, LiteralLocation
 from aria_extension_cloudify import Plan
 
 install_aria_extensions()
+
+def _parse(location):
+    parser = DefaultParser(location)
+    context = ConsumptionContext()
+    parser.parse_and_validate(context)
+    if not context.validation.has_issues:
+        context.deployment.plan = Plan(context).create_classic_plan()
+    context.validation.dump_issues()
+    return context
 
 def parse_from_path(dsl_file_path,
                     resources_base_url=None,
@@ -34,20 +44,20 @@ def parse_from_path(dsl_file_path,
     #print validate_version
     #print additional_resource_sources
     
-    parser = DefaultParser(dsl_file_path)
-    context = ConsumptionContext()
-    parser.parse_and_validate(context)
-    if not context.validation.has_issues:
-        context.deployment.plan = Plan(context).create_classic_plan()
-    context.validation.dump_issues()
-    return context
+    paths = [resources_base_url] if resources_base_url is not None else []
+    paths += additional_resource_sources
+    return _parse(UriLocation(dsl_file_path, paths))
     
 def parse(dsl_string,
           resources_base_url=None,
           resolver=None,
           validate_version=True):
-    print '!!! parse'
-    print dsl_string
-    print resources_base_url
-    print resolver
-    print validate_version
+
+    #print '!!! parse'
+    #print dsl_string
+    #print resources_base_url
+    #print resolver
+    #print validate_version
+
+    paths = [resources_base_url] if resources_base_url is not None else []
+    return _parse(LiteralLocation(dsl_string, paths))

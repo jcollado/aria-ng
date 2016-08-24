@@ -34,9 +34,9 @@ class UriLoader(Loader):
     be used instead.
     """
 
-    def __init__(self, source, uri, headers={}):
+    def __init__(self, source, location, headers={}):
         self.source = source
-        self.location = uri
+        self.location = location
         self.headers = headers
         self.response = None
     
@@ -46,7 +46,7 @@ class UriLoader(Loader):
             SESSION = CacheControl(Session(), cache=FileCache(SESSION_CACHE_PATH))
             
         try:
-            self.response = SESSION.get(self.location, headers=self.headers)
+            self.response = SESSION.get(self.location.uri, headers=self.headers)
             status = self.response.status_code
             if status == 404:
                 self.response = None

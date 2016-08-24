@@ -17,7 +17,7 @@
 from .. import Issue, AriaError, UnimplementedFunctionalityError
 from ..utils import FixedThreadPoolExecutor, print_exception, classname
 from ..consumption import Validate
-from ..loading import DefaultLoaderSource
+from ..loading import DefaultLoaderSource, UriLocation
 from ..reading import DefaultReaderSource, AlreadyReadError
 from ..presentation import DefaultPresenterSource
 
@@ -47,7 +47,7 @@ class Parser(object):
 class DefaultParser(Parser):
     """
     The default ARIA parser supports agnostic raw data composition for presenters
-    that have `\_get\_import\_locations` and `\_merge\_import`.
+    that have :code:`_get_import_locations` and :code:`_merge_import`.
     
     To improve performance, loaders are called asynchronously on separate threads.
     """
@@ -98,7 +98,7 @@ class DefaultParser(Parser):
             self._handle_exception(context, e)
 
     def _parse_all(self, context, location, origin_location, presenter_class, executor):
-        raw, location = self._parse_one(context, location, origin_location)
+        raw = self._parse_one(context, location, origin_location)
         
         if presenter_class is None:
             presenter_class = self.presenter_source.get_presenter(raw)
@@ -114,16 +114,17 @@ class DefaultParser(Parser):
             if import_locations:
                 for import_location in import_locations:
                     # The imports inherit the parent presenter class and use the current location as their origin location
+                    import_location = UriLocation(import_location)
                     executor.submit(self._parse_all, context, import_location, location, presenter_class, executor)
 
         return presentation
     
     def _parse_one(self, context, location, origin_location):
         if self.reader is not None:
-            return self.reader.read(), self.reader.location
+            return self.reader.read()
         loader = self.loader_source.get_loader(location, origin_location)
         reader = self.reader_source.get_reader(context.reading, location, loader)
-        return reader.read(), reader.location
+        return reader.read()
 
     def _handle_exception(self, context, e):
         if isinstance(e, AlreadyReadError):

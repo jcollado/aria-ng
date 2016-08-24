@@ -16,6 +16,7 @@
 
 from .. import VERSION
 from ..utils import import_fullname
+from ..loading import UriLocation
 from argparse import ArgumentParser
 
 class BaseArgumentParser(ArgumentParser):
@@ -43,7 +44,7 @@ def create_parser(uri, parser, loader_source, reader_source, presenter_source, p
     presenter_source_class = import_fullname(presenter_source, ['aria.presentation'])
     presenter_class = import_fullname(presenter, ['aria.presentation'])
 
-    return parser_class(location=uri,
+    return parser_class(location=UriLocation(uri),
         loader_source=loader_source_class(),
         reader_source=reader_source_class(),
         presenter_source=presenter_source_class(),

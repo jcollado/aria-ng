@@ -103,7 +103,7 @@ class PresentationBase(HasCachedMethods):
         Emits a colorized representation.
         
         The base class will emit a sensible default representation of the fields,
-        (by calling \_dump\_content), but subclasses may override this for specialized
+        (by calling :code:`_dump_content`), but subclasses may override this for specialized
         dumping. 
         """
         
@@ -118,7 +118,7 @@ class PresentationBase(HasCachedMethods):
         """
         Emits a colorized representation of the contents.
         
-        The base class will call \_dump\_field on all the fields, but subclasses may
+        The base class will call :code:`_dump_field` on all the fields, but subclasses may
         override this for specialized dumping. 
         """
 
@@ -136,7 +136,7 @@ class PresentationBase(HasCachedMethods):
         Emits a colorized representation of the field.
         
         According to the field type, this may trigger nested recursion. The nested
-        types will delegate to their \_dump methods.
+        types will delegate to their :code:`_dump` methods.
         """
         
         field = self.FIELDS[field_name]

@@ -17,6 +17,7 @@
 from .exceptions import *
 from .loader import *
 from .source import *
+from .location import *
 from .literal import *
 from .uri import *
 from .file import *
@@ -27,6 +28,8 @@ __all__ = (
     'DocumentNotFoundError',
     'Loader',
     'LoaderSource',
+    'Location',
+    'UriLocation',
     'LiteralLocation',
     'LiteralLoader',
     'DefaultLoaderSource',

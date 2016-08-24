@@ -212,7 +212,12 @@ def merge_raw_operation_definition(context, raw_operation, our_operation, interf
 def merge_raw_operation_definitions(context, raw_operations, our_operations, interface_name, presentation, type_name):
     for operation_name, our_operation in our_operations.iteritems():
         if operation_name in raw_operations:
-            merge_raw_operation_definition(context, raw_operations[operation_name], our_operation, interface_name, presentation, type_name)
+            raw_operation = raw_operations[operation_name]
+            if isinstance(raw_operation, basestring):
+                # Convert short form to long form
+                raw_operations[operation_name] = OrderedDict((('implementation', raw_operation),))
+                raw_operation = raw_operations[operation_name]
+            merge_raw_operation_definition(context, raw_operation, our_operation, interface_name, presentation, type_name)
         else:
             raw_operations[operation_name] = deepclone(our_operation._raw)
 

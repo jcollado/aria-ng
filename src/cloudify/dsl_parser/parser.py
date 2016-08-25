@@ -22,6 +22,25 @@ from aria_extension_cloudify import Plan
 
 install_aria_extensions()
 
+
+def parse_from_path(
+        dsl_file_path,
+        resources_base_url=None,
+        additional_resource_sources=(),
+        **legacy):
+    paths = [resources_base_url] if resources_base_url else []
+    paths += additional_resource_sources
+    return _parse(UriLocation(dsl_file_path, paths))
+
+
+def parse(
+        dsl_string,
+        resources_base_url=None,
+        **legacy):
+    paths = [resources_base_url] if resources_base_url else []
+    return _parse(LiteralLocation(dsl_string, paths))
+
+
 def _parse(location):
     parser = DefaultParser(location)
     context = ConsumptionContext()
@@ -30,34 +49,3 @@ def _parse(location):
         context.deployment.plan = Plan(context).create_classic_plan()
     context.validation.dump_issues()
     return context
-
-def parse_from_path(dsl_file_path,
-                    resources_base_url=None,
-                    resolver=None,
-                    validate_version=True,
-                    additional_resource_sources=()):
-    
-    #print '!!! parse_from_path'
-    #print dsl_file_path
-    #print resources_base_url
-    #print resolver
-    #print validate_version
-    #print additional_resource_sources
-    
-    paths = [resources_base_url] if resources_base_url is not None else []
-    paths += additional_resource_sources
-    return _parse(UriLocation(dsl_file_path, paths))
-    
-def parse(dsl_string,
-          resources_base_url=None,
-          resolver=None,
-          validate_version=True):
-
-    #print '!!! parse'
-    #print dsl_string
-    #print resources_base_url
-    #print resolver
-    #print validate_version
-
-    paths = [resources_base_url] if resources_base_url is not None else []
-    return _parse(LiteralLocation(dsl_string, paths))

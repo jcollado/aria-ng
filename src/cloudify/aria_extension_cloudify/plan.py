@@ -59,7 +59,7 @@ def convert_node_template(context, node_template, plan):
     
     return OrderedDict((
         ('id', node_template.name),
-        #TODO name
+        ('name', node_template.name),
         ('properties', convert_properties(context, node_template.properties)),
         ('operations', convert_interfaces(context, node_template.interfaces)),
         ('type_hierarchy', convert_type_hierarchy(context, node_type, context.deployment.node_types)), # strings

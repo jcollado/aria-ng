@@ -14,8 +14,9 @@
 # under the License.
 #
 
-import sys, os, re, shutil, json, urllib2, BaseHTTPServer
 from clint.textui import puts, colored
+import sys, os, re, shutil, json, urllib2, BaseHTTPServer
+from collections import OrderedDict
 
 # Fix issues with decoding HTTP responses
 reload(sys)
@@ -26,8 +27,8 @@ class Config(object):
         self.port = 8080
         self.routes = {}
         self.static_root = '.'
-        self.json_encoder = json.JSONEncoder
-        self.json_decoder = json.JSONDecoder
+        self.json_encoder = json.JSONEncoder()
+        self.json_decoder = json.JSONDecoder(object_pairs_hook=OrderedDict)
 
 def rest_call_json(url, payload=None, with_payload_method='PUT'):
     """
@@ -87,7 +88,7 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return payload
  
     def get_json_payload(self):
-        return json.loads(self.get_payload(), cls=self.config.json_decoder)
+        return self.config.json_decoder.decode(self.get_payload())
         
     def handle_method(self, method):
         route = self.get_route()
@@ -131,7 +132,7 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 self.send_header('Content-type', route['media_type'])
                             self.end_headers()
                             if method != 'DELETE':
-                                self.wfile.write(json.dumps(content, cls=self.config.json_encoder))
+                                self.wfile.write(self.config.json_encoder.encode(content))
                         else:
                             self.send_response(404)
                             self.end_headers()

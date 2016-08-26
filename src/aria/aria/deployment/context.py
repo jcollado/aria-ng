@@ -46,6 +46,7 @@ class DeploymentContext(object):
         self.plan = None
         self.node_types = TypeHierarchy()
         self.capability_types = TypeHierarchy()
+        self.relationship_types = TypeHierarchy()
         
         self._serial_id_counter = itertools.count(1)
         self._locally_unique_ids = set()
@@ -80,3 +81,6 @@ class DeploymentContext(object):
         if self.capability_types.children:
             puts('Capability types:')
             self.capability_types.dump(context)
+        if self.relationship_types.children:
+            puts('Relationship types:')
+            self.relationship_types.dump(context)

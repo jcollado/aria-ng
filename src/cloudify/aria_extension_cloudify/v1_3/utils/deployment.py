@@ -20,6 +20,7 @@ def get_deployment_template(context, presenter):
     r = DeploymentTemplate()
 
     normalize_types(context, context.deployment.node_types, presenter.node_types)
+    normalize_types(context, context.deployment.relationship_types, presenter.relationship_types)
 
     normalize_property_values(r.inputs, presenter.service_template._get_input_values(context))
     normalize_property_values(r.outputs, presenter.service_template._get_output_values(context))
@@ -131,7 +132,7 @@ def normalize_requirement(context, relationship):
 
 def normalize_relationship(context, relationship):
     relationship_type = relationship._get_type(context)
-    r = RelationshipTemplate(template_name=relationship_type._name)
+    r = RelationshipTemplate(type_name=relationship_type._name)
 
     normalize_property_values(r.properties, relationship._get_property_values(context))
     normalize_interfaces(context, r.source_interfaces, relationship._get_source_interfaces(context))

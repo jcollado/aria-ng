@@ -30,7 +30,7 @@ def parse(uri):
     return context
 
 def issues(context):
-    return {'issues': [str(i) for i in context.validation.issues]}
+    return {'issues': [i.as_raw for i in context.validation.issues]}
 
 def validate_get(handler):
     path = urllib.unquote(handler.path[10:])
@@ -81,7 +81,7 @@ def main():
         config.port = args.port
         config.routes = ROUTES
         config.static_root = args.root
-        config.json_encoder = JSONValueEncoder
+        config.json_encoder = JSONValueEncoder()
         
         start_server(config)
 

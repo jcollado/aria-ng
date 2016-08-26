@@ -52,7 +52,7 @@ def convert_node_template(context, node_template, plan):
     relationships = []
     for requirement in node_template.requirements:
         if requirement.relationship_template is not None:
-            relationships.append(convert_relationship_template(context, requirement.relationship_template))
+            relationships.append(convert_relationship_template(context, requirement))
 
     plugins = context.presentation.service_template.plugins
     plugins = [convert_plugin(context, v) for v in plugins.itervalues()] if plugins is not None else []
@@ -81,14 +81,17 @@ def convert_type_hierarchy(context, the_type, hierarchy):
         the_type = hierarchy.get_parent(the_type.name)
     return type_hierarchy
 
-def convert_relationship_template(context, relationship_template):
+def convert_relationship_template(context, requirement):
+    relationship_template = requirement.relationship_template
+    relationship_type = context.deployment.relationship_types.get_descendant(relationship_template.type_name)
+
     return OrderedDict((
-        ('target_id', relationship_template.template_name),
+        ('target_id', requirement.target_node_template_name),
         ('source_operations', convert_interfaces(context, relationship_template.source_interfaces)), 
         ('target_operations', convert_interfaces(context, relationship_template.target_interfaces)),
         ('source_interfaces', OrderedDict()),
         ('target_interfaces', OrderedDict()),
-        ('type_hierarchy', []), # strings
+        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)), # strings
         ('properties', convert_properties(context, relationship_template.properties))))
 
 def convert_node(context, node):
@@ -98,9 +101,11 @@ def convert_node(context, node):
         ('relationships', [convert_relationship(context, v) for v in node.relationships])))
 
 def convert_relationship(context, relationship):
+    target_node = context.deployment.plan.nodes.get(relationship.target_node_id)
+    
     return OrderedDict((
         ('type', relationship.template_name),
-        ('target_name', relationship.target_node_id),
+        ('target_name', target_node.template_name),
         ('target_id', relationship.target_node_id)))
 
 def convert_interfaces(context, interfaces):
@@ -150,4 +155,4 @@ def convert_parameters(context, parameters):
 def convert_parameter(context, parameter):
     return OrderedDict((
         ('type', parameter.type_name),
-        ('value', parameter.value)))
+        ('default', parameter.value)))

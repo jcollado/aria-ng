@@ -31,6 +31,7 @@ def get_deployment_template(context, presenter):
 
     normalize_types(context, context.deployment.node_types, presenter.node_types)
     normalize_types(context, context.deployment.capability_types, presenter.capability_types)
+    normalize_types(context, context.deployment.relationship_types, presenter.relationship_types)
     
     topology_template = presenter.service_template.topology_template
     if topology_template is not None:

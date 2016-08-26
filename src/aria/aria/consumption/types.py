@@ -14,13 +14,14 @@
 # under the License.
 #
 
-from .consumer import Consumer
+from .template import Template
 
-class Types(Consumer):
+class Types(Template):
     """
-    Emits the type hierarchies, highlighting inheritance and override. 
+    Emits the type hierarchies, highlighting inheritance and overrides. 
     """
     
     def consume(self):
-        pass
-        # TODO
+        self.create_deployment_template()
+        if not self.context.validation.has_issues:
+            self.context.deployment.dump_types(self.context)

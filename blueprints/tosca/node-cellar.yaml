@@ -237,4 +237,3 @@ topology_template:
       host: [ node_cellar, host ] # doesn't really make sense; just for testing
     capabilities:
       app_endpoint: [ loadbalancer, client ]
-      

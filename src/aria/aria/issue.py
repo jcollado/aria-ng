@@ -15,6 +15,7 @@
 #
 
 from .utils import classname
+from collections import OrderedDict
 
 class Issue(object):
     PLATFORM = 0
@@ -76,6 +77,17 @@ class Issue(object):
         self.snippet = snippet
         self.level = level
 
+    @property
+    def as_raw(self):
+        return OrderedDict((
+            ('level', self.level),
+            ('message', self.message),
+            ('location', self.location),
+            ('line', self.line),
+            ('column', self.column),
+            ('snippet', self.snippet),
+            ('exception', str(self.exception) if self.exception else None)))
+            
     @property
     def locator_as_str(self):
         if self.location is not None:

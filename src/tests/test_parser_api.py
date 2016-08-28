@@ -216,6 +216,16 @@ node_types:
         self.assertIn('description', result)
         self.assertEquals('sample description', result['description'])
 
+    def test_blueprint_description_field_omitted(self):
+        self.template.node_type_section()
+        self.template.node_template_section()
+        self.template.version_section('cloudify_dsl', '1.2')
+        result = self.parse()
+        self.assert_minimal_blueprint(result)
+        self.assertIn('description', result)
+        self.assertEquals(None, result['description'])
+
+
 
 class TestParserApiWithFileSystem(ParserTestCase, TempDirectoryTestCase, _AssertionsMixin):
     def test_import_from_path(self):

@@ -37,9 +37,11 @@ class Plan(BasicPlan):
 
 def convert_plan(context, plan, template):
     return OrderedDict((
+        ('description', context.presentation.service_template['description'].value),
         ('nodes', [convert_node_template(context, v, plan) for v in template.node_templates.itervalues()]),
         ('node_instances', [convert_node(context, v) for v in plan.nodes.itervalues()]),
-        ('workflows', OrderedDict((k, convert_workflow(context, v)) for k, v in plan.operations.iteritems()))))
+        ('workflows', OrderedDict((k, convert_workflow(context, v)) for k, v in plan.operations.iteritems())),
+    ))
 
 def convert_node_template(context, node_template, plan):
     node_type = context.deployment.node_types.get_descendant(node_template.type_name)
@@ -120,12 +122,12 @@ def convert_interfaces(context, interfaces):
 
 def convert_operation(context, operation):
     plugin_name, operation_name = operation.implementation.split('.', 1)
+    plugin = context.presentation.service_template.plugins[plugin_name]
     return OrderedDict((
         ('plugin', plugin_name),
         ('operation', operation_name),
-        ('parameters', OrderedDict()),
         ('has_intrinsic_functions', False),
-        ('executor', None),
+        ('executor', operation.executor or plugin.executor),
         ('inputs', convert_parameters(context, operation.inputs)),
         ('max_retries', operation.max_retries),
         ('retry_interval', operation.retry_interval)))
@@ -144,7 +146,18 @@ def convert_workflow(context, operation):
 
 def convert_plugin(context, plugin):
     return OrderedDict((
-        ('name', plugin._name),))
+        ('distribution', plugin.distribution),
+        ('distribution_release', plugin.distribution_release),
+        ('distribution_version', plugin.distribution_version),
+        ('executor', plugin.executor),
+        ('install', plugin.install),
+        ('install_arguments', plugin.install_arguments),
+        ('name', plugin._name),  # todo: _name isn't a private member...
+        ('package_name', plugin.package_name),
+        ('package_version', plugin.package_version),
+        ('source', plugin.source),
+        ('supported_platform', plugin.supported_platform),
+    ))
 
 def convert_properties(context, properties):
     return OrderedDict(((k, v.value) for k, v in properties.iteritems()))

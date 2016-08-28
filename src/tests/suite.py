@@ -17,8 +17,8 @@ import os
 from uuid import uuid4
 from shutil import rmtree
 from yaml import safe_dump
-from tempfile import mkdtemp
 from itertools import imap
+from tempfile import mkdtemp
 
 from testtools import TestCase
 
@@ -64,8 +64,8 @@ class TempDirectoryTestCase(TestCase):
             return import_path_maker(path)
 
         return (
-            '\nimports:\n    -   {0}'.format(
-            '\n    -   '.join(imap(import_creator, contents))))
+            '\nimports:\n  - {0}'.format(
+                '\n  - '.join(imap(import_creator, contents))))
 
 
 class ParserTestCase(TestCase):
@@ -86,6 +86,12 @@ class ParserTestCase(TestCase):
         context = parse(
             dsl_string=template,
             resources_base_url=resources_base_url)
+        self._validate_parse_no_issues(context)
+        return context.deployment.plan
+
+    def parse_from_uri(self, uri):
+        context = parse_from_path(uri)
+        self._validate_parse_no_issues(context)
         return context.deployment.plan
 
     def assert_parser_raise_exception(
@@ -103,44 +109,56 @@ class ParserTestCase(TestCase):
                 test(exc)
         return exc
 
+    def _validate_parse_no_issues(self, context):
+        if not context.validation.has_issues:
+            return
+        self.fail(
+            'parse failed with issues: \n\t{0}'.format('\n\t'.join(
+                issue.message for issue in context.validation.issues)))
+
 
 class Template(object):
     BASIC_NODE_TEMPLATES_SECTION = (
-        '\nnode_templates:\n'
-        '    test_node:\n'
-        '        type: test_type\n'
-        '        properties:\n'
-        '            key: "val"\n'
+        '\n'
+        'node_templates:\n'
+        '  test_node:\n'
+        '    type: test_type\n'
+        '    properties:\n'
+        '      key: "val"\n'
     )
 
     BASIC_PLUGIN = (
         '\nplugins:\n'
-        '    test_plugin:\n'
-        '        source: dummy\n'
+        '  test_plugin:\n'
+        '    executor: central_deployment_agent\n'
+        '    source: dummy\n'
     )
 
     BASIC_TYPE = (
-        '\nnode_types:\n'
-        '    test_type:\n'
-        '        interfaces:\n'
-        '            test_interface1:\n'
-        '                install:\n'
-        '                    implementation: test_plugin.install\n'
-        '                    inputs: {}\n'
-        '                terminate:\n'
-        '                    implementation: test_plugin.terminate\n'
-        '                    inputs: {}\n'
-        '        properties:\n'
-        '            install_agent:\n'
-        '               default: "false"\n'
-        '            key: {}\n'
+        '\n'
+        'node_types:\n'
+        '  test_type:\n'
+        '    interfaces:\n'
+        '      test_interface1:\n'
+        '        install:\n'
+        '          implementation: test_plugin.install\n'
+        '          inputs: {}\n'
+        '        terminate:\n'
+        '          implementation: test_plugin.terminate\n'
+        '          inputs: {}\n'
+        '    properties:\n'
+        '      install_agent:\n'
+        '        default: "false"\n'
+        '      key: {}\n'
     )
 
     PLUGIN_WITH_INSTALL_ARGS = (
-        '\nplugins:\n'
-        '    test_plugin:\n'
-        '        source: dummy\n'
-        '        install_arguments: -r requirements.txt\n'
+        '\n'
+        'plugins:\n'
+        '  test_plugin:\n'
+        '    executor: central_deployment_agent\n'
+        '    source: dummy\n'
+        '    install_arguments: -r requirements.txt\n'
     )
 
     def __init__(self):
@@ -214,11 +232,12 @@ class Template(object):
 
     def node_type_section(self, default='"default"'):
         self.template += (
-            '\nnode_types:\n'
-            '    test_type:\n'
-            '        properties:\n'
-            '            key:\n'
-            '                default: {0}\n'
+            '\n'
+            'node_types:\n'
+            '  test_type:\n'
+            '    properties:\n'
+            '      key:\n'
+            '        default: {0}\n'
         ).format(default)
 
     def node_template_section(self):
@@ -231,11 +250,12 @@ class Template(object):
             extras=''):
 
         self.template += (
-            '\ndata_types:\n'
-            '    pair_type:\n'
-            '        properties:\n'
-            '            first: {properties_first}\n'
-            '            second: {properties_second}\n'
+            '\n'
+            'data_types:\n'
+            '  pair_type:\n'
+            '    properties:\n'
+            '      first: {properties_first}\n'
+            '      second: {properties_second}\n'
             '{extras}\n'
             .format(properties_first=properties_first,
                     properties_second=properties_second,
@@ -247,15 +267,35 @@ class Template(object):
 
     def input_section(self):
         self.template += (
-            '\ninputs:\n'
-            '    test_input:\n'
-            '        type: string\n'
-            '        default: test_input_default_value\n'
+            '\n'
+            'inputs:\n'
+            '  test_input:\n'
+            '    type: string\n'
+            '    default: test_input_default_value\n'
         )
 
     def output_section(self):
         self.template += (
-            '\noutputs:\n'
-            '    test_output:\n'
-            '        value: test_output_value\n'
+            '\n'
+            'outputs:\n'
+            '  test_output:\n'
+            '    value: test_output_value\n'
         )
+
+
+def op_struct(
+        plugin_name,
+        mapping,
+        inputs=None,
+        executor='local',
+        max_retries=None,
+        retry_interval=None):
+    return {
+        'plugin': plugin_name,
+        'operation': mapping,
+        'inputs': inputs or {},
+        'executor': executor,
+        'has_intrinsic_functions': False,
+        'max_retries': max_retries,
+        'retry_interval': retry_interval,
+    }

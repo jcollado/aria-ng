@@ -36,8 +36,10 @@ class Plan(BasicPlan):
         return None
 
 def convert_plan(context, plan, template):
+    description = context.presentation.service_template['description']
+
     return OrderedDict((
-        ('description', context.presentation.service_template['description'].value),
+        ('description', None if not description else description.value),
         ('nodes', [convert_node_template(context, v, plan) for v in template.node_templates.itervalues()]),
         ('node_instances', [convert_node(context, v) for v in plan.nodes.itervalues()]),
         ('workflows', OrderedDict((k, convert_workflow(context, v)) for k, v in plan.operations.iteritems())),

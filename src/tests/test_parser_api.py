@@ -226,7 +226,6 @@ node_types:
         self.assertEquals(None, result['description'])
 
 
-
 class TestParserApiWithFileSystem(ParserTestCase, TempDirectoryTestCase, _AssertionsMixin):
     def test_import_from_path(self):
         self.template.version_section('cloudify_dsl', '1.0')
@@ -307,3 +306,21 @@ plugins:
         filename = self.make_yaml_file(str(self.template))
         result = self.parse_from_uri(filename)
         self.assert_minimal_blueprint(result)
+
+    def test_diamond_imports(self):
+
+        bottom_file_content = self.template.BASIC_TYPE
+
+        mid_file1_content = \
+            (self.create_yaml_with_imports([bottom_file_content]) +
+             self.template.BASIC_PLUGIN)
+        mid_file2_content = self.create_yaml_with_imports([bottom_file_content])
+
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template += self.create_yaml_with_imports(
+            [mid_file1_content, mid_file2_content]
+        )
+        self.template.node_template_section()
+
+        result = self.parse()
+        self.assert_blueprint(result)

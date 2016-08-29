@@ -232,9 +232,9 @@ node_types:
   test_type:
     properties:
       key:
-        default: "not_val"
+        default: not_val
       key2:
-        default: "val2"
+        default: val2
 """
         self.template.node_template_section()
         result = self.parse()

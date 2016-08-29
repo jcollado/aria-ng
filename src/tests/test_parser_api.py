@@ -359,13 +359,13 @@ node_types:
         self.template.node_template_section()
         self.template += """
 node_types:
-    test_type:
-        properties:
-            key:
-                default: "not_val"
-            key2:
-                default: "val2"
-    """
+  test_type:
+    properties:
+      key:
+        default: not_val
+      key2:
+        default: val2
+  """
         result = self.parse()
         node = result['nodes'][0]
         self.assertEqual(1, len(node[TYPE_HIERARCHY]))
@@ -376,14 +376,14 @@ node_types:
         self.template.node_template_section()
         self.template += """
 node_types:
-    test_type:
-        derived_from: "test_type_parent"
-        properties:
-            key:
-                default: "not_val"
-            key2:
-                default: "val2"
-    test_type_parent: {}
+  test_type:
+    derived_from: test_type_parent
+    properties:
+      key:
+        default: not_val
+      key2:
+        default: val2
+  test_type_parent: {}
 """
         result = self.parse()
         node = result['nodes'][0]
@@ -396,18 +396,18 @@ node_types:
         self.template.node_template_section()
         self.template += """
 node_types:
-    test_type:
-        derived_from: "test_type_parent"
-        properties:
-            key:
-                default: "not_val"
-            key2:
-                default: "val2"
-    test_type_parent:
-        derived_from: "parent_type"
+  test_type:
+    derived_from: test_type_parent
+    properties:
+      key:
+        default: not_val
+      key2:
+        default: val2
+  test_type_parent:
+    derived_from: parent_type
 
-    parent_type: {}
-    """
+  parent_type: {}
+  """
         result = self.parse()
         node = result['nodes'][0]
         self.assertEqual(3, len(node[TYPE_HIERARCHY]))
@@ -420,36 +420,36 @@ node_types:
         self.template.node_template_section()
         self.template += """
 node_types:
-    test_type:
-        properties:
-            key:
-                default: "not_val"
-            key2:
-                default: "val2"
-        derived_from: "test_type_parent"
+  test_type:
+    properties:
+      key:
+        default: not_val
+      key2:
+        default: val2
+    derived_from: test_type_parent
 
-    test_type_parent:
-        properties:
-            key:
-                default: "val_parent"
-            key2:
-                default: "val2_parent"
-            key4:
-                default: "val4_parent"
-        derived_from: "test_type_grandparent"
+  test_type_parent:
+    properties:
+      key:
+        default: val_parent
+      key2:
+        default: val2_parent
+      key4:
+        default: val4_parent
+    derived_from: test_type_grandparent
 
-    test_type_grandparent:
-        properties:
-            key:
-                default: "val1_grandparent"
-            key2:
-                default: "val2_grandparent"
-            key3:
-                default: "val3_grandparent"
-        derived_from: "test_type_grandgrandparent"
+  test_type_grandparent:
+    properties:
+      key:
+        default: val1_grandparent
+      key2:
+        default: val2_grandparent
+      key3:
+        default: val3_grandparent
+    derived_from: test_type_grandgrandparent
 
-    test_type_grandgrandparent: {}
-    """
+  test_type_grandgrandparent: {}
+  """
         result = self.parse()
         self.assert_minimal_blueprint(result)
         node = result['nodes'][0]
@@ -474,7 +474,7 @@ relationships: {}
         self.template.node_template_section()
         self.template += """
 relationships:
-    test_relationship: {}
+  test_relationship: {}
 """
         result = self.parse()
         self.assert_minimal_blueprint(result)
@@ -594,65 +594,65 @@ plugins:
         ])
         self.template += """
 node_types:
-    test_type:
-        properties:
-            key: {}
-        interfaces:
-            test_interface1:
-                install:
-                    implementation: test_plugin.install
-                    inputs: {}
-                terminate:
-                    implementation: test_plugin.terminate
-                    inputs: {}
-            test_interface2:
-                start:
-                    implementation: test_plugin2.start
-                    inputs: {}
-                stop:
-                    implementation: test_plugin2.stop
-                    inputs: {}
-            test_interface3:
-                op1:
-                    implementation: test_plugin3.op
-                    inputs: {}
-        derived_from: test_type_parent
+  test_type:
+    properties:
+      key: {}
+    interfaces:
+      test_interface1:
+        install:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate:
+          implementation: test_plugin.terminate
+          inputs: {}
+      test_interface2:
+        start:
+          implementation: test_plugin2.start
+          inputs: {}
+        stop:
+          implementation: test_plugin2.stop
+          inputs: {}
+      test_interface3:
+        op1:
+          implementation: test_plugin3.op
+          inputs: {}
+    derived_from: test_type_parent
 
-    test_type_parent:
-        interfaces:
-            test_interface1:
-                install:
-                    implementation: nop_plugin.install
-                    inputs: {}
-                terminate:
-                    implementation: nop_plugin.install
-                    inputs: {}
-            test_interface2:
-                start:
-                    implementation: test_plugin2.start
-                    inputs: {}
-                stop:
-                    implementation: test_plugin2.stop
-                    inputs: {}
-            test_interface3:
-                op1:
-                    implementation: test_plugin3.op
-                    inputs: {}
-            test_interface4:
-                op2:
-                    implementation: test_plugin4.op2
-                    inputs: {}
+  test_type_parent:
+    interfaces:
+      test_interface1:
+        install:
+          implementation: nop_plugin.install
+          inputs: {}
+        terminate:
+          implementation: nop_plugin.install
+          inputs: {}
+      test_interface2:
+        start:
+          implementation: test_plugin2.start
+          inputs: {}
+        stop:
+          implementation: test_plugin2.stop
+          inputs: {}
+      test_interface3:
+        op1:
+          implementation: test_plugin3.op
+          inputs: {}
+      test_interface4:
+        op2:
+          implementation: test_plugin4.op2
+          inputs: {}
 
 plugins:
-    test_plugin2:
-        executor: central_deployment_agent
-        source: dummy
-    test_plugin3:
-        executor: central_deployment_agent
-        source: dummy
-    test_plugin4:
-        executor: central_deployment_agent
-        source: dummy
+  test_plugin2:
+    executor: central_deployment_agent
+    source: dummy
+  test_plugin3:
+    executor: central_deployment_agent
+    source: dummy
+  test_plugin4:
+    executor: central_deployment_agent
+    source: dummy
 """
         result = self.parse()
         self.assert_blueprint(result)
@@ -694,43 +694,43 @@ plugins:
             self.template.BASIC_PLUGIN])
         self.template += """
 node_types:
-    test_type:
-        properties:
-            key: {}
-        interfaces:
-            test_interface1:
-                install:
-                    implementation: test_plugin.install
-                    inputs: {}
-                terminate:
-                    implementation: test_plugin.terminate
-                    inputs: {}
-        derived_from: test_type_parent
+  test_type:
+    properties:
+      key: {}
+    interfaces:
+      test_interface1:
+        install:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate:
+          implementation: test_plugin.terminate
+          inputs: {}
+    derived_from: test_type_parent
 
-    test_type_parent:
-        derived_from: test_type_grandparent
+  test_type_parent:
+    derived_from: test_type_grandparent
 
-    test_type_grandparent:
-        interfaces:
-            test_interface1:
-                install:
-                    implementation: non_plugin.install
-                    inputs: {}
-                terminate:
-                    implementation: non_plugin.terminate
-                    inputs: {}
-            test_interface2:
-                start:
-                    implementation: test_plugin2.start
-                    inputs: {}
-                stop:
-                    implementation: test_plugin2.stop
-                    inputs: {}
+  test_type_grandparent:
+    interfaces:
+      test_interface1:
+        install:
+          implementation: non_plugin.install
+          inputs: {}
+        terminate:
+          implementation: non_plugin.terminate
+          inputs: {}
+      test_interface2:
+        start:
+          implementation: test_plugin2.start
+          inputs: {}
+        stop:
+          implementation: test_plugin2.stop
+          inputs: {}
 
 plugins:
-    test_plugin2:
-        executor: central_deployment_agent
-        source: dummy
+  test_plugin2:
+    executor: central_deployment_agent
+    source: dummy
 """
         result = self.parse()
         self.assert_blueprint(result)
@@ -758,28 +758,28 @@ plugins:
             self.template.BASIC_PLUGIN])
         self.template += """
 node_types:
-    test_type:
-        properties:
-            key: {}
-        interfaces:
-            test_interface1:
-                install:
-                    implementation: test_plugin.install
-                    inputs: {}
-                terminate:
-                    implementation: test_plugin.terminate
-                    inputs: {}
-            test_interface2:
-                install:
-                    implementation: other_test_plugin.install
-                    inputs: {}
-                shutdown:
-                    implementation: other_test_plugin.shutdown
-                    inputs: {}
+  test_type:
+    properties:
+      key: {}
+    interfaces:
+      test_interface1:
+        install:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate:
+          implementation: test_plugin.terminate
+          inputs: {}
+      test_interface2:
+        install:
+          implementation: other_test_plugin.install
+          inputs: {}
+        shutdown:
+          implementation: other_test_plugin.shutdown
+          inputs: {}
 plugins:
-    other_test_plugin:
-        executor: central_deployment_agent
-        source: dummy
+  other_test_plugin:
+    executor: central_deployment_agent
+    source: dummy
 """
         result = self.parse()
         node = result['nodes'][0]
@@ -811,12 +811,12 @@ plugins:
 
         mid_level_yaml = self.template.BASIC_PLUGIN + """
 imports:
-    -   \"bottom_level.yaml\""""
+  -   \"bottom_level.yaml\""""
         mid_file_name = self.make_yaml_file(mid_level_yaml)
 
         top_level_yaml = self.template.BASIC_NODE_TEMPLATES_SECTION + """
 imports:
-    -   {0}""".format(mid_file_name)
+  -   {0}""".format(mid_file_name)
         self.template.version_section('cloudify_dsl', '1.0')
         self.template += top_level_yaml
         result = self.parse(resources_base_url=self.temp_directory)
@@ -837,7 +837,7 @@ imports:
 
         mid_level_yaml = self.template.BASIC_PLUGIN + """
 imports:
-    -   \"bottom_level.yaml\"
+  -   \"bottom_level.yaml\"
 """
         mid_file_name = self.make_yaml_file(mid_level_yaml)
 
@@ -845,7 +845,7 @@ imports:
         self.template.node_template_section()
         self.template += """
 imports:
-    -   {0}""".format('file:///' + pathname2url(mid_file_name))
+  -   {0}""".format('file:///' + pathname2url(mid_file_name))
 
         result = self.parse(resources_base_url=self.temp_directory)
         self.assert_blueprint(result)

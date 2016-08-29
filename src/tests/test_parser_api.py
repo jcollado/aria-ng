@@ -225,6 +225,24 @@ node_types:
         self.assertIn('description', result)
         self.assertEquals(None, result['description'])
 
+    def test_node_get_type_properties_including_overriding_properties(self):
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template.node_template_section()
+        self.template += """
+node_types:
+    test_type:
+        properties:
+            key:
+                default: "not_val"
+            key2:
+                default: "val2"
+    """
+        result = self.parse()
+        # this will also check property "key" = "val"
+        self.assert_minimal_blueprint(result)
+        node = result['nodes'][0]
+        self.assertEquals('val2', node['properties']['key2'])
+
 
 class TestParserApiWithFileSystem(ParserTestCase, TempDirectoryTestCase, _AssertionsMixin):
     def test_import_from_path(self):

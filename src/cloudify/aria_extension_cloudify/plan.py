@@ -14,9 +14,9 @@
 # under the License.
 #
 
+from collections import OrderedDict
 from aria.consumption import Plan as BasicPlan
 from aria.utils import JSONValueEncoder
-from collections import OrderedDict
 import json
 
 class Plan(BasicPlan):
@@ -36,14 +36,14 @@ class Plan(BasicPlan):
         return None
 
 def convert_plan(context, plan, template):
-    description = context.presentation.service_template['description']
-
     return OrderedDict((
-        ('description', None if not description else description.value),
-        ('nodes', [convert_node_template(context, v, plan) for v in template.node_templates.itervalues()]),
+        ('description', plan.description),
+        ('nodes', [convert_node_template(context, value, plan) for value in template.node_templates.itervalues()]),
         ('node_instances', [convert_node(context, v) for v in plan.nodes.itervalues()]),
-        ('workflows', OrderedDict((k, convert_workflow(context, v)) for k, v in plan.operations.iteritems())),
-    ))
+        ('workflows', OrderedDict((
+            key, convert_workflow(context, value)) for key, value in plan.operations.iteritems())),
+        ('relationships', OrderedDict((
+            (relationship_type.name, convert_relationship_type(context, relationship_type)) for relationship_type in context.deployment.relationship_types.iter_descendants())))))
 
 def convert_node_template(context, node_template, plan):
     node_type = context.deployment.node_types.get_descendant(node_template.type_name)
@@ -59,17 +59,17 @@ def convert_node_template(context, node_template, plan):
             relationships.append(convert_relationship_template(context, requirement))
 
     plugins = context.presentation.service_template.plugins
-    plugins = [convert_plugin(context, v) for v in plugins.itervalues()] if plugins is not None else []
-    
+    plugins = [convert_plugin(context, value) for value in plugins.itervalues()] if plugins is not None else []
+
     return OrderedDict((
         ('id', node_template.name),
         ('name', node_template.name),
         ('properties', convert_properties(context, node_template.properties)),
         ('operations', convert_interfaces(context, node_template.interfaces)),
-        ('type_hierarchy', convert_type_hierarchy(context, node_type, context.deployment.node_types)), # strings
+        ('type_hierarchy', convert_type_hierarchy(context, node_type, context.deployment.node_types)),
         ('relationships', relationships),
-        ('plugins', plugins), # strings
-        ('type', node_type.name), # string
+        ('plugins', plugins),
+        ('type', node_type.name),
         ('capabilities', OrderedDict((
             ('scalable', OrderedDict((
                 ('properties', OrderedDict((
@@ -78,31 +78,32 @@ def convert_node_template(context, node_template, plan):
                     ('min_instances', node_template.min_instances),
                     ('max_instances', node_template.max_instances or -1)))),))),)))))
 
-def convert_type_hierarchy(context, the_type, hierarchy):
-    type_hierarchy = []
-    while (the_type is not None) and (the_type.name is not None):
-        type_hierarchy.insert(0, the_type.name)
-        the_type = hierarchy.get_parent(the_type.name)
-    return type_hierarchy
+def convert_relationship_type(context, relationship_type):
+    return OrderedDict((
+        ('name', relationship_type.name),
+        ('properties', convert_properties(context, relationship_type.properties)),
+        ('source_interfaces', convert_interfaces(context, relationship_type.source_interfaces)), # TODO
+        ('target_interfaces', convert_interfaces(context, relationship_type.target_interfaces)), # TODO
+        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)),))
 
 def convert_relationship_template(context, requirement):
     relationship_template = requirement.relationship_template
     relationship_type = context.deployment.relationship_types.get_descendant(relationship_template.type_name)
-
+    
     return OrderedDict((
         ('target_id', requirement.target_node_template_name),
         ('source_operations', convert_interfaces(context, relationship_template.source_interfaces)), 
         ('target_operations', convert_interfaces(context, relationship_template.target_interfaces)),
         ('source_interfaces', OrderedDict()),
         ('target_interfaces', OrderedDict()),
-        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)), # strings
+        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)),
         ('properties', convert_properties(context, relationship_template.properties))))
 
 def convert_node(context, node):
     return OrderedDict((
-        ('name', node.template_name), # string
-        ('id', node.id), # unique string
-        ('relationships', [convert_relationship(context, v) for v in node.relationships])))
+        ('name', node.template_name),
+        ('id', node.id),
+        ('relationships', [convert_relationship(context, v) for v in node.relationships]),))
 
 def convert_relationship(context, relationship):
     target_node = context.deployment.plan.nodes.get(relationship.target_node_id)
@@ -114,28 +115,46 @@ def convert_relationship(context, relationship):
 
 def convert_interfaces(context, interfaces):
     operations = OrderedDict()
+    
+    duplicate_operation_names = set()
     for interface_name, interface in interfaces.iteritems():
         for operation_name, operation in interface.operations.iteritems():
             operation = convert_operation(context, operation)
-            operations[operation_name] = operation # short name
-            operation_name = '%s.%s' % (interface_name, operation_name)
-            operations[operation_name] = operation # long name
+            operations['%s.%s' % (interface_name, operation_name)] = operation
+            if operation_name not in operations:
+                operations[operation_name] = operation
+            else:
+                duplicate_operation_names.add(operation_name)
+
+    # If the short form is not unique, then we should not have it at all 
+    for operation_name in duplicate_operation_names:
+        del operations[operation_name]
+            
     return operations
 
 def convert_operation(context, operation):
-    plugin_name, operation_name = operation.implementation.split('.', 1)
-    plugin = context.presentation.service_template.plugins[plugin_name]
+    implementation = operation.implementation
+    if '/' in implementation:
+        plugin_name = None
+        operation_name = implementation
+        executor = None
+    else:
+        plugin_name, operation_name = operation.implementation.split('.', 1)
+        plugin = context.presentation.service_template.plugins.get(plugin_name) if context.presentation.service_template.plugins is not None else None
+        executor = plugin.executor if plugin is not None else None
+
     return OrderedDict((
         ('plugin', plugin_name),
         ('operation', operation_name),
         ('has_intrinsic_functions', False),
-        ('executor', operation.executor or plugin.executor),
+        ('executor', operation.executor or executor),
         ('inputs', convert_parameters(context, operation.inputs)),
         ('max_retries', operation.max_retries),
         ('retry_interval', operation.retry_interval)))
 
 def convert_workflow(context, operation):
     plugin_name, operation_name = operation.implementation.split('.', 1)
+    
     return OrderedDict((
         ('plugin', plugin_name),
         ('operation', operation_name),
@@ -144,7 +163,7 @@ def convert_workflow(context, operation):
         ('executor', None),
         ('inputs', OrderedDict()),
         ('max_retries', operation.max_retries),
-        ('retry_interval', operation.retry_interval)))
+        ('retry_interval', operation.retry_interval),))
 
 def convert_plugin(context, plugin):
     return OrderedDict((
@@ -154,20 +173,28 @@ def convert_plugin(context, plugin):
         ('executor', plugin.executor),
         ('install', plugin.install),
         ('install_arguments', plugin.install_arguments),
-        ('name', plugin._name),  # todo: _name isn't a private member...
+        ('name', plugin._name),
         ('package_name', plugin.package_name),
         ('package_version', plugin.package_version),
         ('source', plugin.source),
-        ('supported_platform', plugin.supported_platform),
-    ))
+        ('supported_platform', plugin.supported_platform),))
 
 def convert_properties(context, properties):
-    return OrderedDict(((k, v.value) for k, v in properties.iteritems()))
+    return OrderedDict((
+        (k, v.value) for k, v in properties.iteritems()))
 
 def convert_parameters(context, parameters):
-    return OrderedDict(((k, convert_parameter(context, v)) for k, v in parameters.iteritems()))
+    return OrderedDict((
+        (key, convert_parameter(context, value)) for key, value in parameters.iteritems()))
 
 def convert_parameter(context, parameter):
     return OrderedDict((
         ('type', parameter.type_name),
-        ('default', parameter.value)))
+        ('default', parameter.value),))
+
+def convert_type_hierarchy(context, the_type, hierarchy):
+    type_hierarchy = []
+    while (the_type is not None) and (the_type.name is not None):
+        type_hierarchy.insert(0, the_type.name)
+        the_type = hierarchy.get_parent(the_type.name)
+    return type_hierarchy

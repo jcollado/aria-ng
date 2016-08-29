@@ -14,6 +14,8 @@
 # under the License.
 #
 
+from __future__ import absolute_import # so we can import standard 'types'
+
 from .elements import Element, Template, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
 from .utils import instantiate_dict, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
@@ -24,6 +26,7 @@ from types import FunctionType
 
 class DeploymentTemplate(Template):
     def __init__(self):
+        self.description = None
         self.metadata = None
         self.node_templates = StrictDict(key_class=str, value_class=NodeTemplate)
         self.group_templates = StrictDict(key_class=str, value_class=GroupTemplate)
@@ -36,6 +39,8 @@ class DeploymentTemplate(Template):
     def instantiate(self, context, container):
         r = DeploymentPlan()
         context.deployment.plan = r
+        
+        r.description = self.description
         
         if self.metadata is not None:
             r.metadata = self.metadata.instantiate(context, container)
@@ -72,6 +77,8 @@ class DeploymentTemplate(Template):
             operation.validate(context)
 
     def dump(self, context):
+        if self.description is not None:
+            puts('Description: %s' % context.style.meta(self.description))
         if self.metadata is not None:
             self.metadata.dump(context)
         for node_template in self.node_templates.itervalues():

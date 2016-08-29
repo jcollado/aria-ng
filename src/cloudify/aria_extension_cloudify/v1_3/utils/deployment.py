@@ -14,13 +14,15 @@
 # under the License.
 #
 
-from aria.deployment import Type, DeploymentTemplate, NodeTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, GroupPolicy, GroupPolicyTrigger, Interface, Operation, Requirement, Parameter
+from aria.deployment import Type, RelationshipType, DeploymentTemplate, NodeTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, GroupPolicy, GroupPolicyTrigger, Interface, Operation, Requirement, Parameter
 
 def get_deployment_template(context, presenter):
     r = DeploymentTemplate()
+    
+    r.description = presenter.service_template.description.value if presenter.service_template.description is not None else None
 
     normalize_types(context, context.deployment.node_types, presenter.node_types)
-    normalize_types(context, context.deployment.relationship_types, presenter.relationship_types)
+    normalize_types(context, context.deployment.relationship_types, presenter.relationship_types, normalize_relationship_type)
 
     normalize_property_values(r.inputs, presenter.service_template._get_input_values(context))
     normalize_property_values(r.outputs, presenter.service_template._get_output_values(context))
@@ -46,27 +48,6 @@ def get_deployment_template(context, presenter):
             r.operations[workflow_name] = normalize_workflow(context, workflow)
 
     return r
-
-def normalize_types(context, root, types):
-    if types is None:
-        return
-    
-    def added_all():
-        for name in types:
-            if root.get_descendant(name) is None:
-                return False
-        return True
-
-    while not added_all():    
-        for name, the_type in types.iteritems():
-            if root.get_descendant(name) is None:
-                parent_type = the_type._get_parent(context)
-                if parent_type is None:
-                    root.children.append(Type(the_type._name))
-                else:
-                    container = root.get_descendant(parent_type._name)
-                    if container is not None:
-                        container.children.append(Type(the_type._name))
 
 def normalize_node_template(context, node_template):
     the_type = node_template._get_type(context)
@@ -129,6 +110,9 @@ def normalize_requirement(context, relationship):
     r = Requirement(**r)
     r.relationship_template = normalize_relationship(context, relationship)
     return r
+
+def normalize_relationship_type(context, relationship_type):
+    return RelationshipType(relationship_type._name)
 
 def normalize_relationship(context, relationship):
     relationship_type = relationship._get_type(context)
@@ -199,6 +183,31 @@ def normalize_workflow(context, workflow):
 #
 # Utils
 #
+
+def normalize_types(context, root, types, normalize=None):
+    if types is None:
+        return
+    
+    def added_all():
+        for name in types:
+            if root.get_descendant(name) is None:
+                return False
+        return True
+
+    while not added_all():    
+        for name, the_type in types.iteritems():
+            if root.get_descendant(name) is None:
+                parent_type = the_type._get_parent(context)
+                if normalize:
+                    r = normalize(context, the_type)
+                else:
+                    r = Type(the_type._name)
+                if parent_type is None:
+                    root.children.append(r)
+                else:
+                    container = root.get_descendant(parent_type._name)
+                    if container is not None:
+                        container.children.append(r)
 
 def normalize_property_values(properties, source_properties):
     if source_properties:

@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from ..utils import StrictList
+from ..utils import StrictList, StrictDict
 from clint.textui import puts
 
 class Type(object):
@@ -49,13 +49,27 @@ class Type(object):
             if base.get_descendant(name) is not None:
                 return True
         return False
-    
+
+    def iter_descendants(self):
+        for child in self.children:
+            yield child
+            for d in child.iter_descendants():
+                yield d
+
     def dump(self, context):
         if self.name:
             puts(context.style.type(self.name))
         with context.style.indent:
             for child in self.children:
                 child.dump(context)
+
+class RelationshipType(Type):
+    def __init__(self, name):
+        super(RelationshipType, self).__init__(name)
+        
+        self.properties = StrictDict(key_class=str)
+        self.source_interfaces = StrictDict(key_class=str)
+        self.target_interfaces = StrictDict(key_class=str)
 
 class TypeHierarchy(Type):
     def __init__(self):

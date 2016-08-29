@@ -18,7 +18,7 @@ from .context import *
 from .elements import *
 from .plan_elements import *
 from .template_elements import *
-from .hierarchy import *
+from .types import *
 
 __all__ = (
     'IdType',

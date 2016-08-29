@@ -148,7 +148,7 @@ def merge_interface(context, presentation, interface_assignment, our_interface_a
                     interface_assignment._raw[operation_name] = OrderedDict()
                 
             if our_implementation is not None:
-                interface_assignment._raw[operation_name]['implementation'] = deepclone(our_implementation._raw)
+                interface_assignment._raw[operation_name]['implementation'] = deepclone(our_implementation)
             our_executor = our_operation_template.executor
             if our_executor is not None:
                 interface_assignment._raw[operation_name]['executor'] = deepclone(our_executor)

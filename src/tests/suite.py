@@ -16,7 +16,7 @@
 import os
 from uuid import uuid4
 from shutil import rmtree
-from yaml import safe_dump
+from ruamel.yaml import safe_dump
 from itertools import imap
 from tempfile import mkdtemp
 
@@ -287,7 +287,7 @@ def op_struct(
         plugin_name,
         mapping,
         inputs=None,
-        executor='local',
+        executor=None,
         max_retries=None,
         retry_interval=None):
     return {

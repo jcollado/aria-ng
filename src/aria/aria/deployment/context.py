@@ -15,8 +15,8 @@
 #
 
 from .utils import generate_id_string 
+from .types import TypeHierarchy
 from ..utils import JSONValueEncoder, prune
-from .hierarchy import TypeHierarchy
 from clint.textui import puts
 import json, itertools
 

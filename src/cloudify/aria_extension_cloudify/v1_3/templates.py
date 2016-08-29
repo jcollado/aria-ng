@@ -308,6 +308,15 @@ class ServiceTemplate(Presentation):
         :rtype: str
         """
 
+    @primitive_field()
+    @dsl_specification('dsl-definitions', 'cloudify-1.3')
+    def dsl_definitions(self):
+        """
+        The `dsl_definitions` section can be used to define arbitrary data structures that can then be reused in different parts of the blueprint using `YAML anchors and aliases <https://gist.github.com/ddlsmurf/1590434>`__.
+        
+        See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-dsl-definitions/>`__
+        """
+
     @primitive_list_field(str)
     @dsl_specification('imports', 'cloudify-1.3')
     def imports(self):

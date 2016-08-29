@@ -141,18 +141,18 @@ node_types:
         self.template += """
 node_types:
   test_type:
-  interfaces:
-    test_interface1:
-    install:
-      implementation: test_plugin.install
-      inputs: {}
-    terminate:
-      implementation: test_plugin.terminate
-      inputs: {}
-  properties:
-    install_agent:
-    default: 'false'
-    key: {}
+    interfaces:
+      test_interface1:
+        install:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate:
+          implementation: test_plugin.terminate
+          inputs: {}
+    properties:
+      install_agent:
+        default: 'false'
+      key: {}
 """
         result = self.parse()
         self.assert_blueprint(result)
@@ -279,6 +279,26 @@ node_types:
         self.assertEquals('val', node['properties']['key'])
         # TODO: assert node-type's default and description values once
         # 'node_types' is part of the parser's output
+
+    def test_type_properties_property_with_description_only(self):
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template += """
+node_types:
+  test_type:
+    properties:
+      key:
+        description: property_desc
+"""
+        self.template.node_template_section()
+        result = self.parse()
+        self.assertEquals(1, len(result['nodes']))
+        node = result['nodes'][0]
+        self.assertEquals('test_node', node['id'])
+        self.assertEquals('test_node', node['name'])
+        self.assertEquals('test_type', node['type'])
+        self.assertEquals('val', node['properties']['key'])
+        # TODO: assert type's default and description values once 'type' is
+        # part of the parser's output
 
 
 class TestParserApiWithFileSystem(ParserTestCase, TempDirectoryTestCase, _AssertionsMixin):

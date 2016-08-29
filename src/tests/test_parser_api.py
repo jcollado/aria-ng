@@ -106,30 +106,30 @@ class TestParserApi(ParserTestCase, _AssertionsMixin):
         self.template.plugin_section()
         self.template += """
 node_types:
-    test_type:
-        interfaces:
-            test_interface1:
-                install:
-                    implementation: test_plugin.install
-                    inputs: {}
-                terminate:
-                    implementation: test_plugin.terminate
-                    inputs: {}
-                start:
-                    implementation: test_plugin.start
-                    inputs: {}
-        properties:
-            install_agent:
-                default: false
-            key: {}
-            number:
-                default: 80
-            boolean:
-                default: false
-            complex:
-                default:
-                    key1: value1
-                    key2: value2
+  test_type:
+    interfaces:
+      test_interface1:
+        install:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate:
+          implementation: test_plugin.terminate
+          inputs: {}
+        start:
+          implementation: test_plugin.start
+          inputs: {}
+    properties:
+      install_agent:
+        default: false
+      key: {}
+      number:
+        default: 80
+      boolean:
+        default: false
+      complex:
+        default:
+          key1: value1
+          key2: value2
 """
         result = self.parse()
         self.assert_blueprint(result)
@@ -140,19 +140,19 @@ node_types:
         self.template.plugin_section()
         self.template += """
 node_types:
-    test_type:
-        interfaces:
-            test_interface1:
-                install:
-                    implementation: test_plugin.install
-                    inputs: {}
-                terminate:
-                    implementation: test_plugin.terminate
-                    inputs: {}
-        properties:
-            install_agent:
-                default: 'false'
-            key: {}
+  test_type:
+  interfaces:
+    test_interface1:
+    install:
+      implementation: test_plugin.install
+      inputs: {}
+    terminate:
+      implementation: test_plugin.terminate
+      inputs: {}
+  properties:
+    install_agent:
+    default: 'false'
+    key: {}
 """
         result = self.parse()
         self.assert_blueprint(result)
@@ -229,13 +229,13 @@ node_types:
         self.template.version_section('cloudify_dsl', '1.0')
         self.template += """
 node_types:
-    test_type:
-        properties:
-            key:
-                default: "not_val"
-            key2:
-                default: "val2"
-    """
+  test_type:
+    properties:
+      key:
+        default: "not_val"
+      key2:
+        default: "val2"
+"""
         self.template.node_template_section()
         result = self.parse()
         # this will also check property "key" = "val"
@@ -247,11 +247,11 @@ node_types:
         self.template.version_section('cloudify_dsl', '1.0')
         self.template += """
 node_types:
-    test_type:
-        properties: {}
+  test_type:
+    properties: {}
 node_templates:
-    test_node:
-        type: test_type
+  test_node:
+    type: test_type
 """
         result = self.parse()
         self.assertEquals(1, len(result['nodes']))
@@ -282,29 +282,29 @@ class TestParserApiWithFileSystem(ParserTestCase, TempDirectoryTestCase, _Assert
         ])
         self.template += """
 node_types:
-    test_type:
-        properties:
-            key: {}
-        interfaces:
-            test_interface1:
-                install:
-                    implementation: test_plugin.install
-                    inputs: {}
-                terminate:
-                    implementation: test_plugin.terminate
-                    inputs: {}
-            test_interface2:
-                start:
-                    implementation: other_test_plugin.start
-                    inputs: {}
-                shutdown:
-                    implementation: other_test_plugin.shutdown
-                    inputs: {}
+  test_type:
+    properties:
+      key: {}
+    interfaces:
+      test_interface1:
+        install:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate:
+          implementation: test_plugin.terminate
+          inputs: {}
+      test_interface2:
+        start:
+          implementation: other_test_plugin.start
+          inputs: {}
+        shutdown:
+          implementation: other_test_plugin.shutdown
+          inputs: {}
 
 plugins:
-    other_test_plugin:
-        executor: central_deployment_agent
-        source: dummy
+  other_test_plugin:
+    executor: central_deployment_agent
+    source: dummy
 """
         result = self.parse()
         node = result['nodes'][0]

@@ -23,6 +23,7 @@ from clint.textui import puts, indent
 
 class DeploymentPlan(Element):
     def __init__(self):
+        self.description = None
         self.metadata = None
         self.nodes = StrictDict(key_class=str, value_class=Node) 
         self.groups = StrictDict(key_class=str, value_class=Group) 
@@ -113,6 +114,7 @@ class DeploymentPlan(Element):
     @property
     def as_raw(self):
         return OrderedDict((
+            ('description', self.description),
             ('metadata', self.metadata.as_raw if self.metadata is not None else None),
             ('nodes', [v.as_raw for v in self.nodes.itervalues()]),
             ('groups', [v.as_raw for v in self.groups.itervalues()]),
@@ -123,6 +125,8 @@ class DeploymentPlan(Element):
             ('operations', [v.as_raw for v in self.operations.itervalues()])))
 
     def dump(self, context):
+        if self.description is not None:
+            puts('Description: %s' % context.style.meta(self.description))
         if self.metadata is not None:
             self.metadata.dump(context)
         for node in self.nodes.itervalues():

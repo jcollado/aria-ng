@@ -17,3 +17,5 @@ out/
 
 update-docs.sh
 *.pem
+
+test

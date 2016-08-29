@@ -243,6 +243,24 @@ node_types:
         node = result['nodes'][0]
         self.assertEquals('val2', node['properties']['key2'])
 
+    def test_type_properties_empty_properties(self):
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template += """
+node_types:
+    test_type:
+        properties: {}
+node_templates:
+    test_node:
+        type: test_type
+"""
+        result = self.parse()
+        self.assertEquals(1, len(result['nodes']))
+        node = result['nodes'][0]
+        self.assertEquals('test_node', node['id'])
+        self.assertEquals('test_node', node['name'])
+        self.assertEquals('test_type', node['type'])
+        self.assertEqual(0, len(node['properties']))
+
 
 class TestParserApiWithFileSystem(ParserTestCase, TempDirectoryTestCase, _AssertionsMixin):
     def test_import_from_path(self):

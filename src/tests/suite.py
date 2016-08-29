@@ -287,7 +287,7 @@ def op_struct(
         plugin_name,
         mapping,
         inputs=None,
-        executor='local',
+        executor=None,
         max_retries=None,
         retry_interval=None):
     return {

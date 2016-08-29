@@ -33,6 +33,11 @@ class PresentationBase(HasCachedMethods):
         self._raw = raw
         self._container = container
 
+    @property
+    def name(self):
+        # todo: change _name to name and remove this property
+        return self._name
+
     def _validate(self, context):
         """
         Validates the presentation while reporting errors in the validation context but

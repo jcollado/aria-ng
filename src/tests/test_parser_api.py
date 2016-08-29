@@ -421,14 +421,15 @@ node_types:
         self.template += """
 node_types:
   test_type:
+    derived_from: test_type_parent
     properties:
       key:
         default: not_val
       key2:
         default: val2
-    derived_from: test_type_parent
 
   test_type_parent:
+    derived_from: test_type_grandparent
     properties:
       key:
         default: val_parent
@@ -436,9 +437,9 @@ node_types:
         default: val2_parent
       key4:
         default: val4_parent
-    derived_from: test_type_grandparent
 
   test_type_grandparent:
+    derived_from: test_type_grandgrandparent
     properties:
       key:
         default: val1_grandparent
@@ -446,7 +447,6 @@ node_types:
         default: val2_grandparent
       key3:
         default: val3_grandparent
-    derived_from: test_type_grandgrandparent
 
   test_type_grandgrandparent: {}
   """
@@ -595,6 +595,7 @@ plugins:
         self.template += """
 node_types:
   test_type:
+    derived_from: test_type_parent
     properties:
       key: {}
     interfaces:
@@ -616,7 +617,6 @@ node_types:
         op1:
           implementation: test_plugin3.op
           inputs: {}
-    derived_from: test_type_parent
 
   test_type_parent:
     interfaces:
@@ -695,6 +695,7 @@ plugins:
         self.template += """
 node_types:
   test_type:
+    derived_from: test_type_parent
     properties:
       key: {}
     interfaces:
@@ -705,7 +706,6 @@ node_types:
         terminate:
           implementation: test_plugin.terminate
           inputs: {}
-    derived_from: test_type_parent
 
   test_type_parent:
     derived_from: test_type_grandparent

@@ -300,6 +300,28 @@ node_types:
         # TODO: assert type's default and description values once 'type' is
         # part of the parser's output
 
+    def test_type_properties_standard_property(self):
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template += """
+node_types:
+  test_type:
+    properties:
+      key:
+        default: val
+        description: property_desc
+        type: string
+"""
+        self.template.node_template_section()
+        result = self.parse()
+        self.assertEquals(1, len(result['nodes']))
+        node = result['nodes'][0]
+        self.assertEquals('test_node', node['id'])
+        self.assertEquals('test_node', node['name'])
+        self.assertEquals('test_type', node['type'])
+        self.assertEquals('val', node['properties']['key'])
+        # TODO: assert type's default and description values once 'type' is
+        # part of the parser's output
+
 
 class TestParserApiWithFileSystem(ParserTestCase, TempDirectoryTestCase, _AssertionsMixin):
     def test_import_from_path(self):

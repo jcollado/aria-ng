@@ -572,15 +572,16 @@ plugins:
 
         bottom_file_content = self.template.BASIC_TYPE
 
-        mid_file1_content = \
-            (self.create_yaml_with_imports([bottom_file_content]) +
-             self.template.BASIC_PLUGIN)
+        mid_file1_content = (
+            self.create_yaml_with_imports([bottom_file_content])
+            + self.template.BASIC_PLUGIN)
         mid_file2_content = self.create_yaml_with_imports([bottom_file_content])
 
         self.template.version_section('cloudify_dsl', '1.0')
-        self.template += self.create_yaml_with_imports(
-            [mid_file1_content, mid_file2_content]
-        )
+        self.template += self.create_yaml_with_imports([
+            mid_file1_content,
+            mid_file2_content,
+        ])
         self.template.node_template_section()
 
         result = self.parse()

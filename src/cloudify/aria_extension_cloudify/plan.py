@@ -14,9 +14,9 @@
 # under the License.
 #
 
-from collections import OrderedDict
 from aria.consumption import Plan as BasicPlan
 from aria.utils import JSONValueEncoder
+from collections import OrderedDict
 import json
 
 class Plan(BasicPlan):
@@ -36,14 +36,27 @@ class Plan(BasicPlan):
         return None
 
 def convert_plan(context, plan, template):
-    return OrderedDict((
+    r = OrderedDict((
         ('description', plan.description),
+        ('inputs', convert_properties(context, plan.inputs)),
+        ('outputs', convert_properties(context, plan.outputs)),
         ('nodes', [convert_node_template(context, value, plan) for value in template.node_templates.itervalues()]),
         ('node_instances', [convert_node(context, v) for v in plan.nodes.itervalues()]),
         ('workflows', OrderedDict((
-            key, convert_workflow(context, value)) for key, value in plan.operations.iteritems())),
+            key, convert_operation(context, value, True)) for key, value in plan.operations.iteritems())),
         ('relationships', OrderedDict((
             (relationship_type.name, convert_relationship_type(context, relationship_type)) for relationship_type in context.deployment.relationship_types.iter_descendants())))))
+
+    #setattr(version, 'raw', version['raw'])
+    #setattr(version, 'definitions_name', version['definitions_name'])
+    #setattr(version, 'definitions_version', version['definitions_version'])
+    
+    #setattr(r, 'version', r['version'])
+    setattr(r, 'inputs', r['inputs'])
+    setattr(r, 'outputs', r['outputs'])
+    setattr(r, 'node_templates', r['nodes'])
+    
+    return r
 
 def convert_node_template(context, node_template, plan):
     node_type = context.deployment.node_types.get_descendant(node_template.type_name)
@@ -82,22 +95,23 @@ def convert_relationship_type(context, relationship_type):
     return OrderedDict((
         ('name', relationship_type.name),
         ('properties', convert_properties(context, relationship_type.properties)),
-        ('source_interfaces', convert_interfaces(context, relationship_type.source_interfaces)), # TODO
-        ('target_interfaces', convert_interfaces(context, relationship_type.target_interfaces)), # TODO
-        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)),))
+        ('source_interfaces', convert_interfaces(context, relationship_type.source_interfaces)),
+        ('target_interfaces', convert_interfaces(context, relationship_type.target_interfaces)),
+        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types))))
 
 def convert_relationship_template(context, requirement):
     relationship_template = requirement.relationship_template
     relationship_type = context.deployment.relationship_types.get_descendant(relationship_template.type_name)
+    
     return OrderedDict((
+        ('type', relationship_type.name),
         ('target_id', requirement.target_node_template_name),
         ('source_operations', convert_interfaces(context, relationship_template.source_interfaces)), 
         ('target_operations', convert_interfaces(context, relationship_template.target_interfaces)),
-        ('source_interfaces', OrderedDict()),
-        ('target_interfaces', OrderedDict()),
+        ('source_interfaces', OrderedDict()), # TODO: ?
+        ('target_interfaces', OrderedDict()), # TODO: ?
         ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)),
-        ('properties', convert_properties(context, relationship_template.properties)),
-        ('type', relationship_type.name),))
+        ('properties', convert_properties(context, relationship_template.properties))))
 
 def convert_node(context, node):
     host_node = find_host_node(context, node)
@@ -135,40 +149,27 @@ def convert_interfaces(context, interfaces):
             
     return operations
 
-def convert_operation(context, operation):
+def convert_operation(context, operation, is_workflow=False):
     implementation = operation.implementation
     if (not implementation) or ('/' in implementation):
         # Explicit script
         plugin_name = None
         operation_name = implementation
-        executor = None
+        plugin_executor = None
     else:
         # plugin.operation
         plugin_name, operation_name = operation.implementation.split('.', 1)
         plugin = context.presentation.service_template.plugins.get(plugin_name) if context.presentation.service_template.plugins is not None else None
-        executor = plugin.executor if plugin is not None else None
+        plugin_executor = plugin.executor if plugin is not None else None
 
     return OrderedDict((
         ('plugin', plugin_name),
         ('operation', operation_name),
-        ('has_intrinsic_functions', False),
-        ('executor', operation.executor or executor),
-        ('inputs', convert_parameters(context, operation.inputs)),
+        ('has_intrinsic_functions', False), # TODO
+        ('executor', operation.executor or plugin_executor),
+        ('parameters' if is_workflow else 'inputs', convert_parameters(context, operation.inputs)),
         ('max_retries', operation.max_retries),
         ('retry_interval', operation.retry_interval)))
-
-def convert_workflow(context, operation):
-    plugin_name, operation_name = operation.implementation.split('.', 1)
-    
-    return OrderedDict((
-        ('plugin', plugin_name),
-        ('operation', operation_name),
-        ('parameters', convert_parameters(context, operation.inputs)),
-        ('has_intrinsic_functions', False),
-        ('executor', None),
-        ('inputs', OrderedDict()),
-        ('max_retries', operation.max_retries),
-        ('retry_interval', operation.retry_interval),))
 
 def convert_plugin(context, plugin):
     return OrderedDict((
@@ -182,7 +183,7 @@ def convert_plugin(context, plugin):
         ('package_name', plugin.package_name),
         ('package_version', plugin.package_version),
         ('source', plugin.source),
-        ('supported_platform', plugin.supported_platform),))
+        ('supported_platform', plugin.supported_platform)))
 
 def convert_properties(context, properties):
     return OrderedDict((

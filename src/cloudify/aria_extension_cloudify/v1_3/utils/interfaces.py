@@ -77,7 +77,8 @@ def get_template_interfaces(context, presentation, type_name, field_name, fn_nam
                 interface_definition = interface_definitions[interface_name] # InterfaceDefinition
                 merge_interface(context, presentation, interface_assignment, our_interface_assignment, interface_definition, interface_name) 
             else:
-                context.validation.report('interface definition "%s" not declared at %s "%s" in "%s"' % (interface_name, type_name, presentation.type, presentation._fullname), locator=our_interface_assignment._locator, level=Issue.BETWEEN_TYPES)
+                # Unlike TOSCA, Cloudify lets you implement undeclared interfaces
+                template_interfaces[interface_name] = our_interface_assignment
 
     # Check that there are no required inputs that we haven't assigned
     for interface_name, interface_template in template_interfaces.iteritems():
@@ -139,9 +140,6 @@ def merge_interface(context, presentation, interface_assignment, our_interface_a
             our_input_assignments = our_operation_template.inputs
             our_implementation = our_operation_template.implementation
             
-            if operation_definition is None:
-                context.validation.report('interface definition "%s" refers to an unknown operation "%s" in "%s"' % (interface_name, operation_name, presentation._fullname), locator=our_operation_template._locator, level=Issue.BETWEEN_TYPES)
-
             if (our_input_assignments is not None) or (our_implementation is not None):
                 # Make sure we have the dict
                 if (operation_name not in interface_assignment._raw) or (interface_assignment._raw[operation_name] is None):

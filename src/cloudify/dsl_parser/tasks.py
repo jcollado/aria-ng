@@ -19,7 +19,7 @@ def prepare_deployment_plan(context, inputs=None, **kwargs):
     """
     Prepare a plan for deployment
     """
-
+    
     #print '!!! prepare_deployment_plan'
     #print context
     #print inputs

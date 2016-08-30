@@ -97,11 +97,11 @@ class RelationshipTemplate(Presentation):
 
     @cachedmethod
     def _get_source_interfaces(self, context):
-        return ReadOnlyDict(get_template_interfaces(context, self, 'node template', 'source_interfaces', '_get_source_interfaces'))
+        return ReadOnlyDict(get_template_interfaces(context, self, 'relationship template', 'source_interfaces', '_get_source_interfaces'))
 
     @cachedmethod
     def _get_target_interfaces(self, context):
-        return ReadOnlyDict(get_template_interfaces(context, self, 'node template', 'target_interfaces', '_get_target_interfaces'))
+        return ReadOnlyDict(get_template_interfaces(context, self, 'relationship template', 'target_interfaces', '_get_target_interfaces'))
 
     def _validate(self, context):
         super(RelationshipTemplate, self)._validate(context)

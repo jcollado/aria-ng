@@ -70,17 +70,17 @@ def normalize_node_template(context, node_template):
 
     return r
 
-def normalize_interface(context, interface):
+def normalize_interface(context, interface, is_definition=False):
     r = Interface(name=interface._name)
 
     operations = interface.operations
     if operations:
         for operation_name, operation in operations.iteritems():
-            r.operations[operation_name] = normalize_operation(context, operation)
+            r.operations[operation_name] = normalize_operation(context, operation, is_definition)
     
     return r if r.operations else None
 
-def normalize_operation(context, operation):
+def normalize_operation(context, operation, is_definition=False):
     r = Operation(name=operation._name)
 
     implementation = operation.implementation
@@ -99,19 +99,28 @@ def normalize_operation(context, operation):
     inputs = operation.inputs
     if inputs:
         for input_name, the_input in inputs.iteritems():
-            r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value)
+            if is_definition:
+                r.inputs[input_name] = Parameter(the_input.type, the_input.default)
+            else:
+                r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value)
     
     return r
 
 def normalize_requirement(context, relationship):
-    r = {'name': relationship._name}
-    r['target_node_template_name'] = relationship.target
-    r = Requirement(**r)
+    r = Requirement(name=relationship._name, target_node_template_name=relationship.target)
+    
     r.relationship_template = normalize_relationship(context, relationship)
+    
     return r
 
 def normalize_relationship_type(context, relationship_type):
-    return RelationshipType(relationship_type._name)
+    r = RelationshipType(relationship_type._name)
+    
+    normalize_property_definitions(r.properties, relationship_type._get_properties(context))
+    normalize_interfaces(context, r.source_interfaces, relationship_type._get_source_interfaces(context), True)
+    normalize_interfaces(context, r.target_interfaces, relationship_type._get_target_interfaces(context), True)
+    
+    return r
 
 def normalize_relationship(context, relationship):
     relationship_type = relationship._get_type(context)
@@ -213,9 +222,14 @@ def normalize_property_values(properties, source_properties):
         for property_name, prop in source_properties.iteritems():
             properties[property_name] = Parameter(prop.type, prop.value)
 
-def normalize_interfaces(context, interfaces, source_interfaces):
+def normalize_property_definitions(properties, source_properties):
+    if source_properties:
+        for property_name, prop in source_properties.iteritems():
+            properties[property_name] = Parameter(prop.type, prop.default)
+
+def normalize_interfaces(context, interfaces, source_interfaces, is_definition=False):
     if source_interfaces:
         for interface_name, interface in source_interfaces.iteritems():
-            interface = normalize_interface(context, interface)
+            interface = normalize_interface(context, interface, is_definition)
             if interface is not None:
                 interfaces[interface_name] = interface

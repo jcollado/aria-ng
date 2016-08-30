@@ -334,11 +334,8 @@ def coerce_value(context, presentation, the_type, entry_schema, constraints, val
         # Delegate to _coerce_value (likely a DataType instance)
         return the_type._coerce_value(context, presentation, entry_schema, constraints, value, aspect)
 
-    if the_type is not None:
-        # Coerce to primitive type
-        return coerce_to_primitive(context, presentation, the_type, constraints, value, aspect)
-    
-    return None
+    # Coerce to primitive type
+    return coerce_to_primitive(context, presentation, the_type, constraints, value, aspect)
 
 def coerce_to_primitive(context, presentation, primitive_type, constraints, value, aspect=None):
     """

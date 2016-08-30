@@ -31,7 +31,7 @@ class LocatableFloat(float):
 def wrap(value):
     if isinstance(value, basestring):
         return True, LocatableString(value)
-    elif isinstance(value, int):
+    elif isinstance(value, int) and not isinstance(value, bool): # Note: bool counts as int in Python! 
         return True, LocatableInt(value)
     elif isinstance(value, float):
         return True, LocatableFloat(value)

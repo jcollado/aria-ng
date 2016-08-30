@@ -107,8 +107,7 @@ def normalize_interface(context, interface):
     operations = interface.operations
     if operations:
         for operation_name, operation in operations.iteritems():
-            if operation.implementation is not None:
-                r.operations[operation_name] = normalize_operation(context, operation)
+            r.operations[operation_name] = normalize_operation(context, operation)
     
     return r if r.operations else None
 

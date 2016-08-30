@@ -100,16 +100,19 @@ def convert_relationship_template(context, requirement):
         ('properties', convert_properties(context, relationship_template.properties))))
 
 def convert_node(context, node):
+    host_node = find_host_node(context, node)
+
     return OrderedDict((
         ('name', node.template_name),
         ('id', node.id),
-        ('relationships', [convert_relationship(context, v) for v in node.relationships]),))
+        ('relationships', [convert_relationship(context, v) for v in node.relationships]),
+        ('host_id', host_node.id if host_node is not None else None)))
 
 def convert_relationship(context, relationship):
     target_node = context.deployment.plan.nodes.get(relationship.target_node_id)
     
     return OrderedDict((
-        ('type', relationship.template_name),
+        ('type', relationship.type_name), # template_name?
         ('target_name', target_node.template_name),
         ('target_id', relationship.target_node_id)))
 
@@ -134,11 +137,13 @@ def convert_interfaces(context, interfaces):
 
 def convert_operation(context, operation):
     implementation = operation.implementation
-    if '/' in implementation:
+    if (not implementation) or ('/' in implementation):
+        # Explicit script
         plugin_name = None
         operation_name = implementation
         executor = None
     else:
+        # plugin.operation
         plugin_name, operation_name = operation.implementation.split('.', 1)
         plugin = context.presentation.service_template.plugins.get(plugin_name) if context.presentation.service_template.plugins is not None else None
         executor = plugin.executor if plugin is not None else None
@@ -198,3 +203,13 @@ def convert_type_hierarchy(context, the_type, hierarchy):
         type_hierarchy.insert(0, the_type.name)
         the_type = hierarchy.get_parent(the_type.name)
     return type_hierarchy
+
+def find_host_node(context, node):
+    for relationship in node.relationships:
+        if context.deployment.relationship_types.is_descendant('cloudify.relationships.contained_in', relationship.type_name):
+            target_node = context.deployment.plan.nodes.get(relationship.target_node_id)
+            if target_node is not None:
+                next_target_node = find_host_node(context, target_node)
+                if next_target_node is not None:
+                    target_node = next_target_node
+            return target_node

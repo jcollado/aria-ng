@@ -89,7 +89,6 @@ def convert_relationship_type(context, relationship_type):
 def convert_relationship_template(context, requirement):
     relationship_template = requirement.relationship_template
     relationship_type = context.deployment.relationship_types.get_descendant(relationship_template.type_name)
-    
     return OrderedDict((
         ('target_id', requirement.target_node_template_name),
         ('source_operations', convert_interfaces(context, relationship_template.source_interfaces)), 
@@ -97,7 +96,8 @@ def convert_relationship_template(context, requirement):
         ('source_interfaces', OrderedDict()),
         ('target_interfaces', OrderedDict()),
         ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)),
-        ('properties', convert_properties(context, relationship_template.properties))))
+        ('properties', convert_properties(context, relationship_template.properties)),
+        ('type', relationship_type.name),))
 
 def convert_node(context, node):
     host_node = find_host_node(context, node)

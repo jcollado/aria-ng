@@ -299,3 +299,13 @@ def op_struct(
         'max_retries': max_retries,
         'retry_interval': retry_interval,
     }
+
+
+def get_nodes_by_names(plan, names):
+    return [
+        node
+        # for node in plan.node_templates
+        for node in plan['nodes']
+        for name in names
+        if node['id'] == name
+    ]

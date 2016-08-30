@@ -22,6 +22,7 @@ from .suite import (
     TempDirectoryTestCase,
     op_struct,
     parse_from_path,
+    get_nodes_by_names,
 )
 
 AGENT = 'central_deployment_agent'
@@ -37,6 +38,13 @@ PLUGIN_SUPPORTED_PLATFORM = 'supported_platform'
 PLUGIN_DISTRIBUTION = 'distribution'
 PLUGIN_DISTRIBUTION_VERSION = 'distribution_version'
 PLUGIN_DISTRIBUTION_RELEASE = 'distribution_release'
+NO_OP = {
+    'implementation': '',
+    'inputs': None,
+    'executor': None,
+    'max_retries': None,
+    'retry_interval': None,
+}
 
 
 class _AssertionsMixin(object):
@@ -485,6 +493,565 @@ relationships:
              'target_interfaces': {},
              'type_hierarchy': ['test_relationship']},
             result['relationships']['test_relationship'])
+
+    def test_instance_relationships_empty_relationships_section(self):
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template.node_type_section()
+        self.template.node_template_section()
+        self.template += """
+relationships: {}
+"""
+        result = self.parse()
+        self.assert_minimal_blueprint(result)
+        self.assertTrue(isinstance(result['nodes'][0]['relationships'], list))
+        self.assertEqual(0, len(result['nodes'][0]['relationships']))
+
+    def test_instance_relationships_standard_relationship(self):
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template.node_type_section()
+        self.template.node_template_section()
+        self.template += """
+  test_node2:
+    type: test_type
+    relationships:
+      -   type: test_relationship
+          target: test_node
+          source_interfaces:
+            test_interface1:
+              install: test_plugin.install
+relationships:
+  test_relationship: {}
+plugins:
+  test_plugin:
+    executor: central_deployment_agent
+    source: dummy
+"""
+        result = self.parse()
+        self.assertEquals(2, len(result['nodes']))
+
+        nodes = get_nodes_by_names(result, ['test_node', 'test_node2'])
+        self.assertEquals('test_node2', nodes[0]['id'])
+        self.assertEquals(1, len(nodes[0]['relationships']))
+
+        relationship = nodes[0]['relationships'][0]
+        self.assertEquals('test_relationship', relationship['type'])
+        self.assertEquals('test_node', relationship['target_id'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.install',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['source_interfaces']['test_interface1']['install'])
+
+        relationship_source_operations = relationship['source_operations']
+        self.assertEqual(
+            op_struct('test_plugin', 'install'),
+            relationship_source_operations['install'])
+        self.assertEqual(
+            op_struct('test_plugin', 'install'),
+            relationship_source_operations['test_interface1.install'])
+        self.assertEqual(2, len(relationship_source_operations))
+        self.assertEquals(8, len(relationship))
+
+        plugin_def = nodes[0]['plugins'][0]
+        self.assertEquals('test_plugin', plugin_def['name'])
+
+    def test_instance_relationships_duplicate_relationship(self):
+        # right now, having two relationships with the same (type,target)
+        # under one node is valid
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template.node_type_section()
+        self.template.node_template_section()
+        self.template += """
+  test_node2:
+    type: test_type
+    relationships:
+      -   type: test_relationship
+          target: test_node
+      -   type: test_relationship
+          target: test_node
+relationships:
+  test_relationship: {}
+"""
+        result = self.parse()
+        self.assertEquals(2, len(result['nodes']))
+
+        node = get_nodes_by_names(result, ['test_node2'])[0]
+        self.assertEquals('test_node2', node['id'])
+        self.assertEquals(2, len(node['relationships']))
+        self.assertEquals('test_relationship', node['relationships'][0]['type'])
+        self.assertEquals('test_relationship', node['relationships'][1]['type'])
+        self.assertEquals('test_node', node['relationships'][0]['target_id'])
+        self.assertEquals('test_node', node['relationships'][1]['target_id'])
+        self.assertEquals(8, len(node['relationships'][0]))
+        self.assertEquals(8, len(node['relationships'][1]))
+
+    def test_instance_relationships_relationship_inheritance(self):
+        # possibly 'inheritance' is the wrong term to use here,
+        # the meaning is for checking that the relationship properties from the
+        # top-level relationships
+        # section are used for instance-relationships which declare their types
+        # note there are no overrides in this case; these are tested in the
+        # next, more thorough test
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template.node_type_section()
+        self.template.node_template_section()
+        self.template += """
+  test_node2:
+    type: test_type
+    relationships:
+      -   type: test_relationship
+          target: test_node
+          source_interfaces:
+            interface1:
+              op1: test_plugin.task_name1
+relationships:
+  relationship: {}
+  test_relationship:
+    derived_from: relationship
+    target_interfaces:
+      interface2:
+        op2:
+          implementation: test_plugin.task_name2
+          inputs: {}
+plugins:
+  test_plugin:
+    executor: central_deployment_agent
+    source: dummy
+"""
+        result = self.parse()
+        self.assertEquals(2, len(result['nodes']))
+
+        nodes = get_nodes_by_names(result, ['test_node', 'test_node2'])
+        relationship = nodes[0]['relationships'][0]
+        self.assertEquals('test_relationship', relationship['type'])
+        self.assertEquals('test_node', relationship['target_id'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.task_name1',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['source_interfaces']['interface1']['op1'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.task_name2',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['target_interfaces']['interface2']['op2'])
+
+        rel_source_ops = relationship['source_operations']
+        self.assertEqual(
+            op_struct('test_plugin', 'task_name1', executor=AGENT),
+            rel_source_ops['op1'])
+        self.assertEqual(
+            op_struct('test_plugin', 'task_name1', executor=AGENT),
+            rel_source_ops['interface1.op1'])
+        self.assertEquals(2, len(rel_source_ops))
+
+        rel_target_ops = relationship['target_operations']
+        self.assertEqual(
+            op_struct('test_plugin', 'task_name2'),
+            rel_target_ops['op2'])
+        self.assertEqual(
+            op_struct('test_plugin', 'task_name2'),
+            rel_target_ops['interface2.op2'])
+        self.assertEquals(2, len(rel_target_ops))
+        self.assertEquals(8, len(relationship))
+
+    def test_instance_relationship_properties_inheritance(self):
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template.node_type_section()
+        self.template.node_template_section()
+        self.template += """
+  test_node2:
+    type: test_type
+    properties:
+      key: "val"
+    relationships:
+      -   type: empty_relationship
+          target: test_node
+          properties:
+            prop1: prop1_value_new
+            prop2: prop2_value_new
+            prop7: prop7_value_new_instance
+relationships:
+  empty_relationship:
+    properties:
+      prop1: {}
+      prop2: {}
+      prop7: {}
+"""
+        result = self.parse()
+        self.assertEquals(2, len(result['nodes']))
+
+        nodes = get_nodes_by_names(result, ['test_node', 'test_node2'])
+        relationships = result['relationships']
+        self.assertEquals(1, len(relationships))
+
+        i_properties = nodes[0]['relationships'][0]['properties']
+        self.assertEquals(3, len(i_properties))
+        self.assertEquals('prop1_value_new', i_properties['prop1'])
+        self.assertEquals('prop2_value_new', i_properties['prop2'])
+        self.assertEquals('prop7_value_new_instance', i_properties['prop7'])
+
+    def test_relationships_and_node_recursive_inheritance(self):
+        # testing for a complete inheritance path for relationships
+        # from top-level relationships to a relationship instance
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template.node_type_section()
+        self.template.node_template_section()
+        self.template += """
+  test_node2:
+    type: test_type
+    relationships:
+      -   type: relationship
+          target: test_node
+          source_interfaces:
+            test_interface3:
+              install: test_plugin.install
+          target_interfaces:
+            test_interface1:
+              install: test_plugin.install
+relationships:
+  relationship:
+    derived_from: parent_relationship
+    source_interfaces:
+      test_interface2:
+        install:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate:
+          implementation: test_plugin.terminate
+          inputs: {}
+  parent_relationship:
+    target_interfaces:
+      test_interface3:
+        install: {}
+plugins:
+  test_plugin:
+    executor: central_deployment_agent
+    source: dummy
+"""
+        result = self.parse()
+        self.assertEquals(2, len(result['nodes']))
+
+        nodes = get_nodes_by_names(result, ['test_node', 'test_node2'])
+        node_relationship = nodes[0]['relationships'][0]
+        relationship = result['relationships']['relationship']
+        parent_relationship = result['relationships']['parent_relationship']
+        self.assertEquals(2, len(result['relationships']))
+        self.assertEquals(5, len(parent_relationship))
+        self.assertEquals(6, len(relationship))
+        self.assertEquals(8, len(node_relationship))
+        self.assertEquals('parent_relationship', parent_relationship['name'])
+        self.assertEquals(1, len(parent_relationship['target_interfaces']))
+        self.assertEquals(
+            1, len(parent_relationship['target_interfaces']['test_interface3']))
+        self.assertEquals(
+            {'implementation': '',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            parent_relationship['target_interfaces']['test_interface3']['install'])
+
+        self.assertEquals('relationship', relationship['name'])
+        self.assertEquals('parent_relationship', relationship['derived_from'])
+        self.assertEquals(1, len(relationship['target_interfaces']))
+        self.assertEquals(
+            1, len(relationship['target_interfaces']['test_interface3']))
+        self.assertEquals(
+            NO_OP, relationship['target_interfaces']['test_interface3']['install'])
+        self.assertEquals(1, len(relationship['source_interfaces']))
+        self.assertEquals(
+            2, len(relationship['source_interfaces']['test_interface2']))
+        self.assertEqual(
+            {'implementation': 'test_plugin.install',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['source_interfaces']['test_interface2']['install'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.terminate',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['source_interfaces']['test_interface2']['terminate'])
+        self.assertEquals('relationship', node_relationship['type'])
+        self.assertEquals('test_node', node_relationship['target_id'])
+        self.assertEquals(2, len(node_relationship['target_interfaces']))
+        self.assertEquals(
+            1, len(node_relationship['target_interfaces']['test_interface3']))
+        self.assertEquals(
+            NO_OP, node_relationship['target_interfaces']['test_interface3']['install'])
+        self.assertEquals(
+            1, len(node_relationship['target_interfaces']['test_interface1']))
+
+        self.assertEqual(
+            {'implementation': 'test_plugin.install',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            node_relationship['target_interfaces']['test_interface1']['install'])
+        self.assertEquals(2, len(node_relationship['source_interfaces']))
+        self.assertEquals(
+            1, len(node_relationship['source_interfaces']['test_interface3']))
+        self.assertEquals(
+            {'implementation': 'test_plugin.install',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            node_relationship['source_interfaces']['test_interface2']['install'])
+        self.assertEquals(
+            2, len(node_relationship['source_interfaces']['test_interface2']))
+        self.assertEquals(
+            {'implementation': 'test_plugin.install',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            node_relationship['source_interfaces']['test_interface2']['install'])
+        self.assertEquals(
+            {'implementation': 'test_plugin.terminate',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            node_relationship['source_interfaces']['test_interface2']['terminate'])
+
+        rel_source_ops = node_relationship['source_operations']
+        self.assertEquals(4, len(rel_source_ops))
+        self.assertEqual(
+            op_struct('test_plugin', 'install', executor=AGENT),
+            rel_source_ops['test_interface2.install'])
+        self.assertEqual(
+            op_struct('test_plugin', 'install', executor=AGENT),
+            rel_source_ops['test_interface3.install'])
+        self.assertEqual(
+            op_struct('test_plugin', 'terminate', executor=AGENT),
+            rel_source_ops['terminate'])
+        self.assertEqual(
+            op_struct('test_plugin', 'terminate', executor=AGENT),
+            rel_source_ops['test_interface2.terminate'])
+
+        rel_target_ops = node_relationship['target_operations']
+        self.assertEquals(2, len(rel_target_ops))
+        self.assertEqual(
+            op_struct('', '', {}, executor=AGENT),
+            rel_target_ops['test_interface3.install'])
+        self.assertEqual(
+            op_struct('test_plugin', 'install', executor=AGENT),
+            rel_target_ops['test_interface1.install'])
+
+    def test_relationship_interfaces_inheritance_merge(self):
+        # testing for a complete inheritance path for relationships
+        # from top-level relationships to a relationship instance
+        self.template.version_section('cloudify_dsl', '1.0')
+        self.template.node_type_section()
+        self.template.node_template_section()
+        self.template += """
+  test_node2:
+    type: test_type
+    relationships:
+      -   type: relationship
+          target: test_node
+          target_interfaces:
+            test_interface:
+              destroy: test_plugin.destroy1
+          source_interfaces:
+            test_interface:
+              install2: test_plugin.install2
+              destroy2: test_plugin.destroy2
+relationships:
+  parent_relationship:
+    target_interfaces:
+      test_interface:
+        install: {}
+    source_interfaces:
+      test_interface:
+        install2: {}
+  relationship:
+    derived_from: parent_relationship
+    target_interfaces:
+      test_interface:
+        install:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate:
+          implementation: test_plugin.terminate
+          inputs: {}
+    source_interfaces:
+      test_interface:
+        install2:
+          implementation: test_plugin.install
+          inputs: {}
+        terminate2:
+          implementation: test_plugin.terminate
+          inputs: {}
+
+plugins:
+  test_plugin:
+    executor: central_deployment_agent
+    source: dummy
+"""
+        result = self.parse()
+        self.assertEquals(2, len(result['nodes']))
+        nodes = get_nodes_by_names(result, ['test_node', 'test_node2'])
+        node_relationship = nodes[0]['relationships'][0]
+        relationship = result['relationships']['relationship']
+        parent_relationship = result['relationships']['parent_relationship']
+        self.assertEquals(2, len(result['relationships']))
+        self.assertEquals(5, len(parent_relationship))
+        self.assertEquals(6, len(relationship))
+        self.assertEquals(8, len(node_relationship))
+
+        self.assertEquals('parent_relationship', parent_relationship['name'])
+        self.assertEquals(1, len(parent_relationship['target_interfaces']))
+        self.assertEquals(
+            1, len(parent_relationship['target_interfaces']['test_interface']))
+        self.assertIn(
+            'install', parent_relationship['target_interfaces']['test_interface'])
+        self.assertEquals(1, len(parent_relationship['source_interfaces']))
+        self.assertEquals(
+            1, len(parent_relationship['source_interfaces']['test_interface']))
+        self.assertIn(
+            'install2', parent_relationship['source_interfaces']['test_interface'])
+        self.assertEquals('relationship', relationship['name'])
+        self.assertEquals('parent_relationship', relationship['derived_from'])
+        self.assertEquals(1, len(relationship['target_interfaces']))
+        self.assertEquals(
+            2, len(relationship['target_interfaces']['test_interface']))
+        self.assertEqual(
+            {'implementation': 'test_plugin.install',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['target_interfaces']['test_interface']['install'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.terminate',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['target_interfaces']['test_interface']['terminate'])
+        self.assertEquals(1, len(relationship['source_interfaces']))
+        self.assertEquals(
+            2, len(relationship['source_interfaces']['test_interface']))
+        self.assertEqual(
+            {'implementation': 'test_plugin.install',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['source_interfaces']['test_interface']['install2'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.terminate',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['source_interfaces']['test_interface']['terminate2'])
+
+        self.assertEquals('relationship', node_relationship['type'])
+        self.assertEquals('test_node', node_relationship['target_id'])
+        self.assertEquals(1, len(node_relationship['target_interfaces']))
+        self.assertEquals(
+            3, len(node_relationship['target_interfaces']['test_interface']))
+        self.assertEqual(
+            {'implementation': 'test_plugin.install',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            node_relationship['target_interfaces']['test_interface']['install'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.terminate',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['target_interfaces']['test_interface']['terminate'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.destroy1',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            node_relationship['target_interfaces']['test_interface']['destroy'])
+        self.assertEquals(1, len(node_relationship['source_interfaces']))
+        self.assertEquals(
+            3, len(node_relationship['source_interfaces']['test_interface']))
+        self.assertEquals(
+            {'implementation': 'test_plugin.install2',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            node_relationship['source_interfaces']['test_interface']['install2'])
+        self.assertEqual(
+            {'implementation': 'test_plugin.terminate',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            relationship['source_interfaces']['test_interface']['terminate2'])
+        self.assertEquals(
+            {'implementation': 'test_plugin.destroy2',
+             'inputs': {},
+             'executor': AGENT,
+             'max_retries': None,
+             'retry_interval': None},
+            node_relationship['source_interfaces']['test_interface']['destroy2'])
+
+        rel_source_ops = node_relationship['source_operations']
+        self.assertEqual(
+            op_struct('test_plugin', 'install2', executor=AGENT),
+            rel_source_ops['install2'])
+        self.assertEqual(
+            op_struct('test_plugin', 'install2', executor=AGENT),
+            rel_source_ops['test_interface.install2'])
+        self.assertEqual(
+            op_struct('test_plugin', 'terminate', executor=AGENT),
+            rel_source_ops['terminate2'])
+        self.assertEqual(
+            op_struct('test_plugin', 'terminate', executor=AGENT),
+            rel_source_ops['test_interface.terminate2'])
+        self.assertEqual(
+            op_struct('test_plugin', 'destroy2', executor=AGENT),
+            rel_source_ops['destroy2'])
+        self.assertEqual(
+            op_struct('test_plugin', 'destroy2', executor=AGENT),
+            rel_source_ops['test_interface.destroy2'])
+        self.assertEquals(6, len(rel_source_ops))
+
+        rel_target_ops = node_relationship['target_operations']
+        self.assertEqual(
+            op_struct('test_plugin', 'install', executor=AGENT),
+            rel_target_ops['install'])
+        self.assertEqual(
+            op_struct('test_plugin', 'install', executor=AGENT),
+            rel_target_ops['test_interface.install'])
+        self.assertEqual(
+            op_struct('test_plugin', 'terminate', executor=AGENT),
+            rel_target_ops['terminate'])
+        self.assertEqual(
+            op_struct('test_plugin', 'terminate', executor=AGENT),
+            rel_target_ops['test_interface.terminate'])
+        self.assertEqual(
+            op_struct('test_plugin', 'destroy1', executor=AGENT),
+            rel_target_ops['destroy'])
+        self.assertEqual(
+            op_struct('test_plugin', 'destroy1', executor=AGENT),
+            rel_target_ops['test_interface.destroy'])
+        self.assertEquals(6, len(rel_source_ops))
 
 
 class TestParserApiWithFileSystem(ParserTestCase, TempDirectoryTestCase, _AssertionsMixin):

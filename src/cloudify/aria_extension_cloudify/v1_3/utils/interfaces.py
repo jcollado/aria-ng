@@ -46,10 +46,10 @@ def get_inherited_interface_definitions(context, presentation, type_name, field_
 
 def get_template_interfaces(context, presentation, type_name, field_name, fn_name):
     """
-    Returns the assigned interface_template values while making sure they are defined in the type. This includes
-    the interfaces themselves, their operations, and inputs for interfaces and operations.
+    Returns the assigned interface_template values. This includes the interfaces themselves, their
+    operations, and inputs for operations.
     
-    Interface and operation inputs' default values, if available, will be used if we did not assign them.
+    Operation inputs' default values, if available, will be used if we did not assign them.
     
     Makes sure that required inputs indeed end up with a value.
     
@@ -78,7 +78,9 @@ def get_template_interfaces(context, presentation, type_name, field_name, fn_nam
                 merge_interface(context, presentation, interface_assignment, our_interface_assignment, interface_definition, interface_name) 
             else:
                 # Unlike TOSCA, Cloudify lets you implement undeclared interfaces
-                template_interfaces[interface_name] = our_interface_assignment
+                interface_assignment = our_interface_assignment._clone()
+                coerce_inputs(context, presentation, interface_assignment, interface_name)
+                template_interfaces[interface_name] = interface_assignment
 
     # Check that there are no required inputs that we haven't assigned
     for interface_name, interface_template in template_interfaces.iteritems():
@@ -159,7 +161,7 @@ def merge_interface(context, presentation, interface_assignment, our_interface_a
 
             # Assign/merge operation inputs
             input_definitions = operation_definition.inputs if operation_definition is not None else None
-            assign_raw_inputs(context, interface_assignment._raw[operation_name], our_input_assignments, input_definitions, our_operation_template, interface_name, operation_name, presentation)
+            assign_raw_inputs(context, interface_assignment._raw[operation_name], our_input_assignments, input_definitions, interface_name, operation_name, presentation)
 
 def merge_raw_input_definition(context, the_raw_input, our_input, interface_name, operation_name, presentation, type_name):
     # Check if we changed the type
@@ -234,7 +236,7 @@ def merge_interface_definitions(context, interfaces, our_interfaces, presentatio
         else:
             interfaces[name] = our_interface._clone(for_presentation)
 
-def assign_raw_inputs(context, values, assignments, definitions, target, interface_name, operation_name, presentation):
+def assign_raw_inputs(context, values, assignments, definitions, interface_name, operation_name, presentation):
     if not assignments:
         return
 
@@ -256,6 +258,16 @@ def assign_raw_inputs(context, values, assignments, definitions, target, interfa
         
         # Coerce value
         values['inputs'][input_name] = coerce_property_value(context, assignment, definition, assignment.value)
+
+def coerce_inputs(context, presentation, interface_assignment, interface_name):
+    operations = interface_assignment.operations
+    if operations:
+        for operation_name, operation in operations.iteritems():
+            assignments = operation.inputs
+            if assignments:
+                for input_name, assignment in assignments.iteritems():
+                    interface_assignment._raw[operation_name]['inputs'][input_name] = coerce_property_value(context, assignment, None, assignment.value)
+                    interface_assignment._reset_method_cache()
 
 def validate_required_inputs(context, presentation, assignment, definition, original_assignment, interface_name, operation_name):
     input_definitions = definition.inputs

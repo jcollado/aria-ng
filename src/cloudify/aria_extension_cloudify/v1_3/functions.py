@@ -16,7 +16,7 @@
 
 from aria import Issue, InvalidValueError, dsl_specification
 from aria.deployment import Function, CannotEvaluateFunction
-from aria.utils import ReadOnlyList
+from aria.utils import ReadOnlyList, deepclone
 from cStringIO import StringIO
 
 @dsl_specification('intrinsic-functions-1', 'cloudify-1.3')
@@ -69,15 +69,12 @@ class GetInput(Function):
     def _evaluate(self, context, container):
         if not hasattr(context.deployment, 'classic_plan'):
             raise CannotEvaluateFunction()
-        #inputs = context.presentation.service_template._get_input_values(context)
-        #return inputs.get(self.input_property_name)
 
     def _evaluate_classic(self, classic_context):
-        # TODO
-        input = self.context.deployment.classic_plan['inputs'].get(self.input_property_name)
-        print '%%%%%%%%%%%%%%', self.context.deployment.classic_plan.inputs
-        print '%%%%%%%%%%%%%%', input
-        return input
+        inputs = self.context.deployment.classic_plan['inputs']
+        if self.input_property_name not in inputs:
+            raise InvalidValueError('input does not exist for function "get_input": %s' % repr(self.input_property_name), locator=self.locator)
+        return deepclone(inputs[self.input_property_name])
 
 @dsl_specification('intrinsic-functions-3', 'cloudify-1.3')
 class GetProperty(Function):
@@ -111,6 +108,11 @@ class GetAttribute(Function):
         self.locator = presentation._locator
 
     def _evaluate(self, context, container):
+        if not hasattr(context.deployment, 'classic_plan'):
+            raise CannotEvaluateFunction()
+
+    def _evaluate_classic(self, classic_context):
+        # TODO
         return ''
 
 #
@@ -121,7 +123,7 @@ FUNCTIONS = {
     'concat': Concat,
     'get_input': GetInput,
     'get_property': GetProperty,
-    'get_attribute': GetProperty}
+    'get_attribute': GetAttribute}
 
 def get_function(context, presentation, value):
     if isinstance(value, dict) and (len(value) == 1):

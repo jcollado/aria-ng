@@ -22,21 +22,18 @@ from aria_extension_cloudify import Plan
 
 install_aria_extensions()
 
-def parse_from_path(
-        dsl_file_path,
-        resources_base_url=None,
-        additional_resource_sources=(),
-        **legacy):
-    paths = [resources_base_url] if resources_base_url else []
+def parse_from_path(dsl_file_path, resources_base_url=None, additional_resource_sources=(), **legacy):
+    paths = [resources_base_url] if resources_base_url is not None else []
     paths += additional_resource_sources
     return _parse(UriLocation(dsl_file_path, paths))
 
-def parse(
-        dsl_string,
-        resources_base_url=None,
-        **legacy):
-    paths = [resources_base_url] if resources_base_url else []
+def parse(dsl_string, resources_base_url=None, **legacy):
+    paths = [resources_base_url] if resources_base_url is not None else []
     return _parse(LiteralLocation(dsl_string, paths))
+
+#
+# Utils
+#
 
 def _parse(location):
     parser = DefaultParser(location)

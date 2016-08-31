@@ -14,11 +14,11 @@
 # under the License.
 #
 
-def evaluate_outputs(outputs_def,
-                     get_node_instances_method,
-                     get_node_instance_method,
-                     get_node_method):
-    """Evaluates an outputs definition containing intrinsic functions.
+from aria.utils import deepclone
+
+def evaluate_outputs(outputs_def, get_node_instances_method, get_node_instance_method, get_node_method):
+    """
+    Evaluates an outputs definition containing intrinsic functions.
 
     :param outputs_def: Outputs definition.
     :param get_node_instances_method: A method for getting node instances.
@@ -28,11 +28,9 @@ def evaluate_outputs(outputs_def,
     """
     print '!!! evaluate_outputs'
     
-def evaluate_functions(payload, context,
-                       get_node_instances_method,
-                       get_node_instance_method,
-                       get_node_method):
-    """Evaluate functions in payload.
+def evaluate_functions(payload, context, get_node_instances_method, get_node_instance_method, get_node_method):
+    """
+    Evaluate functions in payload.
 
     :param payload: The payload to evaluate.
     :param context: Context used during evaluation.
@@ -42,14 +40,26 @@ def evaluate_functions(payload, context,
     :return: payload.
     """
     
-    print '!!! evaluate_function', payload, context
-    _evaluate_functions(context, payload)
-    print '!!! evaluate_function', payload
-    #node_id = context.get('self')    
+    #print '!!! evaluate_function', payload, context    
+    #node_id = context.get('self')
+    
+    r = {}
+    if payload:
+        for name, value in payload.iteritems():
+            r[name] = _evaluate_functions(context, value['default'])
+            # TODO: coerce to type?
+    
+    return r    
+
+#
+# Utils
+#
 
 def _evaluate_functions(classic_context, value):
     if hasattr(value, '_evaluate_classic'):
         value = value._evaluate_classic(classic_context)
+    else:
+        value = deepclone(value)
     
     if isinstance(value, dict):
         for k, v in value.iteritems():

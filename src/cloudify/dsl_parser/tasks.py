@@ -14,16 +14,18 @@
 # under the License.
 #
 
+from aria.utils import deepclone
 
 def prepare_deployment_plan(context, inputs=None, **kwargs):
     """
     Prepare a plan for deployment
     """
     
-    #print '!!! prepare_deployment_plan'
-    #print context
-    #print inputs
-    #print kwargs
+    #print '!!! prepare_deployment_plan', inputs, kwargs
     
-    context.deployment.plan.coerce_values(context, None, True)
+    if inputs:
+        for input_name, the_input in inputs.iteritems():
+            context.deployment.classic_plan['inputs'][input_name] = deepclone(the_input)
+    
+    #context.deployment.plan.coerce_values(context, None, True)
     return context.deployment.classic_plan

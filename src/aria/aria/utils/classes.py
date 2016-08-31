@@ -55,8 +55,10 @@ class HasCachedMethods(object):
         """
         
         r = {}
-        for k in self.__class__.__dict__:
-            p = getattr(self, k)
+        for k, p in self.__class__.__dict__.iteritems():
+            if isinstance(p, property):
+                # The property getter might be cached
+                p = p.fget
             if hasattr(p, 'cache_info'):
                 r[k] = p.cache_info()
         return r
@@ -66,7 +68,9 @@ class HasCachedMethods(object):
         Resets the caches of all cached methods.
         """
         
-        for k in self.__class__.__dict__:
-            p = getattr(self, k)
+        for k, p in self.__class__.__dict__.iteritems():
+            if isinstance(p, property):
+                # The property getter might be cached
+                p = p.fget
             if hasattr(p, 'cache_clear'):
                 p.cache_clear()

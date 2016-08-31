@@ -14,6 +14,7 @@
 # under the License.
 #
 
+from .exceptions import *
 from .context import *
 from .elements import *
 from .plan_elements import *
@@ -21,6 +22,7 @@ from .template_elements import *
 from .types import *
 
 __all__ = (
+    'CannotEvaluateFunction',
     'IdType',
     'DeploymentContext',
     'Element',

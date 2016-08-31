@@ -14,7 +14,9 @@
 # under the License.
 #
 
+from .exceptions import CannotEvaluateFunction
 from .. import InvalidValueError
+from ..presentation import Value
 from clint.textui import puts
 from collections import OrderedDict
 from shortuuid import ShortUUID
@@ -43,6 +45,9 @@ def generate_hex_string():
     return '%05x' % randrange(16 ** 5)
 
 def coerce_value(context, container, value, report_issues=False):
+    if isinstance(value, Value):
+        value = value.value
+        
     if isinstance(value, list):
         return [coerce_value(context, container, v, report_issues) for v in value]
     elif isinstance(value, dict):
@@ -50,11 +55,12 @@ def coerce_value(context, container, value, report_issues=False):
     elif hasattr(value, '_evaluate'):
         try:
             value = value._evaluate(context, container)
+            value = coerce_value(context, container, value, report_issues)
+        except CannotEvaluateFunction as e:
+            pass
         except InvalidValueError as e:
             if report_issues:
                 context.validation.report(e.issue)
-            return value
-        value = coerce_value(context, container, value, report_issues)
     return value
 
 def coerce_dict_values(context, container, the_dict, report_issues=False):

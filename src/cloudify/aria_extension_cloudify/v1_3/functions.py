@@ -15,7 +15,7 @@
 #
 
 from aria import Issue, InvalidValueError, dsl_specification
-from aria.deployment import Function
+from aria.deployment import Function, CannotEvaluateFunction
 from aria.utils import ReadOnlyList
 from cStringIO import StringIO
 
@@ -63,10 +63,21 @@ class GetInput(Function):
             inputs = context.presentation.inputs
             if (inputs is None) or (self.input_property_name not in inputs):
                 raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
+        
+        self.context = context
     
     def _evaluate(self, context, container):
-        inputs = context.presentation.service_template._get_input_values(context)
-        return inputs.get(self.input_property_name)
+        if not hasattr(context.deployment, 'classic_plan'):
+            raise CannotEvaluateFunction()
+        #inputs = context.presentation.service_template._get_input_values(context)
+        #return inputs.get(self.input_property_name)
+
+    def _evaluate_classic(self, classic_context):
+        # TODO
+        input = self.context.deployment.classic_plan['inputs'].get(self.input_property_name)
+        print '%%%%%%%%%%%%%%', self.context.deployment.classic_plan.inputs
+        print '%%%%%%%%%%%%%%', input
+        return input
 
 @dsl_specification('intrinsic-functions-3', 'cloudify-1.3')
 class GetProperty(Function):

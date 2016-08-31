@@ -125,7 +125,7 @@ def convert_capability_from_definition_to_assignment(context, presentation, cont
     
     properties = presentation.properties
     if properties is not None:
-        raw['properties'] = convert_property_definitions_to_values(properties)
+        raw['properties'] = convert_property_definitions_to_values(context, presentation, properties)
 
     # TODO attributes
 

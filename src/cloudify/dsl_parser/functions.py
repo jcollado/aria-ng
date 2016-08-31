@@ -41,4 +41,21 @@ def evaluate_functions(payload, context,
     :param get_node_method: A method for getting a node.
     :return: payload.
     """
-    print '!!! evaluate_function'
+    
+    print '!!! evaluate_function', payload, context
+    _evaluate_functions(context, payload)
+    print '!!! evaluate_function', payload
+    #node_id = context.get('self')    
+
+def _evaluate_functions(classic_context, value):
+    if hasattr(value, '_evaluate_classic'):
+        value = value._evaluate_classic(classic_context)
+    
+    if isinstance(value, dict):
+        for k, v in value.iteritems():
+            value[k] = _evaluate_functions(classic_context, v)
+    elif isinstance(value, list):
+        for i in range(len(value)):
+            value[i] = _evaluate_functions(classic_context, value[i])
+            
+    return value

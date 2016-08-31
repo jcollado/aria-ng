@@ -157,10 +157,10 @@ def coerce_property_value(context, presentation, definition, value, aspect=None)
     value = coerce_value(context, presentation, the_type, entry_schema, constraints, value, aspect)
     return Value(definition.type, value) if value is not None else None
 
-def convert_property_definitions_to_values(definitions):
+def convert_property_definitions_to_values(context, presentation, definitions):
     values = OrderedDict()
     for name, definition in definitions.iteritems():
         default = definition.default
         if default is not None:
-            values[name] = Value(definition.type, default)
+            values[name] = coerce_property_value(context, presentation, definition, default)
     return values

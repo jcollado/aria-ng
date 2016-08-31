@@ -87,12 +87,12 @@ class ParserTestCase(TestCase):
             dsl_string=template,
             resources_base_url=resources_base_url)
         self._validate_parse_no_issues(context)
-        return context.deployment.plan
+        return context.deployment.classic_plan
 
     def parse_from_uri(self, uri):
         context = parse_from_path(uri)
         self._validate_parse_no_issues(context)
-        return context.deployment.plan
+        return context.deployment.classic_plan
 
     def assert_parser_raise_exception(
             self,

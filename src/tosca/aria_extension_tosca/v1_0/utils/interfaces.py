@@ -181,7 +181,7 @@ def convert_interface_definition_from_type_to_raw_template(context, presentation
     # Copy default values for inputs
     inputs = presentation._get_inputs(context)
     if inputs is not None:
-        raw['inputs'] = convert_property_definitions_to_values(inputs)
+        raw['inputs'] = convert_property_definitions_to_values(context, presentation, inputs)
     
     # Copy operations
     operations = presentation._get_operations(context)
@@ -196,7 +196,7 @@ def convert_interface_definition_from_type_to_raw_template(context, presentation
                 raw[operation_name]['implementation'] = deepclone(implementation._raw)
             inputs = operation.inputs
             if inputs is not None:
-                raw[operation_name]['inputs'] = convert_property_definitions_to_values(inputs)
+                raw[operation_name]['inputs'] = convert_property_definitions_to_values(context, presentation, inputs)
     
     return raw
 

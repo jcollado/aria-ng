@@ -72,7 +72,7 @@ def get_template_requirements(context, presentation):
         for requirement_name, our_requirement_assignment in our_requirement_assignments:
             requirement_definition = get_first_requirement(requirement_definitions, requirement_name)
             if requirement_definition is not None:
-                requirement_assignment, relationship_property_definitions, relationship_interface_definitions = convert_requirement_from_definition_to_assignment(context, requirement_definition, our_requirement_assignment, presentation)
+                requirement_assignment, relationship_property_definitions, relationship_interface_definitions = convert_requirement_from_definition_to_assignment(context, presentation, requirement_definition, our_requirement_assignment, presentation)
                 merge_requirement_assignment(context, presentation, relationship_property_definitions, relationship_interface_definitions, requirement_assignment, our_requirement_assignment)
                 validate_requirement_assignment(context, our_requirement_assignment.relationship or our_requirement_assignment, requirement_assignment, relationship_property_definitions, relationship_interface_definitions)
                 requirement_assignments.append((requirement_name, requirement_assignment))
@@ -96,7 +96,7 @@ def get_template_requirements(context, presentation):
                 # If not specified, we interpret this to mean that exactly 1 occurrence is required
                 if actual_occurrences == 0:
                     # If it's not there, we will automatically add it (this behavior is not in the TOSCA spec, but seems implied)
-                    requirement_assignment, relationship_property_definitions, relationship_interface_definitions = convert_requirement_from_definition_to_assignment(context, requirement_definition, None, presentation)
+                    requirement_assignment, relationship_property_definitions, relationship_interface_definitions = convert_requirement_from_definition_to_assignment(context, presentation, requirement_definition, None, presentation)
                     validate_requirement_assignment(context, presentation, requirement_assignment, relationship_property_definitions, relationship_interface_definitions)
                     requirement_assignments.append((requirement_name, requirement_assignment))
                 elif actual_occurrences > 1:
@@ -114,7 +114,7 @@ def get_template_requirements(context, presentation):
 # Utils
 #
 
-def convert_requirement_from_definition_to_assignment(context, requirement_definition, our_requirement_assignment, container):
+def convert_requirement_from_definition_to_assignment(context, presentation, requirement_definition, our_requirement_assignment, container):
     from ..assignments import RequirementAssignment
     
     raw = OrderedDict()
@@ -163,7 +163,7 @@ def convert_requirement_from_definition_to_assignment(context, requirement_defin
         else:
             if relationship_property_definitions:
                 # Convert property definitions to values
-                raw['properties'] = convert_property_definitions_to_values(relationship_property_definitions)
+                raw['properties'] = convert_property_definitions_to_values(context, presentation, relationship_property_definitions)
         
         # These are our interface definitions
         relationship_interface_definitions = OrderedDict(relationship_type._get_interfaces(context)) # InterfaceDefinition

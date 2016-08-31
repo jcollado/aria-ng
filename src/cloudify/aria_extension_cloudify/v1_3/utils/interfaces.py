@@ -125,7 +125,7 @@ def convert_interface_definition_from_type_to_raw_template(context, presentation
                 raw[operation_name]['retry_interval'] = deepclone(retry_interval)
             inputs = operation.inputs
             if inputs is not None:
-                raw[operation_name]['inputs'] = convert_property_definitions_to_values(inputs)
+                raw[operation_name]['inputs'] = convert_property_definitions_to_values(context, presentation, inputs)
     
     return raw
 

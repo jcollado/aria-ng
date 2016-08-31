@@ -111,6 +111,8 @@ def get_parameter_values(context, presentation, field_name):
                     values[name] = coerce_property_value(context, presentation, parameter, parameter.value) # for parameters only 
                 elif hasattr(parameter, 'default') and (parameter.default is not None):
                     values[name] = coerce_property_value(context, presentation, parameter, parameter.default)
+                else:
+                    values[name] = Value(None, None)
     
     return values
 
@@ -154,10 +156,10 @@ def coerce_property_value(context, presentation, definition, value, aspect=None)
     value = coerce_value(context, presentation, the_type, value, aspect)
     return Value(getattr(definition, 'type', None), value) if value is not None else None
 
-def convert_property_definitions_to_values(definitions):
+def convert_property_definitions_to_values(context, presentation, definitions):
     values = OrderedDict()
     for name, definition in definitions.iteritems():
         default = definition.default
         if default is not None:
-            values[name] = Value(definition.type, default)
+            values[name] = coerce_property_value(context, presentation, definition, default)
     return values

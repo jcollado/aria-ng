@@ -24,6 +24,9 @@ class Function(object):
     def _evaluate(self, context, container):
         raise UnimplementedFunctionalityError(classname(self) + '._evaluate')
 
+    def __deepcopy__(self, memo):
+        return self
+
 class Element(object):
     def validate(self, context):
         pass

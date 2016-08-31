@@ -15,6 +15,7 @@
 #
 
 from aria.consumption import Plan as BasicPlan
+from aria.deployment import Parameter, Function
 from aria.utils import JSONValueEncoder
 from collections import OrderedDict
 import json
@@ -25,15 +26,20 @@ class Plan(BasicPlan):
     """
 
     def consume(self):
-        classic_plan = self.create_classic_plan()
-        if classic_plan is not None:
-            print json.dumps(classic_plan, indent=2, cls=JSONValueEncoder)
+        self.create_classic_plan()
+        if self.context.deployment.classic_plan is not None:
+            print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
 
     def create_classic_plan(self):
         self.create_deployment_plan()
+        classic_plan = None
         if (self.context.deployment.plan is not None) and (not self.context.validation.has_issues):
-            return convert_plan(self.context, self.context.deployment.plan, self.context.deployment.template)
-        return None
+            classic_plan = convert_plan(self.context, self.context.deployment.plan, self.context.deployment.template)
+        setattr(self.context.deployment, 'classic_plan', classic_plan)
+
+#
+# Conversions
+#
 
 def convert_plan(context, plan, template):
     r = OrderedDict((
@@ -47,6 +53,7 @@ def convert_plan(context, plan, template):
         ('relationships', OrderedDict((
             (relationship_type.name, convert_relationship_type(context, relationship_type)) for relationship_type in context.deployment.relationship_types.iter_descendants())))))
 
+    # TODO
     #setattr(version, 'raw', version['raw'])
     #setattr(version, 'definitions_name', version['definitions_name'])
     #setattr(version, 'definitions_version', version['definitions_version'])
@@ -165,7 +172,7 @@ def convert_operation(context, operation, is_workflow=False):
     return OrderedDict((
         ('plugin', plugin_name),
         ('operation', operation_name),
-        ('has_intrinsic_functions', False), # TODO
+        ('has_intrinsic_functions', has_intrinsic_functions(context, operation.inputs)),
         ('executor', operation.executor or plugin_executor),
         ('parameters' if is_workflow else 'inputs', convert_parameters(context, operation.inputs)),
         ('max_retries', operation.max_retries),
@@ -205,12 +212,33 @@ def convert_type_hierarchy(context, the_type, hierarchy):
         the_type = hierarchy.get_parent(the_type.name)
     return type_hierarchy
 
+#
+# Utils
+#
+
+def has_intrinsic_functions(context, value):
+    if isinstance(value, Parameter):
+        value = value.value
+
+    if isinstance(value, Function):
+        return True
+    elif isinstance(value, dict):
+        for v in value.itervalues():
+            if has_intrinsic_functions(context, v):
+                return True
+    elif isinstance(value, list):
+        for v in value:
+            if has_intrinsic_functions(context, v):
+                return True
+    return False
+
 def find_host_node(context, node):
+    node_template = context.deployment.template.node_templates.get(node.template_name)
+    if context.deployment.node_types.is_descendant('cloudify.nodes.Compute', node_template.type_name):
+        return node
+    
     for relationship in node.relationships:
         if context.deployment.relationship_types.is_descendant('cloudify.relationships.contained_in', relationship.type_name):
-            target_node = context.deployment.plan.nodes.get(relationship.target_node_id)
-            if target_node is not None:
-                next_target_node = find_host_node(context, target_node)
-                if next_target_node is not None:
-                    target_node = next_target_node
-            return target_node
+            return find_host_node(context, context.deployment.plan.nodes.get(relationship.target_node_id))
+
+    return None

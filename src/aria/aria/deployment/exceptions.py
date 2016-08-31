@@ -14,16 +14,9 @@
 # under the License.
 #
 
+from .. import AriaError
 
-def prepare_deployment_plan(context, inputs=None, **kwargs):
+class CannotEvaluateFunction(AriaError):
     """
-    Prepare a plan for deployment
+    ARIA could not evaluate the function at this time.
     """
-    
-    #print '!!! prepare_deployment_plan'
-    #print context
-    #print inputs
-    #print kwargs
-    
-    context.deployment.plan.coerce_values(context, None, True)
-    return context.deployment.classic_plan

@@ -40,14 +40,14 @@ def evaluate_functions(payload, context, get_node_instances_method, get_node_ins
     :return: payload.
     """
     
-    #print '!!! evaluate_function', payload, context    
+    print '!!! evaluate_function', payload, context    
     #node_id = context.get('self')
     
     r = {}
     if payload:
         for name, value in payload.iteritems():
             r[name] = _evaluate_functions(context, value['default'])
-            # TODO: coerce to type?
+            # TODO: coerce to value['type']?
     
     return r    
 

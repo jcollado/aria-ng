@@ -38,6 +38,15 @@ class Concat(Function):
             string_expressions.append(parse_string_expression(context, presentation, 'concat', index, None, argument[index]))
         self.string_expressions = ReadOnlyList(string_expressions)    
 
+    @property
+    def as_raw(self):
+        string_expressions = []
+        for string_expression in self.string_expressions:
+            if hasattr(string_expression, 'as_raw'):
+                string_expression = string_expression.as_raw
+            string_expressions.append(string_expression)
+        return {'concat': string_expressions}
+
     def _evaluate(self, context, container):
         r = StringIO()
         for e in self.string_expressions:
@@ -65,6 +74,13 @@ class GetInput(Function):
                 raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
         
         self.context = context
+
+    @property
+    def as_raw(self):
+        input_property_name = self.input_property_name
+        if hasattr(input_property_name, 'as_raw'):
+            input_property_name = input_property_name.as_raw
+        return {'get_input': input_property_name}
     
     def _evaluate(self, context, container):
         if not hasattr(context.deployment, 'classic_plan'):
@@ -93,6 +109,10 @@ class GetProperty(Function):
         self.modelable_entity_name = parse_modelable_entity_name(context, presentation, 'get_property', 0, argument[0])
         self.nested_property_name_or_index = argument[1:] # the first of these will be tried as a req-or-cap name
 
+    @property
+    def as_raw(self):
+        return {'get_property': [self.modelable_entity_name] + self.nested_property_name_or_index}
+
     def _evaluate(self, context, container):
         return ''
 
@@ -110,6 +130,10 @@ class GetAttribute(Function):
     def _evaluate(self, context, container):
         if not hasattr(context.deployment, 'classic_plan'):
             raise CannotEvaluateFunction()
+
+    @property
+    def as_raw(self):
+        return {'get_attribute': []}
 
     def _evaluate_classic(self, classic_context):
         # TODO
@@ -167,12 +191,13 @@ def parse_modelable_entity_name(context, presentation, name, index, value):
 
 def parse_self(presentation):
     from .templates import NodeTemplate, RelationshipTemplate
+    from .types import NodeType, RelationshipType
     
     if presentation is None:
         return None, None    
-    elif isinstance(presentation, NodeTemplate):
+    elif isinstance(presentation, NodeTemplate) or isinstance(presentation, NodeType):
         return presentation, 'node_template'
-    elif isinstance(presentation, RelationshipTemplate):
+    elif isinstance(presentation, RelationshipTemplate) or isinstance(presentation, RelationshipType):
         return presentation, 'relationship_template'
     else:
         return parse_self(presentation._container)

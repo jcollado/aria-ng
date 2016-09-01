@@ -21,10 +21,15 @@ from collections import OrderedDict
 from clint.textui import puts
 
 class Function(object):
+    @property
+    def as_raw(self):
+        raise UnimplementedFunctionalityError(classname(self) + '.as_raw')
+
     def _evaluate(self, context, container):
         raise UnimplementedFunctionalityError(classname(self) + '._evaluate')
 
     def __deepcopy__(self, memo):
+        # Circumvent cloning in order to maintain our state
         return self
 
 class Element(object):

@@ -40,6 +40,15 @@ class Concat(Function):
             string_expressions.append(parse_string_expression(context, presentation, 'concat', index, None, argument[index]))
         self.string_expressions = ReadOnlyList(string_expressions)    
 
+    @property
+    def as_raw(self):
+        string_expressions = []
+        for string_expression in self.string_expressions:
+            if hasattr(string_expression, 'as_raw'):
+                string_expression = string_expression.as_raw
+            string_expressions.append(string_expression)
+        return {'concat': string_expressions}
+
     def _evaluate(self, context, container):
         r = StringIO()
         for e in self.string_expressions:
@@ -63,6 +72,16 @@ class Token(Function):
         self.string_with_tokens = parse_string_expression(context, presentation, 'token', 0, 'the string to tokenize', argument[0])
         self.string_of_token_chars = parse_string_expression(context, presentation, 'token', 1, 'the token separator characters', argument[1])
         self.substring_index = parse_int(context, presentation, 'token', 2, 'the 0-based index of the token to return', argument[2])
+
+    @property
+    def as_raw(self):
+        string_with_tokens = self.string_with_tokens
+        if hasattr(string_with_tokens, 'as_raw'):
+            string_with_tokens = string_with_tokens.as_raw
+        string_of_token_chars = self.string_with_tokens
+        if hasattr(string_of_token_chars, 'as_raw'):
+            string_of_token_chars = string_of_token_chars.as_raw
+        return {'token': [string_with_tokens, string_of_token_chars, self.substring_index]}
 
     def _evaluate(self, context, container):
         string_with_tokens = self.string_with_tokens
@@ -88,6 +107,13 @@ class GetInput(Function):
             inputs = context.presentation.inputs
             if (inputs is None) or (self.input_property_name not in inputs):
                 raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
+
+    @property
+    def as_raw(self):
+        input_property_name = self.input_property_name
+        if hasattr(input_property_name, 'as_raw'):
+            input_property_name = input_property_name.as_raw
+        return {'get_input': input_property_name}
     
     def _evaluate(self, context, container):
         inputs = context.presentation.service_template.topology_template._get_input_values(context) if context.presentation.service_template.topology_template is not None else None
@@ -107,6 +133,10 @@ class GetProperty(Function):
 
         self.modelable_entity_name = parse_modelable_entity_name(context, presentation, 'get_property', 0, argument[0])
         self.nested_property_name_or_index = argument[1:] # the first of these will be tried as a req-or-cap name
+
+    @property
+    def as_raw(self):
+        return {'get_property': [self.modelable_entity_name] + self.nested_property_name_or_index}
 
     def _evaluate(self, context, container):
         modelable_entities = get_modelable_entities(context, container, self.locator, self.modelable_entity_name)
@@ -161,6 +191,10 @@ class GetAttribute(Function):
         self.modelable_entity_name = parse_modelable_entity_name(context, presentation, 'get_attribute', 0, argument[0])
         self.nested_property_name_or_index = argument[1:] # the first of these will be tried as a req-or-cap name
 
+    @property
+    def as_raw(self):
+        return {'get_attribute': [self.modelable_entity_name] + self.nested_property_name_or_index}
+
 #
 # Operation
 #
@@ -182,6 +216,19 @@ class GetOperationOutput(Function):
         self.operation_name = parse_string_expression(context, presentation, 'get_operation_output', 2, 'the operation name', argument[2])
         self.output_variable_name = parse_string_expression(context, presentation, 'get_operation_output', 3, 'the output name', argument[3])
 
+    @property
+    def as_raw(self):
+        interface_name = self.interface_name
+        if hasattr(interface_name, 'as_raw'):
+            interface_name = interface_name.as_raw
+        operation_name = self.operation_name
+        if hasattr(operation_name, 'as_raw'):
+            operation_name = operation_name.as_raw
+        output_variable_name = self.output_variable_name
+        if hasattr(output_variable_name, 'as_raw'):
+            output_variable_name = output_variable_name.as_raw
+        return {'get_operation_output': [self.modelable_entity_name, interface_name, operation_name, output_variable_name]}
+
 #
 # Navigation
 #
@@ -195,12 +242,19 @@ class GetNodesOfType(Function):
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
 
-        self.input_property_name = parse_string_expression(context, presentation, 'get_nodes_of_type', None, 'the node type name', argument)
+        self.node_type_name = parse_string_expression(context, presentation, 'get_nodes_of_type', None, 'the node type name', argument)
 
-        if isinstance(self.input_property_name, basestring):
+        if isinstance(self.node_type_name, basestring):
             node_types = context.presentation.node_types
-            if (node_types is None) or (self.input_property_name not in node_types):
+            if (node_types is None) or (self.node_type_name not in node_types):
                 raise InvalidValueError('function "get_nodes_of_type" argument is not a valid node type name: %s' % repr(argument), locator=self.locator)
+
+    @property
+    def as_raw(self):
+        node_type_name = self.node_type_name
+        if hasattr(node_type_name, 'as_raw'):
+            node_type_name = node_type_name.as_raw
+        return {'get_nodes_of_type': node_type_name}
 
     def _evaluate(self, context, container):
         pass
@@ -225,6 +279,16 @@ class GetArtifact(Function):
         self.artifact_name = parse_string_expression(context, presentation, 'get_artifact', 1, 'the artifact name', argument[1])
         self.location = parse_string_expression(context, presentation, 'get_artifact', 2, 'the location or "LOCAL_FILE"', argument[2])
         self.remove = parse_bool(context, presentation, 'get_artifact', 3, 'the removal flag', argument[3])
+
+    @property
+    def as_raw(self):
+        artifact_name = self.artifact_name
+        if hasattr(artifact_name, 'as_raw'):
+            artifact_name = artifact_name.as_raw
+        location = self.location
+        if hasattr(location, 'as_raw'):
+            location = location.as_raw
+        return {'get_artifacts': [self.modelable_entity_name, artifact_name, location, self.remove]}
 
 #
 # Utils
@@ -295,12 +359,13 @@ def parse_modelable_entity_name(context, presentation, name, index, value):
 
 def parse_self(presentation):
     from .templates import NodeTemplate, RelationshipTemplate
+    from .types import NodeType, RelationshipType
     
     if presentation is None:
         return None, None    
-    elif isinstance(presentation, NodeTemplate):
+    elif isinstance(presentation, NodeTemplate) or isinstance(presentation, NodeType):
         return presentation, 'node_template'
-    elif isinstance(presentation, RelationshipTemplate):
+    elif isinstance(presentation, RelationshipTemplate) or isinstance(presentation, RelationshipType):
         return presentation, 'relationship_template'
     else:
         return parse_self(presentation._container)

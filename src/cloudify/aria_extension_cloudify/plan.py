@@ -16,7 +16,7 @@
 
 from aria.consumption import Plan as BasicPlan
 from aria.deployment import Parameter, Function
-from aria.utils import JSONValueEncoder
+from aria.utils import JSONValueEncoder, deepclone
 from collections import OrderedDict
 import json
 
@@ -98,7 +98,7 @@ def convert_node_template(context, node_template):
                     ('current_instances', current_instances),
                     ('default_instances', node_template.default_instances),
                     ('min_instances', node_template.min_instances),
-                    ('max_instances', node_template.max_instances or -1)))),))),)))))
+                    ('max_instances', node_template.max_instances if node_template.max_instances is not None else -1)))),))),)))))
 
 def convert_relationship_type(context, relationship_type):
     return OrderedDict((
@@ -196,7 +196,7 @@ def convert_plugin(context, plugin):
 
 def convert_properties(context, properties):
     return OrderedDict((
-        (k, v.value) for k, v in properties.iteritems()))
+        (k, as_raw(v.value)) for k, v in properties.iteritems()))
 
 def convert_parameters(context, parameters):
     return OrderedDict((
@@ -205,7 +205,7 @@ def convert_parameters(context, parameters):
 def convert_parameter(context, parameter):
     return OrderedDict((
         ('type', parameter.type_name),
-        ('default', parameter.value),))
+        ('default', as_raw(parameter.value)),))
 
 def convert_type_hierarchy(context, the_type, hierarchy):
     type_hierarchy = []
@@ -217,6 +217,19 @@ def convert_type_hierarchy(context, the_type, hierarchy):
 #
 # Utils
 #
+
+def as_raw(value):
+    if hasattr(value, 'as_raw'):
+        value = value.as_raw
+    elif isinstance(value, list):
+        value = deepclone(value)
+        for i in range(len(value)):
+            value[i] = as_raw(value[i])
+    elif isinstance(value, dict):
+        value = deepclone(value)
+        for k, v in value.iteritems():
+            value[k] = as_raw(v)
+    return value
 
 def has_intrinsic_functions(context, value):
     if isinstance(value, Parameter):

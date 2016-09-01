@@ -301,6 +301,9 @@ def op_struct(
     }
 
 
+def get_node_by_name(plan, name):
+    return get_nodes_by_names(plan, [name])[0]
+
 def get_nodes_by_names(plan, names):
     return [
         node

@@ -34,22 +34,22 @@ class Plan(BasicPlan):
         self.create_deployment_plan()
         classic_plan = None
         if (self.context.deployment.plan is not None) and (not self.context.validation.has_issues):
-            classic_plan = convert_plan(self.context, self.context.deployment.plan, self.context.deployment.template)
+            classic_plan = convert_plan(self.context)
         setattr(self.context.deployment, 'classic_plan', classic_plan)
 
 #
 # Conversions
 #
 
-def convert_plan(context, plan, template):
+def convert_plan(context):
     r = OrderedDict((
-        ('description', plan.description),
-        ('inputs', convert_properties(context, plan.inputs)),
-        ('outputs', convert_properties(context, plan.outputs)),
-        ('nodes', [convert_node_template(context, value, plan) for value in template.node_templates.itervalues()]),
-        ('node_instances', [convert_node(context, v) for v in plan.nodes.itervalues()]),
+        ('description', context.deployment.plan.description),
+        ('inputs', convert_properties(context, context.deployment.plan.inputs)),
+        ('outputs', convert_properties(context, context.deployment.plan.outputs)),
+        ('nodes', [convert_node_template(context, value) for value in context.deployment.template.node_templates.itervalues()]),
+        ('node_instances', [convert_node(context, v) for v in context.deployment.plan.nodes.itervalues()]),
         ('workflows', OrderedDict((
-            key, convert_operation(context, value, True)) for key, value in plan.operations.iteritems())),
+            key, convert_operation(context, value, True)) for key, value in context.deployment.plan.operations.iteritems())),
         ('relationships', OrderedDict((
             (relationship_type.name, convert_relationship_type(context, relationship_type)) for relationship_type in context.deployment.relationship_types.iter_descendants())))))
 
@@ -65,11 +65,12 @@ def convert_plan(context, plan, template):
     
     return r
 
-def convert_node_template(context, node_template, plan):
+def convert_node_template(context, node_template):
     node_type = context.deployment.node_types.get_descendant(node_template.type_name)
+    host_node_template = find_host_node_template(context, node_template)
     
     current_instances = 0
-    for node in plan.nodes.itervalues():
+    for node in context.deployment.plan.nodes.itervalues():
         if node.template_name == node_template.name:
             current_instances += 1
     
@@ -82,14 +83,15 @@ def convert_node_template(context, node_template, plan):
     plugins = [convert_plugin(context, value) for value in plugins.itervalues()] if plugins is not None else []
 
     return OrderedDict((
-        ('id', node_template.name),
         ('name', node_template.name),
+        ('id', node_template.name),
+        ('type', node_type.name),
+        ('host_id', host_node_template.name if host_node_template is not None else None),
         ('properties', convert_properties(context, node_template.properties)),
         ('operations', convert_interfaces(context, node_template.interfaces)),
         ('type_hierarchy', convert_type_hierarchy(context, node_type, context.deployment.node_types)),
         ('relationships', relationships),
         ('plugins', plugins),
-        ('type', node_type.name),
         ('capabilities', OrderedDict((
             ('scalable', OrderedDict((
                 ('properties', OrderedDict((
@@ -112,30 +114,30 @@ def convert_relationship_template(context, requirement):
     
     return OrderedDict((
         ('type', relationship_type.name),
+        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)),
         ('target_id', requirement.target_node_template_name),
-        ('source_operations', convert_interfaces(context, relationship_template.source_interfaces)), 
-        ('target_operations', convert_interfaces(context, relationship_template.target_interfaces)),
+        ('properties', convert_properties(context, relationship_template.properties)),
         ('source_interfaces', OrderedDict()), # TODO: ?
         ('target_interfaces', OrderedDict()), # TODO: ?
-        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types)),
-        ('properties', convert_properties(context, relationship_template.properties))))
+        ('source_operations', convert_interfaces(context, relationship_template.source_interfaces)), 
+        ('target_operations', convert_interfaces(context, relationship_template.target_interfaces))))
 
 def convert_node(context, node):
     host_node = find_host_node(context, node)
 
     return OrderedDict((
-        ('name', node.template_name),
         ('id', node.id),
-        ('relationships', [convert_relationship(context, v) for v in node.relationships]),
-        ('host_id', host_node.id if host_node is not None else None)))
+        ('name', node.template_name),
+        ('host_id', host_node.id if host_node is not None else None),
+        ('relationships', [convert_relationship(context, v) for v in node.relationships])))
 
 def convert_relationship(context, relationship):
     target_node = context.deployment.plan.nodes.get(relationship.target_node_id)
     
     return OrderedDict((
         ('type', relationship.type_name), # template_name?
-        ('target_name', target_node.template_name),
-        ('target_id', relationship.target_node_id)))
+        ('target_id', relationship.target_node_id),
+        ('target_name', target_node.template_name)))
 
 def convert_interfaces(context, interfaces):
     operations = OrderedDict()
@@ -180,13 +182,13 @@ def convert_operation(context, operation, is_workflow=False):
 
 def convert_plugin(context, plugin):
     return OrderedDict((
+        ('name', plugin._name),
         ('distribution', plugin.distribution),
         ('distribution_release', plugin.distribution_release),
         ('distribution_version', plugin.distribution_version),
         ('executor', plugin.executor),
         ('install', plugin.install),
         ('install_arguments', plugin.install_arguments),
-        ('name', plugin._name),
         ('package_name', plugin.package_name),
         ('package_version', plugin.package_version),
         ('source', plugin.source),
@@ -231,6 +233,18 @@ def has_intrinsic_functions(context, value):
             if has_intrinsic_functions(context, v):
                 return True
     return False
+
+def find_host_node_template(context, node_template):
+    if context.deployment.node_types.is_descendant('cloudify.nodes.Compute', node_template.type_name):
+        return node_template
+    
+    for requirement in node_template.requirements:
+        relationship_template = requirement.relationship_template
+        if relationship_template is not None:
+            if context.deployment.relationship_types.is_descendant('cloudify.relationships.contained_in', relationship_template.type_name):
+                return find_host_node_template(context, context.deployment.template.node_templates.get(requirement.target_node_template_name))
+
+    return None
 
 def find_host_node(context, node):
     node_template = context.deployment.template.node_templates.get(node.template_name)

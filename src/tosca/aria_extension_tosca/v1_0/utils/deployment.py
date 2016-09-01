@@ -71,8 +71,7 @@ def get_deployment_template(context, presenter):
     return r
 
 def normalize_node_template(context, node_template):
-    the_type = node_template._get_type(context)
-    r = NodeTemplate(name=node_template._name, type_name=the_type._name)
+    r = NodeTemplate(name=node_template._name, type_name=node_template.type)
 
     normalize_property_values(r.properties, node_template._get_property_values(context))
     normalize_interfaces(context, r.interfaces, node_template._get_interfaces(context))

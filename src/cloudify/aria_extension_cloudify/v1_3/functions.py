@@ -85,8 +85,12 @@ class GetInput(Function):
         return {'get_input': input_property_name}
     
     def _evaluate(self, context, container):
-        if not hasattr(context.deployment, 'classic_plan'):
+        if not hasattr(self.context.deployment, 'classic_plan'):
             raise CannotEvaluateFunction()
+        inputs = self.context.deployment.classic_plan['inputs']
+        if self.input_property_name not in inputs:
+            raise CannotEvaluateFunction()
+        return inputs[self.input_property_name]
 
     def _evaluate_classic(self, classic_context):
         inputs = self.context.deployment.classic_plan['inputs']
@@ -153,42 +157,6 @@ class GetAttribute(Function):
             return get_classic_property(node['runtime_properties'], self.nested_property_name_or_index, 'get_attribute')
         except InvalidValueError:
             return get_classic_property(node_template['properties'], self.nested_property_name_or_index, 'get_attribute')
-
-def get_classic_node(classic_context, modelable_entity_name, function_name):
-    node = None
-    
-    def get_node(node_id):
-        try:
-            return classic_context.get_node(node_id)
-        except Exception as e:
-            raise InvalidValueError('function "%s" refers to an unknown node: %s' % (function_name, repr(node_id)), cause=e)
-
-    if modelable_entity_name == 'SELF':
-        node = get_node(classic_context.self_node_id)
-    elif modelable_entity_name == 'SOURCE':
-        node = get_node(classic_context.source_node_id)
-    elif modelable_entity_name == 'TARGET':
-        node = get_node(classic_context.target_node_id)
-    else:
-        try:
-            nodes = classic_context.get_nodes(modelable_entity_name)
-            node = nodes[0]
-        except Exception as e:
-            raise InvalidValueError('function "%s" refers to an unknown modelable entity: %s' % (function_name, repr(modelable_entity_name)), cause=e)
-    
-    node_template = classic_context.get_node_template(node['name'])
-    
-    return node, node_template
-
-def get_classic_property(value, nested_property_name_or_index, function_name):
-    for name_or_index in nested_property_name_or_index:
-        try:
-            value = value[name_or_index]
-        except KeyError as e:
-            raise InvalidValueError('function "%s" refers to an unknown nested property name: %s' % (function_name, repr(name_or_index)), cause=e)
-        except IndexError as e:
-            raise InvalidValueError('function "%s" refers to an unknown nested index: %s' % (function_name, repr(name_or_index)), cause=e)
-    return value
 
 #
 # Utils
@@ -258,3 +226,39 @@ def parse_self(presentation):
 
 def invalid_modelable_entity_name(name, index, value, locator, contexts):
     return InvalidValueError('function "%s" parameter %d can be "%s" only in %s' % (name, index + 1, value, contexts), locator=locator, level=Issue.FIELD)
+
+def get_classic_node(classic_context, modelable_entity_name, function_name):
+    node = None
+    
+    def get_node(node_id):
+        try:
+            return classic_context.get_node(node_id)
+        except Exception as e:
+            raise InvalidValueError('function "%s" refers to an unknown node: %s' % (function_name, repr(node_id)), cause=e)
+
+    if modelable_entity_name == 'SELF':
+        node = get_node(classic_context.self_node_id)
+    elif modelable_entity_name == 'SOURCE':
+        node = get_node(classic_context.source_node_id)
+    elif modelable_entity_name == 'TARGET':
+        node = get_node(classic_context.target_node_id)
+    else:
+        try:
+            nodes = classic_context.get_nodes(modelable_entity_name)
+            node = nodes[0]
+        except Exception as e:
+            raise InvalidValueError('function "%s" refers to an unknown modelable entity: %s' % (function_name, repr(modelable_entity_name)), cause=e)
+    
+    node_template = classic_context.get_node_template(node['name'])
+    
+    return node, node_template
+
+def get_classic_property(value, nested_property_name_or_index, function_name):
+    for name_or_index in nested_property_name_or_index:
+        try:
+            value = value[name_or_index]
+        except KeyError as e:
+            raise InvalidValueError('function "%s" refers to an unknown nested property name: %s' % (function_name, repr(name_or_index)), cause=e)
+        except IndexError as e:
+            raise InvalidValueError('function "%s" refers to an unknown nested index: %s' % (function_name, repr(name_or_index)), cause=e)
+    return value

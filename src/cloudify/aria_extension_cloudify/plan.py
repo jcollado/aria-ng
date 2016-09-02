@@ -26,14 +26,15 @@ class Plan(BasicPlan):
     """
 
     def consume(self):
-        self.create_classic_plan()
-        if self.context.deployment.classic_plan is not None:
-            print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
+        self.create_deployment_plan()
+        if not self.context.validation.has_issues:
+            self.create_classic_plan()
+            if self.context.deployment.classic_plan is not None:
+                print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
 
     def create_classic_plan(self):
-        self.create_deployment_plan()
         classic_plan = None
-        if (self.context.deployment.plan is not None) and (not self.context.validation.has_issues):
+        if (self.context.deployment.plan is not None):
             classic_plan = convert_plan(self.context)
         setattr(self.context.deployment, 'classic_plan', classic_plan)
 
@@ -66,10 +67,6 @@ def convert_plan(context):
     setattr(r, 'node_templates', r['nodes'])
     
     return r
-
-def convert_group_template(context, group_template):
-    return OrderedDict((
-        ('members', group_template.member_node_template_names),))
 
 def convert_node_template(context, node_template):
     node_type = context.deployment.node_types.get_descendant(node_template.type_name)
@@ -106,13 +103,9 @@ def convert_node_template(context, node_template):
                     ('min_instances', node_template.min_instances),
                     ('max_instances', node_template.max_instances if node_template.max_instances is not None else -1)))),))),)))))
 
-def convert_relationship_type(context, relationship_type):
+def convert_group_template(context, group_template):
     return OrderedDict((
-        ('name', relationship_type.name),
-        ('properties', convert_properties(context, relationship_type.properties)),
-        ('source_interfaces', convert_interfaces(context, relationship_type.source_interfaces)),
-        ('target_interfaces', convert_interfaces(context, relationship_type.target_interfaces)),
-        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types))))
+        ('members', group_template.member_node_template_names),))
 
 def convert_relationship_template(context, requirement):
     relationship_template = requirement.relationship_template
@@ -201,6 +194,14 @@ def convert_plugin(context, plugin):
         ('package_version', plugin.package_version),
         ('source', plugin.source),
         ('supported_platform', plugin.supported_platform)))
+
+def convert_relationship_type(context, relationship_type):
+    return OrderedDict((
+        ('name', relationship_type.name),
+        ('properties', convert_properties(context, relationship_type.properties)),
+        ('source_interfaces', convert_interfaces(context, relationship_type.source_interfaces)),
+        ('target_interfaces', convert_interfaces(context, relationship_type.target_interfaces)),
+        ('type_hierarchy', convert_type_hierarchy(context, relationship_type, context.deployment.relationship_types))))
 
 def convert_properties(context, properties):
     return OrderedDict((

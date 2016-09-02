@@ -40,6 +40,7 @@ class Plan(Template):
                 self.context.deployment.plan.validate(self.context)
             if not self.context.validation.has_issues:
                 self.context.deployment.plan.satisfy_requirements(self.context)
-            self.context.deployment.template.coerce_values(self.context, None, True)
+            if not self.context.validation.has_issues:
+                self.context.deployment.template.coerce_values(self.context, None, True)
             if not self.context.validation.has_issues:
                 self.context.deployment.plan.validate_capabilities(self.context)

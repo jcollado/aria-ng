@@ -15,7 +15,6 @@
 #
 
 from aria_extension_cloudify.v1_3.functions import get_function
-from aria.utils import deepclone
 from aria.consumption import ConsumptionContext
 from aria.presentation import FakePresentation
 

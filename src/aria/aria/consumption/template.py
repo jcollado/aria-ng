@@ -23,7 +23,7 @@ class Template(Consumer):
 
     def consume(self):
         self.create_deployment_template()
-        if not self.context.validation.has_issues:
+        if (self.context.deployment.template is not None) and (not self.context.validation.has_issues):
             self.context.deployment.template.dump(self.context)
     
     def create_deployment_template(self):

@@ -56,7 +56,7 @@ def coerce_value(context, container, value, report_issues=False):
         try:
             value = value._evaluate(context, container)
             value = coerce_value(context, container, value, report_issues)
-        except CannotEvaluateFunction as e:
+        except CannotEvaluateFunction:
             pass
         except InvalidValueError as e:
             if report_issues:
@@ -64,8 +64,14 @@ def coerce_value(context, container, value, report_issues=False):
     return value
 
 def coerce_dict_values(context, container, the_dict, report_issues=False):
+    for value in the_dict.itervalues():
+        value.coerce_values(context, container, report_issues)
+    return
     for k, value in the_dict.iteritems():
-        the_dict[k] = coerce_value(context, container, value, report_issues)
+        if hasattr(value, 'coerce_values'):
+            value.coerce_values(context, container, report_issues)
+        else:
+            the_dict[k] = coerce_value(context, container, value, report_issues)
 
 def instantiate_dict(context, container, the_dict, from_dict):
     if not from_dict:

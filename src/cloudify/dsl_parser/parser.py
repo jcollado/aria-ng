@@ -39,6 +39,10 @@ def _parse(location):
     parser = DefaultParser(location)
     context = ConsumptionContext()
     parser.parse_and_validate(context)
-    Plan(context).create_classic_plan()
+    if not context.validation.has_issues:
+        plan = Plan(context)
+        plan.create_deployment_plan()
+        if not context.validation.has_issues:
+            plan.create_classic_plan()
     context.validation.dump_issues()
     return context

@@ -59,6 +59,10 @@ class Parameter(Template):
         value = coerce_value(context, container, self.value) if self.value is not None else None
         return Parameter(self.type_name, value)
 
+    def coerce_values(self, context, container, report_issues):
+        if self.value is not None:
+            self.value = coerce_value(context, container, self.value, report_issues)
+
     @property
     def as_raw(self):
         return OrderedDict((

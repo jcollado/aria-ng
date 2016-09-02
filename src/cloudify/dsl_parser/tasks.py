@@ -26,6 +26,8 @@ def prepare_deployment_plan(context, inputs=None, **kwargs):
     if inputs:
         for input_name, the_input in inputs.iteritems():
             context.deployment.classic_plan['inputs'][input_name] = deepclone(the_input)
+            
+    # TODO: now that we have inputs, we should scan properties and inputs
+    # and evaluate functions
     
-    #context.deployment.plan.coerce_values(context, None, True)
     return context.deployment.classic_plan

@@ -191,7 +191,6 @@ class PolicyType(Presentation):
     def _get_properties(self, context):
         return self.properties
 
-
 @has_fields
 @dsl_specification('policy-triggers', 'cloudify-1.3')
 class PolicyTrigger(Presentation):

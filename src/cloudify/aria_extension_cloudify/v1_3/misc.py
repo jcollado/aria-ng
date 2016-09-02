@@ -22,9 +22,6 @@ class Description(AsIsPresentation):
     def _dump(self, context):
         puts(context.style.meta(self.value))
 
-class Version(AsIsPresentation):
-    pass
-
 @has_fields
 @dsl_specification('outputs', 'cloudify-1.3')
 class Output(Presentation):
@@ -97,7 +94,7 @@ class Plugin(Presentation):
         :rtype: str
         """
 
-    @object_field(Version)
+    @primitive_field(str)
     def package_version(self):
         """
         Managed plugin package version. (Supported since: :code:`cloudify_dsl_1_2`)
@@ -121,7 +118,7 @@ class Plugin(Presentation):
         :rtype: str
         """
 
-    @object_field(Version)
+    @primitive_field(str)
     def distribution_version(self):
         """
         Managed plugin distribution version. (Supported since: :code:`cloudify_dsl_1_2`)

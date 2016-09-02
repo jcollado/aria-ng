@@ -16,6 +16,7 @@
 
 from aria import Issue, InvalidValueError, dsl_specification
 from aria.deployment import Function, CannotEvaluateFunction
+from aria.presentation import FakePresentation
 from aria.utils import ReadOnlyList, deepclone
 from cStringIO import StringIO
 
@@ -68,10 +69,11 @@ class GetInput(Function):
 
         self.input_property_name = parse_string_expression(context, presentation, 'get_input', None, 'the input property name', argument)
 
-        if isinstance(self.input_property_name, basestring):
-            inputs = context.presentation.inputs
-            if (inputs is None) or (self.input_property_name not in inputs):
-                raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
+        if context.presentation is not None:
+            if isinstance(self.input_property_name, basestring):
+                inputs = context.presentation.inputs
+                if (inputs is None) or (self.input_property_name not in inputs):
+                    raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
         
         self.context = context
 
@@ -114,7 +116,11 @@ class GetProperty(Function):
         return {'get_property': [self.modelable_entity_name] + self.nested_property_name_or_index}
 
     def _evaluate(self, context, container):
-        return ''
+        raise CannotEvaluateFunction()
+
+    def _evaluate_classic(self, classic_context):
+        _, node_template = get_classic_node(classic_context, self.modelable_entity_name, 'get_property')
+        return get_classic_property(node_template['properties'], self.nested_property_name_or_index, 'get_property')
 
 @dsl_specification('intrinsic-functions-4', 'cloudify-1.3')
 class GetAttribute(Function):
@@ -138,12 +144,51 @@ class GetAttribute(Function):
         return {'get_attribute': [self.modelable_entity_name] + self.nested_property_name_or_index}
 
     def _evaluate(self, context, container):
-        if not hasattr(context.deployment, 'classic_plan'):
-            raise CannotEvaluateFunction()
+        raise CannotEvaluateFunction()
 
     def _evaluate_classic(self, classic_context):
-        # TODO
-        return ''
+        node, node_template = get_classic_node(classic_context, self.modelable_entity_name, 'get_attribute')
+
+        try:
+            return get_classic_property(node['runtime_properties'], self.nested_property_name_or_index, 'get_attribute')
+        except InvalidValueError:
+            return get_classic_property(node_template['properties'], self.nested_property_name_or_index, 'get_attribute')
+
+def get_classic_node(classic_context, modelable_entity_name, function_name):
+    node = None
+    
+    def get_node(node_id):
+        try:
+            return classic_context.get_node(node_id)
+        except Exception as e:
+            raise InvalidValueError('function "%s" refers to an unknown node: %s' % (function_name, repr(node_id)), cause=e)
+
+    if modelable_entity_name == 'SELF':
+        node = get_node(classic_context.self_node_id)
+    elif modelable_entity_name == 'SOURCE':
+        node = get_node(classic_context.source_node_id)
+    elif modelable_entity_name == 'TARGET':
+        node = get_node(classic_context.target_node_id)
+    else:
+        try:
+            nodes = classic_context.get_nodes(modelable_entity_name)
+            node = nodes[0]
+        except Exception as e:
+            raise InvalidValueError('function "%s" refers to an unknown modelable entity: %s' % (function_name, repr(modelable_entity_name)), cause=e)
+    
+    node_template = classic_context.get_node_template(node['name'])
+    
+    return node, node_template
+
+def get_classic_property(value, nested_property_name_or_index, function_name):
+    for name_or_index in nested_property_name_or_index:
+        try:
+            value = value[name_or_index]
+        except KeyError as e:
+            raise InvalidValueError('function "%s" refers to an unknown nested property name: %s' % (function_name, repr(name_or_index)), cause=e)
+        except IndexError as e:
+            raise InvalidValueError('function "%s" refers to an unknown nested index: %s' % (function_name, repr(name_or_index)), cause=e)
+    return value
 
 #
 # Utils
@@ -182,17 +227,18 @@ def parse_modelable_entity_name(context, presentation, name, index, value):
             raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a node template or a relationship template')
     elif value == 'HOST':
         _, self_variant = parse_self(presentation)
-        if self_variant != 'node_template':
+        if self_variant not in ('node_template', 'fake'):
             raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a node template')
     elif (value == 'SOURCE') or (value == 'TARGET'):
         _, self_variant = parse_self(presentation)
-        if self_variant != 'relationship_template':
+        if self_variant not in ('relationship_template', 'fake'):
             raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a relationship template')
     elif isinstance(value, basestring):
-        node_templates = context.presentation.node_templates or {}
-        relationship_templates = context.presentation.relationship_templates or {}
-        if (value not in node_templates) and (value not in relationship_templates):
-            raise InvalidValueError('function "%s" parameter %d is not a valid modelable entity name: %s' % (name, index + 1, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
+        if context.presentation is not None:
+            node_templates = context.presentation.node_templates or {}
+            relationship_templates = context.presentation.relationship_templates or {}
+            if (value not in node_templates) and (value not in relationship_templates):
+                raise InvalidValueError('function "%s" parameter %d is not a valid modelable entity name: %s' % (name, index + 1, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
     return value
 
 def parse_self(presentation):
@@ -205,6 +251,8 @@ def parse_self(presentation):
         return presentation, 'node_template'
     elif isinstance(presentation, RelationshipTemplate) or isinstance(presentation, RelationshipType):
         return presentation, 'relationship_template'
+    elif isinstance(presentation, FakePresentation):
+        return presentation, 'fake'
     else:
         return parse_self(presentation._container)
 

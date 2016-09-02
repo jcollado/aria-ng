@@ -183,3 +183,9 @@ class AsIsPresentation(PresentationBase):
     @value.setter
     def value(self, value):
         self._raw = value
+
+class FakePresentation(PresentationBase):
+    """
+    Instances of this class are useful as placeholders when a presentation is required
+    but unavailable. 
+    """

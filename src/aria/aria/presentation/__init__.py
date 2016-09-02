@@ -16,7 +16,7 @@
 
 from .exceptions import PresenterError, PresenterNotFoundError
 from .presenter import Presenter
-from .presentation import Value, PresentationBase, Presentation, AsIsPresentation
+from .presentation import Value, PresentationBase, Presentation, AsIsPresentation, FakePresentation
 from .source import PRESENTER_CLASSES, PresenterSource, DefaultPresenterSource
 from .fields import Field, has_fields, short_form_field, allow_unknown_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, object_sequenced_list_field, object_dict_unknown_fields, field_getter, field_setter, field_validator
 from .field_validators import type_validator, list_type_validator, list_length_validator, derived_from_validator
@@ -30,6 +30,7 @@ __all__ = (
     'PresentationBase',
     'Presentation',
     'AsIsPresentation',
+    'FakePresentation',
     'PresenterSource',
     'PRESENTER_CLASSES',
     'DefaultPresenterSource',

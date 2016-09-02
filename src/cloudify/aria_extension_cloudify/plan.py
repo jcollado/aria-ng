@@ -48,10 +48,12 @@ def convert_plan(context):
         ('outputs', convert_properties(context, context.deployment.plan.outputs)),
         ('nodes', [convert_node_template(context, value) for value in context.deployment.template.node_templates.itervalues()]),
         ('node_instances', [convert_node(context, v) for v in context.deployment.plan.nodes.itervalues()]),
-        ('workflows', OrderedDict((
-            key, convert_operation(context, value, True)) for key, value in context.deployment.plan.operations.iteritems())),
-        ('relationships', OrderedDict((
-            (relationship_type.name, convert_relationship_type(context, relationship_type)) for relationship_type in context.deployment.relationship_types.iter_descendants())))))
+        ('scaling_groups', OrderedDict(
+            (k, convert_group_template(context, v)) for k, v in context.deployment.template.group_templates.iteritems())),
+        ('workflows', OrderedDict(
+            (k, convert_operation(context, v, True)) for k, v in context.deployment.plan.operations.iteritems())),
+        ('relationships', OrderedDict(
+            (relationship_type.name, convert_relationship_type(context, relationship_type)) for relationship_type in context.deployment.relationship_types.iter_descendants()))))
 
     # TODO
     #setattr(version, 'raw', version['raw'])
@@ -64,6 +66,10 @@ def convert_plan(context):
     setattr(r, 'node_templates', r['nodes'])
     
     return r
+
+def convert_group_template(context, group_template):
+    return OrderedDict((
+        ('members', group_template.member_node_template_names),))
 
 def convert_node_template(context, node_template):
     node_type = context.deployment.node_types.get_descendant(node_template.type_name)
@@ -124,12 +130,14 @@ def convert_relationship_template(context, requirement):
 
 def convert_node(context, node):
     host_node = find_host_node(context, node)
+    groups = find_groups(context, node)
 
     return OrderedDict((
         ('id', node.id),
         ('name', node.template_name),
         ('host_id', host_node.id if host_node is not None else None),
-        ('relationships', [convert_relationship(context, v) for v in node.relationships])))
+        ('relationships', [convert_relationship(context, v) for v in node.relationships]),
+        ('scaling_groups', [OrderedDict((('name', group.template_name),)) for group in groups])))
 
 def convert_relationship(context, relationship):
     target_node = context.deployment.plan.nodes.get(relationship.target_node_id)
@@ -269,3 +277,10 @@ def find_host_node(context, node):
             return find_host_node(context, context.deployment.plan.nodes.get(relationship.target_node_id))
 
     return None
+
+def find_groups(context, node):
+    groups = []
+    for group in context.deployment.plan.groups.itervalues():
+        if node.id in group.member_node_ids:
+            groups.append(group)
+    return groups

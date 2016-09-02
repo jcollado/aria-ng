@@ -234,7 +234,6 @@ class PolicyDefinition(Presentation):
     See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policies/>`__.    
     """
     
-    @field_validator(type_validator('policy type', 'policy_types'))
     @primitive_field(str, required=True)
     def type(self):
         """
@@ -261,14 +260,6 @@ class PolicyDefinition(Presentation):
         """
 
     @cachedmethod
-    def _get_type(self, context):
-        return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
-
-    @cachedmethod
-    def _get_property_values(self, context):
-        return ReadOnlyDict(get_assigned_and_defined_property_values(context, self))
-
-    @cachedmethod
     def _get_targets(self, context):
         r = []
         targets = self.targets
@@ -281,7 +272,7 @@ class PolicyDefinition(Presentation):
 
     def _validate(self, context):
         super(PolicyDefinition, self)._validate(context)
-        self._get_property_values(context)
+        self._get_targets(context)
 
 @has_fields
 class ServiceTemplate(Presentation):

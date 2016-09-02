@@ -164,10 +164,9 @@ def normalize_group_policy_trigger(context, trigger):
     return r
 
 def normalize_policy(context, policy):
-    policy_type = policy._get_type(context)
-    r = PolicyTemplate(name=policy._name, type_name=policy_type._name)
+    r = PolicyTemplate(name=policy._name, type_name=policy.type)
 
-    normalize_property_values(r.properties, policy._get_property_values(context))
+    normalize_property_assignments(r.properties, policy.properties)
     
     groups = policy._get_targets(context)
     for group in groups:
@@ -220,6 +219,11 @@ def normalize_property_values(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
             properties[property_name] = Parameter(prop.type, prop.value)
+
+def normalize_property_assignments(properties, source_properties):
+    if source_properties:
+        for property_name, prop in source_properties.iteritems():
+            properties[property_name] = Parameter(None, prop.value)
 
 def normalize_property_definitions(properties, source_properties):
     if source_properties:

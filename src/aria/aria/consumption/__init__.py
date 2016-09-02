@@ -14,16 +14,16 @@
 # under the License.
 #
 
-from .exceptions import *
-from .context import *
-from .consumer import *
-from .style import *
-from .validate import *
-from .yaml import *
-from .presentation import *
-from .template import *
-from .plan import *
-from .types import *
+from .exceptions import ConsumerError
+from .context import ValidationContext, ConsumptionContext
+from .style import Style
+from .consumer import Consumer
+from .validate import Validate
+from .yaml import Yaml
+from .presentation import Presentation
+from .template import Template
+from .plan import Plan
+from .types import Types
 
 MODULES = (
     'validation')

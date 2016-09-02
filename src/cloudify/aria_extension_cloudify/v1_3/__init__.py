@@ -14,12 +14,13 @@
 # under the License.
 #
 
-from .presenter import *
-from .assignments import *
-from .definitions import *
-from .misc import *
-from .templates import *
-from .types import *
+from .presenter import CloudifyPresenter1_3
+from .assignments import PropertyAssignment, TriggerAssignment, PolicyAssignment, OperationAssignment, InterfaceAssignment, CapabilityAssignment
+from .definitions import PropertyDefinition, OperationDefinition, InterfaceDefinition, WorkflowDefinition
+from .misc import Description, Output, Plugin
+from .templates import RelationshipTemplate, NodeTemplate, GroupDefinition, PolicyDefinition, ServiceTemplate
+from .types import NodeType, RelationshipType, PolicyType, PolicyTrigger, DataType
+from .functions import Concat, GetInput, GetProperty, GetAttribute
 
 __all__ = (
     'CloudifyPresenter1_3',
@@ -36,7 +37,6 @@ __all__ = (
     'Description',
     'Output',
     'Plugin',
-    'PolicyTrigger',
     'RelationshipTemplate',
     'NodeTemplate',
     'GroupDefinition',
@@ -45,4 +45,9 @@ __all__ = (
     'NodeType',
     'RelationshipType',
     'PolicyType',
-    'DataType')
+    'PolicyTrigger',
+    'DataType',
+    'Concat',
+    'GetInput',
+    'GetProperty',
+    'GetAttribute')

@@ -14,10 +14,10 @@
 # under the License.
 #
 
-from .issue import *
-from .exceptions import *
-from .specification import *
-import pkgutil
+from .issue import Issue
+from .exceptions import AriaError, UnimplementedFunctionalityError, InvalidValueError
+from .specification import DSL_SPECIFICATION, DSL_SPECIFICATION_PACKAGES, dsl_specification, iter_spec
+import sys, pkgutil
 
 VERSION = '0.1'
 

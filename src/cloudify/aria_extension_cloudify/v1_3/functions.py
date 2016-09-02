@@ -126,14 +126,20 @@ class GetAttribute(Function):
 
     def __init__(self, context, presentation, argument):
         self.locator = presentation._locator
+        
+        if (not isinstance(argument, list)) or (len(argument) < 2):
+            raise InvalidValueError('function "get_attribute" argument must be a list of at least 2 string expressions: %s' % repr(argument), locator=self.locator)
+
+        self.modelable_entity_name = parse_modelable_entity_name(context, presentation, 'get_attribute', 0, argument[0])
+        self.nested_property_name_or_index = argument[1:] # the first of these will be tried as a req-or-cap name
+
+    @property
+    def as_raw(self):
+        return {'get_attribute': [self.modelable_entity_name] + self.nested_property_name_or_index}
 
     def _evaluate(self, context, container):
         if not hasattr(context.deployment, 'classic_plan'):
             raise CannotEvaluateFunction()
-
-    @property
-    def as_raw(self):
-        return {'get_attribute': []}
 
     def _evaluate_classic(self, classic_context):
         # TODO

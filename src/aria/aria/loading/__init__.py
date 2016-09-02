@@ -14,13 +14,13 @@
 # under the License.
 #
 
-from .exceptions import *
-from .loader import *
-from .source import *
-from .location import *
-from .literal import *
-from .uri import *
-from .file import *
+from .exceptions import LoaderError, LoaderNotFoundError, DocumentNotFoundError
+from .loader import Loader
+from .source import LoaderSource, DefaultLoaderSource
+from .location import Location, UriLocation, LiteralLocation
+from .literal import LiteralLoader
+from .uri import SESSION, SESSION_CACHE_PATH, UriLoader, UriTextLoader
+from .file import FILE_LOADER_PATHS, FileTextLoader
 
 __all__ = (
     'LoaderError',
@@ -28,15 +28,14 @@ __all__ = (
     'DocumentNotFoundError',
     'Loader',
     'LoaderSource',
+    'DefaultLoaderSource',
     'Location',
     'UriLocation',
     'LiteralLocation',
     'LiteralLoader',
-    'DefaultLoaderSource',
-    'FILE_LOADER_PATHS',
-    'FileTextLoader',
     'SESSION',
     'SESSION_CACHE_PATH',
     'UriLoader',
-    'UriTextLoader')
-    
+    'UriTextLoader',
+    'FILE_LOADER_PATHS',
+    'FileTextLoader')

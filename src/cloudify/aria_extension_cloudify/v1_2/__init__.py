@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from .misc import *
+from .misc import Instances
 
 __all__ = (
     'Instances',)

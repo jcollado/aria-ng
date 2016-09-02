@@ -14,12 +14,12 @@
 # under the License.
 #
 
-from .exceptions import *
-from .context import *
-from .elements import *
-from .plan_elements import *
-from .template_elements import *
-from .types import *
+from .exceptions import CannotEvaluateFunction
+from .context import IdType, DeploymentContext
+from .elements import Element, Template, Function, Parameter, Metadata, Interface, Operation, Artifact, GroupPolicy, GroupPolicyTrigger
+from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
+from .template_elements import DeploymentTemplate, NodeTemplate, Requirement, CapabilityTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, MappingTemplate, SubstitutionTemplate
+from .types import TypeHierarchy, Type, RelationshipType
 
 __all__ = (
     'CannotEvaluateFunction',
@@ -28,6 +28,7 @@ __all__ = (
     'Element',
     'Template',
     'Function',
+    'Parameter',
     'Metadata',
     'Interface',
     'Operation',
@@ -52,4 +53,5 @@ __all__ = (
     'MappingTemplate',
     'SubstitutionTemplate',
     'TypeHierarchy',
-    'Type')
+    'Type',
+    'RelationshipType')

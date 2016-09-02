@@ -14,8 +14,8 @@
 # under the License.
 #
 
-from .exceptions import *
-from .parser import *
+from .exceptions import ParserError
+from .parser import Parser, DefaultParser
 
 __all__ = (
     'ParserError',

@@ -22,23 +22,22 @@ from aria_extension_cloudify import Plan
 
 install_aria_extensions()
 
-def parse_from_path(dsl_file_path, resources_base_url=None, additional_resource_sources=(), **legacy):
+def parse_from_path(dsl_file_path, resources_base_url=None, additional_resource_sources=(), validate_version=True, **legacy):
     paths = [resources_base_url] if resources_base_url is not None else []
     paths += additional_resource_sources
-    return _parse(UriLocation(dsl_file_path, paths))
+    return _parse(UriLocation(dsl_file_path, paths), validate_version=validate_version)
 
-def parse(dsl_string, resources_base_url=None, **legacy):
+def parse(dsl_string, resources_base_url=None, validate_version=True, **legacy):
     paths = [resources_base_url] if resources_base_url is not None else []
-    return _parse(LiteralLocation(dsl_string, paths))
+    return _parse(LiteralLocation(dsl_string, paths), validate_version=validate_version)
 
-#
-# Utils
-#
-
-def _parse(location):
+def _parse(location, validate_version=True):
     parser = DefaultParser(location)
     context = ConsumptionContext()
-    parser.parse_and_validate(context)
+    if validate_version:
+        parser.parse_and_validate(context)
+    else:
+        parser.parse(context)
     if not context.validation.has_issues:
         plan = Plan(context)
         plan.create_deployment_plan()

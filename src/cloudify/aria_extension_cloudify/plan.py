@@ -85,11 +85,10 @@ def convert_node_template(context, node_template):
     plugins = context.presentation.service_template.plugins
     plugins = [convert_plugin(context, value) for value in plugins.itervalues()] if plugins is not None else []
 
-    return OrderedDict((
+    node_template = OrderedDict((
         ('name', node_template.name),
         ('id', node_template.name),
         ('type', node_type.name),
-        ('host_id', host_node_template.name if host_node_template is not None else None),
         ('properties', convert_properties(context, node_template.properties)),
         ('operations', convert_interfaces(context, node_template.interfaces)),
         ('type_hierarchy', convert_type_hierarchy(context, node_type, context.deployment.node_types)),
@@ -102,6 +101,9 @@ def convert_node_template(context, node_template):
                     ('default_instances', node_template.default_instances),
                     ('min_instances', node_template.min_instances),
                     ('max_instances', node_template.max_instances if node_template.max_instances is not None else -1)))),))),)))))
+    if host_node_template is not None:
+        node_template['host_id'] = host_node_template.name
+    return node_template
 
 def convert_group_template(context, group_template):
     return OrderedDict((
@@ -172,14 +174,18 @@ def convert_operation(context, operation, is_workflow=False):
         plugin = context.presentation.service_template.plugins.get(plugin_name) if context.presentation.service_template.plugins is not None else None
         plugin_executor = plugin.executor if plugin is not None else None
 
-    return OrderedDict((
+    operation_dict = OrderedDict((
         ('plugin', plugin_name),
         ('operation', operation_name),
         ('has_intrinsic_functions', has_intrinsic_functions(context, operation.inputs)),
         ('executor', operation.executor or plugin_executor),
-        ('parameters' if is_workflow else 'inputs', convert_parameters(context, operation.inputs)),
         ('max_retries', operation.max_retries),
         ('retry_interval', operation.retry_interval)))
+    if is_workflow:
+        operation_dict['parameters'] = convert_parameters(context, operation.inputs)
+    else:
+        operation_dict['inputs'] = convert_inputs(context, operation.inputs)
+    return operation_dict
 
 def convert_plugin(context, plugin):
     return OrderedDict((
@@ -206,6 +212,10 @@ def convert_relationship_type(context, relationship_type):
 def convert_properties(context, properties):
     return OrderedDict((
         (k, as_raw(v.value)) for k, v in properties.iteritems()))
+
+def convert_inputs(context, inputs):
+    return OrderedDict((
+        (k, as_raw(v.value)) for k, v in inputs.iteritems()))
 
 def convert_parameters(context, parameters):
     return OrderedDict((

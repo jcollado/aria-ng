@@ -24,7 +24,6 @@ from tempfile import mkdtemp
 from testtools import TestCase
 
 from dsl_parser.parser import parse, parse_from_path
-from dsl_parser.exceptions import DSLParsingException
 
 
 class TempDirectoryTestCase(TestCase):
@@ -79,14 +78,16 @@ class ParserTestCase(TestCase):
     def parse(
             self,
             resources_base_url=None,
-            template_inputs=None):
+            template_inputs=None,
+            validate_version=True):
         if template_inputs:
             template = str(self.template) % template_inputs
         else:
             template = str(self.template)
         context = parse(
             dsl_string=template,
-            resources_base_url=resources_base_url)
+            resources_base_url=resources_base_url,
+            validate_version=validate_version)
         self._validate_parse_no_issues(context)
         return context.deployment.classic_plan
 
@@ -94,21 +95,6 @@ class ParserTestCase(TestCase):
         context = parse_from_path(uri)
         self._validate_parse_no_issues(context)
         return context.deployment.classic_plan
-
-    def assert_parser_raise_exception(
-            self,
-            exception_types=DSLParsingException,
-            error_code=None,
-            extra_tests=()):
-        try:
-            self.parse()
-            self.fail()
-        except exception_types as exc:
-            if error_code:
-                self.assertEquals(error_code, exc.err_code)
-            for test in extra_tests:
-                test(exc)
-        return exc
 
     def _validate_parse_no_issues(self, context):
         if not context.validation.has_issues:
@@ -188,7 +174,7 @@ class Template(object):
             node_template = {'type': 'type'}
             if contained_in:
                 node_template['relationships'] = [
-                    {'type': 'tosca.relationships.HostedOn',
+                    {'type': 'cloudify.relationships.contained_in',
                      'target': contained_in}
                 ]
             node_templates[node] = node_template
@@ -200,7 +186,7 @@ class Template(object):
         blueprint = {
             'tosca_definitions_version': version,
             'node_types': {'type': {}},
-            'relationships': {'tosca.relationships.HostedOn': {}},
+            'relationships': {'cloudify.relationships.contained_in': {}},
             'node_templates': node_templates,
             'groups': blueprint_groups,
         }
@@ -304,6 +290,7 @@ def op_struct(
 
 def get_node_by_name(plan, name):
     return get_nodes_by_names(plan, [name])[0]
+
 
 def get_nodes_by_names(plan, names):
     return [

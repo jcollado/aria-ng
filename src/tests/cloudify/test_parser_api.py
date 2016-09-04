@@ -1305,6 +1305,7 @@ relationships:
 plugins:
   plugin:
     source: source
+    executor: host_agent
 node_templates:
   compute:
     type: tosca.nodes.Compute

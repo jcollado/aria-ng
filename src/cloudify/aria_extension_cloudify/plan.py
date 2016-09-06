@@ -58,7 +58,7 @@ def convert_plan(context):
         ('scaling_groups', OrderedDict(
             (k, convert_group_template(context, v)) for k, v in iter_scaling_groups(context))),
         ('workflows', OrderedDict(
-            (k, convert_workflow(context, v, plugins)) for k, v in context.deployment.plan.operations.iteritems())),
+            (k, convert_workflow(context, v)) for k, v in context.deployment.plan.operations.iteritems())),
         ('workflow_plugins_to_install', plugins_to_install_for_operations(context, context.deployment.plan.operations, plugins, 'central_deployment_agent')),
         ('relationships', OrderedDict(
             (v.name, convert_relationship_type(context, v)) for v in context.deployment.relationship_types.iter_descendants()))))
@@ -207,7 +207,7 @@ def convert_operation(context, operation):
         ('max_retries', operation.max_retries),
         ('retry_interval', operation.retry_interval)))
 
-def convert_workflow(context, operation, plugins):
+def convert_workflow(context, operation):
     plugin_name, _, operation_name = parse_implementation(context, operation.implementation)
 
     r = OrderedDict((
@@ -219,7 +219,6 @@ def convert_workflow(context, operation, plugins):
         ('max_retries', operation.max_retries),
         ('retry_interval', operation.retry_interval)))
 
-    prune(r, lambda container, k, v: not v and k != 'parameters')
     return r
         
 def convert_plugin(context, plugin):

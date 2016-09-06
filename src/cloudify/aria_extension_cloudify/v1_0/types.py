@@ -24,6 +24,9 @@ from aria.presentation import Presentation, has_fields, primitive_field, object_
 from aria.utils import ReadOnlyDict, cachedmethod
 
 @has_fields
+@dsl_specification('node-types', 'cloudify-1.0')
+@dsl_specification('node-types', 'cloudify-1.1')
+@dsl_specification('node-types', 'cloudify-1.2')
 @dsl_specification('node-types', 'cloudify-1.3')
 class NodeType(Presentation):
     """
@@ -83,6 +86,9 @@ class NodeType(Presentation):
         self._get_interfaces(context)
 
 @has_fields
+@dsl_specification('relationships-2', 'cloudify-1.0')
+@dsl_specification('relationships-2', 'cloudify-1.1')
+@dsl_specification('relationships-2', 'cloudify-1.2')
 @dsl_specification('relationships-2', 'cloudify-1.3')
 class RelationshipType(Presentation):
     """
@@ -155,6 +161,9 @@ class RelationshipType(Presentation):
         self._get_target_interfaces(context)
 
 @has_fields
+@dsl_specification('policy-types', 'cloudify-1.0')
+@dsl_specification('policy-types', 'cloudify-1.1')
+@dsl_specification('policy-types', 'cloudify-1.2')
 @dsl_specification('policy-types', 'cloudify-1.3')
 class PolicyType(Presentation):
     """
@@ -192,6 +201,9 @@ class PolicyType(Presentation):
         return self.properties
 
 @has_fields
+@dsl_specification('policy-triggers', 'cloudify-1.0')
+@dsl_specification('policy-triggers', 'cloudify-1.1')
+@dsl_specification('policy-triggers', 'cloudify-1.2')
 @dsl_specification('policy-triggers', 'cloudify-1.3')
 class PolicyTrigger(Presentation):
     """
@@ -221,6 +233,9 @@ class PolicyTrigger(Presentation):
         return self.parameters
 
 @has_fields
+@dsl_specification('data-types', 'cloudify-1.0')
+@dsl_specification('data-types', 'cloudify-1.1')
+@dsl_specification('data-types', 'cloudify-1.2')
 @dsl_specification('data-types', 'cloudify-1.3')
 class DataType(Presentation):
     """

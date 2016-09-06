@@ -14,9 +14,7 @@
 # under the License.
 #
 
-from .presenter import CloudifyPresenter1_3
-from .assignments import CapabilityAssignment
+from .presenter import CloudifyPresenter1_1
 
 __all__ = (
-    'CloudifyPresenter1_3',
-    'CapabilityAssignment')
+    'CloudifyPresenter1_1',)

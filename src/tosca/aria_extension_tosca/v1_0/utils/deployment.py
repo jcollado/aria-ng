@@ -101,7 +101,7 @@ def normalize_interface(context, interface):
     inputs = interface.inputs
     if inputs:
         for input_name, the_input in inputs.iteritems():
-            r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value)
+            r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value, None) # TODO: description
 
     operations = interface.operations
     if operations:
@@ -123,7 +123,7 @@ def normalize_operation(context, operation):
     inputs = operation.inputs
     if inputs:
         for input_name, the_input in inputs.iteritems():
-            r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value)
+            r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value, None) # TODO: description
     
     return r
 
@@ -265,12 +265,12 @@ def normalize_types(context, root, types, normalize=None):
 def normalize_property_values(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
-            properties[property_name] = Parameter(prop.type, prop.value)
+            properties[property_name] = Parameter(prop.type, prop.value, None) # TODO: description
 
 def normalize_properties(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
-            properties[property_name] = Parameter(prop.value.type, prop.value.value)
+            properties[property_name] = Parameter(prop.value.type, prop.value.value, None) # TODO: description
 
 def normalize_interfaces(context, interfaces, source_interfaces):
     if source_interfaces:

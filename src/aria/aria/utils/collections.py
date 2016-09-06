@@ -268,24 +268,26 @@ def make_agnostic(value):
             
     return value
 
-def is_removable(v):
+def is_removable(container, k, v):
     return (v is None) or ((isinstance(v, dict) or isinstance(v, list)) and (len(v) == 0))
 
-def prune(value, is_removable=is_removable):
+def prune(value, is_removable_fn=is_removable):
     """
     Deletes nulls and empty lists and dicts, recursively.
     """
     
     if isinstance(value, dict):
         for k, v in value.iteritems():
-            if is_removable(v):
+            if is_removable_fn(value, k, v):
                 del value[k]
             else:
-                prune(v)
+                prune(v, is_removable_fn)
     elif isinstance(value, list):
         for i in range(len(value)):
             v = value[i]
-            if is_removable(v):
+            if is_removable_fn(value, i, v):
                 del value[i]
             else:
-                prune(v)
+                prune(v, is_removable_fn)
+
+    return value

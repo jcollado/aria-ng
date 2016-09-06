@@ -51,13 +51,14 @@ class Template(Element):
         pass
 
 class Parameter(Template):
-    def __init__(self, type_name, value):
+    def __init__(self, type_name, value, description):
         self.type_name = type_name
         self.value = value
+        self.description = description
 
     def instantiate(self, context, container):
         value = coerce_value(context, container, self.value) if self.value is not None else None
-        return Parameter(self.type_name, value)
+        return Parameter(self.type_name, value, self.description)
 
     def coerce_values(self, context, container, report_issues):
         if self.value is not None:
@@ -67,7 +68,8 @@ class Parameter(Template):
     def as_raw(self):
         return OrderedDict((
             ('type_name', self.type_name),
-            ('value', self.value)))
+            ('value', self.value),
+            ('description', self.description)))
 
 class Metadata(Template):
     def __init__(self):

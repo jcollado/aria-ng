@@ -14,30 +14,34 @@
 # under the License.
 #
 
-from ..v1_2 import NodeTemplate as NodeTemplate1_2, ServiceTemplate as ServiceTemplate1_2
-from .assignments import CapabilityAssignment
+from ..v1_0 import NodeTemplate as NodeTemplate1_0, ServiceTemplate as ServiceTemplate1_0
 from .utils.node_templates import get_node_template_scalable
+from .misc import Instances
 from aria import dsl_specification
-from aria.presentation import has_fields, object_dict_field
+from aria.presentation import has_fields, object_field, object_dict_field
 from aria.utils import cachedmethod
 
 @has_fields
-@dsl_specification('node-templates-1', 'cloudify-1.3')
-class NodeTemplate(NodeTemplate1_2):
-    @object_dict_field(CapabilityAssignment)
-    def capabilities(self):
+@dsl_specification('node-templates-1', 'cloudify-1.2')
+class NodeTemplate(NodeTemplate1_0):
+    @object_field(Instances)
+    def instances(self):
         """
-        Used for specifying the node template capabilities (Supported since: :code:`cloudify_dsl_1_3`. At the moment only scalable capability is supported)
+        Instances configuration. (Deprecated. Replaced by :code:`capabilities.scalable`.)
         
-        :rtype: dict of str, :class:`CapabilityAssignment`
+        :rtype: :class:`Instances`
         """
 
     @cachedmethod
     def _get_scalable(self, context):
         return get_node_template_scalable(context, self)
 
+    def _validate(self, context):
+        super(NodeTemplate, self)._validate(context)
+        self._get_scalable(context)
+
 @has_fields
-class ServiceTemplate(ServiceTemplate1_2):
+class ServiceTemplate(ServiceTemplate1_0):
     @object_dict_field(NodeTemplate)
     def node_templates(self):
         """

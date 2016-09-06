@@ -103,6 +103,9 @@ class OperationDefinition(Presentation):
 
 @allow_unknown_fields
 @has_fields
+@dsl_specification('interfaces-1', 'cloudify-1.0')
+@dsl_specification('interfaces-1', 'cloudify-1.1')
+@dsl_specification('interfaces-1', 'cloudify-1.2')
 @dsl_specification('interfaces-1', 'cloudify-1.3')
 class InterfaceDefinition(Presentation):
     """

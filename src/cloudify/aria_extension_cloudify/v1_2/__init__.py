@@ -14,7 +14,12 @@
 # under the License.
 #
 
+from .presenter import CloudifyPresenter1_2
+from .templates import NodeTemplate, ServiceTemplate
 from .misc import Instances
 
 __all__ = (
-    'Instances',)
+    'CloudifyPresenter1_2',
+    'NodeTemplate',
+    'ServiceTemplate',
+    'Instances')

@@ -13,10 +13,3 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-
-from .presenter import CloudifyPresenter1_3
-from .assignments import CapabilityAssignment
-
-__all__ = (
-    'CloudifyPresenter1_3',
-    'CapabilityAssignment')

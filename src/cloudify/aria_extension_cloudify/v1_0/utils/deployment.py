@@ -60,12 +60,13 @@ def normalize_node_template(context, node_template):
         for relationship in relationships:
             r.requirements.append(normalize_requirement(context, relationship))
 
-    scalable = node_template._get_scalable(context)
-    if scalable is not None:
-        r.default_instances = scalable.default_instances
-        r.min_instances = scalable.min_instances
-        if scalable.max_instances != -1:
-            r.max_instances = scalable.max_instances
+    if hasattr(node_template, '_get_scalable'):
+        scalable = node_template._get_scalable(context)
+        if scalable is not None:
+            r.default_instances = scalable.default_instances
+            r.min_instances = scalable.min_instances
+            if scalable.max_instances != -1:
+                r.max_instances = scalable.max_instances
 
     return r
 
@@ -99,9 +100,9 @@ def normalize_operation(context, operation, is_definition=False):
     if inputs:
         for input_name, the_input in inputs.iteritems():
             if is_definition:
-                r.inputs[input_name] = Parameter(the_input.type, the_input.default)
+                r.inputs[input_name] = Parameter(the_input.type, the_input.default, the_input.description.value if the_input.description is not None else None)
             else:
-                r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value)
+                r.inputs[input_name] = Parameter(the_input.value.type, the_input.value.value, None) # TODO: description
     
     return r
 
@@ -182,7 +183,7 @@ def normalize_workflow(context, workflow):
     parameters = workflow.parameters
     if parameters:
         for parameter_name, parameter in parameters.iteritems():
-            r.inputs[parameter_name] = Parameter(parameter.type, parameter.default)
+            r.inputs[parameter_name] = Parameter(parameter.type, parameter.default, parameter.description.value if parameter.description is not None else None)
     
     return r
 
@@ -218,17 +219,17 @@ def normalize_types(context, root, types, normalize=None):
 def normalize_property_values(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
-            properties[property_name] = Parameter(prop.type, prop.value)
+            properties[property_name] = Parameter(prop.type, prop.value, None) # TODO: description
 
 def normalize_property_assignments(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
-            properties[property_name] = Parameter(None, prop.value)
+            properties[property_name] = Parameter(None, prop.value, None) # TODO: description
 
 def normalize_property_definitions(properties, source_properties):
     if source_properties:
         for property_name, prop in source_properties.iteritems():
-            properties[property_name] = Parameter(prop.type, prop.default)
+            properties[property_name] = Parameter(prop.type, prop.default, prop.description.value if prop.description is not None else None)
 
 def normalize_interfaces(context, interfaces, source_interfaces, is_definition=False):
     if source_interfaces:

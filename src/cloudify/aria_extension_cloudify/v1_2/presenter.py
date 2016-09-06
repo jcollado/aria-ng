@@ -14,9 +14,23 @@
 # under the License.
 #
 
-from .presenter import CloudifyPresenter1_3
-from .assignments import CapabilityAssignment
+from ..v1_1 import CloudifyPresenter1_1
+from .templates import ServiceTemplate
+from aria.utils import cachedmethod
 
-__all__ = (
-    'CloudifyPresenter1_3',
-    'CapabilityAssignment')
+class CloudifyPresenter1_2(CloudifyPresenter1_1):
+    """
+    ARIA presenter for the `Cloudify DSL v1.2 specification <http://docs.getcloudify.org/3.3.1/blueprints/overview/>`__.
+    """
+
+    @property
+    @cachedmethod
+    def service_template(self):
+        return ServiceTemplate(raw=self._raw)
+
+    # Presenter
+
+    @staticmethod
+    def can_present(raw):
+        dsl = raw.get('tosca_definitions_version')
+        return dsl == 'cloudify_dsl_1_2'

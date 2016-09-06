@@ -78,13 +78,12 @@ class DefaultParser(Parser):
                 self._handle_exception(context, e)
             else:
                 raise e
-        except:
+        finally:
             executor.close()
 
         # Merge imports
-        if imported_presentations is not None:
+        if (imported_presentations is not None) and hasattr(presentation, '_merge_import'):
             for imported_presentation in imported_presentations:
-                if hasattr(presentation, '_merge_import'):
                     presentation._merge_import(imported_presentation)
                     
         return presentation

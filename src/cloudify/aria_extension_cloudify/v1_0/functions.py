@@ -20,6 +20,9 @@ from aria.presentation import FakePresentation
 from aria.utils import ReadOnlyList, deepclone
 from cStringIO import StringIO
 
+@dsl_specification('intrinsic-functions-1', 'cloudify-1.0')
+@dsl_specification('intrinsic-functions-1', 'cloudify-1.1')
+@dsl_specification('intrinsic-functions-1', 'cloudify-1.2')
 @dsl_specification('intrinsic-functions-1', 'cloudify-1.3')
 class Concat(Function):
     """
@@ -56,6 +59,9 @@ class Concat(Function):
             r.write(str(e))
         return r.getvalue()
 
+@dsl_specification('intrinsic-functions-2', 'cloudify-1.0')
+@dsl_specification('intrinsic-functions-2', 'cloudify-1.1')
+@dsl_specification('intrinsic-functions-2', 'cloudify-1.2')
 @dsl_specification('intrinsic-functions-2', 'cloudify-1.3')
 class GetInput(Function):
     """
@@ -98,6 +104,9 @@ class GetInput(Function):
             raise InvalidValueError('input does not exist for function "get_input": %s' % repr(self.input_property_name), locator=self.locator)
         return deepclone(inputs[self.input_property_name])
 
+@dsl_specification('intrinsic-functions-3', 'cloudify-1.0')
+@dsl_specification('intrinsic-functions-3', 'cloudify-1.1')
+@dsl_specification('intrinsic-functions-3', 'cloudify-1.2')
 @dsl_specification('intrinsic-functions-3', 'cloudify-1.3')
 class GetProperty(Function):
     """
@@ -126,6 +135,9 @@ class GetProperty(Function):
         _, node_template = get_classic_node(classic_context, self.modelable_entity_name, 'get_property')
         return get_classic_property(node_template['properties'], self.nested_property_name_or_index, 'get_property')
 
+@dsl_specification('intrinsic-functions-4', 'cloudify-1.0')
+@dsl_specification('intrinsic-functions-4', 'cloudify-1.1')
+@dsl_specification('intrinsic-functions-4', 'cloudify-1.2')
 @dsl_specification('intrinsic-functions-4', 'cloudify-1.3')
 class GetAttribute(Function):
     """

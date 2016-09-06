@@ -23,6 +23,9 @@ class Description(AsIsPresentation):
         puts(context.style.meta(self.value))
 
 @has_fields
+@dsl_specification('outputs', 'cloudify-1.0')
+@dsl_specification('outputs', 'cloudify-1.1')
+@dsl_specification('outputs', 'cloudify-1.2')
 @dsl_specification('outputs', 'cloudify-1.3')
 class Output(Presentation):
     """
@@ -46,6 +49,9 @@ class Output(Presentation):
         """
 
 @has_fields
+@dsl_specification('plugins', 'cloudify-1.0')
+@dsl_specification('plugins', 'cloudify-1.1')
+@dsl_specification('plugins', 'cloudify-1.2')
 @dsl_specification('plugins', 'cloudify-1.3')
 class Plugin(Presentation):
     """

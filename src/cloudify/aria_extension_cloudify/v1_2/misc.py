@@ -18,7 +18,7 @@ from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field
 
 @has_fields
-@dsl_specification('node-templates', 'cloudify-1.2')
+@dsl_specification('node-templates-2', 'cloudify-1.2')
 class Instances(Presentation):
     """
     The :code:`instances` key is used for configuring the deployment characteristics of the node template.

@@ -17,7 +17,7 @@
 import os
 from urllib import pathname2url
 
-from yaml import safe_dump, safe_load
+from ruamel.yaml import safe_dump, safe_load
 
 from aria.reading.exceptions import ReaderNotFoundError
 

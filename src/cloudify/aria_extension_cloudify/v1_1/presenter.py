@@ -14,9 +14,16 @@
 # under the License.
 #
 
-from .presenter import CloudifyPresenter1_3
-from .assignments import CapabilityAssignment
+from ..v1_0 import CloudifyPresenter1_0
 
-__all__ = (
-    'CloudifyPresenter1_3',
-    'CapabilityAssignment')
+class CloudifyPresenter1_1(CloudifyPresenter1_0):
+    """
+    ARIA presenter for the `Cloudify DSL v1.1 specification <http://getcloudify.org/guide/3.2/dsl-spec-general.html>`__.
+    """
+
+    # Presenter
+
+    @staticmethod
+    def can_present(raw):
+        dsl = raw.get('tosca_definitions_version')
+        return dsl == 'cloudify_dsl_1_1'

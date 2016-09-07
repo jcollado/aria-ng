@@ -61,7 +61,7 @@ class DefaultParser(Parser):
         imported_presentations = None
         
         executor = FixedThreadPoolExecutor(timeout=10)
-        executor.print_exceptions = True
+        #executor.print_exceptions = True
         try:
             presentation = self._parse_all(context, self.location, None, self.presenter_class, executor)
             executor.drain()
@@ -85,6 +85,10 @@ class DefaultParser(Parser):
         # Merge imports
         if (imported_presentations is not None) and hasattr(presentation, '_merge_import'):
             for imported_presentation in imported_presentations:
+                ok = True
+                if hasattr(presentation, '_validate_import'):
+                    ok = presentation._validate_import(context, imported_presentation)
+                if ok:
                     presentation._merge_import(imported_presentation)
                     
         return presentation
@@ -107,7 +111,7 @@ class DefaultParser(Parser):
 
         if presentation is not None and hasattr(presentation, '_link'):
             presentation._link()
-        
+            
         # Submit imports to executor
         if hasattr(presentation, '_get_import_locations'):
             import_locations = presentation._get_import_locations()

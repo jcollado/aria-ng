@@ -16,6 +16,7 @@
 
 from ..v1_2 import CloudifyPresenter1_2
 from .templates import ServiceTemplate
+from aria import Issue
 from aria.utils import cachedmethod
 
 class CloudifyPresenter1_3(CloudifyPresenter1_2):
@@ -25,6 +26,7 @@ class CloudifyPresenter1_3(CloudifyPresenter1_2):
     Changes over v1.2:
 
     * `Policies <http://docs.getcloudify.org/3.4.0/blueprints/spec-policies/>`__.
+    * Imports no longer forbid `inputs`, `outputs', and `node_templates`.
     * Addition of `capabilities` to `node templates <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-templates/>`__.
     * Deprecate `instances` in `node templates <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-templates/>`__.
     """
@@ -41,6 +43,16 @@ class CloudifyPresenter1_3(CloudifyPresenter1_2):
         dsl = raw.get('tosca_definitions_version')
         return dsl == 'cloudify_dsl_1_3'
 
+    def _validate_import(self, context, presentation):
+        r = True
+        if (presentation.service_template.tosca_definitions_version is not None) and (presentation.service_template.tosca_definitions_version != self.service_template.tosca_definitions_version):
+            context.validation.report('import "tosca_definitions_version" is not "%s": %s' % (self.service_template.tosca_definitions_version, presentation.service_template.tosca_definitions_version), locator=presentation._get_child_locator('inputs'), level=Issue.BETWEEN_TYPES)
+            r = False
+        if presentation.groups is not None:
+            context.validation.report('import has forbidden "groups" section', locator=presentation._get_child_locator('groups'), level=Issue.BETWEEN_TYPES)
+            r = False
+        return r
+    
     @property
     @cachedmethod
     def policies(self):

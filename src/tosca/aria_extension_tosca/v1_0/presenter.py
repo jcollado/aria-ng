@@ -17,6 +17,7 @@
 from .templates import ServiceTemplate
 from .functions import Concat, Token, GetInput, GetProperty, GetAttribute, GetOperationOutput, GetNodesOfType, GetArtifact
 from .utils.deployment import get_deployment_template
+from aria import Issue
 from aria.presentation import Presenter
 from aria.utils import ReadOnlyList, cachedmethod
 
@@ -61,6 +62,13 @@ class ToscaSimplePresenter1_0(Presenter):
     @cachedmethod
     def _get_import_locations(self):
         return ReadOnlyList([i.file for i in self.service_template.imports] if (self.service_template and self.service_template.imports) else [])
+
+    def _validate_import(self, context, presentation):
+        r = True
+        if (presentation.service_template.tosca_definitions_version is not None) and (presentation.service_template.tosca_definitions_version != self.service_template.tosca_definitions_version):
+            context.validation.report('import "tosca_definitions_version" is not "%s": %s' % (self.service_template.tosca_definitions_version, presentation.service_template.tosca_definitions_version), locator=presentation._get_child_locator('inputs'), level=Issue.BETWEEN_TYPES)
+            r = False
+        return r
 
     @cachedmethod
     def _get_deployment_template(self, context):

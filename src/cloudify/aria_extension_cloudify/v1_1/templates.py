@@ -25,19 +25,3 @@ class ServiceTemplate(ServiceTemplate1_0):
         """
         :rtype: dict of str, :class:`Plugin`
         """
-
-    def _dump(self, context):
-        self._dump_content(context, (
-            'description',
-            'tosca_definitions_version',
-            'imports',
-            'plugins',
-            'node_types',
-            'policy_types',
-            'inputs',
-            'node_templates',
-            'relationships',
-            'groups',
-            'policy_triggers',
-            'outputs',
-            'workflows'))

@@ -17,6 +17,7 @@
 from .reader import Reader
 from .exceptions import ReaderSyntaxError
 from .locator import Locator
+from collections import OrderedDict
 import ruamel.yaml as yaml # @UnresolvedImport
 
 class YamlLocator(Locator):
@@ -49,12 +50,13 @@ class YamlReader(Reader):
             data = str(data)
             yaml_loader = yaml.RoundTripLoader(data)
             node = yaml_loader.get_single_node()
-            if node is None:
-                return {}
             locator = YamlLocator(self.loader.location, 0, 0)
-            locator.parse(node, self.loader.location)
+            if node is None:
+                raw = OrderedDict()
+            else:
+                locator.parse(node, self.loader.location)
+                raw = yaml_loader.construct_document(node)
             #locator.dump()
-            raw = yaml_loader.construct_document(node)
             setattr(raw, '_locator', locator)
             return raw
             

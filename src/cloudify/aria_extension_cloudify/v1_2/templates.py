@@ -14,33 +14,11 @@
 # under the License.
 #
 
-from ..v1_0 import NodeTemplate as NodeTemplate1_0
 from ..v1_1 import ServiceTemplate as ServiceTemplate1_1
 from .types import DataType
-from .misc import Instances, Plugin, UploadResources
-from .utils.node_templates import get_node_template_scalable
+from .misc import Plugin, UploadResources
 from aria import dsl_specification
 from aria.presentation import has_fields, primitive_field, object_field, object_dict_field
-from aria.utils import cachedmethod
-
-@has_fields
-@dsl_specification('node-templates-1', 'cloudify-1.2')
-class NodeTemplate(NodeTemplate1_0):
-    @object_field(Instances)
-    def instances(self):
-        """
-        Instances configuration. (Deprecated. Replaced by :code:`capabilities.scalable`.)
-        
-        :rtype: :class:`Instances`
-        """
-
-    @cachedmethod
-    def _get_scalable(self, context):
-        return get_node_template_scalable(context, self)
-
-    def _validate(self, context):
-        super(NodeTemplate, self)._validate(context)
-        self._get_scalable(context)
 
 @has_fields
 class ServiceTemplate(ServiceTemplate1_1):
@@ -52,12 +30,6 @@ class ServiceTemplate(ServiceTemplate1_1):
         The `dsl_definitions` section can be used to define arbitrary data structures that can then be reused in different parts of the blueprint using `YAML anchors and aliases <https://gist.github.com/ddlsmurf/1590434>`__.
         
         See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-dsl-definitions/>`__
-        """
-
-    @object_dict_field(NodeTemplate)
-    def node_templates(self):
-        """
-        :rtype: dict of str, :class:`NodeTemplate`
         """
 
     @object_dict_field(DataType)

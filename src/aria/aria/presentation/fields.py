@@ -44,8 +44,23 @@ class Field(object):
         else:
             raw = deepclone(default_raw)
             merge(raw, presentation._raw)
+
+        if self.field_variant == 'primitive_dict_unknown_fields':
+            if isinstance(raw, dict):
+                r = raw
+                if self.cls is not None:
+                    r = OrderedDict()
+                    for k, v in raw.iteritems():
+                        if k not in presentation.FIELDS:
+                            if not isinstance(v, self.cls):
+                                try:
+                                    r[k] = self.cls(v)
+                                except ValueError:
+                                    raise InvalidValueError('%s is not a dict of "%s" values: entry "%d" is %s' % (self.fullname, self.fullclass, k, repr(v)), locator=self.get_locator(raw))
+                return ReadOnlyDict(r)
+            return None
         
-        if self.field_variant == 'object_dict_unknown_fields':
+        elif self.field_variant == 'object_dict_unknown_fields':
             if isinstance(raw, dict):
                 return ReadOnlyDict(((k, self.cls(name=k, raw=v, container=presentation)) for k, v in raw.iteritems() if k not in presentation.FIELDS))
             return None
@@ -80,15 +95,35 @@ class Field(object):
         elif self.field_variant == 'primitive_list':
             if not isinstance(value, list):
                 raise InvalidValueError('%s is not a list: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+            r = value
             if self.cls is not None:
-                value = deepclone(value)
+                r = []
                 for i in range(len(value)):
-                    if not isinstance(value[i], self.cls):
+                    v = value[i]
+                    if isinstance(v, self.cls):
+                        r.append(v)
+                    else:
                         try:
-                            value[i] = self.cls(value[i])
+                            r.append(self.cls(v))
                         except ValueError:
-                            raise InvalidValueError('%s is not a list of "%s": element %d is %s' % (self.fullname, self.fullclass, i, repr(value[i])), locator=self.get_locator(raw))
-            return ReadOnlyList(value)
+                            raise InvalidValueError('%s is not a list of "%s": element %d is %s' % (self.fullname, self.fullclass, i, repr(v)), locator=self.get_locator(raw))
+            return ReadOnlyList(r)
+
+        elif self.field_variant == 'primitive_dict':
+            if not isinstance(value, dict):
+                raise InvalidValueError('%s is not a dict: %s' % (self.fullname, repr(value)), locator=self.get_locator(raw))
+            r = value
+            if self.cls is not None:
+                r = OrderedDict()
+                for k, v in value.iteritems():
+                    if isinstance(v, self.cls):
+                        r[k] = v
+                    else:
+                        try:
+                            r[k] = self.cls(v)
+                        except ValueError:
+                            raise InvalidValueError('%s is not a dict of "%s" values: entry "%d" is %s' % (self.fullname, self.fullclass, k, repr(v)), locator=self.get_locator(raw))
+            return ReadOnlyDict(r)
 
         elif self.field_variant == 'object':
             try:
@@ -200,6 +235,12 @@ class Field(object):
             puts('%s:' % self.name)
             with context.style.indent:
                 for v in value:
+                    puts(context.style.literal(v))
+
+        elif self.field_variant in ('primitive_dict', 'primitive_dict_unknown_fields'):
+            puts('%s:' % self.name)
+            with context.style.indent:
+                for v in value.itervalues():
                     puts(context.style.literal(v))
 
         elif self.field_variant == 'object':
@@ -387,6 +428,26 @@ def primitive_list_field(cls=None, default=None, allowed=None, required=False):
     """
     def decorator(fn):
         return Field(field_variant='primitive_list', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+    return decorator
+
+def primitive_dict_field(cls=None, default=None, allowed=None, required=False):
+    """
+    Function decorator for dict of primitive fields.
+    
+    The function must be a method in a class decorated with :func:`has_fields`.
+    """
+    def decorator(fn):
+        return Field(field_variant='primitive_dict', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
+    return decorator
+
+def primitive_dict_unknown_fields(cls=None, default=None, allowed=None, required=False):
+    """
+    Function decorator for dict of primitive fields, for all the fields that are not already decorated.
+    
+    The function must be a method in a class decorated with :func:`has_fields`.
+    """
+    def decorator(fn):
+        return Field(field_variant='primitive_dict_unknown_fields', fn=fn, cls=cls, default=default, allowed=allowed, required=required)
     return decorator
 
 def object_field(cls, default=None, allowed=None, required=False):

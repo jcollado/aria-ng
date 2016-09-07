@@ -26,9 +26,13 @@ def get_deployment_template(context, presenter):
     metadata = presenter.service_template.metadata
     if metadata is not None:
         rr = Metadata()
-        rr.template_name = metadata.template_name
-        rr.template_author = metadata.template_author
-        rr.template_version = metadata.template_version
+        rr.values['template_name'] = metadata.template_name
+        rr.values['template_author'] = metadata.template_author
+        rr.values['template_version'] = metadata.template_version
+        custom = metadata.custom
+        if custom:
+            for name, value in custom.iteritems():
+                rr.values[name] = value
         r.metadata = rr
 
     normalize_types(context, context.deployment.node_types, presenter.node_types)

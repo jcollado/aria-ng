@@ -40,3 +40,8 @@ class CloudifyPresenter1_3(CloudifyPresenter1_2):
     def can_present(raw):
         dsl = raw.get('tosca_definitions_version')
         return dsl == 'cloudify_dsl_1_3'
+
+    @property
+    @cachedmethod
+    def policies(self):
+        return self.service_template.policies

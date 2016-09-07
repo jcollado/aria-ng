@@ -28,7 +28,6 @@ class CloudifyPresenter1_2(CloudifyPresenter1_1):
     * `Upload resources <http://docs.getcloudify.org/3.3.1/blueprints/spec-upload-resources/>__.
     * Addition of `dsl_definitions` to `blueprint <http://docs.getcloudify.org/3.3.1/blueprints/spec-dsl-definitions/>`__.
     * Addition of `package_name`, `package_version`, `supported_platform`, `distribution`, `distribution_version`, and `distribution_release` to `plugin definitions <http://docs.getcloudify.org/3.3.1/blueprints/spec-plugins/>`__.
-    * Addition of `instances` to `node templates <http://docs.getcloudify.org/3.3.1/blueprints/spec-node-templates/>`__.
     """
 
     @property
@@ -42,3 +41,8 @@ class CloudifyPresenter1_2(CloudifyPresenter1_1):
     def can_present(raw):
         dsl = raw.get('tosca_definitions_version')
         return dsl == 'cloudify_dsl_1_2'
+
+    @property
+    @cachedmethod
+    def data_types(self):
+        return self.service_template.data_types

@@ -80,3 +80,22 @@ class Plugin(Presentation):
         
         :rtype: bool
         """
+
+@has_fields
+@dsl_specification('node-templates-2', 'cloudify-1.0')
+@dsl_specification('node-templates-2', 'cloudify-1.1')
+@dsl_specification('node-templates-2', 'cloudify-1.2')
+class Instances(Presentation):
+    """
+    The :code:`instances` key is used for configuring the deployment characteristics of the node template.
+    
+    See the `Cloudify DSL v1.2 specification <http://docs.getcloudify.org/3.3.1/blueprints/spec-node-templates/>`__.
+    """
+    
+    @primitive_field(int, default=1)
+    def deploy(self):
+        """
+        The number of node-instances this node template will have.
+        
+        :rtype: int
+        """

@@ -61,6 +61,7 @@ class DefaultParser(Parser):
         imported_presentations = None
         
         executor = FixedThreadPoolExecutor(timeout=10)
+        executor.print_exceptions = True
         try:
             presentation = self._parse_all(context, self.location, None, self.presenter_class, executor)
             executor.drain()

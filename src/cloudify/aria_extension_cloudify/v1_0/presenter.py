@@ -78,7 +78,7 @@ class CloudifyPresenter1_0(Presenter):
     @property
     @cachedmethod
     def data_types(self):
-        return self.service_template.data_types
+        return None
     
     @property
     @cachedmethod
@@ -133,7 +133,7 @@ class CloudifyPresenter1_0(Presenter):
     @property
     @cachedmethod
     def policies(self):
-        return self.service_template.policies
+        return None
 
     @property
     @cachedmethod

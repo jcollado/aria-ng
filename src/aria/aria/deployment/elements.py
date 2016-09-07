@@ -16,7 +16,7 @@
 
 from .utils import instantiate_dict, coerce_value, coerce_dict_values, dump_dict_values, dump_properties
 from .. import UnimplementedFunctionalityError
-from ..utils import StrictList, StrictDict, make_agnostic, classname
+from ..utils import StrictList, StrictDict, make_agnostic, classname, deepclone
 from collections import OrderedDict
 from clint.textui import puts
 
@@ -73,33 +73,22 @@ class Parameter(Template):
 
 class Metadata(Template):
     def __init__(self):
-        self.template_name = None
-        self.template_author = None
-        self.template_version = None
+        self.values = StrictDict(key_class=str)
 
     def instantiate(self, context, container):
         r = Metadata()
-        r.template_name = self.template_name
-        r.template_author = self.template_author
-        r.template_version = self.template_version
+        r.values.update(self.values)
         return r
 
     @property
     def as_raw(self):
-        return OrderedDict((
-            ('template_name', self.template_name),
-            ('template_author', self.template_author),
-            ('template_version', self.template_version)))
+        return deepclone(self.values)
 
     def dump(self, context):
         puts('Metadata:')
         with context.style.indent:
-            if self.template_name:
-                puts('Template name: %s' % context.style.meta(self.template_name))
-            if self.template_author:
-                puts('Template author: %s' % context.style.meta(self.template_author))
-            if self.template_version:
-                puts('Template version: %s' % context.style.meta(self.template_version))
+            for name, value in self.values.iteritems():
+                puts('%s: %s' % (name, context.style.meta(value)))
 
 class Interface(Template):
     def __init__(self, name):

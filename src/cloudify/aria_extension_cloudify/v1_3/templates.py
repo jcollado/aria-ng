@@ -14,8 +14,8 @@
 # under the License.
 #
 
-from ..v1_0 import PropertyAssignment
-from ..v1_2 import NodeTemplate as NodeTemplate1_2, ServiceTemplate as ServiceTemplate1_2
+from ..v1_0 import NodeTemplate as NodeTemplate1_0, PropertyAssignment
+from ..v1_2 import ServiceTemplate as ServiceTemplate1_2
 from .assignments import CapabilityAssignment
 from .utils.node_templates import get_node_template_scalable
 from aria import dsl_specification
@@ -24,7 +24,7 @@ from aria.utils import ReadOnlyList, cachedmethod
 
 @has_fields
 @dsl_specification('node-templates-1', 'cloudify-1.3')
-class NodeTemplate(NodeTemplate1_2):
+class NodeTemplate(NodeTemplate1_0):
     @object_dict_field(CapabilityAssignment)
     def capabilities(self):
         """

@@ -15,16 +15,14 @@
 #
 
 from .presenter import CloudifyPresenter1_2
-from .templates import NodeTemplate, ServiceTemplate
+from .templates import ServiceTemplate
 from .types import DataType
-from .misc import Instances, Plugin, PluginResource, UploadResources
+from .misc import Plugin, PluginResource, UploadResources
 
 __all__ = (
     'CloudifyPresenter1_2',
-    'NodeTemplate',
     'ServiceTemplate',
     'DataType',
-    'Instances',
     'Plugin',
     'PluginResource',
     'UploadResources')

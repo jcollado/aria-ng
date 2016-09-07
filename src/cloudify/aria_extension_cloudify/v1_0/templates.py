@@ -17,10 +17,11 @@
 from .definitions import PropertyDefinition, WorkflowDefinition
 from .assignments import PropertyAssignment, InterfaceAssignment, PolicyAssignment
 from .types import NodeType, RelationshipType, PolicyType, PolicyTrigger
-from .misc import Description, Output, Plugin
+from .misc import Description, Output, Plugin, Instances
 from .field_validators import node_templates_or_groups_validator
 from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
 from .utils.interfaces import get_template_interfaces
+from .utils.node_templates import get_node_template_scalable
 from .utils.relationships import get_relationship_assigned_and_defined_property_values
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
@@ -113,6 +114,7 @@ class RelationshipTemplate(Presentation):
 @has_fields
 @dsl_specification('node-templates', 'cloudify-1.0')
 @dsl_specification('node-templates', 'cloudify-1.1')
+@dsl_specification('node-templates', 'cloudify-1.2')
 class NodeTemplate(Presentation):
     """
     :code:`node_templates` represent the actual instances of node types which would eventually represent a running application/service as described in the blueprint.
@@ -162,6 +164,14 @@ class NodeTemplate(Presentation):
         
         :rtype: list of :class:`RelationshipTemplate`
         """
+
+    @object_field(Instances)
+    def instances(self):
+        """
+        Instances configuration. (Deprecated. Replaced by :code:`capabilities.scalable`.)
+        
+        :rtype: :class:`Instances`
+        """
     
     @cachedmethod
     def _get_type(self, context):
@@ -175,10 +185,15 @@ class NodeTemplate(Presentation):
     def _get_interfaces(self, context):
         return ReadOnlyDict(get_template_interfaces(context, self, 'node template', 'interfaces', '_get_interfaces'))
 
+    @cachedmethod
+    def _get_scalable(self, context):
+        return get_node_template_scalable(context, self)
+
     def _validate(self, context):
         super(NodeTemplate, self)._validate(context)
         self._get_property_values(context)
         self._get_interfaces(context)
+        self._get_scalable(context)
 
 @has_fields
 @dsl_specification('groups', 'cloudify-1.0')

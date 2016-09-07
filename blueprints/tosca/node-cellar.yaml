@@ -22,7 +22,8 @@ description: >-
 metadata:
   template_name: node-cellar
   template_author: ARIA
-  template_version: 1.0.0
+  template_version: '1.0.0'
+  aria_version: '1.0'
 
 imports:
   - types/openstack.yaml

@@ -42,12 +42,12 @@ class Plan(BasicPlan):
 # Conversions
 #
 
-
 def convert_plan(context):
     plugins = context.presentation.service_template.plugins
     plugins = [convert_plugin(context, v) for v in plugins.itervalues()] if plugins is not None else []
 
     r = OrderedDict((
+        ('version', convert_version(context)),
         ('description', context.deployment.plan.description),
         ('inputs', convert_properties(context, context.deployment.plan.inputs)),
         ('outputs', convert_properties(context, context.deployment.plan.outputs)),
@@ -57,26 +57,35 @@ def convert_plan(context):
             (k, convert_group_template(context, v)) for k, v in context.deployment.template.group_templates.iteritems())),
         ('scaling_groups', OrderedDict(
             (k, convert_group_template(context, v)) for k, v in iter_scaling_groups(context))),
+        ('policies', OrderedDict()), # TODO
+        ('policy_triggers', OrderedDict()), # TODO
+        ('policy_types', OrderedDict()), # TODO
         ('workflows', OrderedDict(
             (k, convert_workflow(context, v)) for k, v in context.deployment.plan.operations.iteritems())),
         ('workflow_plugins_to_install', plugins_to_install_for_operations(context, context.deployment.plan.operations, plugins, 'central_deployment_agent')),
         ('relationships', OrderedDict(
             (v.name, convert_relationship_type(context, v)) for v in context.deployment.relationship_types.iter_descendants()))))
         
-    #print '!!!', r['groups']
-    #print '!!!', r['scaling_groups']
-
-    # TODO
-    #setattr(version, 'raw', version['raw'])
-    #setattr(version, 'definitions_name', version['definitions_name'])
-    #setattr(version, 'definitions_version', version['definitions_version'])
-    
-    #setattr(r, 'version', r['version'])
+    setattr(r, 'version', r['version'])
+    setattr(r['version'], 'definitions_name', r['version']['definitions_name'])
+    setattr(r['version'], 'definitions_version', r['version']['definitions_version'])
+    setattr(r['version']['definitions_version'], 'number', r['version']['definitions_version']['number'])
     setattr(r, 'inputs', r['inputs'])
     setattr(r, 'outputs', r['outputs'])
     setattr(r, 'node_templates', r['nodes'])
     
     return r
+
+def convert_version(context):
+    number = context.presentation.service_template.tosca_definitions_version
+    number = number[len('cloudify_dsl_'):]
+    number = number.split('_')
+    number = tuple(int(v) for v in number)
+
+    return OrderedDict((
+        ('definitions_name', 'cloudify_dsl'),
+        ('definitions_version', OrderedDict((
+            ('number', number),)))))
 
 def convert_node_template(context, node_template, plugins):
     node_type = context.deployment.node_types.get_descendant(node_template.type_name)
@@ -119,7 +128,8 @@ def convert_node_template(context, node_template, plugins):
 
 def convert_group_template(context, group_template):
     return OrderedDict((
-        ('members', group_template.member_node_template_names),))
+        ('members', group_template.member_node_template_names),
+        ('policies', []))) # TODO
 
 def convert_relationship_template(context, requirement):
     relationship_template = requirement.relationship_template
@@ -224,16 +234,16 @@ def convert_workflow(context, operation):
 def convert_plugin(context, plugin):
     return OrderedDict((
         ('name', plugin._name),
-        ('distribution', plugin.distribution),
-        ('distribution_release', plugin.distribution_release),
-        ('distribution_version', plugin.distribution_version),
+        ('distribution', getattr(plugin, 'distribution', None)),
+        ('distribution_release', getattr(plugin, 'distribution_release', None)),
+        ('distribution_version', getattr(plugin, 'distribution_version', None)),
         ('executor', plugin.executor),
         ('install', plugin.install),
-        ('install_arguments', plugin.install_arguments),
-        ('package_name', plugin.package_name),
-        ('package_version', plugin.package_version),
+        ('install_arguments', getattr(plugin, 'install_arguments', None)),
+        ('package_name', getattr(plugin, 'package_name', None)),
+        ('package_version', getattr(plugin, 'package_version', None)),
         ('source', plugin.source),
-        ('supported_platform', plugin.supported_platform)))
+        ('supported_platform', getattr(plugin, 'supported_platform', None))))
 
 def convert_relationship_type(context, relationship_type):
     r = OrderedDict((

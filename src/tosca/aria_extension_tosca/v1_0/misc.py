@@ -20,7 +20,7 @@ from .utils.data_types import get_data_type, get_data_type_value, get_property_c
 from .utils.substitution_mappings import validate_subtitution_mappings_requirement, validate_subtitution_mappings_capability
 from aria import dsl_specification
 from aria.utils import cachedmethod
-from aria.presentation import AsIsPresentation, has_fields, short_form_field, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
+from aria.presentation import AsIsPresentation, has_fields, allow_unknown_fields, short_form_field, primitive_field, primitive_list_field, primitive_dict_unknown_fields, object_field, object_list_field, object_dict_field, field_validator, type_validator
 from clint.textui import puts
 
 @dsl_specification('3.5.1', 'tosca-simple-profile-1.0')
@@ -32,6 +32,7 @@ class Description(AsIsPresentation):
     def _dump(self, context):
         puts(context.style.meta(self.value))
 
+@allow_unknown_fields
 @has_fields
 @dsl_specification('3.9.3.2', 'tosca-simple-profile-1.0')
 class MetaData(ToscaPresentation):
@@ -54,6 +55,12 @@ class MetaData(ToscaPresentation):
     def template_version(self):
         """
         This optional metadata keyname can be used to declare a domain specific version of the service template as a single-line string value.
+        """
+
+    @primitive_dict_unknown_fields()
+    def custom(self):
+        """
+        :rtype: dict
         """
 
 @has_fields

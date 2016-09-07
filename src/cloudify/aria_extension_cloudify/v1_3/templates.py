@@ -14,12 +14,13 @@
 # under the License.
 #
 
+from ..v1_0 import PropertyAssignment
 from ..v1_2 import NodeTemplate as NodeTemplate1_2, ServiceTemplate as ServiceTemplate1_2
 from .assignments import CapabilityAssignment
 from .utils.node_templates import get_node_template_scalable
 from aria import dsl_specification
-from aria.presentation import has_fields, object_dict_field
-from aria.utils import cachedmethod
+from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_dict_field, field_validator, list_type_validator
+from aria.utils import ReadOnlyList, cachedmethod
 
 @has_fields
 @dsl_specification('node-templates-1', 'cloudify-1.3')
@@ -37,9 +38,84 @@ class NodeTemplate(NodeTemplate1_2):
         return get_node_template_scalable(context, self)
 
 @has_fields
+@dsl_specification('policies', 'cloudify-1.3')
+class PolicyDefinition(Presentation):
+    """
+    Policies provide a way of configuring reusable behavior by referencing groups for which a policy applies.
+    
+    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policies/>`__.    
+    """
+    
+    @primitive_field(str, required=True)
+    def type(self):
+        """
+        The policy type.
+        
+        :rtype: str
+        """
+
+    @object_dict_field(PropertyAssignment)
+    def properties(self):
+        """
+        The specific policy properties. The properties schema is defined by the policy type.
+        
+        :rtype: dict of str, :class:`PropertyAssignment`
+        """
+
+    @field_validator(list_type_validator('group', 'groups'))
+    @primitive_list_field(str, required=True)
+    def targets(self):
+        """
+        A list of group names. The policy will be applied on the groups specified in this list. 
+        
+        :rtype: list of str
+        """
+
+    @cachedmethod
+    def _get_targets(self, context):
+        r = []
+        targets = self.targets
+        if targets:
+            for target in targets:
+                target = context.presentation.groups.get(target)
+                if target is not None:
+                    r.append(target)
+        return ReadOnlyList(r)
+
+    def _validate(self, context):
+        super(PolicyDefinition, self)._validate(context)
+        self._get_targets(context)
+
+@has_fields
 class ServiceTemplate(ServiceTemplate1_2):
     @object_dict_field(NodeTemplate)
     def node_templates(self):
         """
         :rtype: dict of str, :class:`NodeTemplate`
         """
+
+    @object_dict_field(PolicyDefinition)
+    def policies(self):
+        """
+        :rtype: dict of str, :class:`PolicyDefinition`
+        """
+
+    def _dump(self, context):
+        self._dump_content(context, (
+            'description',
+            'tosca_definitions_version',
+            'imports',
+            'plugins',
+            'data_types',
+            'node_types',
+            'policy_types',
+            'inputs',
+            'node_templates',
+            'relationships',
+            'groups',
+            'policies',
+            'policy_triggers',
+            'outputs',
+            'workflows',
+            'upload_resources'))
+

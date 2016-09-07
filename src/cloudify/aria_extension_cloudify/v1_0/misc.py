@@ -50,9 +50,6 @@ class Output(Presentation):
 
 @has_fields
 @dsl_specification('plugins', 'cloudify-1.0')
-@dsl_specification('plugins', 'cloudify-1.1')
-@dsl_specification('plugins', 'cloudify-1.2')
-@dsl_specification('plugins', 'cloudify-1.3')
 class Plugin(Presentation):
     """
     By declaring :code:`plugins` we can install python modules and use the installed or preinstalled modules to perform different operations. We can also decide where a specific plugin's operations will be executed.
@@ -76,66 +73,10 @@ class Plugin(Presentation):
         :rtype: str
         """
 
-    @primitive_field(str)
-    def install_arguments(self):
-        """
-        Optional arguments passed to the :code:`pip install` command created for the plugin installation.
-        
-        :rtype: str        
-        """
-
     @primitive_field(bool, default=True)
     def install(self):
         """
         Whether to install the plugin or not as it might already be installed as part of the agent. Defaults to true. (Supported since: :code:`cloudify_dsl_1_1`)
         
         :rtype: bool
-        """
-
-    @primitive_field(str)
-    def package_name(self):
-        """
-        Managed plugin package name. (Supported since: :code:`cloudify_dsl_1_2`) If install is false, pacakge_name is redundant. If install is true, package_name (or source) is mandatory.
-        
-        :rtype: str
-        """
-
-    @primitive_field(str)
-    def package_version(self):
-        """
-        Managed plugin package version. (Supported since: :code:`cloudify_dsl_1_2`)
-        
-        :rtype: :class:`Version`
-        """
-
-    @primitive_field(str)
-    def supported_platform(self):
-        """
-        Managed plugin supported platform (e.g. :code:`linux_x86_64`). (Supported since: :code:`cloudify_dsl_1_2`)
-        
-        :rtype: str
-        """
-
-    @primitive_field(str)
-    def distribution(self):
-        """
-        Managed plugin distribution. (Supported since: :code:`cloudify_dsl_1_2`)
-        
-        :rtype: str
-        """
-
-    @primitive_field(str)
-    def distribution_version(self):
-        """
-        Managed plugin distribution version. (Supported since: :code:`cloudify_dsl_1_2`)
-        
-        :rtype: :class:`Version`
-        """
-
-    @primitive_field(str)
-    def distribution_release(self):
-        """
-        Managed plugin distribution release. (Supported since: :code:`cloudify_dsl_1_2`)
-        
-        :rtype: str
         """

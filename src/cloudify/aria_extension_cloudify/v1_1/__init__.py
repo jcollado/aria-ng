@@ -15,6 +15,18 @@
 #
 
 from .presenter import CloudifyPresenter1_1
+from .templates import ServiceTemplate
+from .definitions import OperationDefinition, InterfaceDefinition
+from .types import NodeType, RelationshipType
+from .misc import Plugin
+from .functions import Concat
 
 __all__ = (
-    'CloudifyPresenter1_1',)
+    'CloudifyPresenter1_1',
+    'ServiceTemplate',
+    'OperationDefinition',
+    'InterfaceDefinition',
+    'NodeType',
+    'RelationshipType',
+    'Plugin',
+    'Concat')

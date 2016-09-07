@@ -17,7 +17,6 @@
 from .definitions import InterfaceDefinition, PropertyDefinition
 from .utils.properties import get_inherited_property_definitions
 from .utils.interfaces import get_inherited_interface_definitions
-from .utils.data_types import coerce_data_type_value
 from .utils.relationships import get_relationship_inherited_property_definitions
 from aria import dsl_specification
 from aria.presentation import Presentation, has_fields, primitive_field, object_dict_field, field_validator, derived_from_validator
@@ -25,9 +24,6 @@ from aria.utils import ReadOnlyDict, cachedmethod
 
 @has_fields
 @dsl_specification('node-types', 'cloudify-1.0')
-@dsl_specification('node-types', 'cloudify-1.1')
-@dsl_specification('node-types', 'cloudify-1.2')
-@dsl_specification('node-types', 'cloudify-1.3')
 class NodeType(Presentation):
     """
     :code:`node_types` are used for defining common properties and behaviors for :code:`node_templates`. :code:`node_templates` can then be created based on these types, inheriting their definitions.
@@ -87,9 +83,6 @@ class NodeType(Presentation):
 
 @has_fields
 @dsl_specification('relationships-2', 'cloudify-1.0')
-@dsl_specification('relationships-2', 'cloudify-1.1')
-@dsl_specification('relationships-2', 'cloudify-1.2')
-@dsl_specification('relationships-2', 'cloudify-1.3')
 class RelationshipType(Presentation):
     """
     You can declare your own relationship types in the relationships section in the blueprint. This is useful when you want to change the default implementation of how nodes interact.
@@ -232,54 +225,3 @@ class PolicyTrigger(Presentation):
     def _get_properties(self, context):
         return self.parameters
 
-@has_fields
-@dsl_specification('data-types', 'cloudify-1.0')
-@dsl_specification('data-types', 'cloudify-1.1')
-@dsl_specification('data-types', 'cloudify-1.2')
-@dsl_specification('data-types', 'cloudify-1.3')
-class DataType(Presentation):
-    """
-    :code:`data_types` are useful for grouping together and re-using a common set of properties, along with their types and default values.
-    
-    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-data-types/>`__.
-    """
-
-    @primitive_field(str)
-    def description(self):
-        """
-        Description for the data type.
-        
-        :rtype: str
-        """
-
-    @object_dict_field(PropertyDefinition)
-    def properties(self):
-        """
-        Dictionary of the data type properties.
-        
-        :rtype: dict of str, :class:`PropertyDefinition`
-        """
-
-    @field_validator(derived_from_validator('data_types'))
-    @primitive_field(str)
-    def derived_from(self):
-        """
-        Parent data type.
-        
-        :rtype: str
-        """
-
-    @cachedmethod
-    def _get_parent(self, context):
-        return context.presentation.data_types.get(self.derived_from)
-
-    @cachedmethod
-    def _get_properties(self, context):
-        return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
-
-    def _validate(self, context):
-        super(DataType, self)._validate(context)
-        self._get_properties(context)
-
-    def _coerce_value(self, context, presentation, value, aspect):
-        return coerce_data_type_value(context, presentation, self, value, aspect)

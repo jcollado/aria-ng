@@ -15,6 +15,7 @@
 #
 
 from .templates import ServiceTemplate
+from .functions import Concat, Token, GetInput, GetProperty, GetAttribute, GetOperationOutput, GetNodesOfType, GetArtifact
 from .utils.deployment import get_deployment_template
 from aria.presentation import Presenter
 from aria.utils import ReadOnlyList, cachedmethod
@@ -28,6 +29,19 @@ class ToscaSimplePresenter1_0(Presenter):
     @cachedmethod
     def service_template(self):
         return ServiceTemplate(raw=self._raw)
+
+    @property
+    @cachedmethod
+    def functions(self):
+        return {
+            'concat': Concat,
+            'token': Token,
+            'get_input': GetInput,
+            'get_property': GetProperty,
+            'get_attribute': GetAttribute,
+            'get_operation_output': GetOperationOutput,
+            'get_nodes_of_type': GetNodesOfType,
+            'get_artifact': GetArtifact} 
     
     # Presentation
 

@@ -15,11 +15,27 @@
 #
 
 from ..v1_0 import CloudifyPresenter1_0
+from .functions import Concat
+from aria.utils import cachedmethod
 
 class CloudifyPresenter1_1(CloudifyPresenter1_0):
     """
     ARIA presenter for the `Cloudify DSL v1.1 specification <http://getcloudify.org/guide/3.2/dsl-spec-general.html>`__.
+    
+    Changes over v1.0:
+    
+    * `concat` `intrinsic function <http://getcloudify.org/guide/3.2/dsl-spec-intrinsic-functions.html#concat>`__.
+    * Addition of `max_retries` and `retry_interval` to `operation definitions <http://getcloudify.org/guide/3.2/dsl-spec-interfaces.html>`__.
+    * Addition of `install_arguments` to `plugin definitions <http://getcloudify.org/guide/3.2/dsl-spec-plugins.html>`__.
     """
+
+    @property
+    @cachedmethod
+    def functions(self):
+        functions = super(CloudifyPresenter1_1, self).functions
+        functions.update({
+            'concat': Concat})
+        return functions
 
     # Presenter
 

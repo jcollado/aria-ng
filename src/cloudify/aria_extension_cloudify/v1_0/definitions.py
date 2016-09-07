@@ -104,9 +104,6 @@ class OperationDefinition(Presentation):
 @allow_unknown_fields
 @has_fields
 @dsl_specification('interfaces-1', 'cloudify-1.0')
-@dsl_specification('interfaces-1', 'cloudify-1.1')
-@dsl_specification('interfaces-1', 'cloudify-1.2')
-@dsl_specification('interfaces-1', 'cloudify-1.3')
 class InterfaceDefinition(Presentation):
     """
     Interfaces provide a way to map logical tasks to executable operations.
@@ -122,6 +119,9 @@ class InterfaceDefinition(Presentation):
 
 @short_form_field('mapping')
 @has_fields
+@dsl_specification('workflows', 'cloudify-1.0')
+@dsl_specification('workflows', 'cloudify-1.1')
+@dsl_specification('workflows', 'cloudify-1.2')
 @dsl_specification('workflows', 'cloudify-1.3')
 class WorkflowDefinition(Presentation):
     """

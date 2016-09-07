@@ -14,13 +14,17 @@
 # under the License.
 #
 
-from .presenter import CloudifyPresenter1_3
-from .templates import NodeTemplate, PolicyDefinition, ServiceTemplate
-from .assignments import CapabilityAssignment
+from ..v1_0 import Plugin as Plugin1_0
+from aria import dsl_specification
+from aria.presentation import has_fields, primitive_field 
 
-__all__ = (
-    'CloudifyPresenter1_3',
-    'NodeTemplate,'
-    'PolicyDefinition',
-    'ServiceTemplate',
-    'CapabilityAssignment')
+@has_fields
+@dsl_specification('plugins', 'cloudify-1.1')
+class Plugin(Plugin1_0):
+    @primitive_field(str)
+    def install_arguments(self):
+        """
+        Optional arguments passed to the :code:`pip install` command created for the plugin installation.
+        
+        :rtype: str        
+        """

@@ -17,47 +17,7 @@
 from aria import Issue, InvalidValueError, dsl_specification
 from aria.deployment import Function, CannotEvaluateFunction
 from aria.presentation import FakePresentation
-from aria.utils import ReadOnlyList, deepclone
-from cStringIO import StringIO
-
-@dsl_specification('intrinsic-functions-1', 'cloudify-1.0')
-@dsl_specification('intrinsic-functions-1', 'cloudify-1.1')
-@dsl_specification('intrinsic-functions-1', 'cloudify-1.2')
-@dsl_specification('intrinsic-functions-1', 'cloudify-1.3')
-class Concat(Function):
-    """
-    :code:`concat` is used for concatenating strings in different sections of the blueprint. :code:`concat` can be used in node properties, outputs, and node/relationship operation inputs. The function is evaluated once on deployment creation which will replace :code:`get_input` and :code:`get_property` usages; and it is evaluated on every operation execution and outputs evaluation, to replace usages of :code:`get_attribute` (if there are any).
-    
-    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-intrinsic-functions/>`__.
-    """
-
-    def __init__(self, context, presentation, argument):
-        self.locator = presentation._locator
-        
-        if not isinstance(argument, list):
-            raise InvalidValueError('function "concat" argument must be a list of string expressions: %s' % repr(argument), locator=self.locator)
-        
-        string_expressions = []
-        for index in range(len(argument)):
-            string_expressions.append(parse_string_expression(context, presentation, 'concat', index, None, argument[index]))
-        self.string_expressions = ReadOnlyList(string_expressions)    
-
-    @property
-    def as_raw(self):
-        string_expressions = []
-        for string_expression in self.string_expressions:
-            if hasattr(string_expression, 'as_raw'):
-                string_expression = string_expression.as_raw
-            string_expressions.append(string_expression)
-        return {'concat': string_expressions}
-
-    def _evaluate(self, context, container):
-        r = StringIO()
-        for e in self.string_expressions:
-            if hasattr(e, '_evaluate'):
-                e = e._evaluate(context, container)
-            r.write(str(e))
-        return r.getvalue()
+from aria.utils import deepclone
 
 @dsl_specification('intrinsic-functions-2', 'cloudify-1.0')
 @dsl_specification('intrinsic-functions-2', 'cloudify-1.1')
@@ -174,18 +134,13 @@ class GetAttribute(Function):
 # Utils
 #
 
-FUNCTIONS = {
-    'concat': Concat,
-    'get_input': GetInput,
-    'get_property': GetProperty,
-    'get_attribute': GetAttribute}
-
 def get_function(context, presentation, value):
+    functions = context.presentation.functions
     if isinstance(value, dict) and (len(value) == 1):
         key = value.keys()[0]
-        if key in FUNCTIONS:
+        if key in functions:
             try:
-                return True, FUNCTIONS[key](context, presentation, value[key])
+                return True, functions[key](context, presentation, value[key])
             except InvalidValueError as e:
                 context.validation.report(issue=e.issue)
                 return True, None

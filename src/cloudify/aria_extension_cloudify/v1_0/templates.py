@@ -16,15 +16,15 @@
 
 from .definitions import PropertyDefinition, WorkflowDefinition
 from .assignments import PropertyAssignment, InterfaceAssignment, PolicyAssignment
-from .types import NodeType, RelationshipType, PolicyType, DataType, PolicyTrigger
+from .types import NodeType, RelationshipType, PolicyType, PolicyTrigger
 from .misc import Description, Output, Plugin
 from .field_validators import node_templates_or_groups_validator
 from .utils.properties import get_assigned_and_defined_property_values, get_parameter_values
 from .utils.interfaces import get_template_interfaces
 from .utils.relationships import get_relationship_assigned_and_defined_property_values
 from aria import dsl_specification
-from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator, list_type_validator
-from aria.utils import ReadOnlyList, ReadOnlyDict, cachedmethod
+from aria.presentation import Presentation, has_fields, primitive_field, primitive_list_field, object_field, object_list_field, object_dict_field, field_validator, type_validator
+from aria.utils import ReadOnlyDict, cachedmethod
 
 @has_fields
 @dsl_specification('relationships-1', 'cloudify-1.0')
@@ -210,58 +210,6 @@ class GroupDefinition(Presentation):
         """
 
 @has_fields
-@dsl_specification('policies', 'cloudify-1.0')
-@dsl_specification('policies', 'cloudify-1.1')
-@dsl_specification('policies', 'cloudify-1.2')
-@dsl_specification('policies', 'cloudify-1.3')
-class PolicyDefinition(Presentation):
-    """
-    Policies provide a way of configuring reusable behavior by referencing groups for which a policy applies.
-    
-    See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-policies/>`__.    
-    """
-    
-    @primitive_field(str, required=True)
-    def type(self):
-        """
-        The policy type.
-        
-        :rtype: str
-        """
-
-    @object_dict_field(PropertyAssignment)
-    def properties(self):
-        """
-        The specific policy properties. The properties schema is defined by the policy type.
-        
-        :rtype: dict of str, :class:`PropertyAssignment`
-        """
-
-    @field_validator(list_type_validator('group', 'groups'))
-    @primitive_list_field(str, required=True)
-    def targets(self):
-        """
-        A list of group names. The policy will be applied on the groups specified in this list. 
-        
-        :rtype: list of str
-        """
-
-    @cachedmethod
-    def _get_targets(self, context):
-        r = []
-        targets = self.targets
-        if targets:
-            for target in targets:
-                target = context.presentation.groups.get(target)
-                if target is not None:
-                    r.append(target)
-        return ReadOnlyList(r)
-
-    def _validate(self, context):
-        super(PolicyDefinition, self)._validate(context)
-        self._get_targets(context)
-
-@has_fields
 class ServiceTemplate(Presentation):
     @object_field(Description)
     def description(self):
@@ -287,18 +235,6 @@ class ServiceTemplate(Presentation):
         See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-versioning/>`__
         
         :rtype: str
-        """
-
-    @primitive_field()
-    @dsl_specification('dsl-definitions', 'cloudify-1.0')
-    @dsl_specification('dsl-definitions', 'cloudify-1.1')
-    @dsl_specification('dsl-definitions', 'cloudify-1.2')
-    @dsl_specification('dsl-definitions', 'cloudify-1.3')
-    def dsl_definitions(self):
-        """
-        The `dsl_definitions` section can be used to define arbitrary data structures that can then be reused in different parts of the blueprint using `YAML anchors and aliases <https://gist.github.com/ddlsmurf/1590434>`__.
-        
-        See the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/spec-dsl-definitions/>`__
         """
 
     @primitive_list_field(str)
@@ -373,12 +309,6 @@ class ServiceTemplate(Presentation):
         :rtype: dict of str, :class:`GroupDefinition`
         """
 
-    @object_dict_field(PolicyDefinition)
-    def policies(self):
-        """
-        :rtype: dict of str, :class:`PolicyDefinition`
-        """
-
     @object_dict_field(PolicyType)
     def policy_types(self):
         """
@@ -389,12 +319,6 @@ class ServiceTemplate(Presentation):
     def policy_triggers(self):
         """
         :rtype: dict of str, :class:`PolicyTrigger`
-        """
-
-    @object_dict_field(DataType)
-    def data_types(self):
-        """
-        :rtype: dict of str, :class:`DataType`
         """
 
     @cachedmethod
@@ -410,20 +334,19 @@ class ServiceTemplate(Presentation):
         self._get_input_values(context)
         self._get_output_values(context)
 
+
     def _dump(self, context):
         self._dump_content(context, (
             'description',
             'tosca_definitions_version',
             'imports',
             'plugins',
-            'data_types',
             'node_types',
             'policy_types',
             'inputs',
             'node_templates',
             'relationships',
             'groups',
-            'policies',
             'policy_triggers',
             'outputs',
             'workflows'))

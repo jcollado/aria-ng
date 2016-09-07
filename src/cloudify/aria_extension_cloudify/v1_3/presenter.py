@@ -21,6 +21,12 @@ from aria.utils import cachedmethod
 class CloudifyPresenter1_3(CloudifyPresenter1_2):
     """
     ARIA presenter for the `Cloudify DSL v1.3 specification <http://docs.getcloudify.org/3.4.0/blueprints/overview/>`__.
+
+    Changes over v1.2:
+
+    * `Policies <http://docs.getcloudify.org/3.4.0/blueprints/spec-policies/>`__.
+    * Addition of `capabilities` to `node templates <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-templates/>`__.
+    * Deprecate `instances` in `node templates <http://docs.getcloudify.org/3.4.0/blueprints/spec-node-templates/>`__.
     """
 
     @property

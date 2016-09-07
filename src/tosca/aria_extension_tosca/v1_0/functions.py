@@ -294,22 +294,13 @@ class GetArtifact(Function):
 # Utils
 #
 
-FUNCTIONS = {
-    'concat': Concat,
-    'token': Token,
-    'get_input': GetInput,
-    'get_property': GetProperty,
-    'get_attribute': GetAttribute,
-    'get_operation_output': GetOperationOutput,
-    'get_nodes_of_type': GetNodesOfType,
-    'get_artifact': GetArtifact} 
-
 def get_function(context, presentation, value):
+    functions = context.presentation.functions
     if isinstance(value, dict) and (len(value) == 1):
         key = value.keys()[0]
-        if key in FUNCTIONS:
+        if key in functions:
             try:
-                return True, FUNCTIONS[key](context, presentation, value[key])
+                return True, functions[key](context, presentation, value[key])
             except InvalidValueError as e:
                 context.validation.report(issue=e.issue)
                 return True, None

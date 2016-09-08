@@ -132,7 +132,7 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 self.send_header('Content-type', route['media_type'])
                             self.end_headers()
                             if method != 'DELETE':
-                                self.wfile.write(self.config.json_encoder.encode(content))
+                                self.wfile.write(self.config.json_encoder.encode(content, ensure_ascii=False))
                         else:
                             self.send_response(404)
                             self.end_headers()

@@ -58,13 +58,13 @@ def plan_post(handler):
 
 ROUTES = OrderedDict((
     (r'^/$', {'file': 'index.html', 'media_type': 'text/html'}),
-    (r'^/validate/', {'GET': validate_get, 'POST': validate_post, 'media_type': 'application/json'}),
-    (r'^/plan/', {'GET': plan_get, 'POST': plan_post, 'media_type': 'application/json'})))
+    (r'^/openoapi/tosca/v1/validate', {'GET': validate_get, 'POST': validate_post, 'media_type': 'application/json'}),
+    (r'^/openoapi/tosca/v1/plan', {'GET': plan_get, 'POST': plan_post, 'media_type': 'application/json'})))
 
 class ArgumentParser(CommonArgumentParser):
     def __init__(self):
         super(ArgumentParser, self).__init__(description='REST Server', prog='aria-rest')
-        self.add_argument('--port', type=int, default=8080, help='HTTP port')
+        self.add_argument('--port', type=int, default=8204, help='HTTP port')
         self.add_argument('--root', default='.', help='web root directory')
         self.add_argument('--path', help='path for imports')
 

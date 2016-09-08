@@ -72,7 +72,7 @@ class DeploymentContext(object):
 
     def get_plan_as_json(self, indent=None):
         raw = self.plan_as_raw
-        return json.dumps(raw, indent=indent, cls=JSONValueEncoder)
+        return json.dumps(raw, indent=indent, cls=JSONValueEncoder, ensure_ascii=False)
 
     def dump_types(self, context):
         if self.node_types.children:

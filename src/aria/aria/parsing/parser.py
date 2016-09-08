@@ -60,7 +60,8 @@ class DefaultParser(Parser):
         presentation = None
         imported_presentations = None
         
-        executor = FixedThreadPoolExecutor(timeout=10)
+        # TODO: settings size=1 for now -- we have race conditions due to the shared context!
+        executor = FixedThreadPoolExecutor(size=1, timeout=10)
         #executor.print_exceptions = True
         try:
             presentation = self._parse_all(context, self.location, None, self.presenter_class, executor)

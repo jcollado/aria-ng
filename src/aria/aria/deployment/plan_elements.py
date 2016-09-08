@@ -162,11 +162,14 @@ class DeploymentPlan(Element):
                         self._dump_graph_node(context, target_node)
 
 class Node(Element):
-    def __init__(self, context, template_name):
+    def __init__(self, context, type_name, template_name):
+        if not isinstance(type_name, basestring):
+            raise ValueError('must set type_name (string)')
         if not isinstance(template_name, basestring):
             raise ValueError('must set template_name (string)')
 
         self.id = '%s_%s' % (template_name, context.deployment.generate_id())
+        self.type_name = type_name
         self.template_name = template_name
         self.properties = StrictDict(key_class=str, value_class=Parameter)
         self.interfaces = StrictDict(key_class=str, value_class=Interface)
@@ -228,6 +231,8 @@ class Node(Element):
         if len(self.id) > context.deployment.id_max_length:
             context.validation.report('"%s" has an ID longer than the limit of %d characters: %d' % (self.id, context.deployment.id_max_length, len(self.id)), level=Issue.BETWEEN_INSTANCES)
         
+        # TODO: validate that node template is of type
+        
         for interface in self.interfaces.itervalues():
             interface.validate(context)
         for artifact in self.artifacts.itervalues():
@@ -252,6 +257,7 @@ class Node(Element):
     def as_raw(self):
         return OrderedDict((
             ('id', self.id),
+            ('type_name', self.type_name),
             ('template_name', self.template_name),
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
@@ -263,6 +269,7 @@ class Node(Element):
         puts('Node: %s' % context.style.node(self.id))
         with context.style.indent:
             puts('Template: %s' % context.style.node(self.template_name))
+            puts('Type: %s' % context.style.type(self.type_name))
             dump_properties(context, self.properties)
             dump_interfaces(context, self.interfaces)
             dump_dict_values(context, self.artifacts, 'Artifacts')
@@ -368,11 +375,12 @@ class Relationship(Element):
             dump_interfaces(context, self.target_interfaces, 'Target interfaces')
 
 class Group(Element):
-    def __init__(self, context, template_name):
+    def __init__(self, context, type_name, template_name):
         if not isinstance(template_name, basestring):
             raise ValueError('must set template_name (string)')
 
         self.id = '%s_%s' % (template_name, context.deployment.generate_id())
+        self.type_name = type_name
         self.template_name = template_name
         self.properties = StrictDict(key_class=str, value_class=Parameter)
         self.interfaces = StrictDict(key_class=str, value_class=Interface)
@@ -383,6 +391,7 @@ class Group(Element):
     def as_raw(self):
         return OrderedDict((
             ('id', self.id),
+            ('type_name', self.type_name),
             ('template_name', self.template_name),
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('interfaces', [v.as_raw for v in self.interfaces.itervalues()]),
@@ -405,6 +414,7 @@ class Group(Element):
     def dump(self, context):
         puts('Group: %s' % context.style.node(self.id))
         with context.style.indent:
+            puts('Type: %s' % context.style.type(self.type_name))
             puts('Template: %s' % context.style.type(self.template_name))
             dump_properties(context, self.properties)
             dump_interfaces(context, self.interfaces)

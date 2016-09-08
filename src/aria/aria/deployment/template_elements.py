@@ -120,7 +120,7 @@ class NodeTemplate(Template):
         return True
     
     def instantiate(self, context, container):
-        r = Node(context, self.name)
+        r = Node(context, self.type_name, self.name)
         instantiate_dict(context, r, r.properties, self.properties)
         instantiate_dict(context, r, r.interfaces, self.interfaces)
         instantiate_dict(context, r, r.artifacts, self.artifacts)
@@ -353,7 +353,7 @@ class GroupTemplate(Template):
         self.member_node_template_names = StrictList(value_class=str)
 
     def instantiate(self, context, container):
-        r = Group(context, self.name)
+        r = Group(context, self.type_name, self.name)
         instantiate_dict(context, self, r.properties, self.properties)
         instantiate_dict(context, self, r.interfaces, self.interfaces)
         instantiate_dict(context, self, r.policies, self.policies)

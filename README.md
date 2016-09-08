@@ -161,11 +161,11 @@ wire:
 
 With the server started, you can hit a few endpoints:
 
-    curl http://localhost:8080/plan/blueprints/tosca/node-cellar.yaml
+    curl http://localhost:8204/openoapi/tosca/v1/plan/blueprints/tosca/node-cellar.yaml
     
-    curl http://localhost:8080/validate/blueprints/tosca/node-cellar.yaml
+    curl http://localhost:8204/openoapi/tosca/v1/validate/blueprints/tosca/node-cellar.yaml
 
 You will get a JSON response with a list of validation issues. You can also POST a
 blueprint over the wire:
 
-    curl --data-binary @blueprints/tosca/node-cellar.yaml http://localhost:8080/plan/
+    curl --data-binary @blueprints/tosca/node-cellar.yaml http://localhost:8204/openoapi/tosca/v1/plan/

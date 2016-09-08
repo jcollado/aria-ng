@@ -33,7 +33,7 @@ def issues(context):
     return {'issues': [i.as_raw for i in context.validation.issues]}
 
 def validate_get(handler):
-    path = urllib.unquote(handler.path[10:])
+    path = urllib.unquote(handler.path[len('/openoapi/tosca/v1/validate/'):])
     context = parse(path)
     return issues(context) if context.validation.has_issues else {}
 
@@ -43,7 +43,7 @@ def validate_post(handler):
     return issues(context) if context.validation.has_issues else {}
 
 def plan_get(handler):
-    path = urllib.unquote(handler.path[6:])
+    path = urllib.unquote(handler.path[len('/openoapi/tosca/v1/plan/'):])
     context = parse(path)
     if context.validation.has_issues:
         return issues(context)

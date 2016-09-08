@@ -188,6 +188,9 @@ class StrictDict(OrderedDict):
         return super(StrictDict, self).__setitem__(key, value)
 
 class JSONValueEncoder(json.JSONEncoder):
+    def __init__(self):
+        super(JSONValueEncoder, self).__init__(ensure_ascii=False)
+    
     def default(self, o):
         try:
             return iter(o)

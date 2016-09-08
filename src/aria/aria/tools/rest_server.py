@@ -27,7 +27,7 @@ class Config(object):
         self.port = 8080
         self.routes = {}
         self.static_root = '.'
-        self.json_encoder = json.JSONEncoder()
+        self.json_encoder = json.JSONEncoder(ensure_ascii=False)
         self.json_decoder = json.JSONDecoder(object_pairs_hook=OrderedDict)
 
 def rest_call_json(url, payload=None, with_payload_method='PUT'):
@@ -132,7 +132,7 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 self.send_header('Content-type', route['media_type'])
                             self.end_headers()
                             if method != 'DELETE':
-                                self.wfile.write(self.config.json_encoder.encode(content, ensure_ascii=False))
+                                self.wfile.write(self.config.json_encoder.encode(content))
                         else:
                             self.send_response(404)
                             self.end_headers()

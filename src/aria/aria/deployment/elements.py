@@ -73,7 +73,7 @@ class Parameter(Template):
 
 class Metadata(Template):
     def __init__(self):
-        self.values = StrictDict(key_class=str)
+        self.values = StrictDict(key_class=basestring)
 
     def instantiate(self, context, container):
         r = Metadata()
@@ -96,8 +96,8 @@ class Interface(Template):
             raise ValueError('must set name (string)')
         
         self.name = name
-        self.inputs = StrictDict(key_class=str, value_class=Parameter)
-        self.operations = StrictDict(key_class=str, value_class=Operation)
+        self.inputs = StrictDict(key_class=basestring, value_class=Parameter)
+        self.operations = StrictDict(key_class=basestring, value_class=Operation)
 
     def instantiate(self, context, container):
         r = Interface(self.name)
@@ -134,11 +134,11 @@ class Operation(Template):
         
         self.name = name
         self.implementation = None
-        self.dependencies = StrictList(value_class=str)
+        self.dependencies = StrictList(value_class=basestring)
         self.executor = None # Cloudify
         self.max_retries = None # Cloudify
         self.retry_interval = None # Cloudify
-        self.inputs = StrictDict(key_class=str, value_class=Parameter)
+        self.inputs = StrictDict(key_class=basestring, value_class=Parameter)
 
     def instantiate(self, context, container):
         r = Operation(self.name)
@@ -193,8 +193,8 @@ class Artifact(Template):
         self.source_path = source_path
         self.target_path = None
         self.repository_url = None
-        self.repository_credential = StrictDict(key_class=str, value_class=str)
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.repository_credential = StrictDict(key_class=basestring, value_class=basestring)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
 
     def instantiate(self, context, container):
         r = Artifact(self.name, self.type_name, self.source_path)
@@ -237,8 +237,8 @@ class GroupPolicy(Template):
             raise ValueError('must set name (string)')
 
         self.name = name
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.triggers = StrictDict(key_class=str, value_class=GroupPolicyTrigger)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.triggers = StrictDict(key_class=basestring, value_class=GroupPolicyTrigger)
 
     def instantiate(self, context, container):
         r = GroupPolicy(self.name)
@@ -273,7 +273,7 @@ class GroupPolicyTrigger(Template):
     
         self.name = name
         self.source = source
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
 
     def instantiate(self, context, container):
         r = GroupPolicyTrigger(self.name, self.source)

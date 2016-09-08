@@ -24,6 +24,10 @@ from clint.textui import puts
 
 class Field(object):
     def __init__(self, field_variant, fn, cls=None, default=None, allowed=None, required=False):
+        if cls == str:
+            # Always prefer Unicode
+            cls = unicode
+        
         self.container_cls = None
         self.name = None
         self.field_variant = field_variant

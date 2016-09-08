@@ -25,13 +25,13 @@ class DeploymentPlan(Element):
     def __init__(self):
         self.description = None
         self.metadata = None
-        self.nodes = StrictDict(key_class=str, value_class=Node) 
-        self.groups = StrictDict(key_class=str, value_class=Group) 
-        self.policies = StrictDict(key_class=str, value_class=Policy)
+        self.nodes = StrictDict(key_class=basestring, value_class=Node) 
+        self.groups = StrictDict(key_class=basestring, value_class=Group) 
+        self.policies = StrictDict(key_class=basestring, value_class=Policy)
         self.substitution = None
-        self.inputs = StrictDict(key_class=str, value_class=Parameter)
-        self.outputs = StrictDict(key_class=str, value_class=Parameter)
-        self.operations = StrictDict(key_class=str, value_class=Operation)
+        self.inputs = StrictDict(key_class=basestring, value_class=Parameter)
+        self.outputs = StrictDict(key_class=basestring, value_class=Parameter)
+        self.operations = StrictDict(key_class=basestring, value_class=Operation)
 
     def satisfy_requirements(self, context):
         satisfied = True
@@ -171,10 +171,10 @@ class Node(Element):
         self.id = '%s_%s' % (template_name, context.deployment.generate_id())
         self.type_name = type_name
         self.template_name = template_name
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.interfaces = StrictDict(key_class=str, value_class=Interface)
-        self.artifacts = StrictDict(key_class=str, value_class=Artifact)
-        self.capabilities = StrictDict(key_class=str, value_class=Capability)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.interfaces = StrictDict(key_class=basestring, value_class=Interface)
+        self.artifacts = StrictDict(key_class=basestring, value_class=Artifact)
+        self.capabilities = StrictDict(key_class=basestring, value_class=Capability)
         self.relationships = StrictList(value_class=Relationship)
     
     def satisfy_requirements(self, context):
@@ -287,7 +287,7 @@ class Capability(Element):
         self.type_name = type_name
         self.min_occurrences = None # optional
         self.max_occurrences = None # optional
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
         self.occurrences = 0
     
     @property
@@ -333,9 +333,9 @@ class Relationship(Element):
         self.target_capability_name = None
         self.type_name = type_name
         self.template_name = template_name
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.source_interfaces = StrictDict(key_class=str, value_class=Interface)
-        self.target_interfaces = StrictDict(key_class=str, value_class=Interface)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.source_interfaces = StrictDict(key_class=basestring, value_class=Interface)
+        self.target_interfaces = StrictDict(key_class=basestring, value_class=Interface)
 
     def validate(self, context):
         for interface in self.source_interfaces.itervalues():
@@ -382,10 +382,10 @@ class Group(Element):
         self.id = '%s_%s' % (template_name, context.deployment.generate_id())
         self.type_name = type_name
         self.template_name = template_name
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.interfaces = StrictDict(key_class=str, value_class=Interface)
-        self.policies = StrictDict(key_class=str, value_class=GroupPolicy)
-        self.member_node_ids = StrictList(value_class=str)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.interfaces = StrictDict(key_class=basestring, value_class=Interface)
+        self.policies = StrictDict(key_class=basestring, value_class=GroupPolicy)
+        self.member_node_ids = StrictList(value_class=basestring)
 
     @property
     def as_raw(self):
@@ -434,9 +434,9 @@ class Policy(Element):
         
         self.name = name
         self.type_name = type_name
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.target_node_ids = StrictList(value_class=str)
-        self.target_group_ids = StrictList(value_class=str)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.target_node_ids = StrictList(value_class=basestring)
+        self.target_group_ids = StrictList(value_class=basestring)
 
     @property
     def as_raw(self):
@@ -492,8 +492,8 @@ class Substitution(Element):
             raise ValueError('must set node_type_name (string)')
     
         self.node_type_name = node_type_name
-        self.capabilities = StrictDict(key_class=str, value_class=Mapping)
-        self.requirements = StrictDict(key_class=str, value_class=Mapping)
+        self.capabilities = StrictDict(key_class=basestring, value_class=Mapping)
+        self.requirements = StrictDict(key_class=basestring, value_class=Mapping)
 
     @property
     def as_raw(self):

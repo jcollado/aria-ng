@@ -67,9 +67,9 @@ class RelationshipType(Type):
     def __init__(self, name):
         super(RelationshipType, self).__init__(name)
         
-        self.properties = StrictDict(key_class=str)
-        self.source_interfaces = StrictDict(key_class=str)
-        self.target_interfaces = StrictDict(key_class=str)
+        self.properties = StrictDict(key_class=basestring)
+        self.source_interfaces = StrictDict(key_class=basestring)
+        self.target_interfaces = StrictDict(key_class=basestring)
 
 class TypeHierarchy(Type):
     def __init__(self):

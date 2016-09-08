@@ -1,5 +1,5 @@
 functools32==3.2.3-2
-ruamel.yaml==0.12.2 # we're getting breakage with 0.12.3+!!!!
+ruamel.yaml==0.12.12
 clint==0.5.1
 Jinja2==2.8
 requests==2.11.1

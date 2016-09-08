@@ -28,13 +28,13 @@ class DeploymentTemplate(Template):
     def __init__(self):
         self.description = None
         self.metadata = None
-        self.node_templates = StrictDict(key_class=str, value_class=NodeTemplate)
-        self.group_templates = StrictDict(key_class=str, value_class=GroupTemplate)
-        self.policy_templates = StrictDict(key_class=str, value_class=PolicyTemplate)
+        self.node_templates = StrictDict(key_class=basestring, value_class=NodeTemplate)
+        self.group_templates = StrictDict(key_class=basestring, value_class=GroupTemplate)
+        self.policy_templates = StrictDict(key_class=basestring, value_class=PolicyTemplate)
         self.substitution_template = None
-        self.inputs = StrictDict(key_class=str, value_class=Parameter)
-        self.outputs = StrictDict(key_class=str, value_class=Parameter)
-        self.operations = StrictDict(key_class=str, value_class=Operation)
+        self.inputs = StrictDict(key_class=basestring, value_class=Parameter)
+        self.outputs = StrictDict(key_class=basestring, value_class=Parameter)
+        self.operations = StrictDict(key_class=basestring, value_class=Operation)
 
     def instantiate(self, context, container):
         r = DeploymentPlan()
@@ -105,10 +105,10 @@ class NodeTemplate(Template):
         self.default_instances = 1
         self.min_instances = 0
         self.max_instances = None
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.interfaces = StrictDict(key_class=str, value_class=Interface)
-        self.artifacts = StrictDict(key_class=str, value_class=Artifact)
-        self.capabilities = StrictDict(key_class=str, value_class=CapabilityTemplate)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.interfaces = StrictDict(key_class=basestring, value_class=Interface)
+        self.artifacts = StrictDict(key_class=basestring, value_class=Artifact)
+        self.capabilities = StrictDict(key_class=basestring, value_class=CapabilityTemplate)
         self.requirements = StrictList(value_class=Requirement)
         self.target_node_template_constraints = StrictList(value_class=FunctionType)
     
@@ -259,7 +259,7 @@ class CapabilityTemplate(Template):
         self.min_occurrences = None # optional
         self.max_occurrences = None # optional
         self.valid_source_node_type_names = None
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
         
     def satisfies_requirement(self, context, source_node_template, requirement, target_node_template):
         # Do we match the required capability type?
@@ -311,9 +311,9 @@ class RelationshipTemplate(Template):
         
         self.type_name = type_name
         self.template_name = template_name
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.source_interfaces = StrictDict(key_class=str, value_class=Interface)
-        self.target_interfaces = StrictDict(key_class=str, value_class=Interface)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.source_interfaces = StrictDict(key_class=basestring, value_class=Interface)
+        self.target_interfaces = StrictDict(key_class=basestring, value_class=Interface)
 
     def instantiate(self, context, container):
         r = Relationship(self.type_name, self.template_name)
@@ -347,10 +347,10 @@ class GroupTemplate(Template):
         
         self.name = name
         self.type_name = type_name
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.interfaces = StrictDict(key_class=str, value_class=Interface)
-        self.policies = StrictDict(key_class=str, value_class=GroupPolicy)
-        self.member_node_template_names = StrictList(value_class=str)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.interfaces = StrictDict(key_class=basestring, value_class=Interface)
+        self.policies = StrictDict(key_class=basestring, value_class=GroupPolicy)
+        self.member_node_template_names = StrictList(value_class=basestring)
 
     def instantiate(self, context, container):
         r = Group(context, self.type_name, self.name)
@@ -381,9 +381,9 @@ class PolicyTemplate(Template):
         
         self.name = name
         self.type_name = type_name
-        self.properties = StrictDict(key_class=str, value_class=Parameter)
-        self.target_node_template_names = StrictList(value_class=str)
-        self.target_group_template_names = StrictList(value_class=str)
+        self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        self.target_node_template_names = StrictList(value_class=basestring)
+        self.target_group_template_names = StrictList(value_class=basestring)
 
     def instantiate(self, context, container):
         r = Policy(self.name, self.type_name)
@@ -437,8 +437,8 @@ class SubstitutionTemplate(Template):
             raise ValueError('must set node_type_name (string)')
     
         self.node_type_name = node_type_name
-        self.capabilities = StrictDict(key_class=str, value_class=MappingTemplate)
-        self.requirements = StrictDict(key_class=str, value_class=MappingTemplate)
+        self.capabilities = StrictDict(key_class=basestring, value_class=MappingTemplate)
+        self.requirements = StrictDict(key_class=basestring, value_class=MappingTemplate)
 
     def instantiate(self, context, container):
         r = Substitution(self.node_type_name)

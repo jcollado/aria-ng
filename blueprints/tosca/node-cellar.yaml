@@ -18,6 +18,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 
 description: >-
   Node Cellar TOSCA blueprint.
+  Here is some Unicode: 中國.
 
 metadata:
   template_name: node-cellar

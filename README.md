@@ -179,9 +179,17 @@ You do not want to install with `pip`, but instead work directly with the source
 	pip install virtualenv
 	virtualenv env
 	. env/bin/activate
-	make aria-requirements
+	make requirements
 
 You can then run the scripts in the main directory:
 
 	./aria blueprints/tosca/node-cellar.yaml plan
     ./aria-rest
+
+To run tests:
+
+	make
+
+To build the documentation:
+
+	make docs

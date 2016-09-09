@@ -25,7 +25,7 @@ class CloudifyPresenter1_2(CloudifyPresenter1_1):
     Changes over v1.1:
     
     * `Data types <http://docs.getcloudify.org/3.3.1/blueprints/spec-data-types/>`__.
-    * `Upload resources <http://docs.getcloudify.org/3.3.1/blueprints/spec-upload-resources/>__.
+    * `Upload resources <http://docs.getcloudify.org/3.3.1/blueprints/spec-upload-resources/>`__.
     * Addition of `dsl_definitions` to `blueprint <http://docs.getcloudify.org/3.3.1/blueprints/spec-dsl-definitions/>`__.
     * Addition of `package_name`, `package_version`, `supported_platform`, `distribution`, `distribution_version`, and `distribution_release` to `plugin definitions <http://docs.getcloudify.org/3.3.1/blueprints/spec-plugins/>`__.
     """

@@ -20,7 +20,7 @@ from .assignments import CapabilityAssignment
 
 __all__ = (
     'CloudifyPresenter1_3',
-    'NodeTemplate,'
+    'NodeTemplate',
     'PolicyDefinition',
     'ServiceTemplate',
     'CapabilityAssignment')

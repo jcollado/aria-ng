@@ -43,7 +43,7 @@ test-requirements:
 
 docs: docs-requirements requirements
 	rm -rf "$(DOCS)"
-	sphinx-build -b html -c "$(SPHINX_SRC)" "$(ARIA_SRC)" "$(DOCS)"
+	sphinx-build -b html "$(SPHINX_SRC)" "$(DOCS)"
 
 test: test-requirements requirements
 	PYTHONPATH="$(ARIA_SRC):$(TOSCA_SRC):$(CLOUDIFY_SRC):$(PYTHONPATH)" nosetests -v -s "$(TESTS_SRC)"

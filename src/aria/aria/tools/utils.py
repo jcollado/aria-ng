@@ -17,13 +17,12 @@
 from .. import VERSION
 from ..consumption import ConsumptionContext
 from ..loading import UriLocation
-from ..utils import import_fullname
-from argparse import ArgumentParser
+from ..utils import import_fullname, ArgumentParser
 
 class BaseArgumentParser(ArgumentParser):
     def __init__(self, description, **kwargs):
         super(BaseArgumentParser, self).__init__(description='ARIA version %s %s' % (VERSION, description), **kwargs)
-
+    
 class CommonArgumentParser(BaseArgumentParser):
     def __init__(self, description, **kwargs):
         super(CommonArgumentParser, self).__init__(description='ARIA version %s %s' % (VERSION, description), **kwargs)

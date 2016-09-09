@@ -14,28 +14,22 @@
 # under the License.
 #
 
-from .exceptions import ReaderError, ReaderNotFoundError, ReaderSyntaxError, AlreadyReadError
-from .reader import Reader
-from .source import ReaderSource, DefaultReaderSource
-from .context import ReadingContext
-from .raw import RawReader
-from .locator import init_yaml, Locator
-from .yaml import YamlReader
-from .json import JsonReader
-from .jinja import JinjaReader
+from __future__ import absolute_import # so we can import standard 'json'
 
-__all__ = (
-    'ReaderError',
-    'ReaderNotFoundError',
-    'ReaderSyntaxError',
-    'AlreadyReadError',
-    'Reader',
-    'ReaderSource',
-    'DefaultReaderSource',
-    'ReadingContext',
-    'RawReader',
-    'init_yaml',
-    'Locator',
-    'YamlReader',
-    'JsonReader',
-    'JinjaReader')
+from .reader import Reader
+from .exceptions import ReaderSyntaxError
+from collections import OrderedDict
+import json
+
+class JsonReader(Reader):
+    """
+    ARIA JSON reader.
+    """
+    
+    def read(self):
+        data = self.load()
+        try:
+            data = unicode(data)
+            return json.loads(data, object_pairs_hook=OrderedDict)
+        except Exception as e:
+            raise ReaderSyntaxError('JSON: %s' % e, cause=e)

@@ -25,9 +25,8 @@ class Reader(object):
     Readers provide agnostic raw data by consuming :class:`aria.loader.Loader` instances.
     """
     
-    def __init__(self, context, source, location, loader):
+    def __init__(self, context, location, loader):
         self.context = context
-        self.source = source
         self.location = location
         self.loader = loader
 

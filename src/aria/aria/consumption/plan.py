@@ -17,16 +17,25 @@
 from .template import Template
 
 
-import json
+from ..loading import UriLocation, LiteralLocation
+from ..reading import JsonReader
 
 class Inputs(object):
     def __init__(self, context, payload):
         if payload.endswith('.json') or payload.endswith('.yaml'):
-            print payload
-        payload = json.loads(payload)
-        print payload
-    
-    
+            location = UriLocation(payload)
+        else:
+            location = LiteralLocation(payload)
+
+        loader = context.loading.loader_source.get_loader(location, None)
+        
+        if isinstance(location, LiteralLocation):
+            reader = JsonReader(context.reading, location, loader)
+        else:
+            reader = context.reading.reader_source.get_reader(context.reading, location, loader)
+        
+        raw = reader.read()
+        print raw
 
 class Plan(Template):
     """

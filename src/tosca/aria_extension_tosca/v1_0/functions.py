@@ -104,7 +104,7 @@ class GetInput(Function):
         self.input_property_name = parse_string_expression(context, presentation, 'get_input', None, 'the input property name', argument)
 
         if isinstance(self.input_property_name, basestring):
-            inputs = context.presentation.inputs
+            inputs = context.presentation.presenter.inputs
             if (inputs is None) or (self.input_property_name not in inputs):
                 raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
 
@@ -116,7 +116,7 @@ class GetInput(Function):
         return {'get_input': input_property_name}
     
     def _evaluate(self, context, container):
-        inputs = context.presentation.service_template.topology_template._get_input_values(context) if context.presentation.service_template.topology_template is not None else None
+        inputs = context.presentation.presenter.service_template.topology_template._get_input_values(context) if context.presentation.presenter.service_template.topology_template is not None else None
         return inputs.get(self.input_property_name) if inputs is not None else None
 
 @dsl_specification('4.4.2', 'tosca-simple-profile-1.0')
@@ -245,7 +245,7 @@ class GetNodesOfType(Function):
         self.node_type_name = parse_string_expression(context, presentation, 'get_nodes_of_type', None, 'the node type name', argument)
 
         if isinstance(self.node_type_name, basestring):
-            node_types = context.presentation.node_types
+            node_types = context.presentation.presenter.node_types
             if (node_types is None) or (self.node_type_name not in node_types):
                 raise InvalidValueError('function "get_nodes_of_type" argument is not a valid node type name: %s' % repr(argument), locator=self.locator)
 
@@ -295,7 +295,7 @@ class GetArtifact(Function):
 #
 
 def get_function(context, presentation, value):
-    functions = context.presentation.functions
+    functions = context.presentation.presenter.functions
     if isinstance(value, dict) and (len(value) == 1):
         key = value.keys()[0]
         if key in functions:
@@ -342,8 +342,8 @@ def parse_modelable_entity_name(context, presentation, name, index, value):
         if self_variant != 'relationship_template':
             raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a relationship template')
     elif isinstance(value, basestring):
-        node_templates = context.presentation.node_templates or {}
-        relationship_templates = context.presentation.relationship_templates or {}
+        node_templates = context.presentation.presenter.node_templates or {}
+        relationship_templates = context.presentation.presenter.relationship_templates or {}
         if (value not in node_templates) and (value not in relationship_templates):
             raise InvalidValueError('function "%s" parameter %d is not a valid modelable entity name: %s' % (name, index + 1, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
     return value

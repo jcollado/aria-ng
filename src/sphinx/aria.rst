@@ -38,11 +38,6 @@ This is the core ARIA API.
 
 .. automodule:: aria.loading
 
-:mod:`aria.parsing`
-*******************
-
-.. automodule:: aria.parsing
-
 :mod:`aria.presentation`
 ************************
 

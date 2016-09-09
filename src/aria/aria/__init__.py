@@ -42,7 +42,6 @@ MODULES = (
     'deployment',
     'execution',
     'loading',
-    'parsing',
     'presentation',
     'reading',
     'tools',

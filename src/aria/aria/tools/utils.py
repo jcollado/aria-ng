@@ -15,8 +15,9 @@
 #
 
 from .. import VERSION
-from ..utils import import_fullname
+from ..consumption import ConsumptionContext
 from ..loading import UriLocation
+from ..utils import import_fullname
 from argparse import ArgumentParser
 
 class BaseArgumentParser(ArgumentParser):
@@ -26,26 +27,21 @@ class BaseArgumentParser(ArgumentParser):
 class CommonArgumentParser(BaseArgumentParser):
     def __init__(self, description, **kwargs):
         super(CommonArgumentParser, self).__init__(description='ARIA version %s %s' % (VERSION, description), **kwargs)
-        self.add_argument('--parser', default='aria.parsing.DefaultParser', help='parser class')
         self.add_argument('--loader-source', default='aria.loading.DefaultLoaderSource', help='loader source class for the parser')
         self.add_argument('--reader-source', default='aria.reading.DefaultReaderSource', help='reader source class for the parser')
         self.add_argument('--presenter-source', default='aria.presentation.DefaultPresenterSource', help='presenter source class for the parser')
         self.add_argument('--presenter', help='force use of this presenter class in parser')
 
-def create_parser_ns(ns, **kwargs):
+def create_context_ns(ns, **kwargs):
     args = vars(ns).copy()
     args.update(kwargs)
-    return create_parser(**args)
+    return create_context(**args)
 
-def create_parser(uri, parser, loader_source, reader_source, presenter_source, presenter, **kwargs):
-    parser_class = import_fullname(parser, ['aria.parsing'])
-    loader_source_class = import_fullname(loader_source, ['aria.loading'])
-    reader_source_class = import_fullname(reader_source, ['aria.reading'])
-    presenter_source_class = import_fullname(presenter_source, ['aria.presentation'])
-    presenter_class = import_fullname(presenter, ['aria.presentation'])
-
-    return parser_class(location=UriLocation(uri),
-        loader_source=loader_source_class(),
-        reader_source=reader_source_class(),
-        presenter_source=presenter_source_class(),
-        presenter_class=presenter_class)
+def create_context(uri, loader_source, reader_source, presenter_source, presenter, **kwargs):
+    context = ConsumptionContext()
+    context.parsing.location=UriLocation(uri)
+    context.loading.loader_source = import_fullname(loader_source, ['aria.loading'])()
+    context.reading.reader_source = import_fullname(reader_source, ['aria.reading'])()
+    context.presentation.presenter_source = import_fullname(presenter_source, ['aria.presentation'])()
+    context.presentation.presenter_class = import_fullname(presenter, ['aria.presentation'])
+    return context

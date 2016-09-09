@@ -30,7 +30,7 @@ def type_validator(type_name, types_dict_name):
         # Make sure type exists
         value = getattr(presentation, field.name)
         if value is not None:
-            types_dict = getattr(context.presentation, types_dict_name) or {}
+            types_dict = getattr(context.presentation.presenter, types_dict_name) or {}
             if value not in types_dict:
                 report_issue_for_unknown_type(context, presentation, type_name, field.name)
         
@@ -51,7 +51,7 @@ def list_type_validator(type_name, types_dict_name):
         # Make sure type exists
         values = getattr(presentation, field.name)
         if values is not None:
-            types_dict = getattr(context.presentation, types_dict_name) or {}
+            types_dict = getattr(context.presentation.presenter, types_dict_name) or {}
             for value in values:
                 if value not in types_dict:
                     report_issue_for_unknown_type(context, presentation, type_name, field.name)
@@ -90,7 +90,7 @@ def derived_from_validator(types_dict_name):
     
         value = getattr(presentation, field.name)
         if value is not None:
-            types_dict = getattr(context.presentation, types_dict_name) or {}
+            types_dict = getattr(context.presentation.presenter, types_dict_name) or {}
             
             # Make sure not derived from self
             if value == presentation._name:

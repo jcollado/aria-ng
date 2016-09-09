@@ -14,9 +14,10 @@
 # under the License.
 #
 
-from .. import AriaError
+from .source import DefaultPresenterSource
 
-class ParserError(AriaError):
-    """
-    ARIA parser error.
-    """
+class PresentationContext(object):
+    def __init__(self):
+        self.presenter = None
+        self.presenter_source = DefaultPresenterSource()
+        self.presenter_class = None

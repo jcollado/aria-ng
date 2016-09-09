@@ -15,10 +15,11 @@
 #
 
 from .exceptions import ConsumerError
-from .context import ValidationContext, ConsumptionContext
+from .context import ConsumptionContext
 from .style import Style
 from .consumer import Consumer
-from .validate import Validate
+from .parse import ParsingContext, Parse
+from .validate import ValidationContext, Validate
 from .yaml import Yaml
 from .presentation import Presentation
 from .template import Template
@@ -31,10 +32,12 @@ MODULES = (
 __all__ = (
     'MODULES',
     'ConsumerError',
-    'ValidationContext',
     'ConsumptionContext',
     'Style',
     'Consumer',
+    'ParsingContext',
+    'Parse',
+    'ValidationContext',
     'Validate',
     'Yaml',
     'Presentation',

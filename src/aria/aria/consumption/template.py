@@ -27,7 +27,10 @@ class Template(Consumer):
             self.context.deployment.template.dump(self.context)
     
     def create_deployment_template(self):
-        if hasattr(self.context.presentation, '_get_deployment_template'):
-            self.context.deployment.template = self.context.presentation._get_deployment_template(self.context)
-            if self.context.deployment.template is not None:
-                self.context.deployment.template.validate(self.context)
+        if hasattr(self.context.presentation.presenter, '_get_deployment_template'):
+            try:
+                self.context.deployment.template = self.context.presentation.presenter._get_deployment_template(self.context)
+                if self.context.deployment.template is not None:
+                    self.context.deployment.template.validate(self.context)
+            except Exception as e:
+                self._handle_exception(e)

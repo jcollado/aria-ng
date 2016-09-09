@@ -26,16 +26,20 @@ class Plan(BasicPlan):
     """
 
     def consume(self):
-        self.create_deployment_plan()
-        if not self.context.validation.has_issues:
-            self.create_classic_plan()
-            if self.context.deployment.classic_plan is not None:
-                print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
+        self.create_classic_deployment_plan()
+        if self.context.deployment.classic_plan is not None:
+            print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
 
-    def create_classic_plan(self):
+    def create_classic_deployment_plan(self):
         classic_plan = None
-        if (self.context.deployment.plan is not None):
-            classic_plan = convert_plan(self.context)
+
+        self.create_deployment_plan()
+        if (self.context.deployment.plan is not None) and (not self.context.validation.has_issues):
+            try:
+                classic_plan = convert_plan(self.context)
+            except Exception as e:
+                self._handle_exception(e)
+
         setattr(self.context.deployment, 'classic_plan', classic_plan)
 
 #
@@ -43,7 +47,7 @@ class Plan(BasicPlan):
 #
 
 def convert_plan(context):
-    plugins = context.presentation.service_template.plugins
+    plugins = context.presentation.presenter.service_template.plugins
     plugins = [convert_plugin(context, v) for v in plugins.itervalues()] if plugins is not None else []
 
     r = OrderedDict((
@@ -77,7 +81,7 @@ def convert_plan(context):
     return r
 
 def convert_version(context):
-    number = context.presentation.service_template.tosca_definitions_version
+    number = context.presentation.presenter.service_template.tosca_definitions_version
     number = number[len('cloudify_dsl_'):]
     number = number.split('_')
     number = tuple(int(v) for v in number)
@@ -308,7 +312,7 @@ def parse_implementation(context, implementation):
     else:
         # plugin.operation
         plugin_name, operation_name = implementation.split('.', 1)
-        plugin = context.presentation.service_template.plugins.get(plugin_name) if context.presentation.service_template.plugins is not None else None
+        plugin = context.presentation.presenter.service_template.plugins.get(plugin_name) if context.presentation.presenter.service_template.plugins is not None else None
         plugin_executor = plugin.executor if plugin is not None else None
         #print '!!!!', plugin_name, plugin_executor, operation_name
         return plugin_name, plugin_executor, operation_name

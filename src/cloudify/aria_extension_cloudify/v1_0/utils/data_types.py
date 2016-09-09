@@ -77,7 +77,7 @@ def get_data_type(context, presentation):
         return None
     
     # Try complex data type
-    data_type = context.presentation.data_types.get(the_type) if context.presentation.data_types is not None else None
+    data_type = context.presentation.presenter.data_types.get(the_type) if context.presentation.presenter.data_types is not None else None
     if data_type is not None:
         return data_type
     

@@ -15,9 +15,9 @@
 #
 
 from .. import install_aria_extensions
+from ..consumption import Parse, Validate
 from ..utils import print_exception, import_fullname
-from ..consumption import ConsumptionContext
-from .utils import CommonArgumentParser, create_parser_ns
+from .utils import CommonArgumentParser, create_context_ns
 
 class ArgumentParser(CommonArgumentParser):
     def __init__(self):
@@ -36,19 +36,20 @@ def main():
         install_aria_extensions()
 
         consumer_class = import_fullname(consumer_class_name, ['aria.consumption'])
-        parser = create_parser_ns(args)
-        
-        context = ConsumptionContext()
+        context = create_context_ns(args)
         context.args = unknown_args
-
-        parser.parse_and_validate(context)
         
+        Parse(context).consume()
         if context.validation.dump_issues():
             exit(0)
 
-        consumer_class(context).consume()
-        
-        context.validation.dump_issues()
+        Validate(context).consume()
+        if context.validation.dump_issues():
+            exit(0)
+
+        if consumer_class not in (Parse, Validate):
+            consumer_class(context).consume()
+            context.validation.dump_issues()
     except Exception as e:
         print_exception(e)
 

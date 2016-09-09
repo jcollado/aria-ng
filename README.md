@@ -48,9 +48,17 @@ Now create a deployment plan from a TOSCA blueprint:
 
 	aria blueprints/tosca/node-cellar.yaml
 
+You can also get it in JSON format:
 
-`aria.parsing`
-----------------
+	aria blueprints/tosca/node-cellar.yaml --json
+
+Or get an overview of the relationship graph:
+
+	aria blueprints/tosca/node-cellar.yaml --graph
+
+
+Architecture
+------------
 
 The ARIA parser generates a representation of TOSCA profiles in Python, such that they
 can be validated, consumed, or manipulated.

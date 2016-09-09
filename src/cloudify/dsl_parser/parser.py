@@ -15,8 +15,7 @@
 #
 
 from aria import install_aria_extensions
-from aria.consumption import ConsumptionContext
-from aria.parsing import DefaultParser
+from aria.consumption import ConsumptionContext, Parse, Validate
 from aria.loading import UriLocation, LiteralLocation
 from aria_extension_cloudify import Plan
 
@@ -25,23 +24,25 @@ install_aria_extensions()
 def parse_from_path(dsl_file_path, resources_base_url=None, additional_resource_sources=(), validate_version=True, **legacy):
     paths = [resources_base_url] if resources_base_url is not None else []
     paths += additional_resource_sources
-    return _parse(UriLocation(dsl_file_path, paths), validate_version=validate_version)
+    return _parse(UriLocation(dsl_file_path, paths), validate=validate_version)
 
 def parse(dsl_string, resources_base_url=None, validate_version=True, **legacy):
     paths = [resources_base_url] if resources_base_url is not None else []
-    return _parse(LiteralLocation(dsl_string, paths), validate_version=validate_version)
+    return _parse(LiteralLocation(dsl_string, paths), validate=validate_version)
 
-def _parse(location, validate_version=True):
-    parser = DefaultParser(location)
+def _parse(location, validate=True):
     context = ConsumptionContext()
-    if validate_version:
-        parser.parse_and_validate(context)
-    else:
-        parser.parse(context)
-    if not context.validation.has_issues:
-        plan = Plan(context)
-        plan.create_deployment_plan()
+    context.parsing.location = location
+    
+    Parse(context).consume()
+    
+    if validate:
         if not context.validation.has_issues:
-            plan.create_classic_plan()
+            Validate(context).consume()
+
+    if not context.validation.has_issues:
+        Plan(context).create_classic_deployment_plan()
+    
     context.validation.dump_issues()
+    
     return context

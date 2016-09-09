@@ -43,7 +43,7 @@ class TriggerAssignment(Presentation):
 
     @cachedmethod
     def _get_type(self, context):
-        return context.presentation.policy_triggers.get(self.type) if context.presentation.policy_triggers is not None else None
+        return context.presentation.presenter.policy_triggers.get(self.type) if context.presentation.presenter.policy_triggers is not None else None
 
     @cachedmethod
     def _get_property_values(self, context):
@@ -82,7 +82,7 @@ class PolicyAssignment(Presentation):
 
     @cachedmethod
     def _get_type(self, context):
-        return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
+        return context.presentation.presenter.policy_types.get(self.type) if context.presentation.presenter.policy_types is not None else None
 
     @cachedmethod
     def _get_property_values(self, context):

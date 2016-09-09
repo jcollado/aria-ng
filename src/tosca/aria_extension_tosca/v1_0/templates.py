@@ -137,7 +137,7 @@ class NodeTemplate(ToscaPresentation):
     
     @cachedmethod
     def _get_type(self, context):
-        return context.presentation.node_types.get(self.type) if context.presentation.node_types is not None else None
+        return context.presentation.presenter.node_types.get(self.type) if context.presentation.presenter.node_types is not None else None
 
     @cachedmethod
     def _get_property_values(self, context):
@@ -248,7 +248,7 @@ class RelationshipTemplate(ToscaPresentation):
 
     @cachedmethod
     def _get_type(self, context):
-        return context.presentation.relationship_types.get(self.type) if context.presentation.relationship_types is not None else None
+        return context.presentation.presenter.relationship_types.get(self.type) if context.presentation.presenter.relationship_types is not None else None
 
     @cachedmethod
     def _get_property_values(self, context):
@@ -325,7 +325,7 @@ class GroupDefinition(ToscaPresentation):
 
     @cachedmethod
     def _get_type(self, context):
-        return context.presentation.group_types.get(self.type) if context.presentation.group_types is not None else None
+        return context.presentation.presenter.group_types.get(self.type) if context.presentation.presenter.group_types is not None else None
 
     @cachedmethod
     def _get_property_values(self, context):
@@ -385,7 +385,7 @@ class PolicyDefinition(ToscaPresentation):
 
     @cachedmethod
     def _get_type(self, context):
-        return context.presentation.policy_types.get(self.type) if context.presentation.policy_types is not None else None
+        return context.presentation.presenter.policy_types.get(self.type) if context.presentation.presenter.policy_types is not None else None
 
     @cachedmethod
     def _get_property_values(self, context):

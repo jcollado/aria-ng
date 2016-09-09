@@ -35,9 +35,9 @@ class GetInput(Function):
 
         self.input_property_name = parse_string_expression(context, presentation, 'get_input', None, 'the input property name', argument)
 
-        if context.presentation is not None:
+        if context.presentation.presenter is not None:
             if isinstance(self.input_property_name, basestring):
-                inputs = context.presentation.inputs
+                inputs = context.presentation.presenter.inputs
                 if (inputs is None) or (self.input_property_name not in inputs):
                     raise InvalidValueError('function "get_input" argument is not a valid input name: %s' % repr(argument), locator=self.locator)
         
@@ -135,7 +135,7 @@ class GetAttribute(Function):
 #
 
 def get_function(context, presentation, value):
-    functions = context.presentation.functions
+    functions = context.presentation.presenter.functions
     if isinstance(value, dict) and (len(value) == 1):
         key = value.keys()[0]
         if key in functions:
@@ -169,9 +169,9 @@ def parse_modelable_entity_name(context, presentation, name, index, value):
         if self_variant not in ('relationship_template', 'fake'):
             raise invalid_modelable_entity_name(name, index, value, presentation._locator, 'a relationship template')
     elif isinstance(value, basestring):
-        if context.presentation is not None:
-            node_templates = context.presentation.node_templates or {}
-            relationship_templates = context.presentation.relationship_templates or {}
+        if context.presentation.presenter is not None:
+            node_templates = context.presentation.presenter.node_templates or {}
+            relationship_templates = context.presentation.presenter.relationship_templates or {}
             if (value not in node_templates) and (value not in relationship_templates):
                 raise InvalidValueError('function "%s" parameter %d is not a valid modelable entity name: %s' % (name, index + 1, repr(value)), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
     return value

@@ -22,4 +22,4 @@ class Presentation(Consumer):
     """
     
     def consume(self):
-        self.context.presentation._dump(self.context)
+        self.context.presentation.presenter._dump(self.context)

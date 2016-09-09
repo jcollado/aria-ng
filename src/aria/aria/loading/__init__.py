@@ -15,6 +15,7 @@
 #
 
 from .exceptions import LoaderError, LoaderNotFoundError, DocumentNotFoundError
+from .context import LoadingContext
 from .loader import Loader
 from .source import LoaderSource, DefaultLoaderSource
 from .location import Location, UriLocation, LiteralLocation
@@ -26,6 +27,7 @@ __all__ = (
     'LoaderError',
     'LoaderNotFoundError',
     'DocumentNotFoundError',
+    'LoadingContext',
     'Loader',
     'LoaderSource',
     'DefaultLoaderSource',

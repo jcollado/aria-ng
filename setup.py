@@ -54,7 +54,6 @@ setup(
         'aria.consumption',
         'aria.deployment',
         'aria.loading',
-        'aria.parsing',
         'aria.presentation',
         'aria.reading',
         'aria.tools',

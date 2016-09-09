@@ -75,7 +75,7 @@ def get_assigned_and_defined_property_values(context, presentation, field_name='
 
                     # For data type values, merge into the default value (note: this is Cloudify behavior; in TOSCA these values are always replaced)
                     default = definition.default
-                    if (default is not None) and (context.presentation.data_types is not None) and (definition.type in context.presentation.data_types):
+                    if (default is not None) and (context.presentation.presenter.data_types is not None) and (definition.type in context.presentation.presenter.data_types):
                         t = deepclone(default)
                         merge(t, v)
                         v = t

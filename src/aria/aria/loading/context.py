@@ -14,10 +14,8 @@
 # under the License.
 #
 
-from .exceptions import ParserError
-from .parser import Parser, DefaultParser
+from .source import DefaultLoaderSource 
 
-__all__ = (
-    'ParserError',
-    'Parser',
-    'DefaultParser')
+class LoadingContext(object):
+    def __init__(self):
+        self.loader_source = DefaultLoaderSource()

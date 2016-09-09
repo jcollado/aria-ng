@@ -66,7 +66,7 @@ class NodeType(Presentation):
 
     @cachedmethod
     def _get_parent(self, context):
-        return context.presentation.node_types.get(self.derived_from)
+        return context.presentation.presenter.node_types.get(self.derived_from)
 
     @cachedmethod
     def _get_properties(self, context):
@@ -133,7 +133,7 @@ class RelationshipType(Presentation):
 
     @cachedmethod
     def _get_parent(self, context):
-        return context.presentation.relationship_types.get(self.derived_from)
+        return context.presentation.presenter.relationship_types.get(self.derived_from)
 
     @cachedmethod
     def _get_properties(self, context):

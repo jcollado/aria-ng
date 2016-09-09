@@ -15,25 +15,31 @@
 #
 
 from .. import install_aria_extensions
-from ..consumption import ConsumptionContext, Plan
+from ..consumption import Parse, Validate, Plan
 from ..utils import JSONValueEncoder, print_exception
 from ..loading import FILE_LOADER_PATHS, LiteralLocation
-from .utils import CommonArgumentParser, create_parser_ns
+from .utils import CommonArgumentParser, create_context_ns
 from rest_server import Config, start_server
 from collections import OrderedDict
 import urllib
 
+API_VERSION = 1
+PATH_PREFIX = 'openoapi/tosca/v%d' % API_VERSION
+VALIDATE_PATH = '%s/validate' % PATH_PREFIX
+PLAN_PATH = '%s/plan' % PATH_PREFIX
+
 def parse(uri):
-    parser = create_parser_ns(args, uri=uri)
-    context = ConsumptionContext()
-    parser.parse_and_validate(context)
+    context = create_context_ns(args, uri=uri)
+    Parse(context).consume()
+    if not context.validation.has_issues:
+        Validate(context).consume()
     return context
 
 def issues(context):
     return {'issues': [i.as_raw for i in context.validation.issues]}
 
 def validate_get(handler):
-    path = urllib.unquote(handler.path[len('/openoapi/tosca/v1/validate/'):])
+    path = urllib.unquote(handler.path[len(VALIDATE_PATH) + 2:])
     context = parse(path)
     return issues(context) if context.validation.has_issues else {}
 
@@ -43,7 +49,7 @@ def validate_post(handler):
     return issues(context) if context.validation.has_issues else {}
 
 def plan_get(handler):
-    path = urllib.unquote(handler.path[len('/openoapi/tosca/v1/plan/'):])
+    path = urllib.unquote(handler.path[len(PLAN_PATH) + 2:])
     context = parse(path)
     if context.validation.has_issues:
         return issues(context)
@@ -57,9 +63,9 @@ def plan_post(handler):
         return {'issues': issues}
 
 ROUTES = OrderedDict((
-    (r'^/$', {'file': 'index.html', 'media_type': 'text/html'}),
-    (r'^/openoapi/tosca/v1/validate', {'GET': validate_get, 'POST': validate_post, 'media_type': 'application/json'}),
-    (r'^/openoapi/tosca/v1/plan', {'GET': plan_get, 'POST': plan_post, 'media_type': 'application/json'})))
+    ('^/$', {'file': 'index.html', 'media_type': 'text/html'}),
+    ('^/' + VALIDATE_PATH, {'GET': validate_get, 'POST': validate_post, 'media_type': 'application/json'}),
+    ('^/' + PLAN_PATH, {'GET': plan_get, 'POST': plan_post, 'media_type': 'application/json'})))
 
 class ArgumentParser(CommonArgumentParser):
     def __init__(self):

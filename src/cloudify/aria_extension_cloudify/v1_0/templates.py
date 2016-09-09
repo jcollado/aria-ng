@@ -91,7 +91,7 @@ class RelationshipTemplate(Presentation):
 
     @cachedmethod
     def _get_type(self, context):
-        return context.presentation.relationship_types.get(self.type) if context.presentation.relationship_types is not None else None
+        return context.presentation.presenter.relationship_types.get(self.type) if context.presentation.presenter.relationship_types is not None else None
 
     @cachedmethod
     def _get_property_values(self, context):
@@ -175,7 +175,7 @@ class NodeTemplate(Presentation):
     
     @cachedmethod
     def _get_type(self, context):
-        return context.presentation.node_types.get(self.type) if context.presentation.node_types is not None else None
+        return context.presentation.presenter.node_types.get(self.type) if context.presentation.presenter.node_types is not None else None
 
     @cachedmethod
     def _get_property_values(self, context):

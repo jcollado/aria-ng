@@ -14,8 +14,11 @@
 # under the License.
 #
 
+from .source import DefaultReaderSource
 from ..utils import LockedList
 
 class ReadingContext(object):
     def __init__(self):
+        self.reader_source = DefaultReaderSource()
+        self.reader = None
         self.locations = LockedList()

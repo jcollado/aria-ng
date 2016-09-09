@@ -15,6 +15,7 @@
 #
 
 from .exceptions import PresenterError, PresenterNotFoundError
+from .context import PresentationContext
 from .presenter import Presenter
 from .presentation import Value, PresentationBase, Presentation, AsIsPresentation, FakePresentation
 from .source import PRESENTER_CLASSES, PresenterSource, DefaultPresenterSource
@@ -25,6 +26,7 @@ from .utils import validate_no_short_form, validate_no_unknown_fields, validate_
 __all__ = (
     'PresenterError',
     'PresenterNotFoundError',
+    'PresentationContext',
     'Presenter',
     'Value',
     'PresentationBase',

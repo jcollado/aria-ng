@@ -77,7 +77,7 @@ class PolicyDefinition(Presentation):
         targets = self.targets
         if targets:
             for target in targets:
-                target = context.presentation.groups.get(target)
+                target = context.presentation.presenter.groups.get(target)
                 if target is not None:
                     r.append(target)
         return ReadOnlyList(r)

@@ -14,8 +14,8 @@
 # under the License.
 #
 
-from .. import UnimplementedFunctionalityError
-from ..utils import classname
+from .. import AriaError, UnimplementedFunctionalityError, Issue
+from ..utils import classname, print_exception
 
 class Consumer(object):
     """
@@ -31,3 +31,11 @@ class Consumer(object):
     
     def consume(self):
         raise UnimplementedFunctionalityError(classname(self) + '.consume')
+
+    def _handle_exception(self, e):
+        if hasattr(e, 'issue') and isinstance(e.issue, Issue):
+            self.context.validation.report(issue=e.issue)
+        else:
+            self.context.validation.report(exception=e)
+        if not isinstance(e, AriaError):
+            print_exception(e)

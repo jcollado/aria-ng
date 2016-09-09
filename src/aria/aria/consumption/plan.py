@@ -16,6 +16,18 @@
 
 from .template import Template
 
+
+import json
+
+class Inputs(object):
+    def __init__(self, context, payload):
+        if payload.endswith('.json') or payload.endswith('.yaml'):
+            print payload
+        payload = json.loads(payload)
+        print payload
+    
+    
+
 class Plan(Template):
     """
     Emits the deployment plan instantiated from the deployment template.
@@ -24,6 +36,12 @@ class Plan(Template):
     def consume(self):
         self.create_deployment_plan()
         if (self.context.deployment.plan is not None) and (not self.context.validation.has_issues):
+            for arg in self.context.args:
+                if arg.startswith('--inputs='):
+                    inputs = arg[len('--inputs='):]
+                    inputs = Inputs(self.context, inputs)
+                    exit()
+            
             if '--graph' in self.context.args:
                 self.context.deployment.plan.dump_graph(self.context)
             elif '--json' in self.context.args:
@@ -34,13 +52,16 @@ class Plan(Template):
     def create_deployment_plan(self):
         self.create_deployment_template()
         if self.context.deployment.template is not None:
-            if not self.context.validation.has_issues:
-                self.context.deployment.template.instantiate(self.context, None)
-            if not self.context.validation.has_issues:
-                self.context.deployment.plan.validate(self.context)
-            if not self.context.validation.has_issues:
-                self.context.deployment.plan.satisfy_requirements(self.context)
-            if not self.context.validation.has_issues:
-                self.context.deployment.template.coerce_values(self.context, None, True)
-            if not self.context.validation.has_issues:
-                self.context.deployment.plan.validate_capabilities(self.context)
+            try:
+                if not self.context.validation.has_issues:
+                    self.context.deployment.template.instantiate(self.context, None)
+                if not self.context.validation.has_issues:
+                    self.context.deployment.plan.validate(self.context)
+                if not self.context.validation.has_issues:
+                    self.context.deployment.plan.satisfy_requirements(self.context)
+                if not self.context.validation.has_issues:
+                    self.context.deployment.template.coerce_values(self.context, None, True)
+                if not self.context.validation.has_issues:
+                    self.context.deployment.plan.validate_capabilities(self.context)
+            except Exception as e:
+                self._handle_exception(e)

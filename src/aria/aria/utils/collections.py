@@ -188,8 +188,12 @@ class StrictDict(OrderedDict):
         return super(StrictDict, self).__setitem__(key, value)
 
 class JSONValueEncoder(json.JSONEncoder):
-    def __init__(self):
-        super(JSONValueEncoder, self).__init__(ensure_ascii=False)
+    def __init__(self, *args, **kwargs):
+        if kwargs is None:
+            kwargs = {}
+        if 'ensure_ascii' not in kwargs:
+            kwargs['ensure_ascii'] = False
+        super(JSONValueEncoder, self).__init__(*args, **kwargs)
     
     def default(self, o):
         try:

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python
 
 #
 # Copyright (c) 2016 GigaSpaces Technologies Ltd. All rights reserved.
@@ -16,13 +16,6 @@
 # under the License.
 #
 
-set -e
+from aria.tools.rest import main
 
-
-HERE=$(dirname "$(readlink -f "$0")")
-ARIA_SRC="$HERE/src/aria"
-TOSCA_SRC="$HERE/src/tosca"
-CLOUDIFY_SRC="$HERE/src/cloudify"
-
-PYTHONPATH="$ARIA_SRC:$TOSCA_SRC:$CLOUDIFY_SRC:$PYTHONPATH" \
-python -m aria.tools.cli "$@"
+main()

@@ -68,7 +68,7 @@ class HasCachedMethods(object):
         Resets the caches of all cached methods.
         """
         
-        for k, p in self.__class__.__dict__.iteritems():
+        for p in self.__class__.__dict__.itervalues():
             if isinstance(p, property):
                 # The property getter might be cached
                 p = p.fget

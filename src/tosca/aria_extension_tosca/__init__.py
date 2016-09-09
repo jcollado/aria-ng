@@ -28,7 +28,7 @@ def install_aria_extension():
     DSL_SPECIFICATION_PACKAGES.append('aria_extension_tosca')
     
     # Imports
-    the_dir = os.path.dirname(os.path.dirname(__file__))
+    the_dir = os.path.dirname(__file__)
     FILE_LOADER_PATHS.append(os.path.join(the_dir, 'profiles'))
 
 MODULES = (

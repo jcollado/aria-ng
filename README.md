@@ -37,16 +37,16 @@ documentation.
 Quick Start
 -----------
 
-You need Python v2.7. Use a [virtualenv](https://virtualenv.pypa.io/en/stable/):
+You need Python v2.7. Python v3 is not currently supported. Use a [virtualenv](https://virtualenv.pypa.io/en/stable/):
 
 	pip install virtualenv
 	virtualenv env
 	. env/bin/activate
-	make aria-requirements
+	pip install .
 
 Now create a deployment plan from a TOSCA blueprint:
 
-	./aria blueprints/tosca/node-cellar.yaml
+	aria blueprints/tosca/node-cellar.yaml
 
 
 `aria.parsing`
@@ -169,3 +169,19 @@ You will get a JSON response with a list of validation issues. You can also POST
 blueprint over the wire:
 
     curl --data-binary @blueprints/tosca/node-cellar.yaml http://localhost:8204/openoapi/tosca/v1/plan/
+
+
+Development
+-----------
+
+You do not want to install with `pip`, but instead work directly with the source files:
+
+	pip install virtualenv
+	virtualenv env
+	. env/bin/activate
+	make aria-requirements
+
+You can then run the scripts in the main directory:
+
+	./aria blueprints/tosca/node-cellar.yaml plan
+    ./aria-rest

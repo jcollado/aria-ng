@@ -27,18 +27,13 @@ class ClassicPlan(Consumer):
 
     def consume(self):
         if self.context.deployment.plan is None:
+            self.context.validation.report('ClassicPlan consumer: missing deployment plan')
             return
 
-        try:
-            classic_plan = convert_plan(self.context)
-            setattr(self.context.deployment, 'classic_plan', classic_plan)
-        except Exception as e:
-            self._handle_exception(e)
+        classic_plan = convert_plan(self.context)
+        setattr(self.context.deployment, 'classic_plan', classic_plan)
     
     def dump(self):
-        if self.context.deployment.classic_plan is None:
-            return
-
         print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
 
 #

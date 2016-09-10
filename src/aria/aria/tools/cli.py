@@ -50,6 +50,7 @@ def main():
         elif consumer_class_name == 'types':
             consumer.append(Template, Inputs, Plan, Types)
         else:
+            consumer.append(Template, Inputs, Plan)
             consumer.append(import_fullname(consumer_class_name))
             
         if dumper is None:

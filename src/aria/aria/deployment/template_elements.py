@@ -59,6 +59,12 @@ class DeploymentTemplate(Template):
         instantiate_dict(context, self, r.inputs, self.inputs)
         instantiate_dict(context, self, r.outputs, self.outputs)
         
+        for name, the_input in context.deployment.inputs.iteritems():
+            if name not in r.inputs:
+                context.validation.report('input "%s" is not supported' % name)
+            else:
+                r.inputs[name].value = the_input
+        
         return r
 
     def validate(self, context):

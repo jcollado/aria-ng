@@ -48,18 +48,26 @@ class ConsumerChain(Consumer):
     Calls consumers in order, but stops if there are any validation issues along the way.
     """
 
-    def __init__(self, context, consumer_classes=None):
+    def __init__(self, context, consumer_classes=None, handle_exceptions=True):
         super(ConsumerChain, self).__init__(context)
+        self.handle_exceptions = handle_exceptions
         self.consumers = []
         if consumer_classes:
             for consumer_class in consumer_classes:
                 self.append(consumer_class)
     
-    def append(self, consumer_class):
-        self.consumers.append(consumer_class(self.context))
+    def append(self, *consumer_classes):
+        for consumer_class in consumer_classes:
+            self.consumers.append(consumer_class(self.context))
 
     def consume(self):
         for consumer in self.consumers:
-            consumer.consume()
+            try:
+                consumer.consume()
+            except Exception as e:
+                if self.handle_exceptions:
+                    consumer._handle_exception(e)
+                else:
+                    raise e
             if self.context.validation.has_issues:
                 break

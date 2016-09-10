@@ -39,19 +39,15 @@ class FileTextLoader(Loader):
         self.file = None
     
     def open(self):
-        def _open(path):
-            self.file = codecs.open(path, mode='r', encoding=self.encoding, buffering=1)
-            self.location.uri = path
-        
         try:
-            _open(os.path.abspath(self.path))
+            self._open(os.path.abspath(self.path))
         except IOError as e:
             if e.errno == 2:
                 # Not found, so try in paths
                 for p in self.paths:
                     path = os.path.join(p, self.path)
                     try:
-                        _open(path)
+                        self._open(path)
                         return
                     except IOError as e:
                         if e.errno != 2:
@@ -80,3 +76,7 @@ class FileTextLoader(Loader):
             except Exception as e:
                 raise LoaderError('file error %s' % self.location, cause=e)
         return None
+
+    def _open(self, path):
+        self.file = codecs.open(path, mode='r', encoding=self.encoding, buffering=1)
+        self.location.uri = path

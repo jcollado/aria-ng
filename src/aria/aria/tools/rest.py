@@ -15,7 +15,7 @@
 #
 
 from .. import install_aria_extensions
-from ..consumption import ConsumerChain, Presentation, Validation, Template, Plan
+from ..consumption import ConsumerChain, Presentation, Validation, Template, Inputs, Plan
 from ..utils import JSONValueEncoder, print_exception
 from ..loading import FILE_LOADER_PATHS, LiteralLocation
 from .utils import CommonArgumentParser, create_context_ns
@@ -28,6 +28,8 @@ PATH_PREFIX = 'openoapi/tosca/v%d' % API_VERSION
 VALIDATE_PATH = '%s/validate' % PATH_PREFIX
 PLAN_PATH = '%s/plan' % PATH_PREFIX
 
+args = None
+
 def validate(uri):
     context = create_context_ns(args, uri=uri)
     ConsumerChain(context, (Presentation, Validation)).consume()
@@ -35,7 +37,7 @@ def validate(uri):
 
 def plan(uri):
     context = create_context_ns(args, uri=uri)
-    ConsumerChain(context, (Presentation, Validation, Template, Plan)).consume()
+    ConsumerChain(context, (Presentation, Validation, Template, Inputs, Plan)).consume()
     return context
 
 def issues(context):
@@ -71,7 +73,7 @@ class ArgumentParser(CommonArgumentParser):
         super(ArgumentParser, self).__init__(description='REST Server', prog='aria-rest')
         self.add_argument('--port', type=int, default=8204, help='HTTP port')
         self.add_argument('--root', default='.', help='web root directory')
-        self.add_argument('--path', help='path for imports')
+        self.add_argument('--path', nargs='*', help='paths for imports')
 
 def main():
     try:
@@ -80,7 +82,8 @@ def main():
         global args
         args, _ = ArgumentParser().parse_known_args()
         if args.path:
-            FILE_LOADER_PATHS.append(args.path)
+            for path in args.path:
+                FILE_LOADER_PATHS.append(path)
             
         config = Config()
         config.port = args.port

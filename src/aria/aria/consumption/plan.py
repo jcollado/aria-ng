@@ -14,60 +14,41 @@
 # under the License.
 #
 
-from .consumer import Consumer
-from ..loading import UriLocation, LiteralLocation
-from ..reading import JsonReader
+from .consumer import Consumer, ConsumerChain
 
-class Inputs(object):
-    def __init__(self, context, payload):
-        if payload.endswith('.json') or payload.endswith('.yaml'):
-            location = UriLocation(payload)
-        else:
-            location = LiteralLocation(payload)
+class Instantiate(Consumer):
+    def consume(self):
+        if self.context.deployment.template is None:
+            self.context.validation.report('Plan consumer: missing deployment template')
+            return
 
-        loader = context.loading.loader_source.get_loader(location, None)
+        self.context.deployment.template.instantiate(self.context, None)
+
+class Validate(Consumer):
+    def consume(self):
+        self.context.deployment.plan.validate(self.context)
+
+class SatisfyRequirements(Consumer):
+    def consume(self):
+        self.context.deployment.plan.satisfy_requirements(self.context)
         
-        if isinstance(location, LiteralLocation):
-            reader = JsonReader(context.reading, location, loader)
-        else:
-            reader = context.reading.reader_source.get_reader(context.reading, location, loader)
-        
-        raw = reader.read()
-        print raw
+class CoerceValues(Consumer):
+    def consume(self):
+        self.context.deployment.template.coerce_values(self.context, None, True)
 
-class Plan(Consumer):
+class ValidateCapabilities(Consumer):
+    def consume(self):
+        self.context.deployment.plan.validate_capabilities(self.context)
+
+class Plan(ConsumerChain):
     """
     Generates the deployment plan by instantiating the deployment template.
     """
-
-    def consume(self):
-        if self.context.deployment.template is None:
-            return
-
-        for arg in self.context.args:
-            if arg.startswith('--inputs='):
-                inputs = arg[len('--inputs='):]
-                inputs = Inputs(self.context, inputs)
-                exit()
-
-        try:
-            if not self.context.validation.has_issues:
-                self.context.deployment.template.instantiate(self.context, None)
-            if not self.context.validation.has_issues:
-                self.context.deployment.plan.validate(self.context)
-            if not self.context.validation.has_issues:
-                self.context.deployment.plan.satisfy_requirements(self.context)
-            if not self.context.validation.has_issues:
-                self.context.deployment.template.coerce_values(self.context, None, True)
-            if not self.context.validation.has_issues:
-                self.context.deployment.plan.validate_capabilities(self.context)
-        except Exception as e:
-            self._handle_exception(e)
     
+    def __init__(self, context):
+        super(Plan, self).__init__(context, (Instantiate, Validate, SatisfyRequirements, CoerceValues, ValidateCapabilities))
+
     def dump(self):
-        if self.context.deployment.plan is None:
-            return
-        
         if '--graph' in self.context.args:
             self.context.deployment.plan.dump_graph(self.context)
         elif '--yaml' in self.context.args:

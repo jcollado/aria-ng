@@ -15,7 +15,7 @@
 #
 
 from .. import install_aria_extensions
-from ..consumption import ConsumerChain, Presentation, Validation, Yaml, Template, Plan
+from ..consumption import ConsumerChain, Presentation, Validation, Yaml, Template, Inputs, Plan, Types
 from ..utils import print_exception, import_fullname
 from .utils import CommonArgumentParser, create_context_ns
 
@@ -46,8 +46,9 @@ def main():
         elif consumer_class_name == 'template':
             consumer.append(Template)
         elif consumer_class_name == 'plan':
-            consumer.append(Template)
-            consumer.append(Plan)
+            consumer.append(Template, Inputs, Plan)
+        elif consumer_class_name == 'types':
+            consumer.append(Template, Inputs, Plan, Types)
         else:
             consumer.append(import_fullname(consumer_class_name))
             

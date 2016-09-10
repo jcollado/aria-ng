@@ -267,6 +267,14 @@ class CapabilityType(ToscaPresentation):
         return context.presentation.presenter.capability_types.get(self.derived_from)
 
     @cachedmethod
+    def _is_descendant(self, context, the_type):
+        if the_type is None:
+            return False
+        elif the_type._name == self._name:
+            return True
+        return self._is_descendant(context, the_type._get_parent(context))
+
+    @cachedmethod
     def _get_properties(self, context):
         return ReadOnlyDict(get_inherited_property_definitions(context, self, 'properties'))
 
@@ -554,7 +562,7 @@ class NodeType(ToscaPresentation):
     def _is_descendant(self, context, the_type):
         if the_type is None:
             return False
-        elif the_type == self:
+        elif the_type._name == self._name:
             return True
         return self._is_descendant(context, the_type._get_parent(context))
 
@@ -674,7 +682,7 @@ class GroupType(ToscaPresentation):
     def _is_descendant(self, context, the_type):
         if the_type is None:
             return False
-        elif the_type == self:
+        elif the_type._name == self._name:
             return True
         return self._is_descendant(context, the_type._get_parent(context))
 

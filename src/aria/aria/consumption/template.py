@@ -14,26 +14,31 @@
 # under the License.
 #
 
-from .consumer import Consumer
+from .consumer import Consumer, ConsumerChain
 
-class Template(Consumer):
+class Derive(Consumer):
+    def consume(self):
+        if self.context.presentation.presenter is None:
+            self.context.validation.report('Template consumer: missing presenter')
+            return
+        
+        if not hasattr(self.context.presentation.presenter, '_get_deployment_template'):
+            self.context.validation.report('Template consumer: presenter does not support "_get_deployment_template"')
+            return
+
+        self.context.deployment.template = self.context.presentation.presenter._get_deployment_template(self.context)
+
+class Validate(Consumer):
+    def consume(self):
+        self.context.deployment.template.validate(self.context)
+
+class Template(ConsumerChain):
     """
     Generates the deployment template by deriving it from the presentation.
     """
 
-    def consume(self):
-        if (self.context.presentation.presenter is None) or (not hasattr(self.context.presentation.presenter, '_get_deployment_template')):
-            return
+    def __init__(self, context):
+        super(Template, self).__init__(context, (Derive, Validate))
 
-        try:
-            self.context.deployment.template = self.context.presentation.presenter._get_deployment_template(self.context)
-            if self.context.deployment.template is not None:
-                self.context.deployment.template.validate(self.context)
-        except Exception as e:
-            self._handle_exception(e)
-    
     def dump(self):
-        if self.context.deployment.template is None:
-            return
-        
         self.context.deployment.template.dump(self.context)

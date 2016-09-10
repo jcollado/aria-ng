@@ -69,6 +69,7 @@ class Validation(Consumer):
 
     def consume(self):
         if self.context.presentation.presenter is None:
+            self.context.validation.report('Validation consumer: missing presenter')
             return
 
         self.context.presentation.presenter._validate(self.context)

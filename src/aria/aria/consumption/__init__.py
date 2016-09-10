@@ -22,6 +22,7 @@ from .presentation import ParsingContext, Presentation
 from .validation import ValidationContext, Validation
 from .yaml import Yaml
 from .template import Template
+from .inputs import Inputs
 from .plan import Plan
 from .types import Types
 
@@ -37,5 +38,6 @@ __all__ = (
     'Validation',
     'Yaml',
     'Template',
+    'Inputs',
     'Plan',
     'Types')

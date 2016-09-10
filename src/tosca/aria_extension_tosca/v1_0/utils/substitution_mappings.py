@@ -79,14 +79,7 @@ def validate_subtitution_mappings_capability(context, presentation):
     type_capability_type = type_capability._get_type(context)
     capability_type = capability._get_type(context)
 
-    def is_descendant(context, parent, child):
-        if child is None:
-            return False
-        if parent == child:
-            return True
-        return is_descendant(context, parent, child._get_parent(context))
-
-    if not is_descendant(context, type_capability_type, capability_type):
+    if not type_capability_type._is_descendant(context, capability_type):
         context.validation.report('type "%s" of substitution mappings capability "%s" is not a descendant of "%s"' % (capability_type._name, presentation._name, type_capability_type._name), locator=presentation._locator, level=Issue.BETWEEN_TYPES)
 
 #

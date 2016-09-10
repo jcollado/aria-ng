@@ -47,7 +47,7 @@ You need Python v2.7. Python v3 is not currently supported. Use a [virtualenv](h
 Now create a deployment plan from a TOSCA blueprint:
 
 	aria blueprints/tosca/node-cellar.yaml
-
+	
 You can also get it in JSON format:
 
 	aria blueprints/tosca/node-cellar.yaml --json
@@ -56,6 +56,14 @@ Or get an overview of the relationship graph:
 
 	aria blueprints/tosca/node-cellar.yaml --graph
 
+You can provide inputs as JSON, overriding default values provided in the blueprint
+
+	aria blueprints/tosca/node-cellar.yaml --inputs='{"openstack_credential": {"user": "username"}}'
+
+Instead of providing them explicitly, you can also provide them in a file or URL, in either
+JSON or YAML. If you do so, the value must end in ".json" or ".yaml":
+
+	aria blueprints/tosca/node-cellar.yaml --inputs=blueprints/tosca/inputs.yaml
 
 Architecture
 ------------
@@ -176,7 +184,12 @@ With the server started, you can hit a few endpoints:
 You will get a JSON response with a list of validation issues. You can also POST a
 blueprint over the wire:
 
-    curl --data-binary @blueprints/tosca/node-cellar.yaml http://localhost:8204/openoapi/tosca/v1/plan/
+    curl --data-binary @blueprints/tosca/node-cellar.yaml http://localhost:8204/openoapi/tosca/v1/plan
+
+If you do so and want to import from the filesystem, note that you must specify search
+paths when you start the server: 
+
+    aria-rest --path blueprints/tosca /another/path/to/imports
 
 
 Development

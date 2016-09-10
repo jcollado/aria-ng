@@ -41,9 +41,16 @@ def classname(o):
     
     return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
 
-cachedmethod = lru_cache(maxsize=64)
+cachedmethod = lambda x: x
 
+#
+# DISABLED FOR NOW.
+# lru_cache does not work with methods!
+#
+#cachedmethod = lru_cache(maxsize=64)
+#
 # See also: http://code.activestate.com/recipes/498245-lru-and-lfu-cache-decorators/
+#
 
 class HasCachedMethods(object):
     @property

@@ -42,6 +42,10 @@ class Presentation(Consumer):
     """
     
     def consume(self):
+        if self.context.parsing.location is None:
+            self.context.validation.report('Presentation consumer: missing location')
+            return
+
         presenter = None
         imported_presentations = None
         
@@ -57,8 +61,6 @@ class Presentation(Consumer):
                 self._handle_exception(e)
                 
             imported_presentations = executor.returns
-        except Exception as e:
-            self._handle_exception(e)
         finally:
             executor.close()
 
@@ -74,9 +76,6 @@ class Presentation(Consumer):
         self.context.presentation.presenter = presenter
 
     def dump(self):
-        if self.context.presentation.presenter is None:
-            return
-        
         self.context.presentation.presenter._dump(self.context)
 
     def _handle_exception(self, e):

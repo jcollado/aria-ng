@@ -16,7 +16,7 @@
 
 from .utils import generate_id_string 
 from .types import TypeHierarchy
-from ..utils import JSONValueEncoder, prune, puts
+from ..utils import JSONValueEncoder, StrictDict, prune, puts
 from ruamel import yaml
 import json, itertools
 
@@ -42,6 +42,7 @@ class DeploymentContext(object):
         #self.id_type = IdType.LOCAL_RANDOM
         self.id_type = IdType.UNIVERSAL_RANDOM
         self.id_max_length = 63 # See: http://www.faqs.org/rfcs/rfc1035.html
+        self.inputs = StrictDict(key_class=basestring)
         self.template = None
         self.plan = None
         self.node_types = TypeHierarchy()

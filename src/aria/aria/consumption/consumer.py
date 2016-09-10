@@ -45,7 +45,8 @@ class ConsumerChain(Consumer):
     """
     ARIA consumer chain.
     
-    Calls consumers in order, but stops if there are any validation issues along the way.
+    Calls consumers in order, handling exception by calling `_handle_exception` on them, 
+    and stops the chain if there are any validation issues.
     """
 
     def __init__(self, context, consumer_classes=None, handle_exceptions=True):

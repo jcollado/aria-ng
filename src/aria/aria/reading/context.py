@@ -18,7 +18,15 @@ from .source import DefaultReaderSource
 from ..utils import LockedList
 
 class ReadingContext(object):
+    """
+    Properties:
+    
+    * :code:`reader_source`: For finding reader instances
+    * :code:`reader`: Overrides :code:`reader_source` with a specific class
+    """
+    
     def __init__(self):
         self.reader_source = DefaultReaderSource()
         self.reader = None
-        self.locations = LockedList()
+        
+        self._locations = LockedList() # for keeping track of locations already read

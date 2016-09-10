@@ -16,9 +16,9 @@
 
 from .. import install_aria_extensions
 from ..consumption import ConsumerChain, Presentation, Validation, Template, Inputs, Plan
-from ..utils import JSONValueEncoder, print_exception
-from ..loading import FILE_LOADER_PATHS, LiteralLocation
-from .utils import CommonArgumentParser, create_context_ns
+from ..utils import JsonAsRawEncoder, print_exception
+from ..loading import LiteralLocation
+from .utils import CommonArgumentParser, create_context_from_namespace
 from rest_server import Config, start_server
 from collections import OrderedDict
 import urllib
@@ -31,12 +31,12 @@ PLAN_PATH = '%s/plan' % PATH_PREFIX
 args = None
 
 def validate(uri):
-    context = create_context_ns(args, uri=uri)
+    context = create_context_from_namespace(args, uri=uri)
     ConsumerChain(context, (Presentation, Validation)).consume()
     return context
 
 def plan(uri):
-    context = create_context_ns(args, uri=uri)
+    context = create_context_from_namespace(args, uri=uri)
     ConsumerChain(context, (Presentation, Validation, Template, Inputs, Plan)).consume()
     return context
 
@@ -73,7 +73,6 @@ class ArgumentParser(CommonArgumentParser):
         super(ArgumentParser, self).__init__(description='REST Server', prog='aria-rest')
         self.add_argument('--port', type=int, default=8204, help='HTTP port')
         self.add_argument('--root', default='.', help='web root directory')
-        self.add_argument('--path', nargs='*', help='paths for imports')
 
 def main():
     try:
@@ -81,15 +80,12 @@ def main():
         
         global args
         args, _ = ArgumentParser().parse_known_args()
-        if args.path:
-            for path in args.path:
-                FILE_LOADER_PATHS.append(path)
             
         config = Config()
         config.port = args.port
         config.routes = ROUTES
         config.static_root = args.root
-        config.json_encoder = JSONValueEncoder(separators=(',',':'))
+        config.json_encoder = JsonAsRawEncoder(ensure_ascii=False, separators=(',',':'))
         
         start_server(config)
 

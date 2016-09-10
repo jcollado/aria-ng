@@ -18,7 +18,7 @@ from .loader import Loader
 from .exceptions import LoaderError, DocumentNotFoundError
 import codecs, os.path
 
-FILE_LOADER_PATHS = []
+FILE_LOADER_SEARCH_PATHS = []
 
 class FileTextLoader(Loader):
     """
@@ -27,16 +27,24 @@ class FileTextLoader(Loader):
     Extracts a text document from a file. The default encoding is UTF-8, but other supported
     encoding can be specified instead.
     
-    Supports a list of base paths that are tried in order if the file cannot be found.
+    Supports a list of search paths that are tried in order if the file cannot be found.
+    
+    If :code:`origin_location` is provided, a base path will be extracted from it and prepended
+    to the search paths.
     """
 
-    def __init__(self, source, location, encoding='utf-8'):
+    def __init__(self, source, location, origin_location, encoding='utf-8'):
         self.source = source
         self.location = location
         self.encoding = encoding
         self.path = location.as_file
-        self.paths = FILE_LOADER_PATHS + location.paths
+        self.search_paths = FILE_LOADER_SEARCH_PATHS
         self.file = None
+        
+        if origin_location is not None:
+            origin_search_path = origin_location.search_path
+            if origin_search_path is not None:
+                self.search_paths = [origin_search_path] + self.search_paths
     
     def open(self):
         try:
@@ -44,7 +52,7 @@ class FileTextLoader(Loader):
         except IOError as e:
             if e.errno == 2:
                 # Not found, so try in paths
-                for p in self.paths:
+                for p in self.search_paths:
                     path = os.path.join(p, self.path)
                     try:
                         self._open(path)

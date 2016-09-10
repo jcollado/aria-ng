@@ -19,7 +19,6 @@ from .location import LiteralLocation, UriLocation
 from .literal import LiteralLoader
 from .file import FileTextLoader
 from .uri import UriTextLoader
-import os.path
 
 class LoaderSource(object):
     """
@@ -41,29 +40,13 @@ class DefaultLoaderSource(LoaderSource):
     """
     The default ARIA loader source will generate a :class:`UriTextLoader` for
     locations that are non-file URIs, and a :class:`FileTextLoader` for file
-    URIs and other strings.
-    
-    If :class:`FileTextLoader` is used, a base path will be extracted from
-    :code:`origin_location`.
+    URIs.
     """
     
     def get_loader(self, location, origin_location):
-        if origin_location is not None:
-            if isinstance(origin_location, UriLocation):
-                origin_file = origin_location.as_file
-                if origin_file is not None:
-                    # It's a file, so include its base path
-                    path = os.path.dirname(origin_file)
-                    if path not in location.paths:
-                        location.paths.insert(0, path)
-
-            for path in origin_location.paths:
-                if path not in location.paths:
-                    location.paths.append(path)
-            
         if isinstance(location, UriLocation):
             if location.as_file is not None:
-                return FileTextLoader(self, location)
+                return FileTextLoader(self, location, origin_location)
             else:
                 return UriTextLoader(self, location)
             

@@ -15,7 +15,7 @@
 #
 
 from .classes import OpenClose, classname, cachedmethod, HasCachedMethods
-from .collections import ReadOnlyList, EMPTY_READ_ONLY_LIST, ReadOnlyDict, EMPTY_READ_ONLY_DICT, StrictList, StrictDict, JSONValueEncoder, merge, deepclone, make_agnostic, prune
+from .collections import ReadOnlyList, EMPTY_READ_ONLY_LIST, ReadOnlyDict, EMPTY_READ_ONLY_DICT, StrictList, StrictDict, JsonAsRawEncoder, merge, prune, deepclone, copy_locators, make_agnostic
 from .exceptions import print_exception, print_traceback
 from .imports import import_fullname, import_modules
 from .threading import ExecutorException, FixedThreadPoolExecutor, LockedList
@@ -33,11 +33,12 @@ __all__ = (
     'EMPTY_READ_ONLY_DICT',
     'StrictList',
     'StrictDict',
-    'JSONValueEncoder',
+    'JsonAsRawEncoder',
     'merge',
-    'deepclone',
-    'make_agnostic',
     'prune',
+    'deepclone',
+    'copy_locators',
+    'make_agnostic',
     'print_exception',
     'print_traceback',
     'import_fullname',

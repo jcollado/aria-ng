@@ -19,12 +19,6 @@ from ..utils import FixedThreadPoolExecutor
 from ..loading import UriLocation
 from ..reading import AlreadyReadError
 
-class ParsingContext(object):
-    def __init__(self):
-        self.location = None
-        self.threads = 1 # TODO: setting threads=1 for now -- we have race conditions due to the shared context!
-        self.timeout = 10 # in seconds
-
 class Presentation(Consumer):
     """
     Generates the presentation.
@@ -42,18 +36,17 @@ class Presentation(Consumer):
     """
     
     def consume(self):
-        if self.context.parsing.location is None:
+        if self.context.presentation.location is None:
             self.context.validation.report('Presentation consumer: missing location')
             return
 
         presenter = None
         imported_presentations = None
         
-        # TODO: settings size=1 for now -- we have race conditions due to the shared context!
-        executor = FixedThreadPoolExecutor(size=self.context.parsing.threads, timeout=self.context.parsing.timeout)
-        #executor.print_exceptions = True
+        executor = FixedThreadPoolExecutor(size=self.context.presentation.threads, timeout=self.context.presentation.timeout)
+        executor.print_exceptions = self.context.presentation.print_exceptions
         try:
-            presenter = self._parse_all(self.context.parsing.location, None, self.context.presentation.presenter_class, executor)
+            presenter = self._present(self.context.presentation.location, None, self.context.presentation.presenter_class, executor)
             executor.drain()
             
             # Handle exceptions
@@ -83,8 +76,8 @@ class Presentation(Consumer):
             return
         super(Presentation, self)._handle_exception(e)
     
-    def _parse_all(self, location, origin_location, presenter_class, executor):
-        raw = self._parse_one(location, origin_location)
+    def _present(self, location, origin_location, presenter_class, executor):
+        raw = self._read(location, origin_location)
         
         if presenter_class is None:
             presenter_class = self.context.presentation.presenter_source.get_presenter(raw)
@@ -101,11 +94,11 @@ class Presentation(Consumer):
                 for import_location in import_locations:
                     # The imports inherit the parent presenter class and use the current location as their origin location
                     import_location = UriLocation(import_location)
-                    executor.submit(self._parse_all, import_location, location, presenter_class, executor)
+                    executor.submit(self._present, import_location, location, presenter_class, executor)
 
         return presentation
     
-    def _parse_one(self, location, origin_location):
+    def _read(self, location, origin_location):
         if self.context.reading.reader is not None:
             return self.context.reading.reader.read()
         loader = self.context.loading.loader_source.get_loader(location, origin_location)

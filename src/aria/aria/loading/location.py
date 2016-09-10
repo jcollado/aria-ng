@@ -14,22 +14,27 @@
 # under the License.
 #
 
-import urlparse
+import urlparse, os
 
 class Location(object):
-    def __init__(self, paths=[]):
-        self.paths = paths
-    
     def is_equivalent(self, location):
         return False
+    
+    @property
+    def search_path(self):
+        return None
 
 class UriLocation(Location):
-    def __init__(self, uri, paths=[]):
-        super(UriLocation, self).__init__(paths)
+    def __init__(self, uri):
         self.uri = uri
 
     def is_equivalent(self, location):
         return isinstance(location, UriLocation) and (location.uri == self.uri)
+
+    @property
+    def search_path(self):
+        file = self.as_file
+        return os.path.dirname(file) if file is not None else None
     
     @property
     def as_file(self):
@@ -42,8 +47,7 @@ class UriLocation(Location):
         return self.uri
 
 class LiteralLocation(Location):
-    def __init__(self, content, paths=[]):
-        super(LiteralLocation, self).__init__(paths)
+    def __init__(self, content):
         self.content = content
 
     def is_equivalent(self, location):

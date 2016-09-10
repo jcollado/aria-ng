@@ -18,7 +18,7 @@ from .exceptions import ConsumerError
 from .context import ConsumptionContext
 from .style import Style
 from .consumer import Consumer, ConsumerChain
-from .presentation import ParsingContext, Presentation
+from .presentation import Presentation
 from .validation import ValidationContext, Validation
 from .yaml import Yaml
 from .template import Template
@@ -32,7 +32,6 @@ __all__ = (
     'Style',
     'Consumer',
     'ConsumerChain',
-    'ParsingContext',
     'Presentation',
     'ValidationContext',
     'Validation',

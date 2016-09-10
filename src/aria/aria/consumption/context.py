@@ -14,7 +14,6 @@
 # under the License.
 #
 
-from .presentation import ParsingContext
 from .validation import ValidationContext
 from ..loading import LoadingContext
 from ..reading import ReadingContext
@@ -24,11 +23,23 @@ from .style import Style
 import sys
 
 class ConsumptionContext(object):
+    """
+    Properties:
+    
+    * :code:`args`: The runtime arguments (usually provided on the command line)
+    * :code:`out`: Message output stream
+    * :code:`style`: Message output style
+    * :code:`validation`: :class:`ValidationContext`
+    * :code:`loading`: :class:`aria.loading.LoadingContext`
+    * :code:`reading`: :class:`aria.reading.ReadingContext`
+    * :code:`presentation`: :class:`aria.presentation.PresentationContext`
+    * :code:`deployment`: :class:`aria.deployment.DeploymentContext`
+    """
+    
     def __init__(self):
-        self.args = []
+        self.args = [] #: The runtime arguments (usually provided on the command line)
         self.out = sys.stdout
         self.style = Style()
-        self.parsing = ParsingContext()
         self.validation = ValidationContext()
         self.loading = LoadingContext()
         self.reading = ReadingContext()

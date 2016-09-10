@@ -17,5 +17,11 @@
 from .source import DefaultLoaderSource 
 
 class LoadingContext(object):
+    """
+    Properties:
+    
+    * :code:`loader_source`: For finding loader instances
+    """
+    
     def __init__(self):
         self.loader_source = DefaultLoaderSource()

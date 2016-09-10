@@ -16,7 +16,7 @@
 
 from .utils import generate_id_string 
 from .types import TypeHierarchy
-from ..utils import JSONValueEncoder, StrictDict, prune, puts
+from ..utils import JsonAsRawEncoder, StrictDict, prune, puts
 from ruamel import yaml
 import json, itertools
 
@@ -37,6 +37,19 @@ class IdType(object):
     """
 
 class DeploymentContext(object):
+    """
+    Properties:
+    
+    * :code:`id_type`: Type of IDs to use for instances
+    * :code:`id_max_length`: Maximum allowed instance ID length
+    * :code:`inputs`: Dict of inputs values
+    * :code:`template`: The generated deployment template
+    * :code:`plan`: The generated deployment plan
+    * :code:`node_types`: The generated hierarchy of node types
+    * :code:`capability_types`: The generated hierarchy of capability types
+    * :code:`relationship_types`: The generated hierarchy of relationship types
+    """
+
     def __init__(self):
         #self.id_type = IdType.LOCAL_SERIAL
         #self.id_type = IdType.LOCAL_RANDOM
@@ -77,7 +90,7 @@ class DeploymentContext(object):
 
     def get_plan_as_json(self, indent=None):
         raw = self.plan_as_raw
-        return json.dumps(raw, indent=indent, cls=JSONValueEncoder, ensure_ascii=False)
+        return json.dumps(raw, indent=indent, ensure_ascii=False, cls=JsonAsRawEncoder)
 
     def dump_types(self, context):
         if self.node_types.children:

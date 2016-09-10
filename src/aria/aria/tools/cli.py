@@ -17,7 +17,7 @@
 from .. import install_aria_extensions
 from ..consumption import ConsumerChain, Presentation, Validation, Yaml, Template, Inputs, Plan, Types
 from ..utils import print_exception, import_fullname
-from .utils import CommonArgumentParser, create_context_ns
+from .utils import CommonArgumentParser, create_context_from_namespace
 
 class ArgumentParser(CommonArgumentParser):
     def __init__(self):
@@ -32,7 +32,7 @@ def main():
         
         install_aria_extensions()
 
-        context = create_context_ns(args)
+        context = create_context_from_namespace(args)
         context.args = unknown_args
         
         consumer = ConsumerChain(context, (Presentation, Validation))

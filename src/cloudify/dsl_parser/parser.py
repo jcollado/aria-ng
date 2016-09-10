@@ -32,7 +32,7 @@ def parse(dsl_string, resources_base_url=None, validate_version=True, **legacy):
 
 def _parse(location, validate=True):
     context = ConsumptionContext()
-    context.parsing.location = location
+    context.presentation.location = location
     
     if validate:
         consumer = ConsumerChain(context, (Presentation, Validation, Template, Plan, ClassicPlan))

@@ -16,11 +16,11 @@
 
 from .consumer import Consumer
 from .. import Issue
-from ..utils import ReadOnlyList, print_exception, puts, colored, indent
+from ..utils import LockedList, ReadOnlyList, print_exception, puts, colored, indent
 
 class ValidationContext(object):
     def __init__(self):
-        self._issues = []
+        self._issues = LockedList()
         self.allow_unknown_fields = False
         self.max_level = Issue.ALL
 
@@ -28,12 +28,13 @@ class ValidationContext(object):
         if issue is None:
             issue = Issue(message, exception, location, line, column, locator, snippet, level)
 
-        # Avoid duplicate issues        
-        for i in self._issues:
-            if str(i) == str(issue):
-                return
+        # Avoid duplicate issues
+        with self._issues:        
+            for i in self._issues:
+                if str(i) == str(issue):
+                    return
             
-        self._issues.append(issue)
+            self._issues.append(issue)
     
     @property
     def has_issues(self):

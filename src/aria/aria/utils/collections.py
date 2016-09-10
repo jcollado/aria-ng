@@ -22,10 +22,12 @@ import json
 
 class ReadOnlyList(list):
     """
-    A read-only list.
+    An immutable list.
     
-    After initialization it will raise TypeError exceptions if modification
+    After initialization it will raise :class:`TypeError` exceptions if modification
     is attempted.
+    
+    Note that objects stored in the list may not be immutable.
     """
     def __init__(self, *args, **kwargs):
         self.locked = False
@@ -48,7 +50,8 @@ class ReadOnlyList(list):
         return super(ReadOnlyList, self).__iadd__(values)
     
     def __deepcopy__(self, memo):
-        return ReadOnlyList(self)
+        r = [deepcopy(v, memo) for v in self]
+        return ReadOnlyList(r)
 
     def append(self, value):
         if self.locked:
@@ -69,10 +72,12 @@ EMPTY_READ_ONLY_LIST = ReadOnlyList()
 
 class ReadOnlyDict(OrderedDict):
     """
-    A read-only ordered dict.
+    An immutable ordered dict.
     
-    After initialization it will raise TypeError exceptions if modification
+    After initialization it will raise :class:`TypeError` exceptions if modification
     is attempted.
+
+    Note that objects stored in the dict may not be immutable.
     """
     
     def __init__(self, *args, **kwargs):
@@ -91,13 +96,14 @@ class ReadOnlyDict(OrderedDict):
         return super(ReadOnlyDict, self).__delitem__(key)
     
     def __deepcopy__(self, memo):
-        return ReadOnlyDict(self)
+        r = [(deepcopy(k, memo), deepcopy(v, memo)) for k, v in self.iteritems()]
+        return ReadOnlyDict(r)
 
 EMPTY_READ_ONLY_DICT = ReadOnlyDict()
 
 class StrictList(list):
     """
-    A list that raises TypeError exceptions when objects of the wrong type are inserted.
+    A list that raises :class:`TypeError` exceptions when objects of the wrong type are inserted.
     """
     
     def __init__(self, items=None, value_class=None, wrapper_fn=None, unwrapper_fn=None):
@@ -152,7 +158,7 @@ class StrictList(list):
 
 class StrictDict(OrderedDict):
     """
-    An ordered dict that raises TypeError exceptions when keys or values of the wrong type are used.
+    An ordered dict that raises :class:`TypeError` exceptions when keys or values of the wrong type are used.
     """
     
     def __init__(self, items=None, key_class=None, value_class=None, wrapper_fn=None, unwrapper_fn=None):
@@ -187,20 +193,18 @@ class StrictDict(OrderedDict):
             value = self.wrapper_fn(value)
         return super(StrictDict, self).__setitem__(key, value)
 
-class JSONValueEncoder(json.JSONEncoder):
-    def __init__(self, *args, **kwargs):
-        if kwargs is None:
-            kwargs = {}
-        if 'ensure_ascii' not in kwargs:
-            kwargs['ensure_ascii'] = False
-        super(JSONValueEncoder, self).__init__(*args, **kwargs)
+class JsonAsRawEncoder(json.JSONEncoder):
+    """
+    A :class:`JSONEncoder` that will use the :code:`as_raw` property of objects
+    if available.
+    """
     
     def default(self, o):
         try:
             return iter(o)
         except TypeError:
-            if hasattr(o, 'value'):
-                return o.value
+            if hasattr(o, 'as_raw'):
+                return o.as_raw
             return str(o)
         return json.JSONEncoder.default(self, o)
 
@@ -225,56 +229,6 @@ def merge(a, b, path=[], strict=False):
             a[key] = value_b
     return a
 
-def deepclone(value):
-    """
-    Copies dicts and lists, recursively.
-    
-    If the value uses dict or list subclasses, they are used for the clone.
-    
-    Makes sure to copy over :code:`_locator` for all elements.
-    """
-    
-    if isinstance(value, dict):
-        r = []
-        for k, v in value.iteritems():
-            r.append((k, deepclone(v)))
-        r = value.__class__(r)
-    elif isinstance(value, list):
-        r = []
-        for v in value:
-            r.append(deepclone(v))
-        r = value.__class__(r)
-    else:
-        r = deepcopy(value)
-    
-    locator = getattr(value, '_locator', None)
-    if locator is not None:
-        try:
-            setattr(r, '_locator', locator)
-        except AttributeError:
-            pass
-        
-    return r
-
-def make_agnostic(value):
-    """
-    Converts subclasses of dict and list to standard dicts and lists, recursively.
-    """
-
-    if isinstance(value, dict) and (type(value) != dict):
-        value = dict(value)
-    elif isinstance(value, list) and (type(value) != list):
-        value = list(value)
-        
-    if isinstance(value, dict):
-        for k, v in value.iteritems():
-            value[k] = make_agnostic(v)
-    elif isinstance(value, list):
-        for i in range(len(value)):
-            value[i] = make_agnostic(value[i])
-            
-    return value
-
 def is_removable(container, k, v):
     return (v is None) or ((isinstance(v, dict) or isinstance(v, list)) and (len(v) == 0))
 
@@ -283,18 +237,69 @@ def prune(value, is_removable_fn=is_removable):
     Deletes nulls and empty lists and dicts, recursively.
     """
     
-    if isinstance(value, dict):
-        for k, v in value.iteritems():
-            if is_removable_fn(value, k, v):
-                del value[k]
-            else:
-                prune(v, is_removable_fn)
-    elif isinstance(value, list):
+    if isinstance(value, list):
         for i in range(len(value)):
             v = value[i]
             if is_removable_fn(value, i, v):
                 del value[i]
             else:
                 prune(v, is_removable_fn)
+    elif isinstance(value, dict):
+        for k, v in value.iteritems():
+            if is_removable_fn(value, k, v):
+                del value[k]
+            else:
+                prune(v, is_removable_fn)
 
+    return value
+
+def deepclone(value):
+    """
+    Like :code:`deepcopy`, but also copies over locators.
+    """
+    
+    r = deepcopy(value)
+    copy_locators(r, value)
+    return r
+
+def copy_locators(target, source):
+    """
+    Copies over :code:`_locator` for all elements, recursively.
+    
+    Assumes that target and source have exactly the same list/dict structure.
+    """
+
+    locator = getattr(source, '_locator', None)
+    if locator is not None:
+        try:
+            setattr(target, '_locator', locator)
+        except AttributeError:
+            pass
+
+    if isinstance(target, list) and isinstance(source, list):
+        for i in range(len(target)):
+            copy_locators(target[i], source[i])
+    elif isinstance(target, dict) and isinstance(source, dict):
+        for k, v in target.iteritems():
+            copy_locators(v, source[k])
+
+def make_agnostic(value):
+    """
+    Converts subclasses of list and dict to standard lists and dicts, recursively.
+    
+    Useful for creating human-readable output of structures.
+    """
+
+    if isinstance(value, list) and (type(value) != list):
+        value = list(value)
+    elif isinstance(value, dict) and (type(value) != dict):
+        value = dict(value)
+        
+    if isinstance(value, list):
+        for i in range(len(value)):
+            value[i] = make_agnostic(value[i])
+    elif isinstance(value, dict):
+        for k, v in value.iteritems():
+            value[k] = make_agnostic(v)
+            
     return value

@@ -16,7 +16,7 @@
 
 from .. import VERSION
 from ..consumption import ConsumptionContext
-from ..loading import UriLocation
+from ..loading import UriLocation, FILE_LOADER_SEARCH_PATHS
 from ..utils import import_fullname, ArgumentParser
 
 class BaseArgumentParser(ArgumentParser):
@@ -30,17 +30,27 @@ class CommonArgumentParser(BaseArgumentParser):
         self.add_argument('--reader-source', default='aria.reading.DefaultReaderSource', help='reader source class for the parser')
         self.add_argument('--presenter-source', default='aria.presentation.DefaultPresenterSource', help='presenter source class for the parser')
         self.add_argument('--presenter', help='force use of this presenter class in parser')
+        self.add_argument('--path', nargs='*', help='search paths for imports')
 
-def create_context_ns(ns, **kwargs):
+    def parse_known_args(self, args=None, namespace=None):
+        namespace, args = super(CommonArgumentParser, self).parse_known_args(args, namespace)
+        
+        if namespace.path:
+            for path in namespace.path:
+                FILE_LOADER_SEARCH_PATHS.append(path)
+        
+        return namespace, args
+
+def create_context_from_namespace(ns, **kwargs):
     args = vars(ns).copy()
     args.update(kwargs)
     return create_context(**args)
 
 def create_context(uri, loader_source, reader_source, presenter_source, presenter, **kwargs):
     context = ConsumptionContext()
-    context.parsing.location=UriLocation(uri) if isinstance(uri, basestring) else uri
     context.loading.loader_source = import_fullname(loader_source)()
     context.reading.reader_source = import_fullname(reader_source)()
+    context.presentation.location=UriLocation(uri) if isinstance(uri, basestring) else uri
     context.presentation.presenter_source = import_fullname(presenter_source)()
     context.presentation.presenter_class = import_fullname(presenter)
     return context

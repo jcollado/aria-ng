@@ -16,7 +16,7 @@
 
 from aria.consumption import Consumer
 from aria.deployment import Parameter, Function
-from aria.utils import JSONValueEncoder, deepclone, prune
+from aria.utils import JsonAsRawEncoder, deepclone, prune
 from collections import OrderedDict
 import json
 
@@ -34,7 +34,7 @@ class ClassicPlan(Consumer):
         setattr(self.context.deployment, 'classic_plan', classic_plan)
     
     def dump(self):
-        print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
+        print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JsonAsRawEncoder)
 
 #
 # Conversions

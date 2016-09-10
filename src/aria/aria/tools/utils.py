@@ -31,6 +31,7 @@ class CommonArgumentParser(BaseArgumentParser):
         self.add_argument('--presenter-source', default='aria.presentation.DefaultPresenterSource', help='presenter source class for the parser')
         self.add_argument('--presenter', help='force use of this presenter class in parser')
         self.add_argument('--path', nargs='*', help='search paths for imports')
+        self.add_argument('--debug', action='store_true', help='print debug info')
 
     def parse_known_args(self, args=None, namespace=None):
         namespace, args = super(CommonArgumentParser, self).parse_known_args(args, namespace)
@@ -46,11 +47,12 @@ def create_context_from_namespace(ns, **kwargs):
     args.update(kwargs)
     return create_context(**args)
 
-def create_context(uri, loader_source, reader_source, presenter_source, presenter, **kwargs):
+def create_context(uri, loader_source, reader_source, presenter_source, presenter, debug, **kwargs):
     context = ConsumptionContext()
     context.loading.loader_source = import_fullname(loader_source)()
     context.reading.reader_source = import_fullname(reader_source)()
     context.presentation.location=UriLocation(uri) if isinstance(uri, basestring) else uri
     context.presentation.presenter_source = import_fullname(presenter_source)()
     context.presentation.presenter_class = import_fullname(presenter)
+    context.presentation.print_exceptions = debug
     return context

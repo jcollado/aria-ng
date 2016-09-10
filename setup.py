@@ -77,7 +77,6 @@ setup(
       
     # Please make sure this is in sync with src/aria/requirements.txt
     install_requires=[
-        'functools32==3.2.3-2',
         'ruamel.yaml==0.12.12',
         'clint==0.5.1',
         'Jinja2==2.8',

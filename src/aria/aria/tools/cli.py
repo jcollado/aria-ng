@@ -58,6 +58,7 @@ def main():
             dumper = consumer.consumers[-1]
         
         consumer.consume()
+        
         if not context.validation.dump_issues():
             dumper.dump()
             

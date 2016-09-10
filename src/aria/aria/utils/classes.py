@@ -14,7 +14,9 @@
 # under the License.
 #
 
-from functools32 import lru_cache
+from functools import partial
+from threading import Lock
+from collections import OrderedDict
 
 class OpenClose(object):
     """
@@ -41,27 +43,77 @@ def classname(o):
     
     return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
 
-cachedmethod = lambda x: x
+#cachedmethod = lambda x: x
 
-#
-# DISABLED FOR NOW.
-# lru_cache does not work with methods!
-#
-#cachedmethod = lru_cache(maxsize=64)
-#
-# See also: http://code.activestate.com/recipes/498245-lru-and-lfu-cache-decorators/
-#
+class cachedmethod(object):
+    """
+    Decorator for caching method return values.
+    
+    Supports :code:`cache_info` to be compatible with Python 3's :code:`functools.lru_cache`. The statistics are
+    combined for all instances of the class.
+    
+    Won't use the cache if not called when bound to an object, allowing you to override the cache.
+    
+    Adapted from `this solution <http://code.activestate.com/recipes/577452-a-memoize-decorator-for-instance-methods/>`__.
+    """
+    
+    def __init__(self, func):
+        self.func = func
+        self.hits = 0
+        self.misses = 0
+        self.lock = Lock()
+
+    def cache_info(self):
+        with self.lock:
+            return (self.hits, self.misses, None, self.misses)
+    
+    def reset_cache_info(self):
+        with self.lock:
+            self.hits = 0
+            self.misses = 0
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            # Don't use cache if not bound to an object
+            return self.func
+        return partial(self, obj)
+    
+    def __call__(self, *args, **kw):
+        instance = args[0]
+        
+        try:
+            cache = instance._method_cache
+        except AttributeError:
+            cache = {}
+            instance._method_cache = cache
+            
+        key = (self.func, args[1:], frozenset(kw.items()))
+        
+        try:
+            r = cache[key]
+            with self.lock:
+                self.hits += 1
+        except KeyError:
+            r = cache[key] = self.func(*args, **kw)
+            with self.lock:
+                self.misses += 1
+                
+        return r
 
 class HasCachedMethods(object):
+    """
+    Provides convenience methods for working with :class:`cachedmethod`.
+    """
+    
     @property
     def _method_cache_info(self):
         """
         The cache infos of all cached methods.
         
-        :rtype: dict of str, CacheInfo
+        :rtype: dict of str, 4-tuple
         """
         
-        r = {}
+        r = OrderedDict()
         for k, p in self.__class__.__dict__.iteritems():
             if isinstance(p, property):
                 # The property getter might be cached
@@ -75,9 +127,12 @@ class HasCachedMethods(object):
         Resets the caches of all cached methods.
         """
         
+        if hasattr(self, '_method_cache'):
+            delattr(self, '_method_cache')
+        
         for p in self.__class__.__dict__.itervalues():
             if isinstance(p, property):
                 # The property getter might be cached
                 p = p.fget
-            if hasattr(p, 'cache_clear'):
-                p.cache_clear()
+            if hasattr(p, 'reset_cache_info'):
+                p.reset_cache_info()

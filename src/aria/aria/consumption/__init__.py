@@ -17,30 +17,25 @@
 from .exceptions import ConsumerError
 from .context import ConsumptionContext
 from .style import Style
-from .consumer import Consumer
-from .parse import ParsingContext, Parse
-from .validate import ValidationContext, Validate
+from .consumer import Consumer, ConsumerChain
+from .presentation import ParsingContext, Presentation
+from .validation import ValidationContext, Validation
 from .yaml import Yaml
-from .presentation import Presentation
 from .template import Template
 from .plan import Plan
 from .types import Types
 
-MODULES = (
-    'validation')
-
 __all__ = (
-    'MODULES',
     'ConsumerError',
     'ConsumptionContext',
     'Style',
     'Consumer',
+    'ConsumerChain',
     'ParsingContext',
-    'Parse',
-    'ValidationContext',
-    'Validate',
-    'Yaml',
     'Presentation',
+    'ValidationContext',
+    'Validation',
+    'Yaml',
     'Template',
     'Plan',
     'Types')

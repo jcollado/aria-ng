@@ -14,9 +14,8 @@
 # under the License.
 #
 
-from ..utils import classname, deepclone, HasCachedMethods
+from ..utils import HasCachedMethods, classname, deepclone, puts
 from .utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
-from clint.textui import puts
 
 class Value(object):
     def __init__(self, the_type, value):

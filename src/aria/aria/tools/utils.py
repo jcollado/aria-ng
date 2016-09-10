@@ -38,7 +38,7 @@ def create_context_ns(ns, **kwargs):
 
 def create_context(uri, loader_source, reader_source, presenter_source, presenter, **kwargs):
     context = ConsumptionContext()
-    context.parsing.location=UriLocation(uri)
+    context.parsing.location=UriLocation(uri) if isinstance(uri, basestring) else uri
     context.loading.loader_source = import_fullname(loader_source, ['aria.loading'])()
     context.reading.reader_source = import_fullname(reader_source, ['aria.reading'])()
     context.presentation.presenter_source = import_fullname(presenter_source, ['aria.presentation'])()

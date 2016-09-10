@@ -20,6 +20,7 @@ from .exceptions import print_exception, print_traceback
 from .imports import import_fullname, import_modules
 from .threading import ExecutorException, FixedThreadPoolExecutor, LockedList
 from .argparse import ArgumentParser
+from .console import puts, colored, indent
 
 __all__ = (
     'OpenClose',
@@ -44,4 +45,7 @@ __all__ = (
     'ExecutorException',
     'FixedThreadPoolExecutor',
     'LockedList',
-    'ArgumentParser')
+    'ArgumentParser',
+    'puts',
+    'colored',
+    'indent')

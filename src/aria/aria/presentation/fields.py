@@ -16,11 +16,10 @@
 
 from ..issue import Issue
 from ..exceptions import InvalidValueError, AriaError
-from ..utils import ReadOnlyList, ReadOnlyDict, print_exception, deepclone, merge, cachedmethod
+from ..utils import ReadOnlyList, ReadOnlyDict, print_exception, deepclone, merge, cachedmethod, puts
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict
-from clint.textui import puts
 
 class Field(object):
     def __init__(self, field_variant, fn, cls=None, default=None, allowed=None, required=False):

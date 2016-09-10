@@ -24,7 +24,7 @@ class Yaml(Consumer):
     Emits the presentation's raw data as YAML.
     """
     
-    def consume(self):
+    def dump(self):
         try:
             init_yaml()
             text = yaml.dump(self.context.presentation.presenter._raw, Dumper=yaml.RoundTripDumper)

@@ -16,7 +16,7 @@
 
 from aria import dsl_specification
 from aria.presentation import Presentation, AsIsPresentation, has_fields, primitive_field, object_field 
-from clint.textui import puts
+from aria.utils import puts
 
 class Description(AsIsPresentation):
     def _dump(self, context):

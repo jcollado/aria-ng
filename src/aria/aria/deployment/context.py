@@ -16,8 +16,8 @@
 
 from .utils import generate_id_string 
 from .types import TypeHierarchy
-from ..utils import JSONValueEncoder, prune
-from clint.textui import puts
+from ..utils import JSONValueEncoder, prune, puts
+from ruamel import yaml
 import json, itertools
 
 class IdType(object):
@@ -69,6 +69,10 @@ class DeploymentContext(object):
         raw = self.plan.as_raw
         prune(raw)
         return raw
+
+    def get_plan_as_yaml(self, indent=None):
+        raw = self.plan_as_raw
+        return yaml.dump(raw, Dumper=yaml.Dumper, allow_unicode=True, indent=indent)
 
     def get_plan_as_json(self, indent=None):
         raw = self.plan_as_raw

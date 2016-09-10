@@ -14,33 +14,32 @@
 # under the License.
 #
 
-from aria.consumption import Plan as BasicPlan
+from aria.consumption import Consumer
 from aria.deployment import Parameter, Function
 from aria.utils import JSONValueEncoder, deepclone, prune
 from collections import OrderedDict
 import json
 
-class Plan(BasicPlan):
+class ClassicPlan(Consumer):
     """
-    Emits the deployment plan instantiated from the deployment template.
+    Generates the classic deployment plan based on the standard deployment plan.
     """
 
     def consume(self):
-        self.create_classic_deployment_plan()
-        if self.context.deployment.classic_plan is not None:
-            print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
+        if self.context.deployment.plan is None:
+            return
 
-    def create_classic_deployment_plan(self):
-        classic_plan = None
+        try:
+            classic_plan = convert_plan(self.context)
+            setattr(self.context.deployment, 'classic_plan', classic_plan)
+        except Exception as e:
+            self._handle_exception(e)
+    
+    def dump(self):
+        if self.context.deployment.classic_plan is None:
+            return
 
-        self.create_deployment_plan()
-        if (self.context.deployment.plan is not None) and (not self.context.validation.has_issues):
-            try:
-                classic_plan = convert_plan(self.context)
-            except Exception as e:
-                self._handle_exception(e)
-
-        setattr(self.context.deployment, 'classic_plan', classic_plan)
+        print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JSONValueEncoder)
 
 #
 # Conversions

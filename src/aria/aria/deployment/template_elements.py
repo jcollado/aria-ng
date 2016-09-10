@@ -20,8 +20,7 @@ from .elements import Element, Template, Parameter, Interface, Operation, Artifa
 from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
 from .utils import instantiate_dict, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from .. import Issue
-from ..utils import StrictList, StrictDict
-from clint.textui import puts
+from ..utils import StrictList, StrictDict, puts
 from types import FunctionType
 
 class DeploymentTemplate(Template):

@@ -14,8 +14,7 @@
 # under the License.
 #
 
-from ..utils import StrictList, StrictDict
-from clint.textui import puts
+from ..utils import StrictList, StrictDict, puts
 
 class Type(object):
     def __init__(self, name):

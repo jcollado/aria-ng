@@ -17,9 +17,8 @@
 from .elements import Element, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .utils import coerce_dict_values, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from .. import Issue
-from ..utils import StrictList, StrictDict, ReadOnlyList 
+from ..utils import StrictList, StrictDict, ReadOnlyList, puts, indent 
 from collections import OrderedDict
-from clint.textui import puts, indent
 
 class DeploymentPlan(Element):
     def __init__(self):

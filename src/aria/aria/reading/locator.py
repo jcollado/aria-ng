@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from clint.textui import puts, colored, indent
+from ..utils import puts, colored, indent
 from ruamel.yaml.representer import RoundTripRepresenter # @UnresolvedImport
 
 # We are inheriting the primitive types in order to add the ability to set an attribute (_locator) on them.

@@ -16,8 +16,7 @@
 
 from .consumer import Consumer
 from .. import Issue
-from ..utils import ReadOnlyList, print_exception
-from clint.textui import puts, colored, indent
+from ..utils import ReadOnlyList, print_exception, puts, colored, indent
 
 class ValidationContext(object):
     def __init__(self):
@@ -63,10 +62,16 @@ class ValidationContext(object):
             return True
         return False
 
-class Validate(Consumer):
+class Validation(Consumer):
     """
     Validates the presentation.
     """
 
     def consume(self):
+        if self.context.presentation.presenter is None:
+            return
+
         self.context.presentation.presenter._validate(self.context)
+
+    def dump(self):
+        self.context.validation.dump_issues()

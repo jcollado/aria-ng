@@ -16,9 +16,8 @@
 
 from .utils import instantiate_dict, coerce_value, coerce_dict_values, dump_dict_values, dump_properties
 from .. import UnimplementedFunctionalityError
-from ..utils import StrictList, StrictDict, make_agnostic, classname, deepclone
+from ..utils import StrictList, StrictDict, make_agnostic, classname, deepclone, puts
 from collections import OrderedDict
-from clint.textui import puts
 
 class Function(object):
     @property

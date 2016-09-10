@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from clint.textui import puts, colored
+from ..utils import puts, colored
 import sys, os, re, shutil, json, urllib2, BaseHTTPServer
 from collections import OrderedDict
 
@@ -27,7 +27,7 @@ class Config(object):
         self.port = 8080
         self.routes = {}
         self.static_root = '.'
-        self.json_encoder = json.JSONEncoder(ensure_ascii=False)
+        self.json_encoder = json.JSONEncoder(ensure_ascii=False, separators=(',',':'))
         self.json_decoder = json.JSONDecoder(object_pairs_hook=OrderedDict)
 
 def rest_call_json(url, payload=None, with_payload_method='PUT'):

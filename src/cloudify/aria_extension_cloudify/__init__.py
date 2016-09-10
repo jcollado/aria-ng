@@ -18,7 +18,7 @@ from .v1_0 import CloudifyPresenter1_0
 from .v1_1 import CloudifyPresenter1_1
 from .v1_2 import CloudifyPresenter1_2
 from .v1_3 import CloudifyPresenter1_3
-from .plan import Plan
+from .classic_plan import ClassicPlan
 from aria import DSL_SPECIFICATION_PACKAGES
 from aria.presentation import PRESENTER_CLASSES
 
@@ -38,4 +38,4 @@ MODULES = (
 __all__ = (
     'MODULES',
     'install_aria_extension',
-    'Plan')
+    'ClassicPlan')

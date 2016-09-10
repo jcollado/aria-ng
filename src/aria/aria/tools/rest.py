@@ -15,7 +15,7 @@
 #
 
 from .. import install_aria_extensions
-from ..consumption import Parse, Validate, Plan
+from ..consumption import ConsumerChain, Presentation, Validation, Template, Plan
 from ..utils import JSONValueEncoder, print_exception
 from ..loading import FILE_LOADER_PATHS, LiteralLocation
 from .utils import CommonArgumentParser, create_context_ns
@@ -28,11 +28,14 @@ PATH_PREFIX = 'openoapi/tosca/v%d' % API_VERSION
 VALIDATE_PATH = '%s/validate' % PATH_PREFIX
 PLAN_PATH = '%s/plan' % PATH_PREFIX
 
-def parse(uri):
+def validate(uri):
     context = create_context_ns(args, uri=uri)
-    Parse(context).consume()
-    if not context.validation.has_issues:
-        Validate(context).consume()
+    ConsumerChain(context, (Presentation, Validation)).consume()
+    return context
+
+def plan(uri):
+    context = create_context_ns(args, uri=uri)
+    ConsumerChain(context, (Presentation, Validation, Template, Plan)).consume()
     return context
 
 def issues(context):
@@ -40,27 +43,23 @@ def issues(context):
 
 def validate_get(handler):
     path = urllib.unquote(handler.path[len(VALIDATE_PATH) + 2:])
-    context = parse(path)
+    context = validate(path)
     return issues(context) if context.validation.has_issues else {}
 
 def validate_post(handler):
     payload = handler.get_payload()
-    context = parse(LiteralLocation(payload))
+    context = validate(LiteralLocation(payload))
     return issues(context) if context.validation.has_issues else {}
 
 def plan_get(handler):
     path = urllib.unquote(handler.path[len(PLAN_PATH) + 2:])
-    context = parse(path)
-    if context.validation.has_issues:
-        return issues(context)
-    Plan(context).create_deployment_plan()
-    return context.deployment.plan_as_raw
+    context = plan(path)
+    return issues(context) if context.validation.has_issues else context.deployment.plan_as_raw
 
 def plan_post(handler):
     payload = handler.get_payload()
-    _, issues = parse(LiteralLocation(payload))
-    if issues:
-        return {'issues': issues}
+    context = plan(LiteralLocation(payload))
+    return issues(context) if context.validation.has_issues else context.deployment.plan_as_raw
 
 ROUTES = OrderedDict((
     ('^/$', {'file': 'index.html', 'media_type': 'text/html'}),
@@ -87,7 +86,7 @@ def main():
         config.port = args.port
         config.routes = ROUTES
         config.static_root = args.root
-        config.json_encoder = JSONValueEncoder()
+        config.json_encoder = JSONValueEncoder(separators=(',',':'))
         
         start_server(config)
 

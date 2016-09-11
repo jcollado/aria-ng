@@ -41,4 +41,7 @@ class Template(ConsumerChain):
         super(Template, self).__init__(context, (Derive, Validate))
 
     def dump(self):
-        self.context.deployment.template.dump(self.context)
+        if self.context.has_arg_switch('types'):
+            self.context.deployment.dump_types(self.context)
+        else:
+            self.context.deployment.template.dump(self.context)

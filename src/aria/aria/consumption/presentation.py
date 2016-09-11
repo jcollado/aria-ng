@@ -15,7 +15,7 @@
 #
 
 from .consumer import Consumer
-from ..utils import FixedThreadPoolExecutor
+from ..utils import FixedThreadPoolExecutor, json_dumps, yaml_dumps
 from ..loading import UriLocation
 from ..reading import AlreadyReadError
 
@@ -69,7 +69,16 @@ class Presentation(Consumer):
         self.context.presentation.presenter = presenter
 
     def dump(self):
-        self.context.presentation.presenter._dump(self.context)
+        if self.context.has_arg_switch('yaml'):
+            indent = self.context.get_arg_value_int('indent', 2)
+            raw = self.context.presentation.presenter._raw
+            self.context.out.write(yaml_dumps(raw, indent=indent))
+        elif self.context.has_arg_switch('json'):
+            indent = self.context.get_arg_value_int('indent', 2)
+            raw = self.context.presentation.presenter._raw
+            self.context.out.write(json_dumps(raw, indent=indent))
+        else:
+            self.context.presentation.presenter._dump(self.context)
 
     def _handle_exception(self, e):
         if isinstance(e, AlreadyReadError):

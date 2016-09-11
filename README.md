@@ -112,8 +112,9 @@ you will _always_ be able to use ARIA with other systems.
 Consumers
 ---------
 
-ARIA also comes with various "consumers" that do things with presentations. Consumers
-can be generic, or can be designed to work only with specific kinds of presentations.
+ARIA also comes with various "consumers" that do things with deployment plans.
+Consumers can be generic, or can be designed to work only with specific kinds of
+presentations.
 
 Though you can simply make use of presentation without using the ARIA consumer API,
 the advantage of using it is that you may benefit from other tools that make use of
@@ -124,22 +125,19 @@ With the CLI tool, just include the name of the consumer after the blueprint.
 The following consumers are built-in and useful for seeing ARIA at work at different
 phases:
 
-* `yaml`: emits a combined, validated, and normalized YAML representation of the
-   blueprint.
-* `json`: emits a combined, validated, and normalized JSON representation of the
-   blueprint.
 * `presentation`: emits a colorized textual representation of the Python presentation
-   classes wrapping the blueprint.
+   classes wrapping the blueprint. You can also use `--json` or `--yaml` flags to emit
+   in those formats.
 * `template`: emits a colorized textual representation of the complete topology
    template derived from the validated blueprint. This includes all the node templates,
    with their requirements satisfied at the level of relating to other node templates.
-* `types`: emits a colorized textual representation of the the template's type
-   hierarchies: for nodes, capabilities, and relationships.
+   Use `--types` to see just the type hierarchy.
 * `plan`: **this is the default consumer**; emits a colorized textual representation of
    a deployment plan instantiated from the deployment template. Here the node templates
    are each used to create one or more nodes, with the appropriate relationships between
    them. Note that every time you run this consumer, you will get a different set of node
-   IDs.
+   IDs. Use `--graph` to see just the node relationship graph. You can also use `--json`
+   or `--yaml` flags to emit in those formats.
 
 ### Generator (extension)
 

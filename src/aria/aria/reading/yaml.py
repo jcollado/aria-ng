@@ -18,7 +18,7 @@ from .reader import Reader
 from .exceptions import ReaderSyntaxError
 from .locator import Locator
 from collections import OrderedDict
-import ruamel.yaml as yaml # @UnresolvedImport
+from ruamel import yaml
 
 class YamlLocator(Locator):
     """

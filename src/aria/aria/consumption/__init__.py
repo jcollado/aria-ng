@@ -21,6 +21,7 @@ from .consumer import Consumer, ConsumerChain
 from .presentation import Presentation
 from .validation import ValidationContext, Validation
 from .yaml import Yaml
+from .json import Json
 from .template import Template
 from .inputs import Inputs
 from .plan import Plan
@@ -36,6 +37,7 @@ __all__ = (
     'ValidationContext',
     'Validation',
     'Yaml',
+    'Json',
     'Template',
     'Inputs',
     'Plan',

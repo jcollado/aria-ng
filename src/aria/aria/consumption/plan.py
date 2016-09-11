@@ -15,6 +15,7 @@
 #
 
 from .consumer import Consumer, ConsumerChain
+from ..utils import json_dumps, yaml_dumps
 
 class Instantiate(Consumer):
     def consume(self):
@@ -49,11 +50,15 @@ class Plan(ConsumerChain):
         super(Plan, self).__init__(context, (Instantiate, Validate, SatisfyRequirements, CoerceValues, ValidateCapabilities))
 
     def dump(self):
-        if '--graph' in self.context.args:
+        if self.context.has_arg_switch('graph'):
             self.context.deployment.plan.dump_graph(self.context)
-        elif '--yaml' in self.context.args:
-            print self.context.deployment.get_plan_as_yaml(indent=2)
-        elif '--json' in self.context.args:
-            print self.context.deployment.get_plan_as_json(indent=2)
+        elif self.context.has_arg_switch('yaml'):
+            indent = self.context.get_arg_value_int('indent', 2)
+            raw = self.context.deployment.plan_as_raw
+            self.context.out.write(yaml_dumps(raw, indent=indent))
+        elif self.context.has_arg_switch('json'):
+            indent = self.context.get_arg_value_int('indent', 2)
+            raw = self.context.deployment.plan_as_raw
+            self.context.out.write(json_dumps(raw, indent=indent))
         else:
             self.context.deployment.plan.dump(self.context)

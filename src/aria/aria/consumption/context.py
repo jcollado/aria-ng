@@ -45,3 +45,23 @@ class ConsumptionContext(object):
         self.reading = ReadingContext()
         self.presentation = PresentationContext()
         self.deployment = DeploymentContext()
+
+    def has_arg_switch(self, name):
+        name = '--%s' % name
+        return name in self.args
+
+    def get_arg_value(self, name, default=None):
+        name = '--%s=' % name
+        for arg in self.args:
+            if arg.startswith(name):
+                return arg[len(name):]
+        return default
+    
+    def get_arg_value_int(self, name, default=None):
+        value = self.get_arg_value(name)
+        if value is not None:
+            try:
+                return int(value)
+            except:
+                pass
+        return default

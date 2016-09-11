@@ -16,9 +16,8 @@
 
 from .utils import generate_id_string 
 from .types import TypeHierarchy
-from ..utils import JsonAsRawEncoder, StrictDict, prune, puts
-from ruamel import yaml
-import json, itertools
+from ..utils import StrictDict, prune, puts
+import itertools
 
 class IdType(object):
     LOCAL_SERIAL = 0
@@ -83,14 +82,6 @@ class DeploymentContext(object):
         raw = self.plan.as_raw
         prune(raw)
         return raw
-
-    def get_plan_as_yaml(self, indent=None):
-        raw = self.plan_as_raw
-        return yaml.dump(raw, Dumper=yaml.Dumper, allow_unicode=True, indent=indent)
-
-    def get_plan_as_json(self, indent=None):
-        raw = self.plan_as_raw
-        return json.dumps(raw, indent=indent, ensure_ascii=False, cls=JsonAsRawEncoder)
 
     def dump_types(self, context):
         if self.node_types.children:

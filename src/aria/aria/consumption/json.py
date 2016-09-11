@@ -15,14 +15,14 @@
 #
 
 from .consumer import Consumer
-from ..utils import yaml_dumps
+from ..utils import json_dumps
 
-class Yaml(Consumer):
+class Json(Consumer):
     """
-    Emits the presentation's raw data as YAML.
+    Emits the presentation's raw data as JSON.
     """
     
     def dump(self):
         indent = self.context.get_arg_value_int('indent', 2)
-        text = yaml_dumps(self.context.presentation.presenter._raw, indent=indent)
+        text = json_dumps(self.context.presentation.presenter._raw, indent=indent)
         self.context.out.write(text)

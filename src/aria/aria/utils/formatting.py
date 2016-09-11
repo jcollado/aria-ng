@@ -15,7 +15,34 @@
 #
 
 import json
-        
+from ruamel import yaml
+
+class JsonAsRawEncoder(json.JSONEncoder):
+    """
+    A :class:`JSONEncoder` that will use the :code:`as_raw` property of objects
+    if available.
+    """
+    
+    def default(self, o):
+        try:
+            return iter(o)
+        except TypeError:
+            if hasattr(o, 'as_raw'):
+                return o.as_raw
+            return str(o)
+        return super(JsonAsRawEncoder, self).default(self, o)
+
+class YamlAsRawDumper(yaml.dumper.RoundTripDumper):
+    """
+    A :class:`RoundTripDumper` that will use the :code:`as_raw` property of objects
+    if available.
+    """
+    
+    def represent_data(self, data):
+        if hasattr(data, 'as_raw'):
+            data = data.as_raw
+        return super(YamlAsRawDumper, self).represent_data(data)
+
 def classname(o):
     """
     The full class name of an object.
@@ -58,17 +85,19 @@ def make_agnostic(value):
             
     return value
 
-class JsonAsRawEncoder(json.JSONEncoder):
+def json_dumps(value, indent):
     """
-    A :class:`JSONEncoder` that will use the :code:`as_raw` property of objects
-    if available.
+    JSON dumps that supports Unicode and the :code:`as_raw` property of objects
+    if available. 
     """
     
-    def default(self, o):
-        try:
-            return iter(o)
-        except TypeError:
-            if hasattr(o, 'as_raw'):
-                return o.as_raw
-            return str(o)
-        return json.JSONEncoder.default(self, o)
+    return json.dumps(value, indent=indent, ensure_ascii=False, cls=JsonAsRawEncoder)
+
+def yaml_dumps(value, indent):
+    """
+    YAML dumps that supports Unicode and the :code:`as_raw` property of objects
+    if available. 
+    """
+    
+    value = make_agnostic(value)
+    return yaml.dump(value, indent=indent, allow_unicode=True, Dumper=YamlAsRawDumper)

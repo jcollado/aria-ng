@@ -9,4 +9,5 @@ encoding//env/lib/python2.7/site-packages/ruamel/yaml/emitter.py=utf-8
 encoding//env/lib/python2.7/site-packages/ruamel/yaml/loader.py=utf-8
 encoding//env/lib/python2.7/site-packages/ruamel/yaml/main.py=utf-8
 encoding//env/lib/python2.7/site-packages/ruamel/yaml/reader.py=utf-8
+encoding//env/lib/python2.7/site-packages/ruamel/yaml/representer.py=utf-8
 encoding//src/sphinx/conf.py=utf-8

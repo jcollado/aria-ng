@@ -24,12 +24,7 @@ class Inputs(Consumer):
     """
     
     def consume(self):
-        inputs = None
-        for arg in self.context.args:
-            if arg.startswith('--inputs='):
-                inputs = arg[len('--inputs='):]
-                break
-
+        inputs = self.context.get_arg_value('inputs')
         if inputs is None:
             return
 

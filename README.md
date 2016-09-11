@@ -126,6 +126,8 @@ phases:
 
 * `yaml`: emits a combined, validated, and normalized YAML representation of the
    blueprint.
+* `json`: emits a combined, validated, and normalized JSON representation of the
+   blueprint.
 * `presentation`: emits a colorized textual representation of the Python presentation
    classes wrapping the blueprint.
 * `template`: emits a colorized textual representation of the complete topology
@@ -194,7 +196,7 @@ You can also POST a blueprint over the wire:
     curl --data-binary @blueprints/tosca/node-cellar.yaml http://localhost:8204/openoapi/tosca/v1/plan
 
 If you POST and also want to import from the filesystem, note that you must specify search
-paths when you start the server: 
+paths when you start the server:
 
     aria-rest --path blueprints/tosca /another/path/to/imports
 

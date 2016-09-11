@@ -65,6 +65,7 @@ class MethodRequest(urllib2.Request):
 class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def __init__(self, config, *args, **kwargs):
         self.config = config
+        self.handled = False
         return BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, *args, **kwargs)
     
     def do_HEAD(self):
@@ -125,18 +126,24 @@ class RESTRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         self.wfile.write('Only GET is supported\n')
                 else:
                     if method in route:
-                        content = route[method](self)
-                        if content is not None:
-                            self.send_response(200)
-                            if 'media_type' in route:
-                                self.send_header('Content-type', route['media_type'])
+                        try:
+                            content = route[method](self)
+                            if not self.handled:
+                                if content is not None:
+                                    self.send_response(200)
+                                    if 'media_type' in route:
+                                        self.send_header('Content-type', route['media_type'])
+                                    self.end_headers()
+                                    if method != 'DELETE':
+                                        self.wfile.write(self.config.json_encoder.encode(content))
+                                else:
+                                    self.send_response(404)
+                                    self.end_headers()
+                                    self.wfile.write('Not found\n')
+                        except Exception as e:
+                            self.send_response(500)
                             self.end_headers()
-                            if method != 'DELETE':
-                                self.wfile.write(self.config.json_encoder.encode(content))
-                        else:
-                            self.send_response(404)
-                            self.end_headers()
-                            self.wfile.write('Not found\n')
+                            self.wfile.write('Internal error: %s\n' % e)
                     else:
                         self.send_response(405)
                         self.end_headers()

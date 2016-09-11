@@ -76,6 +76,10 @@ class DeploymentContext(object):
             return the_id
         
         return generate_id_string()
+    
+    def set_input(self, name, value):
+        self.inputs[name] = value
+        # TODO: coerce to validate type
 
     @property
     def plan_as_raw(self):

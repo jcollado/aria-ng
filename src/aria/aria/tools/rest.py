@@ -74,7 +74,11 @@ def validate(uri):
 def plan(uri, inputs):
     context = create_context_from_namespace(args, uri=uri)
     if inputs:
-        context.args.append('--inputs=%s' % inputs)
+        if isinstance(inputs, dict):
+            for name, value in inputs.iteritems():
+                context.deployment.set_input(name, value)
+        else:
+            context.args.append('--inputs=%s' % inputs)
     ConsumerChain(context, (Presentation, Validation, Template, Inputs, Plan)).consume()
     return context
 
@@ -123,8 +127,6 @@ def indirect_plan_post(handler):
     uri, inputs = parse_indirect_payload(handler)
     if uri is None:
         return None
-    if inputs:
-        inputs = handler.config.json_encoder.encode(inputs)  
     context = plan(uri, inputs)
     return issues(context) if context.validation.has_issues else context.deployment.plan_as_raw
 

@@ -14,13 +14,13 @@
 # under the License.
 #
 
-from ..utils import HasCachedMethods, classname, deepclone, puts
+from ..utils import HasCachedMethods, classname, deepcopy_with_locators, puts
 from .utils import validate_no_short_form, validate_no_unknown_fields, validate_known_fields
 
 class Value(object):
     def __init__(self, the_type, value):
-        self.type = deepclone(the_type)
-        self.value = deepclone(value)
+        self.type = deepcopy_with_locators(the_type)
+        self.value = deepcopy_with_locators(value)
 
 class PresentationBase(HasCachedMethods):
     """
@@ -146,7 +146,7 @@ class PresentationBase(HasCachedMethods):
         Creates a clone of this presentation, optionally allowing for a new container.
         """
         
-        raw = deepclone(self._raw)
+        raw = deepcopy_with_locators(self._raw)
         if container is None:
             container = self._container
         return self.__class__(name=self._name, raw=raw, container=container)

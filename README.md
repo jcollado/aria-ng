@@ -181,12 +181,19 @@ With the server started, you can hit a few endpoints:
     
     curl http://localhost:8204/openoapi/tosca/v1/validate/blueprints/tosca/node-cellar.yaml
 
-You will get a JSON response with a list of validation issues. You can also POST a
-blueprint over the wire:
+You will get a JSON response with a deployment plan or validation issues.
+
+You can send inputs:
+
+	curl http://localhost:8204/openoapi/tosca/v1/plan/blueprints/tosca/node-cellar.yaml?inputs=%7B%22openstack_credential%22%3A%7B%22user%22%3A%22username%22%7D%7D
+
+	curl http://localhost:8204/openoapi/tosca/v1/plan/blueprints/tosca/node-cellar.yaml?inputs=blueprints/tosca/inputs.yaml
+
+You can also POST a blueprint over the wire:
 
     curl --data-binary @blueprints/tosca/node-cellar.yaml http://localhost:8204/openoapi/tosca/v1/plan
 
-If you do so and want to import from the filesystem, note that you must specify search
+If you POST and also want to import from the filesystem, note that you must specify search
 paths when you start the server: 
 
     aria-rest --path blueprints/tosca /another/path/to/imports

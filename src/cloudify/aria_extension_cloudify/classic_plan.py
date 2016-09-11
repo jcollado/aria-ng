@@ -16,7 +16,7 @@
 
 from aria.consumption import Consumer
 from aria.deployment import Parameter, Function
-from aria.utils import JsonAsRawEncoder, deepclone, prune
+from aria.utils import JsonAsRawEncoder, deepcopy_with_locators, prune
 from collections import OrderedDict
 import json
 
@@ -290,11 +290,11 @@ def as_raw(value):
     if hasattr(value, 'as_raw'):
         value = value.as_raw
     elif isinstance(value, list):
-        value = deepclone(value)
+        value = deepcopy_with_locators(value)
         for i in range(len(value)):
             value[i] = as_raw(value[i])
     elif isinstance(value, dict):
-        value = deepclone(value)
+        value = deepcopy_with_locators(value)
         for k, v in value.iteritems():
             value[k] = as_raw(v)
     return value

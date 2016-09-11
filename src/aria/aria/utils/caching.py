@@ -18,47 +18,24 @@ from functools import partial
 from threading import Lock
 from collections import OrderedDict
 
-class OpenClose(object):
-    """
-    Wraps an object that has open() and close() methods to support the "with" keyword.
-    """
-    
-    def __init__(self, wrapped):
-        self.wrapped = wrapped
-
-    def __enter__(self):
-        if hasattr(self.wrapped, 'open'):
-            self.wrapped.open()
-        return self.wrapped
-
-    def __exit__(self, the_type, value, traceback):
-        if hasattr(self.wrapped, 'close'):
-            self.wrapped.close()
-        return False
-        
-def classname(o):
-    """
-    The full class name of an object.
-    """
-    
-    return '%s.%s' % (o.__class__.__module__, o.__class__.__name__)
-
 #cachedmethod = lambda x: x
 
 class cachedmethod(object):
     """
     Decorator for caching method return values.
     
-    Supports :code:`cache_info` to be compatible with Python 3's :code:`functools.lru_cache`. The statistics are
-    combined for all instances of the class.
+    The implementation is thread-safe.
+    
+    Supports :code:`cache_info` to be compatible with Python 3's :code:`functools.lru_cache`. Note that the statistics
+    are combined for all instances of the class.
     
     Won't use the cache if not called when bound to an object, allowing you to override the cache.
     
     Adapted from `this solution <http://code.activestate.com/recipes/577452-a-memoize-decorator-for-instance-methods/>`__.
     """
     
-    def __init__(self, func):
-        self.func = func
+    def __init__(self, fn):
+        self.fn = fn
         self.hits = 0
         self.misses = 0
         self.lock = Lock()
@@ -72,32 +49,38 @@ class cachedmethod(object):
             self.hits = 0
             self.misses = 0
 
-    def __get__(self, obj, objtype=None):
-        if obj is None:
+    def __get__(self, instance, owner):
+        if instance is None:
             # Don't use cache if not bound to an object
-            return self.func
-        return partial(self, obj)
+            return self.fn
+        return partial(self, instance)
     
-    def __call__(self, *args, **kw):
+    def __call__(self, *args, **kwargs):
         instance = args[0]
         
         try:
             cache = instance._method_cache
         except AttributeError:
-            cache = {}
-            instance._method_cache = cache
+            instance._method_cache = {}
+            # Note: Another thread may override it here, so we need to read it again
+            # to make sure all threads are using the same cache
+            cache = instance._method_cache
             
-        key = (self.func, args[1:], frozenset(kw.items()))
+        key = (self.fn, args[1:], frozenset(kwargs.items()))
         
         try:
-            r = cache[key]
             with self.lock:
+                r = cache[key]
                 self.hits += 1
         except KeyError:
-            r = cache[key] = self.func(*args, **kw)
+            r = self.fn(*args, **kwargs)
             with self.lock:
+                cache[key] = r
                 self.misses += 1
-                
+            # Another thread may override our cache entry here, so we need to read
+            # it again to make sure all threads use the same return value
+            r = cache.get(key, r)
+            
         return r
 
 class HasCachedMethods(object):
@@ -128,7 +111,11 @@ class HasCachedMethods(object):
         """
         
         if hasattr(self, '_method_cache'):
-            delattr(self, '_method_cache')
+            self._method_cache = {}
+            
+        # Note: Another thread may already be storing entries in the cache here.
+        # But it's not a big deal! It only means that our cache_info isn't
+        # guaranteed to be accurate.
         
         for p in self.__class__.__dict__.itervalues():
             if isinstance(p, property):

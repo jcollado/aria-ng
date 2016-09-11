@@ -14,6 +14,7 @@
 # under the License.
 #
 
+from .formatting import safe_str
 from clint.textui import puts as _puts
 from clint.textui.core import STDOUT
 from clint.textui.colored import ColoredString as _ColoredString
@@ -21,10 +22,10 @@ from clint.textui import indent # @UnusedImport
 
 class ColoredString(_ColoredString):
     def __init__(self, color, s, always_color=False, bold=False):
-        super(ColoredString, self).__init__(color, safe(s), always_color, bold)
+        super(ColoredString, self).__init__(color, safe_str(s), always_color, bold)
 
 def puts(s='', newline=True, stream=STDOUT):
-    _puts(safe(s), newline, stream)
+    _puts(safe_str(s), newline, stream)
 
 class colored():
     @staticmethod
@@ -58,12 +59,3 @@ class colored():
     @staticmethod
     def white(string, always=False, bold=False):
         return ColoredString('WHITE', string, always_color=always, bold=bold)
-
-def safe(s):
-    if s is None:
-        return ''
-    try:
-        return str(s)
-    except UnicodeEncodeError:
-        s = unicode(s)
-        return s.encode('utf8')

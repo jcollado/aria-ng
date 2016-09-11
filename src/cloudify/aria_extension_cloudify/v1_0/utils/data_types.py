@@ -16,7 +16,7 @@
 
 from ..functions import get_function
 from aria import Issue
-from aria.utils import import_fullname, deepclone
+from aria.utils import import_fullname, deepcopy_with_locators
 from collections import OrderedDict
 
 #
@@ -139,7 +139,7 @@ def coerce_value(context, presentation, the_type, value, aspect=None):
     
     if the_type is None:
         if isinstance(value, dict):
-            value = deepclone(value)
+            value = deepcopy_with_locators(value)
             find_functions(context, presentation, value)
         return value
 

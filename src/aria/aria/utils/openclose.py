@@ -14,20 +14,20 @@
 # under the License.
 #
 
-from aria.utils import deepcopy_with_locators
+class OpenClose(object):
+    """
+    Wraps an object that has open() and close() methods to support the "with" keyword.
+    """
+    
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
 
-def prepare_deployment_plan(context, inputs=None, **kwargs):
-    """
-    Prepare a plan for deployment
-    """
-    
-    #print '!!! prepare_deployment_plan', inputs, kwargs
-    
-    if inputs:
-        for input_name, the_input in inputs.iteritems():
-            context.deployment.classic_plan['inputs'][input_name] = deepcopy_with_locators(the_input)
-            
-    # TODO: now that we have inputs, we should scan properties and inputs
-    # and evaluate functions
-    
-    return context.deployment.classic_plan
+    def __enter__(self):
+        if hasattr(self.wrapped, 'open'):
+            self.wrapped.open()
+        return self.wrapped
+
+    def __exit__(self, the_type, value, traceback):
+        if hasattr(self.wrapped, 'close'):
+            self.wrapped.close()
+        return False

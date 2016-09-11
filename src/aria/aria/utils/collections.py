@@ -18,7 +18,6 @@ from __future__ import absolute_import # so we can import standard 'collections'
 
 from collections import OrderedDict
 from copy import deepcopy
-import json
 
 class ReadOnlyList(list):
     """
@@ -193,21 +192,6 @@ class StrictDict(OrderedDict):
             value = self.wrapper_fn(value)
         return super(StrictDict, self).__setitem__(key, value)
 
-class JsonAsRawEncoder(json.JSONEncoder):
-    """
-    A :class:`JSONEncoder` that will use the :code:`as_raw` property of objects
-    if available.
-    """
-    
-    def default(self, o):
-        try:
-            return iter(o)
-        except TypeError:
-            if hasattr(o, 'as_raw'):
-                return o.as_raw
-            return str(o)
-        return json.JSONEncoder.default(self, o)
-
 def merge(a, b, path=[], strict=False):
     """
     Merges dicts, recursively.
@@ -253,7 +237,7 @@ def prune(value, is_removable_fn=is_removable):
 
     return value
 
-def deepclone(value):
+def deepcopy_with_locators(value):
     """
     Like :code:`deepcopy`, but also copies over locators.
     """
@@ -282,24 +266,3 @@ def copy_locators(target, source):
     elif isinstance(target, dict) and isinstance(source, dict):
         for k, v in target.iteritems():
             copy_locators(v, source[k])
-
-def make_agnostic(value):
-    """
-    Converts subclasses of list and dict to standard lists and dicts, recursively.
-    
-    Useful for creating human-readable output of structures.
-    """
-
-    if isinstance(value, list) and (type(value) != list):
-        value = list(value)
-    elif isinstance(value, dict) and (type(value) != dict):
-        value = dict(value)
-        
-    if isinstance(value, list):
-        for i in range(len(value)):
-            value[i] = make_agnostic(value[i])
-    elif isinstance(value, dict):
-        for k, v in value.iteritems():
-            value[k] = make_agnostic(v)
-            
-    return value

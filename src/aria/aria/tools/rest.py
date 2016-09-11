@@ -21,6 +21,7 @@ from ..loading import LiteralLocation
 from .utils import CommonArgumentParser, create_context_from_namespace
 from rest_server import Config, start_server
 from collections import OrderedDict
+from urlparse import urlparse, parse_qs
 import urllib
 
 API_VERSION = 1
@@ -28,24 +29,35 @@ PATH_PREFIX = 'openoapi/tosca/v%d' % API_VERSION
 VALIDATE_PATH = '%s/validate' % PATH_PREFIX
 PLAN_PATH = '%s/plan' % PATH_PREFIX
 
-args = None
+# Utils
+
+def parse_path(handler):
+    parsed = urlparse(urllib.unquote(handler.path))
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    return parsed.path, query
 
 def validate(uri):
     context = create_context_from_namespace(args, uri=uri)
     ConsumerChain(context, (Presentation, Validation)).consume()
     return context
 
-def plan(uri):
+def plan(uri, query):
     context = create_context_from_namespace(args, uri=uri)
+    inputs = query.get('inputs')
+    if inputs:
+        context.args.append('--inputs=%s' % inputs[0])
     ConsumerChain(context, (Presentation, Validation, Template, Inputs, Plan)).consume()
     return context
 
 def issues(context):
     return {'issues': [i.as_raw for i in context.validation.issues]}
 
+# Handlers
+
 def validate_get(handler):
-    path = urllib.unquote(handler.path[len(VALIDATE_PATH) + 2:])
-    context = validate(path)
+    path, _ = parse_path(handler)
+    uri = path[len(VALIDATE_PATH) + 2:]
+    context = validate(uri)
     return issues(context) if context.validation.has_issues else {}
 
 def validate_post(handler):
@@ -54,13 +66,15 @@ def validate_post(handler):
     return issues(context) if context.validation.has_issues else {}
 
 def plan_get(handler):
-    path = urllib.unquote(handler.path[len(PLAN_PATH) + 2:])
-    context = plan(path)
+    path, query = parse_path(handler)
+    uri = path[len(PLAN_PATH) + 2:]
+    context = plan(uri, query)
     return issues(context) if context.validation.has_issues else context.deployment.plan_as_raw
 
 def plan_post(handler):
+    _, query = parse_path(handler)
     payload = handler.get_payload()
-    context = plan(LiteralLocation(payload))
+    context = plan(LiteralLocation(payload), query)
     return issues(context) if context.validation.has_issues else context.deployment.plan_as_raw
 
 ROUTES = OrderedDict((

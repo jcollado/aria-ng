@@ -16,7 +16,7 @@
 
 from .properties import coerce_property_value, convert_property_definitions_to_values
 from aria import Issue
-from aria.utils import merge, deepclone
+from aria.utils import merge, deepcopy_with_locators
 from collections import OrderedDict
 
 #
@@ -115,16 +115,16 @@ def convert_interface_definition_from_type_to_raw_template(context, presentation
             raw[operation_name] = OrderedDict()
             implementation = operation.implementation
             if implementation is not None:
-                raw[operation_name]['implementation'] = deepclone(implementation)
+                raw[operation_name]['implementation'] = deepcopy_with_locators(implementation)
             executor = operation.executor
             if executor is not None:
-                raw[operation_name]['executor'] = deepclone(executor)
+                raw[operation_name]['executor'] = deepcopy_with_locators(executor)
             max_retries = operation.max_retries
             if max_retries is not None:
-                raw[operation_name]['max_retries'] = deepclone(max_retries)
+                raw[operation_name]['max_retries'] = deepcopy_with_locators(max_retries)
             retry_interval = operation.retry_interval
             if retry_interval is not None:
-                raw[operation_name]['retry_interval'] = deepclone(retry_interval)
+                raw[operation_name]['retry_interval'] = deepcopy_with_locators(retry_interval)
             inputs = operation.inputs
             if inputs is not None:
                 raw[operation_name]['inputs'] = convert_property_definitions_to_values(context, presentation, inputs)
@@ -148,16 +148,16 @@ def merge_interface(context, presentation, interface_assignment, our_interface_a
                     interface_assignment._raw[operation_name] = OrderedDict()
             
             if our_implementation is not None:
-                interface_assignment._raw[operation_name]['implementation'] = deepclone(our_implementation)
+                interface_assignment._raw[operation_name]['implementation'] = deepcopy_with_locators(our_implementation)
             our_executor = our_operation_template.executor
             if our_executor is not None:
-                interface_assignment._raw[operation_name]['executor'] = deepclone(our_executor)
+                interface_assignment._raw[operation_name]['executor'] = deepcopy_with_locators(our_executor)
             our_max_retries = our_operation_template.max_retries
             if our_max_retries is not None:
-                interface_assignment._raw[operation_name]['max_retries'] = deepclone(our_max_retries)
+                interface_assignment._raw[operation_name]['max_retries'] = deepcopy_with_locators(our_max_retries)
             our_retry_interval = our_operation_template.retry_interval
             if our_retry_interval is not None:
-                interface_assignment._raw[operation_name]['retry_interval'] = deepclone(our_retry_interval)
+                interface_assignment._raw[operation_name]['retry_interval'] = deepcopy_with_locators(our_retry_interval)
 
             # Assign/merge operation inputs
             input_definitions = operation_definition.inputs if operation_definition is not None else None
@@ -182,12 +182,12 @@ def merge_raw_input_definitions(context, raw_inputs, our_inputs, interface_name,
         if input_name in raw_inputs:
             merge_raw_input_definition(context, raw_inputs[input_name], our_input, interface_name, operation_name, presentation, type_name)
         else:
-            raw_inputs[input_name] = deepclone(our_input._raw)
+            raw_inputs[input_name] = deepcopy_with_locators(our_input._raw)
 
 def merge_raw_operation_definition(context, raw_operation, our_operation, interface_name, presentation, type_name):
     if not isinstance(our_operation._raw, dict):
         # Convert short form to long form
-        raw_operation['implementation'] = deepclone(our_operation._raw)
+        raw_operation['implementation'] = deepcopy_with_locators(our_operation._raw)
         return
 
     # Add/merge inputs
@@ -201,13 +201,13 @@ def merge_raw_operation_definition(context, raw_operation, our_operation, interf
     
     # Overrides
     if our_operation._raw.get('implementation') is not None:
-        raw_operation['implementation'] = deepclone(our_operation._raw['implementation'])
+        raw_operation['implementation'] = deepcopy_with_locators(our_operation._raw['implementation'])
     if our_operation._raw.get('executor') is not None:
-        raw_operation['executor'] = deepclone(our_operation._raw['executor'])
+        raw_operation['executor'] = deepcopy_with_locators(our_operation._raw['executor'])
     if our_operation._raw.get('max_retries') is not None:
-        raw_operation['max_retries'] = deepclone(our_operation._raw['max_retries'])
+        raw_operation['max_retries'] = deepcopy_with_locators(our_operation._raw['max_retries'])
     if our_operation._raw.get('retry_interval') is not None:
-        raw_operation['retry_interval'] = deepclone(our_operation._raw['retry_interval'])
+        raw_operation['retry_interval'] = deepcopy_with_locators(our_operation._raw['retry_interval'])
 
 def merge_raw_operation_definitions(context, raw_operations, our_operations, interface_name, presentation, type_name):
     for operation_name, our_operation in our_operations.iteritems():
@@ -219,7 +219,7 @@ def merge_raw_operation_definitions(context, raw_operations, our_operations, int
                 raw_operation = raw_operations[operation_name]
             merge_raw_operation_definition(context, raw_operation, our_operation, interface_name, presentation, type_name)
         else:
-            raw_operations[operation_name] = deepclone(our_operation._raw)
+            raw_operations[operation_name] = deepcopy_with_locators(our_operation._raw)
 
 def merge_interface_definition(context, interface, our_source, presentation, type_name):
     # Add/merge operations

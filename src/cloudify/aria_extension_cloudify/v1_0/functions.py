@@ -17,7 +17,7 @@
 from aria import Issue, InvalidValueError, dsl_specification
 from aria.deployment import Function, CannotEvaluateFunction
 from aria.presentation import FakePresentation
-from aria.utils import deepclone
+from aria.utils import deepcopy_with_locators
 
 @dsl_specification('intrinsic-functions-2', 'cloudify-1.0')
 @dsl_specification('intrinsic-functions-2', 'cloudify-1.1')
@@ -62,7 +62,7 @@ class GetInput(Function):
         inputs = self.context.deployment.classic_plan['inputs']
         if self.input_property_name not in inputs:
             raise InvalidValueError('input does not exist for function "get_input": %s' % repr(self.input_property_name), locator=self.locator)
-        return deepclone(inputs[self.input_property_name])
+        return deepcopy_with_locators(inputs[self.input_property_name])
 
 @dsl_specification('intrinsic-functions-3', 'cloudify-1.0')
 @dsl_specification('intrinsic-functions-3', 'cloudify-1.1')

@@ -17,7 +17,7 @@
 from .data_types import coerce_value
 from aria import Issue
 from aria.presentation import Value
-from aria.utils import merge, deepclone
+from aria.utils import merge, deepcopy_with_locators
 from collections import OrderedDict
 
 #
@@ -76,7 +76,7 @@ def get_assigned_and_defined_property_values(context, presentation, field_name='
                     # For data type values, merge into the default value (note: this is Cloudify behavior; in TOSCA these values are always replaced)
                     default = definition.default
                     if (default is not None) and (context.presentation.presenter.data_types is not None) and (definition.type in context.presentation.presenter.data_types):
-                        t = deepclone(default)
+                        t = deepcopy_with_locators(default)
                         merge(t, v)
                         v = t
 

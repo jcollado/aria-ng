@@ -16,7 +16,7 @@
 
 from ..issue import Issue
 from ..exceptions import InvalidValueError, AriaError
-from ..utils import ReadOnlyList, ReadOnlyDict, print_exception, deepclone, merge, cachedmethod, puts
+from ..utils import ReadOnlyList, ReadOnlyDict, print_exception, deepcopy_with_locators, merge, cachedmethod, puts
 from functools import wraps
 from types import MethodType
 from collections import OrderedDict
@@ -45,7 +45,7 @@ class Field(object):
         if default_raw is None:
             raw = presentation._raw
         else:
-            raw = deepclone(default_raw)
+            raw = deepcopy_with_locators(default_raw)
             merge(raw, presentation._raw)
 
         if self.field_variant == 'primitive_dict_unknown_fields':

@@ -104,7 +104,10 @@ def indirect_validate_post(handler):
 def plan_get(handler):
     path, query = parse_path(handler)
     uri = path[len(PLAN_PATH) + 2:]
-    context = plan(uri, query)
+    inputs = query.get('inputs')
+    if inputs:
+        inputs = inputs[0]
+    context = plan(uri, inputs)
     return issues(context) if context.validation.has_issues else context.deployment.plan_as_raw
 
 def plan_post(handler):

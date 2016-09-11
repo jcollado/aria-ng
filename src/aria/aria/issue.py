@@ -59,7 +59,7 @@ class Issue(object):
         if message is not None:
             self.message = str(message)
         elif exception is not None:
-            self.message = '%s was raised' % classname(exception)
+            self.message = str(exception)
         else:
             self.message = 'unknown issue'
             
@@ -86,7 +86,7 @@ class Issue(object):
             ('line', self.line),
             ('column', self.column),
             ('snippet', self.snippet),
-            ('exception', str(self.exception) if self.exception else None)))
+            ('exception', classname(self.exception) if self.exception else None)))
             
     @property
     def locator_as_str(self):

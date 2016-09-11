@@ -34,8 +34,7 @@ class UriLoader(Loader):
     be used instead.
     """
 
-    def __init__(self, source, location, headers={}):
-        self.source = source
+    def __init__(self, location, headers={}):
         self.location = location
         self.headers = headers
         self.response = None

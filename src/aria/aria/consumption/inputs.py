@@ -38,7 +38,7 @@ class Inputs(Consumer):
         else:
             location = LiteralLocation(inputs)
 
-        loader = self.context.loading.loader_source.get_loader(location, None)
+        loader = self.context.loading.loader_source.get_loader(self.context.loading, location, None)
         
         if isinstance(location, LiteralLocation):
             reader = JsonReader(self.context.reading, location, loader)

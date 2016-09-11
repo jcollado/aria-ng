@@ -101,6 +101,6 @@ class Presentation(Consumer):
     def _read(self, location, origin_location):
         if self.context.reading.reader is not None:
             return self.context.reading.reader.read()
-        loader = self.context.loading.loader_source.get_loader(location, origin_location)
+        loader = self.context.loading.loader_source.get_loader(self.context.loading, location, origin_location)
         reader = self.context.reading.reader_source.get_reader(self.context.reading, location, loader)
         return reader.read()

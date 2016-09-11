@@ -30,7 +30,7 @@ class LoaderSource(object):
     in a :class:`LiteralLoader`.
     """
     
-    def get_loader(self, location, origin_location):
+    def get_loader(self, context, location, origin_location):
         if isinstance(location, LiteralLocation):
             return LiteralLoader(location)
         
@@ -43,11 +43,11 @@ class DefaultLoaderSource(LoaderSource):
     URIs.
     """
     
-    def get_loader(self, location, origin_location):
+    def get_loader(self, context, location, origin_location):
         if isinstance(location, UriLocation):
             if location.as_file is not None:
-                return FileTextLoader(self, location, origin_location)
+                return FileTextLoader(context, location, origin_location)
             else:
-                return UriTextLoader(self, location)
+                return UriTextLoader(location)
             
-        return super(DefaultLoaderSource, self).get_loader(location, origin_location)
+        return super(DefaultLoaderSource, self).get_loader(context, location, origin_location)

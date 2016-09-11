@@ -15,13 +15,16 @@
 #
 
 from .source import DefaultLoaderSource 
+from ..utils import StrictList
 
 class LoadingContext(object):
     """
     Properties:
     
     * :code:`loader_source`: For finding loader instances
+    * :code:`search_paths`: List of additional search paths :class:`FileTextLoader`
     """
     
     def __init__(self):
         self.loader_source = DefaultLoaderSource()
+        self.search_paths = StrictList(value_class=basestring)

@@ -24,15 +24,18 @@ install_aria_extensions()
 def parse_from_path(dsl_file_path, resources_base_url=None, additional_resource_sources=(), validate_version=True, **legacy):
     paths = [resources_base_url] if resources_base_url is not None else []
     paths += additional_resource_sources
-    return _parse(UriLocation(dsl_file_path, paths), validate=validate_version)
+    return _parse(UriLocation(dsl_file_path), paths, validate_version)
 
 def parse(dsl_string, resources_base_url=None, validate_version=True, **legacy):
     paths = [resources_base_url] if resources_base_url is not None else []
-    return _parse(LiteralLocation(dsl_string, paths), validate=validate_version)
+    return _parse(LiteralLocation(dsl_string), paths, validate_version)
 
-def _parse(location, validate=True):
+def _parse(location, search_paths=None, validate=True):
     context = ConsumptionContext()
     context.presentation.location = location
+    
+    if search_paths:
+        context.loading.search_paths += search_paths
     
     if validate:
         consumer = ConsumerChain(context, (Presentation, Validation, Template, Plan, ClassicPlan))

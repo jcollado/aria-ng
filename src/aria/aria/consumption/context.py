@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from .validation import ValidationContext
+from ..validation import ValidationContext
 from ..loading import LoadingContext
 from ..reading import ReadingContext
 from ..presentation import PresentationContext
@@ -29,7 +29,7 @@ class ConsumptionContext(object):
     * :code:`args`: The runtime arguments (usually provided on the command line)
     * :code:`out`: Message output stream
     * :code:`style`: Message output style
-    * :code:`validation`: :class:`ValidationContext`
+    * :code:`validation`: :class:`aria.validation.ValidationContext`
     * :code:`loading`: :class:`aria.loading.LoadingContext`
     * :code:`reading`: :class:`aria.reading.ReadingContext`
     * :code:`presentation`: :class:`aria.presentation.PresentationContext`

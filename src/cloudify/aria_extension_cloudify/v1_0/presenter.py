@@ -17,7 +17,7 @@
 from .templates import ServiceTemplate
 from .functions import GetInput, GetProperty, GetAttribute
 from .utils.deployment import get_deployment_template
-from aria import Issue
+from aria.validation import Issue
 from aria.presentation import Presenter
 from aria.utils import EMPTY_READ_ONLY_LIST, cachedmethod
 

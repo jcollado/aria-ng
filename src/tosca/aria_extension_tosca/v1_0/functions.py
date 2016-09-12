@@ -14,7 +14,8 @@
 # under the License.
 #
 
-from aria import dsl_specification, InvalidValueError, Issue
+from aria import dsl_specification, InvalidValueError
+from aria.validation import Issue
 from aria.deployment import Function
 from aria.utils import ReadOnlyList
 from cStringIO import StringIO

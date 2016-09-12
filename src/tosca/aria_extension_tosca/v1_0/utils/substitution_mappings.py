@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from aria import Issue
+from aria.validation import Issue
 
 def validate_subtitution_mappings_requirement(context, presentation):
     if not validate_format(context, presentation, 'requirement'):

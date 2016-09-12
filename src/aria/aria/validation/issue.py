@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from .utils import classname
+from ..utils import classname
 from collections import OrderedDict
 
 class Issue(object):

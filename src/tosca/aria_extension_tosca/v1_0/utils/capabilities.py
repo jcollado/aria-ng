@@ -15,7 +15,7 @@
 #
 
 from .properties import convert_property_definitions_to_values, merge_raw_property_definitions, get_assigned_and_defined_property_values
-from aria import Issue
+from aria.validation import Issue
 from aria.utils import deepcopy_with_locators
 from collections import OrderedDict
 

@@ -5,7 +5,7 @@ ARIA is a platform and a set of tools for building TOSCA-based products, such as
 Its features can be accessed via a well-documented Python API, as well as a language-agnostic
 RESTful API that can be deployed as a microservice.
 
-On its own, ARIA it provides built-in tools for blueprint validation and for creating ready-to-run
+On its own, ARIA provides built-in tools for blueprint validation and for creating ready-to-run
 deployment plans. 
 
 ARIA adheres strictly and meticulously to the
@@ -48,7 +48,7 @@ Now create a deployment plan from a TOSCA blueprint:
 
 	aria blueprints/tosca/node-cellar.yaml
 	
-You can also get it in JSON format:
+You can also get it in JSON or YAML formats:
 
 	aria blueprints/tosca/node-cellar.yaml --json
 
@@ -65,32 +65,28 @@ JSON or YAML. If you do so, the value must end in ".json" or ".yaml":
 
 	aria blueprints/tosca/node-cellar.yaml --inputs=blueprints/tosca/inputs.yaml
 
-Architecture
-------------
 
-The ARIA parser generates a representation of TOSCA profiles in Python, such that they
-can be validated, consumed, or manipulated.
+API Architecture
+----------------
 
-Importantly, it keeps the original TOSCA data intact, such that modifications can be
-written back to files. This includes keeping all the original comments in the YAML
-file in their right places.
+ARIA's parsing engine comprises individual "consumers" (in the `aria.consumption`
+package) that do things with blueprints. When chained together, each performs a
+different task, adds its own validations, and can provide its own output.
 
-It is furthermore possible to use ARIA in order to generate a complete TOSCA profile
-programmatically, in Python, and then write it to files. The same technique can be
-used to convert from one DSL (parse it) to another (write it).
-
-The parser works in five phases, represented by packages and classes in the API:
+Parsing happens in five phases, represented in five packages:
 
 * `aria.loading`: Loaders are used to read the TOSCA data, usually as text.
   For example UriTextLoader will load text from URIs (including files).
 * `aria.reading`: Readers convert data from the loaders into agnostic raw
-  data. For example, YamlReader converts YAML text into Python dicts, lists, and
-  primitives.
+  data. For example, `YamlReader` converts YAML text into Python dicts, lists,
+  and primitives.
 * `aria.presentation`: Presenters wrap the agnostic raw data in a nice
   Python facade (a "presentation") that makes it much easier to work with the data,
   including utilities for validation, querying, etc. Note that presenters are
   _wrappers_: the agnostic raw data is always maintained intact, and can always be
-  accessed directly or written back to files.
+  accessed directly or written back to files. Importantly, even YAML comments are
+  maintained. So, you can modify the presentation and write it back to a YAML file
+  while keeping all the original YAML comments in the file in their right places.
 * `aria.deployment.template`: Here the topology is normalized into a coherent
   structure of node templates, requirements, and capabilities. Types are inherited
   and properties are assigned. The deployment template is a _new_ structure,
@@ -101,6 +97,12 @@ The parser works in five phases, represented by packages and classes in the API:
   requirements are satisfied by matching them to capabilities. This is where level
   5 validation errors are detected (see above).
 
+The phases do not have to be used in order. Indeed, consumers do not have to be
+used at all: ARIA can be used to _produce_ blueprints. For example, it is possible
+to fill in the `aria.presentation` classes programmatically, in Python, and then
+write the presentation to a YAML file as compliant TOSCA. The same technique can be
+used to convert from one DSL (consume it) to another (write it).
+
 The term "agnostic raw data" (ARD?) appears often in the documentation. It denotes
 data structures comprising _only_ Python dicts, lists, and primitives, such that
 they can always be converted to and from language-agnostic formats such as YAML,
@@ -109,21 +111,16 @@ data at all times. Thus, though ARIA makes good use of the dynamic power of Pyth
 you will _always_ be able to use ARIA with other systems.
 
 
-Consumers
----------
+CLI Tool
+--------
 
-ARIA also comes with various "consumers" that do things with deployment plans.
-Consumers can be generic, or can be designed to work only with specific kinds of
-presentations.
+Though ARIA is fully exposed as an API, it also comes with a CLI tool to allow you to
+work from the shell:
 
-Though you can simply make use of presentation without using the ARIA consumer API,
-the advantage of using it is that you may benefit from other tools that make use of
-the API.
+	aria blueprints/tosca/node-cellar.yaml plan
 
-With the CLI tool, just include the name of the consumer after the blueprint.
-
-The following consumers are built-in and useful for seeing ARIA at work at different
-phases:
+The CLI supports the following commands to create variations of the default consumer
+chain:
 
 * `presentation`: emits a colorized textual representation of the Python presentation
    classes wrapping the blueprint. You can also use `--json` or `--yaml` flags to emit
@@ -139,32 +136,11 @@ phases:
    IDs. Use `--graph` to see just the node relationship graph. You can also use `--json`
    or `--yaml` flags to emit in those formats.
 
-### Generator (extension)
+Additionally, The CLI tool lets you specify the complete classname of your own custom
+consumer to chain at the end of the default consumer chain, after `plan`.
 
-This converts the blueprint into Python code: a bunch of Python classes representing
-the blueprint. Thus, node types become classes, the instances being nodes, interfaces
-can be turned into methods, and these are connected to each other via special
-relationship classes. You can use these classes directly in your product, allowing
-a quick and easy way to move from a TOSCA blueprint to executable code.
-
-Note that the generator is entirely optional: it is very much possible to consume
-the deployment plan without converting it into Python code.
-
-
-CLI Tool
---------
-
-Though ARIA is fully exposed as an API, it also comes with a CLI tool to allow you to
-work from the shell:
-
-	aria blueprints/tosca/node-cellar.yaml plan
-
-The tool loads YAML files and runs consumers on them. It can be useful for quickly
-validating a blueprint.
-
-If other consumers are in the Python path, it can run them, too: it can thus serve as
-a useful entry point for complex TOSCA-based tools, such as orchestrators, graphical
-modeling tools, etc.
+Your customer consumer can be an entry point into a powerful TOSCA-based tool or
+application, such as an orchestrator, a graphical modeling tool, etc.
 
 
 REST Tool
@@ -197,6 +173,19 @@ If you POST and also want to import from the filesystem, note that you must spec
 paths when you start the server:
 
     aria-rest --path blueprints/tosca /another/path/to/imports
+
+
+Generator (Extension)
+---------------------
+
+This converts the blueprint into Python code: a bunch of Python classes representing
+the blueprint. Thus, node types become classes, the instances being nodes, interfaces
+can be turned into methods, and these are connected to each other via special
+relationship classes. You can use these classes directly in your product, allowing
+a quick and easy way to move from a TOSCA blueprint to executable code.
+
+Note that the generator is entirely optional: it is very much possible to consume
+the deployment plan without converting it into Python code.
 
 
 Development

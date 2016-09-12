@@ -15,7 +15,8 @@
 #
 
 from ..functions import get_function
-from aria import Issue, dsl_specification
+from aria import dsl_specification
+from aria.validation import Issue
 from aria.utils import import_fullname
 from collections import OrderedDict
 import re

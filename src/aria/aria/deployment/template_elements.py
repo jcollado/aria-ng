@@ -19,7 +19,7 @@ from __future__ import absolute_import # so we can import standard 'types'
 from .elements import Element, Template, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
 from .utils import instantiate_dict, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
-from .. import Issue
+from ..validation import Issue
 from ..utils import StrictList, StrictDict, puts
 from types import FunctionType
 

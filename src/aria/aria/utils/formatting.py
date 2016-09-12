@@ -15,7 +15,7 @@
 #
 
 import json
-from ruamel import yaml
+from ruamel import yaml # @UnresolvedImport
 
 class JsonAsRawEncoder(json.JSONEncoder):
     """

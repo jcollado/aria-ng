@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from aria import Issue
+from aria.validation import Issue
 
 class Scalable(object):
     """

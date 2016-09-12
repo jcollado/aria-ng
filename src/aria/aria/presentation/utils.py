@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from .. import Issue
+from ..validation import Issue
 
 def validate_no_short_form(presentation, context):
     """

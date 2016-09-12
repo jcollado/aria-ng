@@ -14,7 +14,8 @@
 # under the License.
 #
 
-from aria import Issue, InvalidValueError, dsl_specification
+from aria import InvalidValueError, dsl_specification
+from aria.validation import Issue
 from aria.deployment import Function, CannotEvaluateFunction
 from aria.presentation import FakePresentation
 from aria.utils import deepcopy_with_locators

@@ -16,7 +16,7 @@
 
 from .elements import Element, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .utils import coerce_dict_values, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
-from .. import Issue
+from ..validation import Issue
 from ..utils import StrictList, StrictDict, ReadOnlyList, puts, indent 
 from collections import OrderedDict
 

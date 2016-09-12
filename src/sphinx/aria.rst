@@ -57,3 +57,8 @@ This is the core ARIA API.
 *****************
 
 .. automodule:: aria.utils
+
+:mod:`aria.validation`
+**********************
+
+.. automodule:: aria.validation

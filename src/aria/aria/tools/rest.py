@@ -15,7 +15,7 @@
 #
 
 from .. import install_aria_extensions
-from ..consumption import ConsumerChain, Presentation, Validation, Template, Inputs, Plan
+from ..consumption import ConsumerChain, Read, Validate, Template, Inputs, Plan
 from ..utils import JsonAsRawEncoder, print_exception
 from ..loading import LiteralLocation
 from .utils import CommonArgumentParser, create_context_from_namespace
@@ -68,7 +68,7 @@ def parse_indirect_payload(handler):
 
 def validate(uri):
     context = create_context_from_namespace(args, uri=uri)
-    ConsumerChain(context, (Presentation, Validation)).consume()
+    ConsumerChain(context, (Read, Validate)).consume()
     return context
 
 def plan(uri, inputs):
@@ -79,7 +79,7 @@ def plan(uri, inputs):
                 context.deployment.set_input(name, value)
         else:
             context.args.append('--inputs=%s' % inputs)
-    ConsumerChain(context, (Presentation, Validation, Template, Inputs, Plan)).consume()
+    ConsumerChain(context, (Read, Validate, Template, Inputs, Plan)).consume()
     return context
 
 def issues(context):

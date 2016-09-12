@@ -15,7 +15,7 @@
 #
 
 from aria import install_aria_extensions
-from aria.consumption import ConsumptionContext, ConsumerChain, Presentation, Validation, Template, Plan
+from aria.consumption import ConsumptionContext, ConsumerChain, Read, Validate, Template, Plan
 from aria.loading import UriLocation, LiteralLocation
 from aria_extension_cloudify import ClassicPlan
 
@@ -38,9 +38,9 @@ def _parse(location, search_paths=None, validate=True):
         context.loading.search_paths += search_paths
     
     if validate:
-        consumer = ConsumerChain(context, (Presentation, Validation, Template, Plan, ClassicPlan))
+        consumer = ConsumerChain(context, (Read, Validate, Template, Plan, ClassicPlan))
     else:
-        consumer = ConsumerChain(context, (Presentation,))
+        consumer = ConsumerChain(context, (Read,))
 
     consumer.consume()    
     context.validation.dump_issues()

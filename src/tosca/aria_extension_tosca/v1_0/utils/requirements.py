@@ -16,7 +16,7 @@
 
 from .properties import convert_property_definitions_to_values, validate_required_values, coerce_property_value
 from .interfaces import convert_requirement_interface_definitions_from_type_to_raw_template, merge_interface_definitions, merge_interface, validate_required_inputs
-from aria import Issue
+from aria.validation import Issue
 from aria.utils import deepcopy_with_locators
 from collections import OrderedDict
 

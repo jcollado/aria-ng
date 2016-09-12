@@ -15,7 +15,7 @@
 #
 
 from .. import install_aria_extensions
-from ..consumption import ConsumerChain, Presentation, Validation, Template, Inputs, Plan
+from ..consumption import ConsumerChain, Read, Validate, Template, Inputs, Plan
 from ..utils import print_exception, import_fullname
 from .utils import CommonArgumentParser, create_context_from_namespace
 
@@ -35,7 +35,7 @@ def main():
         context = create_context_from_namespace(args)
         context.args = unknown_args
         
-        consumer = ConsumerChain(context, (Presentation, Validation))
+        consumer = ConsumerChain(context, (Read, Validate))
         
         consumer_class_name = args.consumer
         dumper = None

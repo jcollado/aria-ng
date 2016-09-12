@@ -14,8 +14,8 @@
 # under the License.
 #
 
-from .. import Issue
 from .utils import report_issue_for_unknown_type, report_issue_for_parent_is_self, report_issue_for_unknown_parent_type, report_issue_for_circular_type_hierarchy
+from ..validation import Issue
 
 def type_validator(type_name, types_dict_name):
     """

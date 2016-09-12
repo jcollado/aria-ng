@@ -15,7 +15,7 @@
 #
 
 from ..utils import puts, colored, indent
-from ruamel import yaml
+from ruamel import yaml # @UnresolvedImport
 
 # We are inheriting the primitive types in order to add the ability to set an attribute (_locator) on them.
 

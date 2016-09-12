@@ -15,7 +15,8 @@
 #
 
 from .utils.data_types import get_primitive_data_type, get_data_type_name, coerce_value
-from aria import Issue, dsl_specification
+from aria import dsl_specification
+from aria.validation import Issue
 from aria.presentation import report_issue_for_unknown_type, derived_from_validator
 import re
 

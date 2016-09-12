@@ -19,9 +19,9 @@ from ..utils import FixedThreadPoolExecutor, json_dumps, yaml_dumps
 from ..loading import UriLocation
 from ..reading import AlreadyReadError
 
-class Presentation(Consumer):
+class Read(Consumer):
     """
-    Generates the presentation.
+    Reads the presentation.
     
     It works by consuming a data source via appropriate :class:`aria.loader.Loader`,
     :class:`aria.reader.Reader`, and :class:`aria.presenter.Presenter` instances.
@@ -83,7 +83,7 @@ class Presentation(Consumer):
     def _handle_exception(self, e):
         if isinstance(e, AlreadyReadError):
             return
-        super(Presentation, self)._handle_exception(e)
+        super(Read, self)._handle_exception(e)
     
     def _present(self, location, origin_location, presenter_class, executor):
         raw = self._read(location, origin_location)

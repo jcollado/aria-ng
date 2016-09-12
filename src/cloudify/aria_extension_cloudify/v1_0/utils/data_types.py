@@ -15,7 +15,7 @@
 #
 
 from ..functions import get_function
-from aria import Issue
+from aria.validation import Issue
 from aria.utils import import_fullname, deepcopy_with_locators
 from collections import OrderedDict
 

@@ -14,8 +14,8 @@
 # under the License.
 #
 
-from ..issue import Issue
 from ..exceptions import InvalidValueError, AriaError
+from ..validation import Issue
 from ..utils import ReadOnlyList, ReadOnlyDict, print_exception, deepcopy_with_locators, merge, cachedmethod, puts
 from functools import wraps
 from types import MethodType

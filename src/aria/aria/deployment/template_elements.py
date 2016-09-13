@@ -16,14 +16,34 @@
 
 from __future__ import absolute_import # so we can import standard 'types'
 
-from .elements import Element, Template, Parameter, Interface, Operation, Artifact, GroupPolicy
+from .shared_elements import Element, TemplateElement, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
 from .utils import instantiate_dict, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from ..validation import Issue
 from ..utils import StrictList, StrictDict, puts
 from types import FunctionType
 
-class DeploymentTemplate(Template):
+class DeploymentTemplate(TemplateElement):
+    """
+    A deployment template is a normalized blueprint from which :class:`DeploymentPlan` instances
+    can be created.
+    
+    It is usually created by various DSL parsers, such as ARIA's TOSCA extension. However, it
+    can also be created programmatically.
+        
+    Properties:
+    
+    * :code:`description`: Human-readable description
+    * :code:`metadata`: :class:`Metadata`
+    * :code:`node_templates`: Dict of :class:`NodeTemplate`
+    * :code:`group_templates`: Dict of :class:`GroupTemplate`
+    * :code:`policy_templates`: Dict of :class:`PolicyTemplate`
+    * :code:`substitution_template`: :class:`SubstituionTemplate`
+    * :code:`inputs`: Dict of :class:`Parameter`
+    * :code:`outputs`: Dict of :class:`Parameter`
+    * :code:`operations`: Dict of :class:`Operation`
+    """
+    
     def __init__(self):
         self.description = None
         self.metadata = None
@@ -98,7 +118,25 @@ class DeploymentTemplate(Template):
         dump_properties(context, self.outputs, 'Outputs')
         dump_dict_values(context, self.operations, 'Operations')
 
-class NodeTemplate(Template):
+class NodeTemplate(TemplateElement):
+    """
+    A template for creating zero or more :class:`Node` instances.
+    
+    Properties:
+    
+    * :code:`name`: Name (will be used as a prefix for node IDs)
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`default_instances`: Default number nodes that will appear in the deployment plan
+    * :code:`min_instances`: Minimum number nodes that will appear in the deployment plan
+    * :code:`max_instances`: Maximum number nodes that will appear in the deployment plan
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`interfaces`: Dict of :class:`Interface`
+    * :code:`artifacts`: Dict of :class:`Artifact`
+    * :code:`capabilities`: Dict of :class:`CapabilityTemplate`
+    * :code:`requirements`: List of :class:`Requirement`
+    * :code:`target_node_template_constraints`: List of :class:`FunctionType`
+    """
+    
     def __init__(self, name, type_name):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
@@ -157,6 +195,23 @@ class NodeTemplate(Template):
             dump_list_values(context, self.requirements, 'Requirements')
 
 class Requirement(Element):
+    """
+    A requirement for a :class:`NodeTemplate`. During instantiation will be matched with a capability of another
+    node.
+    
+    Requirements may optionally contain a :class:`RelationshipTemplate` that will be created between the nodes.
+    
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`target_node_type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`target_node_template_name`: Must be represented in the :class:`DeploymentTemplate`
+    * :code:`target_node_template_constraints`: List of :class:`FunctionType`
+    * :code:`target_capability_type_name`: Type of capability in target node
+    * :code:`target_capability_name`: Name of capability in target node
+    * :code:`relationship_template`: :class:`RelationshipTemplate`
+    """
+    
     def __init__(self, name=None, target_node_type_name=None, target_node_template_name=None, target_capability_type_name=None, target_capability_name=None):
         if name and not isinstance(name, basestring):
             raise ValueError('name must be a string)')
@@ -252,7 +307,21 @@ class Requirement(Element):
             if self.relationship_template:
                 self.relationship_template.dump(context)
 
-class CapabilityTemplate(Template):
+class CapabilityTemplate(TemplateElement):
+    """
+    A capability of a :class:`NodeTemplate`. Nodes expose zero or more capabilities that can be
+    matched with :class:`Requirement` instances of other nodes.
+    
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`min_occurrences`: Minimum number of requirement matches required
+    * :code:`max_occurrences`: Maximum number of requirement matches allowed
+    * :code:`valid_source_node_type_names`: Must be represented in the :class:`DeploymentContext`
+    * :code:`properties`: Dict of :class:`Parameter`
+    """
+    
     def __init__(self, name, type_name):
         if not isinstance(name, basestring):
             raise ValueError('name must be string')
@@ -305,7 +374,20 @@ class CapabilityTemplate(Template):
                 puts('Valid source node types: %s' % ', '.join((str(context.style.type(v)) for v in self.valid_source_node_type_names)))
             dump_properties(context, self.properties)
 
-class RelationshipTemplate(Template):
+class RelationshipTemplate(TemplateElement):
+    """
+    Optional addition to a :class:`NodeTemplate` :class:`Requirement` that can be applied when the
+    requirement is matched with a capability.
+
+    Properties:
+    
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`template_name`: Must be represented in the :class:`DeploymentTemplate`
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`source_interfaces`: Dict of :class:`Interface`
+    * :code:`target_interfaces`: Dict of :class:`Interface`
+    """
+    
     def __init__(self, type_name=None, template_name=None):
         if type_name and not isinstance(type_name, basestring):
             raise ValueError('type_name must be string')
@@ -328,6 +410,8 @@ class RelationshipTemplate(Template):
         return r
 
     def validate(self, context):
+        if context.deployment.relationship_types.get_descendant(self.type_name) is None:
+            context.validation.report('relationship template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
         for interface in self.source_interfaces.itervalues():
             interface.validate(context)
         for interface in self.target_interfaces.itervalues():
@@ -343,7 +427,23 @@ class RelationshipTemplate(Template):
             dump_interfaces(context, self.source_interfaces, 'Source interfaces')
             dump_interfaces(context, self.target_interfaces, 'Target interfaces')
 
-class GroupTemplate(Template):
+class GroupTemplate(TemplateElement):
+    """
+    A template for creating zero or more :class:`Group` instances.
+
+    Groups are logical containers for zero or more nodes that allow applying zero or more :class:`GroupPolicy`
+    instances to the nodes together.
+    
+    Properties:
+    
+    * :code:`name`: Name (will be used as a prefix for group IDs)
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`interfaces`: Dict of :class:`Interface`
+    * :code:`policies`: Dict of :class:`GroupPolicy`
+    * :code:`member_node_template_names`: Must be represented in the :class:`DeploymentTemplate`
+    """
+    
     def __init__(self, name, type_name=None):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
@@ -356,6 +456,10 @@ class GroupTemplate(Template):
         self.interfaces = StrictDict(key_class=basestring, value_class=Interface)
         self.policies = StrictDict(key_class=basestring, value_class=GroupPolicy)
         self.member_node_template_names = StrictList(value_class=basestring)
+
+    def validate(self, context):
+        if context.deployment.group_types.get_descendant(self.type_name) is None:
+            context.validation.report('group template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
 
     def instantiate(self, context, container):
         r = Group(context, self.type_name, self.name)
@@ -377,7 +481,19 @@ class GroupTemplate(Template):
             if self.member_node_template_names:
                 puts('Member node templates: %s' % ', '.join((str(context.style.node(v)) for v in self.member_node_template_names)))
 
-class PolicyTemplate(Template):
+class PolicyTemplate(TemplateElement):
+    """
+    Policies can be applied to zero or more :class:`NodeTemplate` or :class:`GroupTemplate` instances.
+    
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`target_node_template_names`: Must be represented in the :class:`DeploymentTemplate`
+    * :code:`target_group_template_names`: Must be represented in the :class:`DeploymentTemplate`
+    """
+    
     def __init__(self, name, type_name):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
@@ -389,6 +505,10 @@ class PolicyTemplate(Template):
         self.properties = StrictDict(key_class=basestring, value_class=Parameter)
         self.target_node_template_names = StrictList(value_class=basestring)
         self.target_group_template_names = StrictList(value_class=basestring)
+
+    def validate(self, context):
+        if context.deployment.policy_types.get_descendant(self.type_name) is None:
+            context.validation.report('policy template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
 
     def instantiate(self, context, container):
         r = Policy(self.name, self.type_name)
@@ -409,7 +529,17 @@ class PolicyTemplate(Template):
             if self.target_group_template_names:
                 puts('Target group templates: %s' % ', '.join((str(context.style.node(v)) for v in self.target_group_template_names)))
 
-class MappingTemplate(Template):
+class MappingTemplate(TemplateElement):
+    """
+    Used by :class:`SubstitutionTemplate` to map a capability or a requirement to a node.
+    
+    Properties:
+    
+    * :code:`mapped_name`: Exposed capability or requirement name
+    * :code:`node_template_name`: Must be represented in the :class:`DeploymentTemplate`
+    * :code:`name`: Name of capability or requirement at the node template
+    """
+    
     def __init__(self, mapped_name, node_template_name, name):
         if not isinstance(mapped_name, basestring):
             raise ValueError('must set mapped_name (string)')
@@ -436,7 +566,17 @@ class MappingTemplate(Template):
     def dump(self, context):
         puts('%s -> %s.%s' % (context.style.node(self.mapped_name), context.style.node(self.node_template_name), context.style.node(self.name)))
 
-class SubstitutionTemplate(Template):
+class SubstitutionTemplate(TemplateElement):
+    """
+    Used to substitute a single node for the entire deployment.
+
+    Properties:
+    
+    * :code:`node_type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`capabilities`: Dict of :class:`MappingTemplate`
+    * :code:`requirements`: Dict of :class:`MappingTemplate`
+    """
+    
     def __init__(self, node_type_name):
         if not isinstance(node_type_name, basestring):
             raise ValueError('must set node_type_name (string)')

@@ -45,8 +45,12 @@ class DeploymentContext(object):
     * :code:`template`: The generated deployment template
     * :code:`plan`: The generated deployment plan
     * :code:`node_types`: The generated hierarchy of node types
+    * :code:`group_types`: The generated hierarchy of group types
     * :code:`capability_types`: The generated hierarchy of capability types
     * :code:`relationship_types`: The generated hierarchy of relationship types
+    * :code:`policy_types`: The generated hierarchy of policy types
+    * :code:`artifact_types`: The generated hierarchy of artifact types
+    * :code:`interface_types`: The generated hierarchy of interface types
     """
 
     def __init__(self):
@@ -58,8 +62,12 @@ class DeploymentContext(object):
         self.template = None
         self.plan = None
         self.node_types = TypeHierarchy()
+        self.group_types = TypeHierarchy()
         self.capability_types = TypeHierarchy()
         self.relationship_types = TypeHierarchy()
+        self.policy_types = TypeHierarchy()
+        self.artifact_types = TypeHierarchy()
+        self.interface_types = TypeHierarchy()
         
         self._serial_id_counter = itertools.count(1)
         self._locally_unique_ids = set()
@@ -91,9 +99,21 @@ class DeploymentContext(object):
         if self.node_types.children:
             puts('Node types:')
             self.node_types.dump(context)
+        if self.group_types.children:
+            puts('Group types:')
+            self.group_types.dump(context)
         if self.capability_types.children:
             puts('Capability types:')
             self.capability_types.dump(context)
         if self.relationship_types.children:
             puts('Relationship types:')
             self.relationship_types.dump(context)
+        if self.policy_types.children:
+            puts('Policy types:')
+            self.policy_types.dump(context)
+        if self.artifact_types.children:
+            puts('Artifact types:')
+            self.artifact_types.dump(context)
+        if self.interface_types.children:
+            puts('Interface types:')
+            self.interface_types.dump(context)

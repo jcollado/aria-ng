@@ -17,6 +17,10 @@
 from .consumer import Consumer, ConsumerChain
 
 class Derive(Consumer):
+    """
+    Derives the deployment template.
+    """
+    
     def consume(self):
         if self.context.presentation.presenter is None:
             self.context.validation.report('Template consumer: missing presenter')
@@ -29,6 +33,10 @@ class Derive(Consumer):
         self.context.deployment.template = self.context.presentation.presenter._get_deployment_template(self.context)
 
 class Validate(Consumer):
+    """
+    Validates the deployment template.
+    """
+
     def consume(self):
         self.context.deployment.template.validate(self.context)
 

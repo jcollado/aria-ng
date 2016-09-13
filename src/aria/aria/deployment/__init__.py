@@ -16,7 +16,7 @@
 
 from .exceptions import CannotEvaluateFunction
 from .context import IdType, DeploymentContext
-from .elements import Element, Template, Function, Parameter, Metadata, Interface, Operation, Artifact, GroupPolicy, GroupPolicyTrigger
+from .shared_elements import Element, TemplateElement, Function, Parameter, Metadata, Interface, Operation, Artifact, GroupPolicy, GroupPolicyTrigger
 from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
 from .template_elements import DeploymentTemplate, NodeTemplate, Requirement, CapabilityTemplate, RelationshipTemplate, GroupTemplate, PolicyTemplate, MappingTemplate, SubstitutionTemplate
 from .types import TypeHierarchy, Type, RelationshipType
@@ -26,7 +26,7 @@ __all__ = (
     'IdType',
     'DeploymentContext',
     'Element',
-    'Template',
+    'TemplateElement',
     'Function',
     'Parameter',
     'Metadata',

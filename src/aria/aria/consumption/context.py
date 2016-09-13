@@ -37,7 +37,7 @@ class ConsumptionContext(object):
     """
     
     def __init__(self):
-        self.args = [] #: The runtime arguments (usually provided on the command line)
+        self.args = []
         self.out = sys.stdout
         self.style = Style()
         self.validation = ValidationContext()

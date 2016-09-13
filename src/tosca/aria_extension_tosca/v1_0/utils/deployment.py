@@ -36,8 +36,12 @@ def get_deployment_template(context, presenter):
         r.metadata = rr
 
     normalize_types(context, context.deployment.node_types, presenter.node_types)
+    normalize_types(context, context.deployment.group_types, presenter.group_types)
     normalize_types(context, context.deployment.capability_types, presenter.capability_types)
     normalize_types(context, context.deployment.relationship_types, presenter.relationship_types, normalize_relationship_type)
+    normalize_types(context, context.deployment.policy_types, presenter.policy_types)
+    normalize_types(context, context.deployment.artifact_types, presenter.artifact_types)
+    normalize_types(context, context.deployment.interface_types, presenter.interface_types)
     
     topology_template = presenter.service_template.topology_template
     if topology_template is not None:
@@ -100,7 +104,9 @@ def normalize_node_template(context, node_template):
     return r
 
 def normalize_interface(context, interface):
-    r = Interface(name=interface._name)
+    the_type = interface._get_type(context)
+    
+    r = Interface(name=interface._name, type_name=the_type._name)
 
     inputs = interface.inputs
     if inputs:

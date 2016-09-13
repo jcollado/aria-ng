@@ -16,10 +16,18 @@
 
 from .utils import instantiate_dict, coerce_value, coerce_dict_values, dump_dict_values, dump_properties
 from .. import UnimplementedFunctionalityError
+from ..validation import Issue
 from ..utils import StrictList, StrictDict, make_agnostic, classname, deepcopy_with_locators, puts
 from collections import OrderedDict
 
 class Function(object):
+    """
+    An intrinsic function.
+    
+    Serves as a placeholder for a value that should eventually be derived
+    by calling the function.
+    """
+    
     @property
     def as_raw(self):
         raise UnimplementedFunctionalityError(classname(self) + '.as_raw')
@@ -32,6 +40,13 @@ class Function(object):
         return self
 
 class Element(object):
+    """
+    Base class for :class:`DeploymentPlan` elements.
+    
+    All elements support validation, diagnostic dumping, and representation as
+    raw data (which can be translated into JSON or YAML) via :code:`as_raw`.
+    """
+    
     def validate(self, context):
         pass
 
@@ -45,11 +60,23 @@ class Element(object):
     def dump(self, context):
         pass
 
-class Template(Element):
+class TemplateElement(Element):
+    """
+    Base class for :class:`DeploymentTemplate` elements.
+    
+    All template elements can be instantiated into :class:`DeploymentPlan` elements. 
+    """
+
     def instantiate(self, context, container):
         pass
 
-class Parameter(Template):
+class Parameter(TemplateElement):
+    """
+    Represents a typed value.
+
+    Used by both :class:`DeploymentTemplate` and :class:`DeploymentPlan` elements.
+    """
+    
     def __init__(self, type_name, value, description):
         self.type_name = type_name
         self.value = value
@@ -70,7 +97,15 @@ class Parameter(Template):
             ('value', self.value),
             ('description', self.description)))
 
-class Metadata(Template):
+class Metadata(TemplateElement):
+    """
+    Custom values associated with the deployment template and its plans.
+
+    Properties:
+    
+    * :code:`values`: Dict of custom values
+    """
+    
     def __init__(self):
         self.values = StrictDict(key_class=basestring)
 
@@ -89,24 +124,41 @@ class Metadata(Template):
             for name, value in self.values.iteritems():
                 puts('%s: %s' % (name, context.style.meta(value)))
 
-class Interface(Template):
-    def __init__(self, name):
+class Interface(TemplateElement):
+    """
+    A typed set of operations.
+    
+    This class is used by both deployment template and deployment plan elements.
+    
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`inputs`: Dict of :class:`Parameter`
+    * :code:`operations`: Dict of :class:`Operation`
+    """
+    
+    def __init__(self, name, type_name):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
         
         self.name = name
+        self.type_name = type_name
         self.inputs = StrictDict(key_class=basestring, value_class=Parameter)
         self.operations = StrictDict(key_class=basestring, value_class=Operation)
 
+    def validate(self, context):
+        if self.type_name:
+            if context.deployment.interface_types.get_descendant(self.type_name) is None:
+                context.validation.report('interface "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
+        for operation in self.operations.itervalues():
+            operation.validate(context)
+
     def instantiate(self, context, container):
-        r = Interface(self.name)
+        r = Interface(self.name, self.type_name)
         instantiate_dict(context, container, r.inputs, self.inputs)
         instantiate_dict(context, container, r.operations, self.operations)
         return r
-                
-    def validate(self, context):
-        for operation in self.operations.itervalues():
-            operation.validate(context)
 
     def coerce_values(self, context, container, report_issues):
         coerce_dict_values(context, container, self.inputs, report_issues)
@@ -117,16 +169,34 @@ class Interface(Template):
     def as_raw(self):
         return OrderedDict((
             ('name', self.name),
+            ('type_name', self.type_name),
             ('inputs', {k: v.as_raw for k, v in self.inputs.iteritems()}),
             ('operations', [v.as_raw for v in self.operations.itervalues()])))
 
     def dump(self, context):
         puts(context.style.node(self.name))
         with context.style.indent:
+            puts('Interface type: %s' % context.style.type(self.type_name))
             dump_properties(context, self.inputs, 'Inputs')
             dump_dict_values(context, self.operations, 'Operations')
 
-class Operation(Template):
+class Operation(TemplateElement):
+    """
+    A typed set of operations.
+    
+    This class is used by both deployment template and deployment plan elements.
+    
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`implementation`: Implementation string (interpreted by the orchestrator)
+    * :code:`dependencies`: List of strings (interpreted by the orchestrator)
+    * :code:`executor`: Executor string (interpreted by the orchestrator)
+    * :code:`max_retries`: Maximum number of retries allowed in case of failure
+    * :code:`retry_interval`: Interval between retries
+    * :code:`inputs`: Dict of :class:`Parameter`
+    """
+    
     def __init__(self, name):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
@@ -178,7 +248,23 @@ class Operation(Template):
                 puts('Retry interval: %s' % context.style.literal(self.retry_interval))
             dump_properties(context, self.inputs, 'Inputs')
 
-class Artifact(Template):
+class Artifact(TemplateElement):
+    """
+    A file associated with a node.
+
+    This class is used by both deployment template and deployment plan elements.
+
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`source_path`: Source path (CSAR or repository)
+    * :code:`target_path`: Path at destination machine
+    * :code:`repository_url`: Repository URL
+    * :code:`repository_credential`: Dict of string
+    * :code:`properties`: Dict of :class:`Parameter`
+    """
+    
     def __init__(self, name, type_name, source_path):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
@@ -194,6 +280,10 @@ class Artifact(Template):
         self.repository_url = None
         self.repository_credential = StrictDict(key_class=basestring, value_class=basestring)
         self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+
+    def validate(self, context):
+        if context.deployment.artifact_types.get_descendant(self.type_name) is None:
+            context.validation.report('artifact "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
 
     def instantiate(self, context, container):
         r = Artifact(self.name, self.type_name, self.source_path)
@@ -230,7 +320,19 @@ class Artifact(Template):
                 puts('Repository credential: %s' % context.style.literal(self.repository_credential))
             dump_properties(context, self.properties)
 
-class GroupPolicy(Template):
+class GroupPolicy(TemplateElement):
+    """
+    Policies applied to groups.
+
+    This class is used by both deployment template and deployment plan elements.
+
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`triggers`: Dict of :class:`GroupPolicyTrigger`
+    """
+    
     def __init__(self, name):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
@@ -263,19 +365,29 @@ class GroupPolicy(Template):
             dump_properties(context, self.properties)
             dump_dict_values(context, self.triggers, 'Triggers')
 
-class GroupPolicyTrigger(Template):
-    def __init__(self, name, source):
+class GroupPolicyTrigger(TemplateElement):
+    """
+    Triggers for :class:`GroupPolicy`.
+    
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`implementation`: Implementation string (interpreted by the orchestrator)
+    * :code:`properties`: Dict of :class:`Parameter`
+    """
+    
+    def __init__(self, name, implementation):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
-        if not isinstance(source, basestring):
-            raise ValueError('must set source (string)')
+        if not isinstance(implementation, basestring):
+            raise ValueError('must set implementation (string)')
     
         self.name = name
-        self.source = source
+        self.implementation = implementation
         self.properties = StrictDict(key_class=basestring, value_class=Parameter)
 
     def instantiate(self, context, container):
-        r = GroupPolicyTrigger(self.name, self.source)
+        r = GroupPolicyTrigger(self.name, self.implementation)
         instantiate_dict(context, container, r.properties, self.properties)
         return r
 
@@ -286,11 +398,11 @@ class GroupPolicyTrigger(Template):
     def as_raw(self):
         return OrderedDict((
             ('name', self.name),
-            ('source', self.source),
+            ('implementation', self.implementation),
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()})))
 
     def dump(self, context):
         puts(context.style.node(self.name))
         with context.style.indent:
-            puts('Source: %s' % context.style.literal(self.source))
+            puts('Implementation: %s' % context.style.literal(self.implementation))
             dump_properties(context, self.properties)

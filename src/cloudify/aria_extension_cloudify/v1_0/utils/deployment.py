@@ -22,7 +22,9 @@ def get_deployment_template(context, presenter):
     r.description = presenter.service_template.description.value if presenter.service_template.description is not None else None
 
     normalize_types(context, context.deployment.node_types, presenter.node_types)
+    normalize_types(context, context.deployment.group_types, presenter.group_types)
     normalize_types(context, context.deployment.relationship_types, presenter.relationship_types, normalize_relationship_type)
+    normalize_types(context, context.deployment.policy_types, presenter.policy_types)
 
     normalize_property_values(r.inputs, presenter.service_template._get_input_values(context))
     normalize_property_values(r.outputs, presenter.service_template._get_output_values(context))
@@ -71,7 +73,7 @@ def normalize_node_template(context, node_template):
     return r
 
 def normalize_interface(context, interface, is_definition=False):
-    r = Interface(name=interface._name)
+    r = Interface(name=interface._name, type_name=None)
 
     operations = interface.operations
     if operations:
@@ -160,7 +162,7 @@ def normalize_group_policy(context, policy):
 
 def normalize_group_policy_trigger(context, trigger):
     trigger_type = trigger._get_type(context)
-    r = GroupPolicyTrigger(name=trigger._name, source=trigger_type.source)
+    r = GroupPolicyTrigger(name=trigger._name, implementation=trigger_type.source)
     normalize_property_values(r.properties, trigger._get_property_values(context))
     return r
 

@@ -14,13 +14,32 @@
 # under the License.
 #
 
-from .elements import Element, Parameter, Interface, Operation, Artifact, GroupPolicy
+from .shared_elements import Element, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .utils import coerce_dict_values, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from ..validation import Issue
 from ..utils import StrictList, StrictDict, ReadOnlyList, puts, indent 
 from collections import OrderedDict
 
 class DeploymentPlan(Element):
+    """
+    A deployment plan is an instance of a :class:`DeploymentTemplate`.
+    
+    You will usually not create it programmatically, but instead instantiate
+    it from the template.
+    
+    Properties:
+    
+    * :code:`description`: Human-readable description
+    * :code:`metadata`: :class:`Metadata`
+    * :code:`nodes`: Dict of :class:`Node`
+    * :code:`groups`: Dict of :class:`Group`
+    * :code:`policies`: Dict of :class:`Policy`
+    * :code:`substitution`: :class:`Substituion`
+    * :code:`inputs`: Dict of :class:`Parameter`
+    * :code:`outputs`: Dict of :class:`Parameter`
+    * :code:`operations`: Dict of :class:`Operation`
+    """
+    
     def __init__(self):
         self.description = None
         self.metadata = None
@@ -161,6 +180,23 @@ class DeploymentPlan(Element):
                         self._dump_graph_node(context, target_node)
 
 class Node(Element):
+    """
+    An instance of a :class:`NodeTemplate`.
+    
+    Nodes may have zero or more :class:`Relationship` instances to other nodes.
+    
+    Properties:
+    
+    * :code:`id`: Unique ID (prefixed with the template name)
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`template_name`: Must be represented in the :class:`DeploymentTemplate`
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`interfaces`: Dict of :class:`Interface`
+    * :code:`artifacts`: Dict of :class:`Artifact`
+    * :code:`capabilities`: Dict of :class:`CapabilityTemplate`
+    * :code:`relationship`: List of :class:`Relationship`
+    """
+    
     def __init__(self, context, type_name, template_name):
         if not isinstance(type_name, basestring):
             raise ValueError('must set type_name (string)')
@@ -276,6 +312,20 @@ class Node(Element):
             dump_list_values(context, self.relationships, 'Relationships')
 
 class Capability(Element):
+    """
+    A capability of a :class:`Node`.
+    
+    An instance of a :class:`CapabilityTemplate`.
+
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`min_occurrences`: Minimum number of requirement matches required
+    * :code:`max_occurrences`: Maximum number of requirement matches allowed
+    * :code:`properties`: Dict of :class:`Parameter`
+    """
+    
     def __init__(self, name, type_name):
         if not isinstance(name, basestring):
             raise ValueError('name must be string')
@@ -287,6 +337,7 @@ class Capability(Element):
         self.min_occurrences = None # optional
         self.max_occurrences = None # optional
         self.properties = StrictDict(key_class=basestring, value_class=Parameter)
+        
         self.occurrences = 0
     
     @property
@@ -320,6 +371,22 @@ class Capability(Element):
             dump_properties(context, self.properties)
 
 class Relationship(Element):
+    """
+    Connects :class:`Node` to another node.
+
+    An instance of a :class:`RelationshipTemplate`.
+
+    Properties:
+
+    * :code:`target_node_id`: Must be represented in the :class:`DeploymentPlan`
+    * :code:`target_capability_name`: The matches capability at the target node
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`template_name`: Must be represented in the :class:`DeploymentTemplate`
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`source_interfaces`: Dict of :class:`Interface`
+    * :code:`target_interfaces`: Dict of :class:`Interface`
+    """
+    
     def __init__(self, type_name=None, template_name=None):
         if type_name and not isinstance(type_name, basestring):
             raise ValueError('type_name must be string')
@@ -374,6 +441,20 @@ class Relationship(Element):
             dump_interfaces(context, self.target_interfaces, 'Target interfaces')
 
 class Group(Element):
+    """
+    An instance of a :class:`GroupTemplate`.
+
+    Properties:
+    
+    * :code:`id`: Unique ID (prefixed with the template name)
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`template_name`: Must be represented in the :class:`DeploymentTemplate`
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`interfaces`: Dict of :class:`Interface`
+    * :code:`policies`: Dict of :class:`GroupPolicy`
+    * :code:`member_node_ids`: Must be represented in the :class:`DeploymentPlan`
+    """    
+    
     def __init__(self, context, type_name, template_name):
         if not isinstance(template_name, basestring):
             raise ValueError('must set template_name (string)')
@@ -425,6 +506,18 @@ class Group(Element):
                         puts(context.style.node(node_id))
 
 class Policy(Element):
+    """
+    An instance of a :class:`PolicyTemplate`.
+    
+    Properties:
+    
+    * :code:`name`: Name
+    * :code:`type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`properties`: Dict of :class:`Parameter`
+    * :code:`target_node_ids`: Must be represented in the :class:`DeploymentPlan`
+    * :code:`target_group_ids`: Must be represented in the :class:`DeploymentPlan`
+    """
+    
     def __init__(self, name, type_name):
         if not isinstance(name, basestring):
             raise ValueError('must set name (string)')
@@ -463,6 +556,16 @@ class Policy(Element):
                         puts(context.style.node(group_id))
 
 class Mapping(Element):
+    """
+    An instance of a :class:`MappingTemplate`.
+    
+    Properties:
+    
+    * :code:`mapped_name`: Exposed capability or requirement name
+    * :code:`node_id`: Must be represented in the :class:`DeploymentPlan`
+    * :code:`name`: Name of capability or requirement at the node
+    """
+    
     def __init__(self, mapped_name, node_id, name):
         if not isinstance(mapped_name, basestring):
             raise ValueError('must set mapped_name (string)')
@@ -486,6 +589,16 @@ class Mapping(Element):
         puts('%s -> %s.%s' % (context.style.node(self.mapped_name), context.style.node(self.node_id), context.style.node(self.name)))
 
 class Substitution(Element):
+    """
+    An instance of a :class:`SubstitutionTemplate`.
+    
+    Properties:
+    
+    * :code:`node_type_name`: Must be represented in the :class:`DeploymentContext`
+    * :code:`capabilities`: Dict of :class:`Mapping`
+    * :code:`requirements`: Dict of :class:`Mapping`
+    """
+    
     def __init__(self, node_type_name):
         if not isinstance(node_type_name, basestring):
             raise ValueError('must set node_type_name (string)')

@@ -58,6 +58,7 @@ setup(
         'aria.reading',
         'aria.tools',
         'aria.utils',
+	'aria.validation',
         'aria_extension_tosca',
         'aria_extension_tosca.v1_0',
         'aria_extension_tosca.v1_0.utils'],

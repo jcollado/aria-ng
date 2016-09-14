@@ -18,6 +18,10 @@ from .consumer import Consumer, ConsumerChain
 from ..utils import json_dumps, yaml_dumps
 
 class Instantiate(Consumer):
+    """
+    Instantiates the deployment plan.
+    """
+    
     def consume(self):
         if self.context.deployment.template is None:
             self.context.validation.report('Plan consumer: missing deployment template')
@@ -25,19 +29,35 @@ class Instantiate(Consumer):
 
         self.context.deployment.template.instantiate(self.context, None)
 
+class CoerceValues(Consumer):
+    """
+    Coerces values in the deployment plan.
+    """
+
+    def consume(self):
+        self.context.deployment.plan.coerce_values(self.context, None, True)
+
 class Validate(Consumer):
+    """
+    Validates the deployment plan.
+    """
+
     def consume(self):
         self.context.deployment.plan.validate(self.context)
 
 class SatisfyRequirements(Consumer):
+    """
+    Satisfies node requirements in the deployment plan.
+    """
+
     def consume(self):
         self.context.deployment.plan.satisfy_requirements(self.context)
         
-class CoerceValues(Consumer):
-    def consume(self):
-        self.context.deployment.template.coerce_values(self.context, None, True)
-
 class ValidateCapabilities(Consumer):
+    """
+    Validates capabilities in the deployment plan.
+    """
+
     def consume(self):
         self.context.deployment.plan.validate_capabilities(self.context)
 
@@ -47,7 +67,7 @@ class Plan(ConsumerChain):
     """
     
     def __init__(self, context):
-        super(Plan, self).__init__(context, (Instantiate, Validate, SatisfyRequirements, CoerceValues, ValidateCapabilities))
+        super(Plan, self).__init__(context, (Instantiate, CoerceValues, Validate, CoerceValues, SatisfyRequirements, CoerceValues, ValidateCapabilities, CoerceValues))
 
     def dump(self):
         if self.context.has_arg_switch('graph'):

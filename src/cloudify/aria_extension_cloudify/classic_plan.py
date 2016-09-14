@@ -34,7 +34,7 @@ class ClassicPlan(Consumer):
         setattr(self.context.deployment, 'classic_plan', classic_plan)
     
     def dump(self):
-        print json.dumps(self.context.deployment.classic_plan, indent=2, cls=JsonAsRawEncoder)
+        self.context.out.write(json.dumps(self.context.deployment.classic_plan, indent=2, cls=JsonAsRawEncoder))
 
 #
 # Conversions
@@ -175,7 +175,6 @@ def convert_interfaces(context, interfaces):
 
 def convert_interface_operation(context, operation):
     _, plugin_executor, _ = parse_implementation(context, operation.implementation)
-    #print '@@@@', plugin_executor
 
     return OrderedDict((
         ('implementation', operation.implementation or ''),
@@ -308,7 +307,6 @@ def parse_implementation(context, implementation):
         plugin_name, operation_name = implementation.split('.', 1)
         plugin = context.presentation.presenter.service_template.plugins.get(plugin_name) if context.presentation.presenter.service_template.plugins is not None else None
         plugin_executor = plugin.executor if plugin is not None else None
-        #print '!!!!', plugin_name, plugin_executor, operation_name
         return plugin_name, plugin_executor, operation_name
 
 def has_intrinsic_functions(context, value):
@@ -383,7 +381,8 @@ def find_groups(context, node):
     return groups
 
 def iter_scaling_groups(context):
-    for group_name, group in context.deployment.template.group_templates.iteritems():
-        for policy in group.policies.itervalues():
-            if policy.name == 'cloudify.policies.scalable':
-                yield group_name, group
+    for policy_template in context.deployment.template.policy_templates.itervalues():
+        if policy_template.type_name == 'cloudify.policies.scaling':
+            for group_template_name in policy_template.target_group_template_names:
+                group_template = context.deployment.template.group_templates[group_template_name]
+                yield group_template_name, group_template

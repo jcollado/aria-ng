@@ -18,7 +18,7 @@ from __future__ import absolute_import # so we can import standard 'types'
 
 from .shared_elements import Element, TemplateElement, Parameter, Interface, Operation, Artifact, GroupPolicy
 from .plan_elements import DeploymentPlan, Node, Capability, Relationship, Group, Policy, Mapping, Substitution
-from .utils import instantiate_dict, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
+from .utils import validate_dict_values, validate_list_values, instantiate_dict, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from ..validation import Issue
 from ..utils import StrictList, StrictDict, puts
 from types import FunctionType
@@ -90,16 +90,14 @@ class DeploymentTemplate(TemplateElement):
     def validate(self, context):
         if self.metadata is not None:
             self.metadata.validate(context)
-        for node_template in self.node_templates.itervalues():
-            node_template.validate(context)
-        for group_template in self.group_templates.itervalues():
-            group_template.validate(context)
-        for policy_template in self.policy_templates.itervalues():
-            policy_template.validate(context)
+        validate_dict_values(context, self.node_templates)
+        validate_dict_values(context, self.group_templates)
+        validate_dict_values(context, self.policy_templates)
         if self.substitution_template is not None:
             self.substitution_template.validate(context)
-        for operation in self.operations.itervalues():
-            operation.validate(context)
+        validate_dict_values(context, self.inputs)
+        validate_dict_values(context, self.outputs)
+        validate_dict_values(context, self.operations)
 
     def dump(self, context):
         if self.description is not None:
@@ -168,20 +166,17 @@ class NodeTemplate(TemplateElement):
         instantiate_dict(context, r, r.interfaces, self.interfaces)
         instantiate_dict(context, r, r.artifacts, self.artifacts)
         instantiate_dict(context, r, r.capabilities, self.capabilities)
-        r.coerce_values(context, r, False)
         return r
     
     def validate(self, context):
         if context.deployment.node_types.get_descendant(self.type_name) is None:
-            context.validation.report('node template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
-        for interface in self.interfaces.itervalues():
-            interface.validate(context)
-        for artifact in self.artifacts.itervalues():
-            artifact.validate(context)
-        for capability in self.capabilities.itervalues():
-            capability.validate(context)
-        for requirement in self.requirements:
-            requirement.validate(context)
+            context.validation.report('node template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)  
+
+        validate_dict_values(context, self.properties)
+        validate_dict_values(context, self.interfaces)
+        validate_dict_values(context, self.artifacts)
+        validate_dict_values(context, self.capabilities)
+        validate_list_values(context, self.requirements)
     
     def dump(self, context):
         puts('Node template: %s' % context.style.node(self.name))
@@ -282,6 +277,7 @@ class Requirement(Element):
             context.validation.report('requirement "%s" refers to an unknown node type: %s' % (self.name, repr(self.target_node_type_name)), level=Issue.BETWEEN_TYPES)        
         if (self.target_capability_type_name) and (context.deployment.capability_types.get_descendant(self.target_capability_type_name) is None):
             context.validation.report('requirement "%s" refers to an unknown capability type: %s' % (self.name, repr(self.target_capability_type_name)), level=Issue.BETWEEN_TYPES)        
+
         if self.relationship_template:
             self.relationship_template.validate(context)
 
@@ -365,6 +361,8 @@ class CapabilityTemplate(TemplateElement):
         if context.deployment.capability_types.get_descendant(self.type_name) is None:
             context.validation.report('capability "%s" refers to an unknown type: %s' % (self.name, repr(self.type)), level=Issue.BETWEEN_TYPES)        
 
+        validate_dict_values(context, self.properties)
+
     def dump(self, context):
         puts(context.style.node(self.name))
         with context.style.indent:
@@ -412,10 +410,10 @@ class RelationshipTemplate(TemplateElement):
     def validate(self, context):
         if context.deployment.relationship_types.get_descendant(self.type_name) is None:
             context.validation.report('relationship template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
-        for interface in self.source_interfaces.itervalues():
-            interface.validate(context)
-        for interface in self.target_interfaces.itervalues():
-            interface.validate(context)
+
+        validate_dict_values(context, self.properties)
+        validate_dict_values(context, self.source_interfaces)
+        validate_dict_values(context, self.target_interfaces)
 
     def dump(self, context):
         if self.type_name is not None:
@@ -457,10 +455,6 @@ class GroupTemplate(TemplateElement):
         self.policies = StrictDict(key_class=basestring, value_class=GroupPolicy)
         self.member_node_template_names = StrictList(value_class=basestring)
 
-    def validate(self, context):
-        if context.deployment.group_types.get_descendant(self.type_name) is None:
-            context.validation.report('group template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
-
     def instantiate(self, context, container):
         r = Group(context, self.type_name, self.name)
         instantiate_dict(context, self, r.properties, self.properties)
@@ -469,6 +463,14 @@ class GroupTemplate(TemplateElement):
         for member_node_template_name in self.member_node_template_names:
             r.member_node_ids.extend(context.deployment.plan.get_node_ids(member_node_template_name))
         return r
+
+    def validate(self, context):
+        if context.deployment.group_types.get_descendant(self.type_name) is None:
+            context.validation.report('group template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.properties)
+        validate_dict_values(context, self.interfaces)
+        validate_dict_values(context, self.policies)
 
     def dump(self, context):
         puts('Group template: %s' % context.style.node(self.name))
@@ -506,10 +508,6 @@ class PolicyTemplate(TemplateElement):
         self.target_node_template_names = StrictList(value_class=basestring)
         self.target_group_template_names = StrictList(value_class=basestring)
 
-    def validate(self, context):
-        if context.deployment.policy_types.get_descendant(self.type_name) is None:
-            context.validation.report('policy template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
-
     def instantiate(self, context, container):
         r = Policy(self.name, self.type_name)
         instantiate_dict(context, self, r.properties, self.properties)
@@ -518,6 +516,12 @@ class PolicyTemplate(TemplateElement):
         for group_template_name in self.target_group_template_names:
             r.target_group_ids.extend(context.deployment.plan.get_group_ids(group_template_name))
         return r
+
+    def validate(self, context):
+        if context.deployment.policy_types.get_descendant(self.type_name) is None:
+            context.validation.report('policy template "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.properties)
 
     def dump(self, context):
         puts('Policy template: %s' % context.style.node(self.name))
@@ -552,16 +556,16 @@ class MappingTemplate(TemplateElement):
         self.node_template_name = node_template_name
         self.name = name
 
-    def validate(self, context):
-        if self.node_template_name not in context.deployment.template.node_templates:
-            context.validation.report('mapping "%s" refers to an unknown node template: %s' % (self.mapped_name, repr(self.node_template_name)), level=Issue.BETWEEN_TYPES)        
-
     def instantiate(self, context, container):
         nodes = context.deployment.plan.find_nodes(self.node_template_name)
         if len(nodes) == 0:
             context.validation.report('mapping "%s" refer to node template "%s" but there are no node instances' % (self.mapped_name, self.node_template_name), level=Issue.BETWEEN_INSTANCES)
             return None        
         return Mapping(self.mapped_name, nodes[0].id, self.name)
+
+    def validate(self, context):
+        if self.node_template_name not in context.deployment.template.node_templates:
+            context.validation.report('mapping "%s" refers to an unknown node template: %s' % (self.mapped_name, repr(self.node_template_name)), level=Issue.BETWEEN_TYPES)        
 
     def dump(self, context):
         puts('%s -> %s.%s' % (context.style.node(self.mapped_name), context.style.node(self.node_template_name), context.style.node(self.name)))
@@ -592,10 +596,11 @@ class SubstitutionTemplate(TemplateElement):
         return r
 
     def validate(self, context):
-        for capability in self.capabilities.itervalues():
-            capability.validate(context)
-        for requirement in self.requirements.itervalues():
-            requirement.validate(context)
+        if context.deployment.node_types.get_descendant(self.node_type_name) is None:
+            context.validation.report('substitution template "%s" has an unknown type: %s' % (self.name, repr(self.node_type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.capabilities)
+        validate_dict_values(context, self.requirements)
 
     def dump(self, context):
         puts('Substitution:')

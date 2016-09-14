@@ -15,7 +15,7 @@
 #
 
 from .shared_elements import Element, Parameter, Interface, Operation, Artifact, GroupPolicy
-from .utils import coerce_dict_values, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
+from .utils import validate_dict_values, validate_list_values, coerce_dict_values, coerce_list_values, dump_list_values, dump_dict_values, dump_properties, dump_interfaces
 from ..validation import Issue
 from ..utils import StrictList, StrictDict, ReadOnlyList, puts, indent 
 from collections import OrderedDict
@@ -102,32 +102,6 @@ class DeploymentPlan(Element):
                         if self._is_node_a_target(context, node, target_node):
                             return True
         return False
-    
-    def validate(self, context):
-        if self.metadata is not None:
-            self.metadata.validate(context)
-        for node in self.nodes.itervalues():
-            node.validate(context)
-        for group in self.groups.itervalues():
-            group.validate(context)
-        for policy in self.policies.itervalues():
-            policy.validate(context)
-        if self.substitution is not None:
-            self.substitution.validate(context)
-        for operation in self.operations.itervalues():
-            operation.validate(context)
-
-    def coerce_values(self, context, container, report_issues):
-        for node in self.nodes.itervalues():
-            node.coerce_values(context, self, report_issues)
-        for group in self.groups.itervalues():
-            group.coerce_values(context, self, report_issues)
-        for policy in self.policies.itervalues():
-            policy.coerce_values(context, self, report_issues)
-        coerce_dict_values(context, container, self.inputs, report_issues)
-        coerce_dict_values(context, container, self.outputs, report_issues)
-        for operation in self.operations.itervalues():
-            operation.coerce_values(context, container, report_issues)
 
     @property
     def as_raw(self):
@@ -141,6 +115,30 @@ class DeploymentPlan(Element):
             ('inputs', {k: v.as_raw for k, v in self.inputs.iteritems()}),
             ('outputs', {k: v.as_raw for k, v in self.outputs.iteritems()}),
             ('operations', [v.as_raw for v in self.operations.itervalues()])))
+    
+    def validate(self, context):
+        if self.metadata is not None:
+            self.metadata.validate(context)
+        validate_dict_values(context, self.nodes)
+        validate_dict_values(context, self.groups)
+        validate_dict_values(context, self.policies)
+        if self.substitution is not None:
+            self.substitution.validate(context)
+        validate_dict_values(context, self.inputs)
+        validate_dict_values(context, self.outputs)
+        validate_dict_values(context, self.operations)
+
+    def coerce_values(self, context, container, report_issues):
+        if self.metadata is not None:
+            self.metadata.coerce_values(context, container, report_issues)
+        coerce_dict_values(context, container, self.nodes, report_issues)
+        coerce_dict_values(context, container, self.groups, report_issues)
+        coerce_dict_values(context, container, self.policies, report_issues)
+        if self.substitution is not None:
+            self.substitution.coerce_values(context, container, report_issues)
+        coerce_dict_values(context, container, self.inputs, report_issues)
+        coerce_dict_values(context, container, self.outputs, report_issues)
+        coerce_dict_values(context, container, self.operations, report_issues)
 
     def dump(self, context):
         if self.description is not None:
@@ -262,32 +260,6 @@ class Node(Element):
                 satisfied = False
         return satisfied
 
-    def validate(self, context):
-        if len(self.id) > context.deployment.id_max_length:
-            context.validation.report('"%s" has an ID longer than the limit of %d characters: %d' % (self.id, context.deployment.id_max_length, len(self.id)), level=Issue.BETWEEN_INSTANCES)
-        
-        # TODO: validate that node template is of type
-        
-        for interface in self.interfaces.itervalues():
-            interface.validate(context)
-        for artifact in self.artifacts.itervalues():
-            artifact.validate(context)
-        for capability in self.capabilities.itervalues():
-            capability.validate(context)
-        for relationship in self.relationships:
-            relationship.validate(context)
-
-    def coerce_values(self, context, container, report_issues):
-        coerce_dict_values(context, self, self.properties, report_issues)
-        for interface in self.interfaces.itervalues():
-            interface.coerce_values(context, self, report_issues)
-        for artifact in self.artifacts.itervalues():
-            artifact.coerce_values(context, self, report_issues)
-        for capability in self.capabilities.itervalues():
-            capability.coerce_values(context, self, report_issues)
-        for relationship in self.relationships:
-            relationship.coerce_values(context, self, report_issues)
-
     @property
     def as_raw(self):
         return OrderedDict((
@@ -300,6 +272,25 @@ class Node(Element):
             ('capabilities', [v.as_raw for v in self.capabilities.itervalues()]),
             ('relationships', [v.as_raw for v in self.relationships])))
             
+    def validate(self, context):
+        if len(self.id) > context.deployment.id_max_length:
+            context.validation.report('"%s" has an ID longer than the limit of %d characters: %d' % (self.id, context.deployment.id_max_length, len(self.id)), level=Issue.BETWEEN_INSTANCES)
+        
+        # TODO: validate that node template is of type?
+        
+        validate_dict_values(context, self.properties)
+        validate_dict_values(context, self.interfaces)
+        validate_dict_values(context, self.artifacts)
+        validate_dict_values(context, self.capabilities)
+        validate_list_values(context, self.relationships)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, self, self.properties, report_issues)
+        coerce_dict_values(context, self, self.interfaces, report_issues)
+        coerce_dict_values(context, self, self.artifacts, report_issues)
+        coerce_dict_values(context, self, self.capabilities, report_issues)
+        coerce_list_values(context, self, self.relationships, report_issues)
+
     def dump(self, context):
         puts('Node: %s' % context.style.node(self.id))
         with context.style.indent:
@@ -360,6 +351,12 @@ class Capability(Element):
             ('type_name', self.type_name),
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()})))
 
+    def validate(self, context):
+        if context.deployment.capability_types.get_descendant(self.type_name) is None:
+            context.validation.report('capability "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)
+        
+        validate_dict_values(context, self.properties)
+
     def coerce_values(self, context, container, report_issues):
         coerce_dict_values(context, container, self.properties, report_issues)
             
@@ -403,19 +400,6 @@ class Relationship(Element):
         self.source_interfaces = StrictDict(key_class=basestring, value_class=Interface)
         self.target_interfaces = StrictDict(key_class=basestring, value_class=Interface)
 
-    def validate(self, context):
-        for interface in self.source_interfaces.itervalues():
-            interface.validate(context)
-        for interface in self.target_interfaces.itervalues():
-            interface.validate(context)
-
-    def coerce_values(self, context, container, report_issues):
-        coerce_dict_values(context, container, self.properties, report_issues)
-        for interface in self.source_interfaces.itervalues():
-            interface.coerce_values(context, container, report_issues)
-        for interface in self.target_interfaces.itervalues():
-            interface.coerce_values(context, container, report_issues)
-
     @property
     def as_raw(self):
         return OrderedDict((
@@ -426,6 +410,20 @@ class Relationship(Element):
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('source_interfaces', [v.as_raw for v in self.source_interfaces.itervalues()]),            
             ('target_interfaces', [v.as_raw for v in self.target_interfaces.itervalues()])))            
+
+    def validate(self, context):
+        if self.type_name:
+            if context.deployment.relationship_types.get_descendant(self.type_name) is None:
+                context.validation.report('relationship "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.properties)
+        validate_dict_values(context, self.source_interfaces)
+        validate_dict_values(context, self.target_interfaces)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
+        coerce_dict_values(context, container, self.source_interfaces, report_issues)
+        coerce_dict_values(context, container, self.target_interfaces, report_issues)
 
     def dump(self, context):
         puts('Target node: %s' % context.style.node(self.target_node_id))
@@ -479,17 +477,17 @@ class Group(Element):
             ('member_node_ids', self.member_node_ids)))
 
     def validate(self, context):
-        for interface in self.interfaces.itervalues():
-            interface.validate(context)
-        for policy in self.policies.itervalues():
-            policy.validate(context)
+        if context.deployment.group_types.get_descendant(self.type_name) is None:
+            context.validation.report('group "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.properties)
+        validate_dict_values(context, self.interfaces)
+        validate_dict_values(context, self.policies)
 
     def coerce_values(self, context, container, report_issues):
         coerce_dict_values(context, container, self.properties, report_issues)
-        for interface in self.interfaces.itervalues():
-            interface.coerce_values(context, container, report_issues)
-        for policy in self.policies.itervalues():
-            policy.coerce_values(context, container, report_issues)
+        coerce_dict_values(context, container, self.interfaces, report_issues)
+        coerce_dict_values(context, container, self.policies, report_issues)
 
     def dump(self, context):
         puts('Group: %s' % context.style.node(self.id))
@@ -538,6 +536,15 @@ class Policy(Element):
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('target_node_ids', self.target_node_ids),
             ('target_group_ids', self.target_group_ids)))
+
+    def validate(self, context):
+        if context.deployment.policy_types.get_descendant(self.type_name) is None:
+            context.validation.report('policy "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.properties)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
 
     def dump(self, context):
         puts('Policy: %s' % context.style.node(self.name))
@@ -613,6 +620,17 @@ class Substitution(Element):
             ('node_type_name', self.node_type_name),
             ('capabilities', [v.as_raw for v in self.capabilities.itervalues()]),
             ('requirements', [v.as_raw for v in self.requirements.itervalues()])))
+
+    def validate(self, context):
+        if context.deployment.node_types.get_descendant(self.node_type_name) is None:
+            context.validation.report('substitution "%s" has an unknown type: %s' % (self.name, repr(self.node_type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.capabilities)
+        validate_dict_values(context, self.requirements)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.capabilities, report_issues)
+        coerce_dict_values(context, container, self.requirements, report_issues)
 
     def dump(self, context):
         puts('Substitution:')

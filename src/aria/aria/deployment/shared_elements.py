@@ -14,7 +14,7 @@
 # under the License.
 #
 
-from .utils import instantiate_dict, coerce_value, coerce_dict_values, dump_dict_values, dump_properties
+from .utils import validate_dict_values, instantiate_dict, coerce_value, coerce_dict_values, dump_dict_values, dump_properties
 from .. import UnimplementedFunctionalityError
 from ..validation import Issue
 from ..utils import StrictList, StrictDict, make_agnostic, classname, deepcopy_with_locators, puts
@@ -47,16 +47,16 @@ class Element(object):
     raw data (which can be translated into JSON or YAML) via :code:`as_raw`.
     """
     
+    @property
+    def as_raw(self):
+        raise UnimplementedFunctionalityError(classname(self) + '.as_raw')
+
     def validate(self, context):
         pass
 
     def coerce_values(self, context, container, report_issues):
         pass
     
-    @property
-    def as_raw(self):
-        raise UnimplementedFunctionalityError(classname(self) + '.as_raw')
-
     def dump(self, context):
         pass
 
@@ -82,20 +82,19 @@ class Parameter(TemplateElement):
         self.value = value
         self.description = description
 
-    def instantiate(self, context, container):
-        value = coerce_value(context, container, self.value) if self.value is not None else None
-        return Parameter(self.type_name, value, self.description)
-
-    def coerce_values(self, context, container, report_issues):
-        if self.value is not None:
-            self.value = coerce_value(context, container, self.value, report_issues)
-
     @property
     def as_raw(self):
         return OrderedDict((
             ('type_name', self.type_name),
             ('value', self.value),
             ('description', self.description)))
+
+    def instantiate(self, context, container):
+        return Parameter(self.type_name, self.value, self.description)
+
+    def coerce_values(self, context, container, report_issues):
+        if self.value is not None:
+            self.value = coerce_value(context, container, self.value, report_issues)
 
 class Metadata(TemplateElement):
     """
@@ -109,14 +108,14 @@ class Metadata(TemplateElement):
     def __init__(self):
         self.values = StrictDict(key_class=basestring)
 
+    @property
+    def as_raw(self):
+        return deepcopy_with_locators(self.values)
+
     def instantiate(self, context, container):
         r = Metadata()
         r.values.update(self.values)
         return r
-
-    @property
-    def as_raw(self):
-        return deepcopy_with_locators(self.values)
 
     def dump(self, context):
         puts('Metadata:')
@@ -147,24 +146,6 @@ class Interface(TemplateElement):
         self.inputs = StrictDict(key_class=basestring, value_class=Parameter)
         self.operations = StrictDict(key_class=basestring, value_class=Operation)
 
-    def validate(self, context):
-        if self.type_name:
-            if context.deployment.interface_types.get_descendant(self.type_name) is None:
-                context.validation.report('interface "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
-        for operation in self.operations.itervalues():
-            operation.validate(context)
-
-    def instantiate(self, context, container):
-        r = Interface(self.name, self.type_name)
-        instantiate_dict(context, container, r.inputs, self.inputs)
-        instantiate_dict(context, container, r.operations, self.operations)
-        return r
-
-    def coerce_values(self, context, container, report_issues):
-        coerce_dict_values(context, container, self.inputs, report_issues)
-        for operation in self.operations.itervalues():
-            operation.coerce_values(context, container, report_issues)
-    
     @property
     def as_raw(self):
         return OrderedDict((
@@ -173,6 +154,24 @@ class Interface(TemplateElement):
             ('inputs', {k: v.as_raw for k, v in self.inputs.iteritems()}),
             ('operations', [v.as_raw for v in self.operations.itervalues()])))
 
+    def instantiate(self, context, container):
+        r = Interface(self.name, self.type_name)
+        instantiate_dict(context, container, r.inputs, self.inputs)
+        instantiate_dict(context, container, r.operations, self.operations)
+        return r
+
+    def validate(self, context):
+        if self.type_name:
+            if context.deployment.interface_types.get_descendant(self.type_name) is None:
+                context.validation.report('interface "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.inputs)
+        validate_dict_values(context, self.operations)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.inputs, report_issues)
+        coerce_dict_values(context, container, self.operations, report_issues)
+    
     def dump(self, context):
         puts(context.style.node(self.name))
         with context.style.indent:
@@ -209,19 +208,6 @@ class Operation(TemplateElement):
         self.retry_interval = None # Cloudify
         self.inputs = StrictDict(key_class=basestring, value_class=Parameter)
 
-    def instantiate(self, context, container):
-        r = Operation(self.name)
-        r.implementation = self.implementation
-        r.dependencies = self.dependencies
-        r.executor = self.executor
-        r.max_retries = self.max_retries
-        r.retry_interval = self.retry_interval
-        instantiate_dict(context, container, r.inputs, self.inputs)
-        return r
-
-    def coerce_values(self, context, container, report_issues):
-        coerce_dict_values(context, container, self.inputs, report_issues)
-
     @property
     def as_raw(self):
         return OrderedDict((
@@ -232,6 +218,22 @@ class Operation(TemplateElement):
             ('max_retries', self.max_retries),
             ('retry_interval', self.retry_interval),
             ('inputs', {k: v.as_raw for k, v in self.inputs.iteritems()})))
+
+    def instantiate(self, context, container):
+        r = Operation(self.name)
+        r.implementation = self.implementation
+        r.dependencies = self.dependencies
+        r.executor = self.executor
+        r.max_retries = self.max_retries
+        r.retry_interval = self.retry_interval
+        instantiate_dict(context, container, r.inputs, self.inputs)
+        return r
+
+    def validate(self, context):
+        validate_dict_values(context, self.inputs)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.inputs, report_issues)
 
     def dump(self, context):
         puts(context.style.node(self.name))
@@ -281,21 +283,6 @@ class Artifact(TemplateElement):
         self.repository_credential = StrictDict(key_class=basestring, value_class=basestring)
         self.properties = StrictDict(key_class=basestring, value_class=Parameter)
 
-    def validate(self, context):
-        if context.deployment.artifact_types.get_descendant(self.type_name) is None:
-            context.validation.report('artifact "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
-
-    def instantiate(self, context, container):
-        r = Artifact(self.name, self.type_name, self.source_path)
-        r.target_path = self.target_path
-        r.repository_url = self.repository_url
-        r.repository_credential = self.repository_credential
-        instantiate_dict(context, container, r.properties, self.properties)
-        return r
-
-    def coerce_values(self, context, container, report_issues):
-        coerce_dict_values(context, container, self.properties, report_issues)
-
     @property
     def as_raw(self):
         return OrderedDict((
@@ -306,6 +293,23 @@ class Artifact(TemplateElement):
             ('repository_url', self.repository_url),
             ('repository_credential', make_agnostic(self.repository_credential)),
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()})))
+
+    def instantiate(self, context, container):
+        r = Artifact(self.name, self.type_name, self.source_path)
+        r.target_path = self.target_path
+        r.repository_url = self.repository_url
+        r.repository_credential = self.repository_credential
+        instantiate_dict(context, container, r.properties, self.properties)
+        return r
+
+    def validate(self, context):
+        if context.deployment.artifact_types.get_descendant(self.type_name) is None:
+            context.validation.report('artifact "%s" has an unknown type: %s' % (self.name, repr(self.type_name)), level=Issue.BETWEEN_TYPES)        
+
+        validate_dict_values(context, self.properties)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
 
     def dump(self, context):
         puts(context.style.node(self.name))
@@ -341,23 +345,26 @@ class GroupPolicy(TemplateElement):
         self.properties = StrictDict(key_class=basestring, value_class=Parameter)
         self.triggers = StrictDict(key_class=basestring, value_class=GroupPolicyTrigger)
 
-    def instantiate(self, context, container):
-        r = GroupPolicy(self.name)
-        instantiate_dict(context, container, r.properties, self.properties)
-        instantiate_dict(context, container, r.triggers, self.triggers)
-        return r
-
-    def coerce_values(self, context, container, report_issues):
-        coerce_dict_values(context, container, self.properties, report_issues)
-        for policy in self.policies.itervalues():
-            policy.coerce_values(context, container, report_issues)
-
     @property
     def as_raw(self):
         return OrderedDict((
             ('name', self.name),
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()}),
             ('triggers', [v.as_raw for v in self.triggers.itervalues()])))
+
+    def instantiate(self, context, container):
+        r = GroupPolicy(self.name)
+        instantiate_dict(context, container, r.properties, self.properties)
+        instantiate_dict(context, container, r.triggers, self.triggers)
+        return r
+
+    def validate(self, context):
+        validate_dict_values(context, self.properties)
+        validate_dict_values(context, self.triggers)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
+        coerce_dict_values(context, container, self.triggers, report_issues)
 
     def dump(self, context):
         puts(context.style.node(self.name))
@@ -386,20 +393,23 @@ class GroupPolicyTrigger(TemplateElement):
         self.implementation = implementation
         self.properties = StrictDict(key_class=basestring, value_class=Parameter)
 
-    def instantiate(self, context, container):
-        r = GroupPolicyTrigger(self.name, self.implementation)
-        instantiate_dict(context, container, r.properties, self.properties)
-        return r
-
-    def coerce_values(self, context, container, report_issues):
-        coerce_dict_values(context, container, self.properties, report_issues)
-
     @property
     def as_raw(self):
         return OrderedDict((
             ('name', self.name),
             ('implementation', self.implementation),
             ('properties', {k: v.as_raw for k, v in self.properties.iteritems()})))
+
+    def instantiate(self, context, container):
+        r = GroupPolicyTrigger(self.name, self.implementation)
+        instantiate_dict(context, container, r.properties, self.properties)
+        return r
+
+    def validate(self, context):
+        validate_dict_values(context, self.properties)
+
+    def coerce_values(self, context, container, report_issues):
+        coerce_dict_values(context, container, self.properties, report_issues)
 
     def dump(self, context):
         puts(context.style.node(self.name))

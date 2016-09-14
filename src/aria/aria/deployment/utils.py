@@ -47,7 +47,7 @@ def generate_hex_string():
 def coerce_value(context, container, value, report_issues=False):
     if isinstance(value, Value):
         value = value.value
-        
+
     if isinstance(value, list):
         return [coerce_value(context, container, v, report_issues) for v in value]
     elif isinstance(value, dict):
@@ -63,15 +63,19 @@ def coerce_value(context, container, value, report_issues=False):
                 context.validation.report(e.issue)
     return value
 
+def validate_dict_values(context, the_dict):
+    validate_list_values(context, the_dict.itervalues())
+
+def validate_list_values(context, the_list):
+    for value in the_list:
+        value.validate(context)
+
 def coerce_dict_values(context, container, the_dict, report_issues=False):
-    for value in the_dict.itervalues():
+    coerce_list_values(context, container, the_dict.itervalues(), report_issues)
+
+def coerce_list_values(context, container, the_list, report_issues=False):
+    for value in the_list:
         value.coerce_values(context, container, report_issues)
-    return
-    for k, value in the_dict.iteritems():
-        if hasattr(value, 'coerce_values'):
-            value.coerce_values(context, container, report_issues)
-        else:
-            the_dict[k] = coerce_value(context, container, value, report_issues)
 
 def instantiate_dict(context, container, the_dict, from_dict):
     if not from_dict:

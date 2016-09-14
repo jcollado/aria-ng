@@ -267,6 +267,7 @@ def coerce_inputs(context, presentation, interface_assignment, interface_name):
             if assignments:
                 for input_name, assignment in assignments.iteritems():
                     interface_assignment._raw[operation_name]['inputs'][input_name] = coerce_property_value(context, assignment, None, assignment.value)
+                    interface_assignment._reset_method_cache()
 
 def validate_required_inputs(context, presentation, assignment, definition, original_assignment, interface_name, operation_name):
     input_definitions = definition.inputs
